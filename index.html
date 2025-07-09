@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced QA Testing Reports System</title>
+    <!-- External Chart.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">Enhanced QA Reports System</div>
+            <div class="nav-links">
+    <a href="#" class="nav-link active" onclick="showPage('dashboardPage')">Dashboard</a>
+    <a href="#" class="nav-link" onclick="showPage('reportsPage')">Reports</a>
+    <a href="#" class="nav-link" onclick="createNewReport()">New Report</a>
+    <a href="/manage" class="nav-link">Manage Data</a>
+</div>
+        </div>
+    </nav>
+
+    <!-- Enhanced Dashboard Page -->
+    <div id="dashboardPage" class="page active">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>Enhanced QA Testing Dashboard</h1>
+                <p>Comprehensive Quality Assurance Management System</p>
+            </div>
+
+            <!-- Overall Statistics -->
+            <div class="dashboard-section">
+                <h2 class="section-title">Overall Statistics</h2>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="icon">📋</div>
+                        <h3 id="totalReports">0</h3>
+                        <p>Total Reports</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">✅</div>
+                        <h3 id="completedReports">0</h3>
+                        <p>Completed</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">🔄</div>
+                        <h3 id="inProgressReports">0</h3>
+                        <p>In Progress</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">⏳</div>
+                        <h3 id="pendingReports">0</h3>
+                        <p>Pending</p>
+                    </div>
+                </div>
+
+                <!-- Aggregate Metrics -->
+                <div class="aggregate-metrics">
+                    <div class="metric-card">
+                        <div class="metric-icon">📝</div>
+                        <div class="metric-content">
+                            <h3 id="totalUserStories">0</h3>
+                            <p>Total User Stories</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">🧪</div>
+                        <div class="metric-content">
+                            <h3 id="totalTestCases">0</h3>
+                            <p>Total Test Cases</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">🐛</div>
+                        <div class="metric-content">
+                            <h3 id="totalIssues">0</h3>
+                            <p>Total Issues</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">⚡</div>
+                        <div class="metric-content">
+                            <h3 id="totalEnhancements">0</h3>
+                            <p>Total Enhancements</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">⭐</div>
+                        <div class="metric-content">
+                            <h3 id="avgEvaluationScore">0</h3>
+                            <p>Avg Evaluation Score</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">🎯</div>
+                        <div class="metric-content">
+                            <h3 id="avgProjectEvaluationScore">0</h3>
+                            <p>Avg Project Score</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project-Specific Metrics -->
+            <div class="dashboard-section">
+                <h2 class="section-title">Project Metrics</h2>
+                <div id="projectMetrics" class="project-metrics-container">
+                    <!-- Project cards will be dynamically generated here -->
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h2 style="margin-bottom: 30px; color: #2c3e50;">Quick Actions</h2>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="createNewReport()">➕ Create New Report</button>
+                    <button class="action-btn secondary" onclick="showPage('reportsPage')">📊 View All Reports</button>
+                    <button class="action-btn secondary" onclick="exportDashboardReport()">📄 Export Dashboard Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports List Page -->
+    <div id="reportsPage" class="page">
+        <div class="reports-container">
+            <div class="page-header">
+                <h1>Reports Management</h1>
+                <div class="header-actions">
+                    <input type="text" class="search-box" placeholder="Search reports..." id="searchInput" onkeyup="searchReports()">
+                    <button class="action-btn" onclick="createNewReport()">➕ New Report</button>
+                </div>
+            </div>
+
+            <div class="reports-table-container">
+                <div id="reports-loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Loading reports...</p>
+                </div>
+                <table class="reports-table" id="reportsTable">
+                    <thead>
+                        <tr>
+                            <th>Report Title</th>
+                            <th>Project</th>
+                            <th>Portfolio</th>
+                            <th>Sprint</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        <!-- Reports will be rendered here by script.js -->
+                    </tbody>
+                </table>
+
+                <div class="pagination" id="pagination">
+                    <!-- Pagination will be rendered here by script.js -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced QA Form Page -->
+    <div id="formPage" class="page">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+        
+        <div class="form-container">
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>Report Sections</h2>
+                    <button class="back-btn" onclick="backToDashboard()">← Back</button>
+                </div>
+                <a href="#" class="nav-item active" onclick="showSection(0)">1. General Details</a>
+                <a href="#" class="nav-item" onclick="showSection(1)">2. Test Summary</a>
+                <a href="#" class="nav-item" onclick="showSection(2)">3. Additional Info</a>
+                <a href="#" class="nav-item" onclick="showSection(3)">4. User Stories</a>
+                <a href="#" class="nav-item" onclick="showSection(4)">5. Test Cases</a>
+                <a href="#" class="nav-item" onclick="showSection(5)">6. Issues Analysis</a>
+                <a href="#" class="nav-item" onclick="showSection(6)">7. Enhancements</a>
+                <a href="#" class="nav-item" onclick="showSection(7)">8. Evaluation</a>
+                <a href="#" class="nav-item" onclick="showSection(8)">9. Project Evaluation</a>
+                <a href="#" class="nav-item" onclick="showSection(9)">10. Custom Fields</a>
+                <a href="#" class="nav-item" onclick="showSection(10)">11. QA Notes</a>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="content-header">
+                    <h1 id="formTitle">Create Enhanced QA Report</h1>
+                    <p>Complete all sections to generate your comprehensive QA testing report</p>
+                </div>
+
+                <div class="content-area">
+                    <form id="qaReportForm">
+                        <!-- Section 1: General Details -->
+                        <div class="section active" id="section-0">
+                            <h2 class="section-title">General Details</h2>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="portfolioName">Portfolio Name</label>
+                                    <div class="select-with-add">
+                                        <select id="portfolioName" name="portfolioName" required>
+                                        </select>
+                                        <button type="button" class="add-btn" onclick="showAddPortfolioModal()">+ Add</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="projectName">Project Name</label>
+                                    <div class="select-with-add">
+                                        <select id="projectName" name="projectName" required>
+                                            <option value="">Select Project</option>
+                                        </select>
+                                        <button type="button" class="add-btn" onclick="showAddProjectModal()">+ Add</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="sprintNumber">Sprint Number</label>
+                                    <input type="number" id="sprintNumber" name="sprintNumber" min="1" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="reportVersion">Report Version</label>
+                                    <input type="text" id="reportVersion" name="reportVersion" placeholder="e.g., 1.0, 2.1" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="cycleNumber">Cycle Number</label>
+                                    <input type="number" id="cycleNumber" name="cycleNumber" min="1" required>
+                                </div>
+                                        <div class="form-group">
+            <label for="releaseNumber">Release Number</label>
+            <input type="text" id="releaseNumber" name="releaseNumber" placeholder="e.g., R1.0, R2.1" required>
+        </div>
+                                <div class="form-group">
+                                    <label for="reportDate">Report Date (dd-mm-yyyy)</label>
+                                    <input type="text" id="reportDate" name="reportDate" pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Test Summary -->
+                        <div class="section" id="section-1">
+                            <h2 class="section-title">Test Summary & Status</h2>
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="testSummary">Test Summary</label>
+                                    <textarea id="testSummary" name="testSummary" placeholder="Provide a comprehensive summary of the testing activities..." required></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="testingStatus">Testing Status</label>
+                                    <select id="testingStatus" name="testingStatus" required>
+                                        <option value="">Select Status</option>
+                                        <option value="passed">Passed</option>
+                                        <option value="passed-with-issues">Passed with Issues</option>
+                                        <option value="failed">Failed</option>
+                                        <option value="blocked">Blocked</option>
+                                        <option value="cancelled">Cancelled</option>
+                                        <option value="deferred">Deferred</option>
+                                        <option value="not-testable">Not Testable</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="table-container">
+                                <h3 style="margin-bottom: 20px; color: #2c3e50; font-size: 1.4em;">Testing Metrics (Auto-Calculated)</h3>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Metric</th>
+                                            <th>Value</th>
+                                            <th>Source</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>User Stories</strong><br><small>Auto-calculated from section 4</small></td>
+                                            <td><input type="number" id="userStoriesMetric" name="userStoriesMetric" readonly class="readonly-field"></td>
+                                            <td><small>Sum of all user story statuses</small></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Test Cases</strong><br><small>Auto-calculated from section 5</small></td>
+                                            <td><input type="number" id="testCasesMetric" name="testCasesMetric" readonly class="readonly-field"></td>
+                                            <td><small>Sum of all test case statuses</small></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Issues</strong><br><small>Auto-calculated from section 6</small></td>
+                                            <td><input type="number" id="issuesMetric" name="issuesMetric" readonly class="readonly-field"></td>
+                                            <td><small>Sum of all issue priorities</small></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Enhancements</strong><br><small>Auto-calculated from section 7</small></td>
+                                            <td><input type="number" id="enhancementsMetric" name="enhancementsMetric" readonly class="readonly-field"></td>
+                                            <td><small>Sum of all enhancement statuses</small></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Evaluation Score</strong><br><small>Auto-calculated from section 8</small></td>
+                                            <td><input type="text" id="evaluationTotalScore" name="evaluationTotalScore" readonly class="readonly-field"></td>
+                                            <td><small>Average of evaluation scores</small></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Project Evaluation Score</strong><br><small>Auto-calculated from section 9</small></td>
+                                            <td><input type="text" id="projectEvaluationTotalScore" name="projectEvaluationTotalScore" readonly class="readonly-field"></td>
+                                            <td><small>Average of project evaluation scores</small></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>QA Notes Count</strong><br><small>Manual entry</small></td>
+                                            <td><input type="number" name="qaNotesMetric" min="0" placeholder="0" required></td>
+                                            <td><small>Number of QA notes</small></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Additional Information -->
+                        <div class="section" id="section-2">
+                            <h2 class="section-title">Additional Information</h2>
+                            
+                            <div class="dynamic-section">
+                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: #2c3e50;">
+                                    Request Information
+                                    <button type="button" class="section-btn" onclick="showRequestModal()">+ Add Request</button>
+                                </h3>
+                                <div class="dynamic-list" id="requestList" style="background: white; border-radius: 15px; padding: 20px; border: 2px dashed #dee2e6; min-height: 80px;">
+                                    <div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No requests added yet. Click "Add Request" to get started.</div>
+                                </div>
+                            </div>
+
+                            <div class="dynamic-section">
+                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: #2c3e50;">
+                                    Build Information
+                                    <button type="button" class="section-btn" onclick="showBuildModal()">+ Add Build</button>
+                                </h3>
+                                <div class="dynamic-list" id="buildList" style="background: white; border-radius: 15px; padding: 20px; border: 2px dashed #dee2e6; min-height: 80px;">
+                                    <div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No builds added yet. Click "Add Build" to get started.</div>
+                                </div>
+                            </div>
+
+                            <<div class="dynamic-section">
+    <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: #2c3e50;">
+        Tester(s) Information
+        <button type="button" class="section-btn" onclick="showTesterModal()">+ Add/Select Tester</button>
+    </h3>
+    <div class="dynamic-list" id="testerList" style="background: white; border-radius: 15px; padding: 20px; border: 2px dashed #dee2e6; min-height: 80px;">
+        <div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No testers added yet. Click "Add/Select Tester" to get started.</div>
+    </div>
+</div>
+
+                            <!-- Add Team Members section -->
+<div class="dynamic-section">
+    <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: #2c3e50;">
+        Team Members
+        <button type="button" class="section-btn" onclick="showTeamMemberModal()">+ Add Team Member</button>
+    </h3>
+    <div class="dynamic-list" id="teamMemberList">
+        <div class="empty-state">No team members added yet.</div>
+    </div>
+</div>
+                        </div>
+
+                        <!-- Section 4: User Stories -->
+                        <div class="section" id="section-3">
+                            <h2 class="section-title">User Stories Analysis</h2>
+                            
+                            <div class="user-stories-container">
+                                <div class="stories-table-section">
+                                    <h3 style="margin-bottom: 20px; color: #2c3e50;">User Stories Summary</h3>
+                                    <table class="data-table" id="userStoriesTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Status</th>
+                                                <th>Count</th>
+                                                <th>Percentage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Total Number of Stories</strong></td>
+                                                <td><input type="number" id="totalStories" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
+                                                <td class="percentage-cell" style="font-weight: 700; color: #4facfe; text-align: center;">100%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Passed</td>
+                                                <td><input type="number" id="passedStories" name="passedUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
+                                                <td class="percentage-cell" id="passedPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Passed with Issue/s</td>
+                                                <td><input type="number" id="passedWithIssuesStories" name="passedWithIssuesUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
+                                                <td class="percentage-cell" id="passedWithIssuesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Failed</td>
+                                                <td><input type="number" id="failedStories" name="failedUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
+                                                <td class="percentage-cell" id="failedPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Blocked</td>
+                                                <td><input type="number" id="blockedStories" name="blockedUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
+                                                <td class="percentage-cell" id="blockedPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Cancelled</td>
+                                                <td><input type="number" id="cancelledStories" name="cancelledUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
+                                                <td class="percentage-cell" id="cancelledPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Deferred</td>
+                                                <td><input type="number" id="deferredStories" name="deferredUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
+                                                <td class="percentage-cell" id="deferredPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Not Testable</td>
+                                                <td><input type="number" id="notTestableStories" name="notTestableUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
+                                                <td class="percentage-cell" id="notTestablePercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="chart-section">
+                                    <h3 style="margin-bottom: 20px; color: #2c3e50; text-align: center;">User Stories Distribution</h3>
+                                    <div class="chart-container">
+                                        <canvas id="userStoriesChart" width="400" height="400"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 5: Test Cases -->
+                        <div class="section" id="section-4">
+                            <h2 class="section-title">Test Cases Analysis</h2>
+                            
+                            <div class="user-stories-container">
+                                <div class="stories-table-section">
+                                    <h3 style="margin-bottom: 20px; color: #2c3e50;">Test Cases Summary</h3>
+                                    <table class="data-table" id="testCasesTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Status</th>
+                                                <th>Count</th>
+                                                <th>Percentage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Total Number of Test Cases</strong></td>
+                                                <td><input type="number" id="totalTestCases" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
+                                                <td class="percentage-cell" style="font-weight: 700; color: #4facfe; text-align: center;">100%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Passed</td>
+                                                <td><input type="number" id="passedTestCases" name="passedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
+                                                <td class="percentage-cell" id="passedTestCasesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Passed with Issue/s</td>
+                                                <td><input type="number" id="passedWithIssuesTestCases" name="passedWithIssuesTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
+                                                <td class="percentage-cell" id="passedWithIssuesTestCasesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Failed</td>
+                                                <td><input type="number" id="failedTestCases" name="failedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
+                                                <td class="percentage-cell" id="failedTestCasesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Blocked</td>
+                                                <td><input type="number" id="blockedTestCases" name="blockedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
+                                                <td class="percentage-cell" id="blockedTestCasesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Cancelled</td>
+                                                <td><input type="number" id="cancelledTestCases" name="cancelledTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
+                                                <td class="percentage-cell" id="cancelledTestCasesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Deferred</td>
+                                                <td><input type="number" id="deferredTestCases" name="deferredTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
+                                                <td class="percentage-cell" id="deferredTestCasesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Not Testable</td>
+                                                <td><input type="number" id="notTestableTestCases" name="notTestableTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
+                                                <td class="percentage-cell" id="notTestableTestCasesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="chart-section">
+                                    <h3 style="margin-bottom: 20px; color: #2c3e50; text-align: center;">Test Cases Distribution</h3>
+                                    <div class="chart-container">
+                                        <canvas id="testCasesChart" width="400" height="400"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 6: Issues Analysis -->
+                        <div class="section" id="section-5">
+                            <h2 class="section-title">Issues Analysis</h2>
+                            
+                            <div class="issues-container">
+                                <div class="issues-priority-section">
+                                    <h3 style="margin-bottom: 20px; color: #2c3e50;">Issues by Priority</h3>
+                                    <table class="data-table" id="issuesPriorityTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Priority</th>
+                                                <th>Count</th>
+                                                <th>Percentage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Total Issues</strong></td>
+                                                <td><input type="number" id="totalIssues" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
+                                                <td class="percentage-cell" style="font-weight: 700; color: #4facfe; text-align: center;">100%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Critical</td>
+                                                <td><input type="number" id="criticalIssues" name="criticalIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
+                                                <td class="percentage-cell" id="criticalIssuesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>High</td>
+                                                <td><input type="number" id="highIssues" name="highIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
+                                                <td class="percentage-cell" id="highIssuesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Medium</td>
+                                                <td><input type="number" id="mediumIssues" name="mediumIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
+                                                <td class="percentage-cell" id="mediumIssuesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Low</td>
+                                                <td><input type="number" id="lowIssues" name="lowIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
+                                                <td class="percentage-cell" id="lowIssuesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="chart-container">
+                                        <canvas id="issuesPriorityChart" width="400" height="300"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="issues-status-section">
+                                    <h3 style="margin-bottom: 20px; color: #2c3e50;">Issues by Status</h3>
+                                    <table class="data-table" id="issuesStatusTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Status</th>
+                                                <th>Count</th>
+                                                <th>Percentage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>New</td>
+                                                <td><input type="number" id="newIssues" name="newIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
+                                                <td class="percentage-cell" id="newIssuesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Fixed</td>
+                                                <td><input type="number" id="fixedIssues" name="fixedIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
+                                                <td class="percentage-cell" id="fixedIssuesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Not Fixed</td>
+                                                <td><input type="number" id="notFixedIssues" name="notFixedIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
+                                                <td class="percentage-cell" id="notFixedIssuesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Re-opened</td>
+                                                <td><input type="number" id="reopenedIssues" name="reopenedIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
+                                                <td class="percentage-cell" id="reopenedIssuesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Deferred</td>
+                                                <td><input type="number" id="deferredIssues" name="deferredIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
+                                                <td class="percentage-cell" id="deferredIssuesPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="chart-container">
+                                        <canvas id="issuesStatusChart" width="400" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 7: Enhancements -->
+                        <div class="section" id="section-6">
+                            <h2 class="section-title">Enhancements Analysis</h2>
+                            
+                            <div class="user-stories-container">
+                                <div class="stories-table-section">
+                                    <h3 style="margin-bottom: 20px; color: #2c3e50;">Enhancements Summary</h3>
+                                    <table class="data-table" id="enhancementsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Status</th>
+                                                <th>Count</th>
+                                                <th>Percentage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Total Enhancements</strong></td>
+                                                <td><input type="number" id="totalEnhancements" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
+                                                <td class="percentage-cell" style="font-weight: 700; color: #4facfe; text-align: center;">100%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>New</td>
+                                                <td><input type="number" id="newEnhancements" name="newEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
+                                                <td class="percentage-cell" id="newEnhancementsPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Implemented</td>
+                                                <td><input type="number" id="implementedEnhancements" name="implementedEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
+                                                <td class="percentage-cell" id="implementedEnhancementsPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Exists</td>
+                                                <td><input type="number" id="existsEnhancements" name="existsEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
+                                                <td class="percentage-cell" id="existsEnhancementsPercentage" style="font-weight: 700; color: #4facfe; text-align: center;">0%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="chart-section">
+                                    <h3 style="margin-bottom: 20px; color: #2c3e50; text-align: center;">Enhancements Distribution</h3>
+                                    <div class="chart-container">
+                                        <canvas id="enhancementsChart" width="400" height="400"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 8: Evaluation -->
+<!-- Section 8: Evaluation -->
+<div class="section" id="section-7">
+    <h2 class="section-title">Evaluation</h2>
+    
+    <!-- Move criteria description to top -->
+    <div style="margin-bottom: 35px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
+        <h3 style="margin-bottom: 20px; color: #2c3e50;">Evaluation Criteria:</h3>
+        <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #4facfe;"><strong>Involvement:</strong> The QA team is testing within the sprint and is involved in all the scrum ceremonies.</li>
+            <li style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #4facfe;"><strong>Requirements quality:</strong> The quality of the user stories and documents.</li>
+            <li style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #4facfe;"><strong>QA plan review:</strong> Review the QA plan that the vendor will provide.</li>
+            <li style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #4facfe;"><strong>UX:</strong> The user flow (it will be checked against the Ministry's evaluation criteria).</li>
+            <li style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #4facfe;"><strong>Cooperation:</strong> This will measure the cooperation between QA, Product Owners, and vendors.</li>
+            <li style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #4facfe;"><strong>Critical bugs:</strong> 1 cycle (must be fixed on the next cycle of the bug detection).</li>
+            <li style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #4facfe;"><strong>High bugs:</strong> 1 cycle (must be fixed on the next cycle of the bug detection).</li>
+            <li style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #4facfe;"><strong>Medium bugs:</strong> 2 cycles (must be fixed on the second cycle of the bug detection).</li>
+            <li style="margin-bottom: 0; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #4facfe;"><strong>Low bugs:</strong> We start counting once the number of detected low bugs => 10.</li>
+        </ul>
+    </div>
+    
+    <div class="dynamic-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 20px; padding: 30px;">
+        <div style="margin-bottom: 25px; text-align: right;">
+            <button type="button" class="section-btn" onclick="addScoreColumn()">+ Add Score Column</button>
+            <button type="button" class="section-btn" onclick="toggleWeightColumn()" id="toggleWeightBtn">Show Weight</button>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table" id="evaluationTable">
+                <thead>
+                    <tr id="evaluationHeader">
+                        <th>Criteria</th>
+                        <th>Score</th>
+                        <th class="weight-column" style="display: none;">Weight</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Involvement</td>
+                        <td><input type="text" name="eval_involvement_score" placeholder="Enter score" oninput="calculateEvaluationTotals()"></td>
+                        <td class="weight-column" style="display: none;"><input type="text" name="eval_involvement_weight" placeholder="Weight"></td>
+                    </tr>
+                    <tr>
+                        <td>Requirements quality</td>
+                        <td><input type="text" name="eval_requirements_score" placeholder="Enter score" oninput="calculateEvaluationTotals()"></td>
+                        <td class="weight-column" style="display: none;"><input type="text" name="eval_requirements_weight" placeholder="Weight"></td>
+                    </tr>
+                    <tr>
+                        <td>QA plan review</td>
+                        <td><input type="text" name="eval_qaplan_score" placeholder="Enter score" oninput="calculateEvaluationTotals()"></td>
+                        <td class="weight-column" style="display: none;"><input type="text" name="eval_qaplan_weight" placeholder="Weight"></td>
+                    </tr>
+                    <tr>
+                        <td>UX</td>
+                        <td><input type="text" name="eval_ux_score" placeholder="Enter score" oninput="calculateEvaluationTotals()"></td>
+                        <td class="weight-column" style="display: none;"><input type="text" name="eval_ux_weight" placeholder="Weight"></td>
+                    </tr>
+                    <tr>
+                        <td>Cooperation</td>
+                        <td><input type="text" name="eval_cooperation_score" placeholder="Enter score" oninput="calculateEvaluationTotals()"></td>
+                        <td class="weight-column" style="display: none;"><input type="text" name="eval_cooperation_weight" placeholder="Weight"></td>
+                    </tr>
+                    <tr>
+                        <td>Critical bugs</td>
+                        <td><input type="text" name="eval_critical_bugs_score" placeholder="Enter score" oninput="calculateEvaluationTotals()"></td>
+                        <td class="weight-column" style="display: none;"><input type="text" name="eval_critical_bugs_weight" placeholder="Weight"></td>
+                    </tr>
+                    <tr>
+                        <td>High bugs</td>
+                        <td><input type="text" name="eval_high_bugs_score" placeholder="Enter score" oninput="calculateEvaluationTotals()"></td>
+                        <td class="weight-column" style="display: none;"><input type="text" name="eval_high_bugs_weight" placeholder="Weight"></td>
+                    </tr>
+                    <tr>
+                        <td>Medium bugs</td>
+                        <td><input type="text" name="eval_medium_bugs_score" placeholder="Enter score" oninput="calculateEvaluationTotals()"></td>
+                        <td class="weight-column" style="display: none;"><input type="text" name="eval_medium_bugs_weight" placeholder="Weight"></td>
+                    </tr>
+                    <tr>
+                        <td>Low bugs</td>
+                        <td><input type="text" name="eval_low_bugs_score" placeholder="Enter score" oninput="calculateEvaluationTotals()"></td>
+                        <td class="weight-column" style="display: none;"><input type="text" name="eval_low_bugs_weight" placeholder="Weight"></td>
+                    </tr>
+                    <tr style="background: #f8f9fa; font-weight: bold;">
+                        <td><strong>Total Score</strong></td>
+                        <td><input type="text" id="evaluationTotalScoreField" readonly class="readonly-field calculated-total" placeholder="Auto-calculated"></td>
+                        <td class="weight-column" style="display: none;">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+                        <!-- Section 9: Project Evaluation -->
+<!-- Section 9: Project Evaluation -->
+<div class="section" id="section-8">
+    <h2 class="section-title">Project Evaluation</h2>
+    
+    <div style="margin-bottom: 25px; text-align: right;">
+        <button type="button" class="section-btn" onclick="toggleProjectReasonColumn()" id="toggleProjectReasonBtn">Show Reason</button>
+    </div>
+    
+    <div class="table-container">
+        <table class="data-table" id="projectEvaluationTable">
+            <thead>
+                <tr>
+                    <th>Criteria</th>
+                    <th>Score</th>
+                    <th class="project-reason-column" style="display: none;">Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Involvement</td>
+                    <td><input type="text" name="proj_involvement_score" placeholder="Enter score" oninput="calculateProjectEvaluationTotals()"></td>
+                    <td class="project-reason-column" style="display: none;"><input type="text" name="proj_involvement_reason" placeholder="Enter reason"></td>
+                </tr>
+                <tr>
+                    <td>Requirements quality</td>
+                    <td><input type="text" name="proj_requirements_score" placeholder="Enter score" oninput="calculateProjectEvaluationTotals()"></td>
+                    <td class="project-reason-column" style="display: none;"><input type="text" name="proj_requirements_reason" placeholder="Enter reason"></td>
+                </tr>
+                <tr>
+                    <td>QA plan review</td>
+                    <td><input type="text" name="proj_qaplan_score" placeholder="Enter score" oninput="calculateProjectEvaluationTotals()"></td>
+                    <td class="project-reason-column" style="display: none;"><input type="text" name="proj_qaplan_reason" placeholder="Enter reason"></td>
+                </tr>
+                <tr>
+                    <td>UX</td>
+                    <td><input type="text" name="proj_ux_score" placeholder="Enter score" oninput="calculateProjectEvaluationTotals()"></td>
+                    <td class="project-reason-column" style="display: none;"><input type="text" name="proj_ux_reason" placeholder="Enter reason"></td>
+                </tr>
+                <tr>
+                    <td>Cooperation</td>
+                    <td><input type="text" name="proj_cooperation_score" placeholder="Enter score" oninput="calculateProjectEvaluationTotals()"></td>
+                    <td class="project-reason-column" style="display: none;"><input type="text" name="proj_cooperation_reason" placeholder="Enter reason"></td>
+                </tr>
+                <tr>
+                    <td>Critical bugs</td>
+                    <td><input type="text" name="proj_critical_bugs_score" placeholder="Enter score" oninput="calculateProjectEvaluationTotals()"></td>
+                    <td class="project-reason-column" style="display: none;"><input type="text" name="proj_critical_bugs_reason" placeholder="Enter reason"></td>
+                </tr>
+                <tr>
+                    <td>High bugs</td>
+                    <td><input type="text" name="proj_high_bugs_score" placeholder="Enter score" oninput="calculateProjectEvaluationTotals()"></td>
+                    <td class="project-reason-column" style="display: none;"><input type="text" name="proj_high_bugs_reason" placeholder="Enter reason"></td>
+                </tr>
+                <tr>
+                    <td>Medium bugs</td>
+                    <td><input type="text" name="proj_medium_bugs_score" placeholder="Enter score" oninput="calculateProjectEvaluationTotals()"></td>
+                    <td class="project-reason-column" style="display: none;"><input type="text" name="proj_medium_bugs_reason" placeholder="Enter reason"></td>
+                </tr>
+                <tr>
+                    <td>Low bugs</td>
+                    <td><input type="text" name="proj_low_bugs_score" placeholder="Enter score" oninput="calculateProjectEvaluationTotals()"></td>
+                    <td class="project-reason-column" style="display: none;"><input type="text" name="proj_low_bugs_reason" placeholder="Enter reason"></td>
+                </tr>
+                <tr style="background: #f8f9fa; font-weight: bold;">
+                    <td><strong>Final Score of 100%</strong></td>
+                    <td><input type="text" id="projectEvaluationTotalScoreField" readonly class="readonly-field calculated-total" placeholder="Auto-calculated"></td>
+                    <td class="project-reason-column" style="display: none;"><input type="text" name="proj_final_reason" placeholder="Enter reason"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-left: 6px solid #4facfe; padding: 25px 30px; margin-top: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(79, 172, 254, 0.1);">
+        <p style="margin: 0; color: #1565c0; font-weight: 500; line-height: 1.6;"><strong>Please note:</strong> This evaluation is for the technical part of the project, it doesn't affect the non-technical part. The score given to this project will be calculated along with the other scores of the portfolio.</p>
+    </div>
+</div>
+
+                        <!-- Section 10: Custom Fields -->
+                        <div class="section" id="section-9">
+                            <h2 class="section-title">Custom Fields</h2>
+                            
+                            <div class="custom-fields-section">
+                                <div class="custom-fields-header">
+                                    <p style="margin-bottom: 20px; color: #6c757d;">Add custom fields specific to this report. You can choose different field types and configure their visibility in the final report.</p>
+                                    <button type="button" class="section-btn" onclick="showAddCustomFieldModal()">+ Add Custom Field</button>
+                                </div>
+                                
+                                <div id="customFieldsList" class="custom-fields-list">
+                                    <div class="empty-state" style="text-align: center; color: #6c757d; padding: 40px 0;">
+                                        <div style="font-size: 3em; margin-bottom: 20px;">📝</div>
+                                        <h3>No Custom Fields Added</h3>
+                                        <p>Click "Add Custom Field" to create custom fields for this report.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 11: QA Notes -->
+<!-- Section 11: QA Notes -->
+<div class="section" id="section-10">
+    <h2 class="section-title">QA Notes</h2>
+    
+    <div class="custom-fields-section">
+        <div class="custom-fields-header">
+            <p style="margin-bottom: 20px; color: #6c757d;">Customize QA notes with different field types to capture specific information relevant to your testing process.</p>
+            <button type="button" class="section-btn" onclick="showAddQANoteFieldModal()">+ Add QA Note Field</button>
+        </div>
+        
+        <div id="qaNotesFieldsList" class="custom-fields-list">
+            <!-- Default general notes field -->
+            <div class="custom-field-item">
+                <div class="custom-field-header">
+                    <h4>General Notes</h4>
+                    <div class="custom-field-badges">
+                        <span class="badge badge-visible">Default Field</span>
+                    </div>
+                </div>
+                <div class="custom-field-input">
+                    <textarea id="qaNotesText" name="qaNotesText" placeholder="Add general notes, observations, or comments here..." rows="8"></textarea>
+                </div>
+            </div>
+            
+            <!-- Dynamic QA note fields will be added here -->
+        </div>
+    </div>
+</div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="navigation-buttons">
+                            <button type="button" class="nav-btn" id="prevBtn" onclick="previousSection()" disabled>Previous</button>
+                            <button type="button" class="nav-btn" id="nextBtn" onclick="nextSection()">Next</button>
+                            <button type="submit" class="nav-btn submit-btn" id="submitBtn" style="display: none;">Save Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- ... All existing modals ... -->
+    <!-- Add Custom Field Modal -->
+    <div id="addCustomFieldModal" class="modal">
+        <div class="modal-content">
+            <h3>Add Custom Field</h3>
+            <div class="modal-form">
+                <label for="customFieldName">Field Name:</label>
+                <input type="text" id="customFieldName" placeholder="Enter field name">
+                
+                <label for="customFieldType">Field Type:</label>
+                <select id="customFieldType" onchange="updateCustomFieldOptions()">
+                    <option value="input">Text Input</option>
+                    <option value="textarea">Text Area</option>
+                    <option value="select">Dropdown Menu</option>
+                    <option value="radio">Radio Buttons</option>
+                    <option value="checkbox">Checkboxes</option>
+                    <option value="number">Number Input</option>
+                    <option value="date">Date Input</option>
+                </select>
+                
+                <div id="customFieldOptions" style="display: none;">
+                    <label for="customFieldOptionsList">Options (one per line):</label>
+                    <textarea id="customFieldOptionsList" placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
+                </div>
+                
+                <label>
+                    <input type="checkbox" id="customFieldRequired"> Required field
+                </label>
+                
+                <label>
+                    <input type="checkbox" id="customFieldShowInReport" checked> Show in final report
+                </label>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addCustomFieldModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addCustomField()">Add Field</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include all existing modals -->
+    <!-- Modal for portfolio/project -->
+    <div id="addPortfolioModal" class="modal">
+        <div class="modal-content">
+            <h3>Add New Portfolio</h3>
+            <div class="modal-form">
+                <label for="newPortfolioName">Portfolio Name:</label>
+                <input type="text" id="newPortfolioName" placeholder="Enter portfolio name">
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addPortfolioModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addPortfolio()">Add Portfolio</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addProjectModal" class="modal">
+        <div class="modal-content">
+            <h3>Add New Project</h3>
+            <div class="modal-form">
+                <label for="newProjectName">Project Name:</label>
+                <input type="text" id="newProjectName" placeholder="Enter project name">
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addProjectModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addProject()">Add Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Request Modal -->
+    <div id="requestModal" class="modal">
+        <div class="modal-content">
+            <h3>Add Request Information</h3>
+            <div class="modal-form">
+                <label for="requestId">Request ID:</label>
+                <input type="text" id="requestId" placeholder="Enter request ID">
+                
+                <label for="requestUrl">Request URL:</label>
+                <input type="url" id="requestUrl" placeholder="Enter request URL">
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('requestModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addRequest()">Add Request</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Build Modal -->
+    <div id="buildModal" class="modal">
+        <div class="modal-content">
+            <h3>Add Build Information</h3>
+            <div class="modal-form">
+                <label for="buildRequestId">Request ID:</label>
+                <input type="text" id="buildRequestId" placeholder="Enter request ID">
+                
+                <label for="buildRequestUrl">Request URL:</label>
+                <input type="url" id="buildRequestUrl" placeholder="Enter request URL">
+                
+                <label for="buildEnvironment">Environment:</label>
+                <input type="text" id="buildEnvironment" placeholder="Enter environment">
+                
+                <label for="buildCycles">Cycles:</label>
+                <input type="text" id="buildCycles" placeholder="Enter cycles">
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('buildModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addBuild()">Add Build</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Tester Modal -->
+<!-- Enhanced Tester Modal -->
+<div id="testerModal" class="modal">
+    <div class="modal-content">
+        <h3>Add/Select Tester</h3>
+        <div class="modal-form">
+            <!-- Option to select existing tester -->
+            <div class="form-group">
+                <label for="existingTesterSelect">Select Existing Tester:</label>
+                <select id="existingTesterSelect" onchange="handleTesterSelection()">
+                    <option value="">-- Select from existing testers --</option>
+                </select>
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0; color: #6c757d; font-weight: 600;">
+                OR
+            </div>
+            
+            <!-- Option to add new tester -->
+            <div class="form-group">
+                <label for="newTesterName">Add New Tester Name:</label>
+                <input type="text" id="newTesterName" placeholder="Enter new tester name">
+            </div>
+            
+            <div class="form-group">
+                <label for="newTesterEmail">New Tester Email:</label>
+                <input type="email" id="newTesterEmail" placeholder="Enter new tester email">
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('testerModal')">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="addSelectedTester()">Add Tester</button>
+        </div>
+    </div>
+</div>
+
+<!-- QA Note Field Modal -->
+<div id="addQANoteFieldModal" class="modal">
+    <div class="modal-content">
+        <h3>Add QA Note Field</h3>
+        <div class="modal-form">
+            <label for="qaFieldName">Field Name:</label>
+            <input type="text" id="qaFieldName" placeholder="Enter field name">
+            
+            <label for="qaFieldType">Field Type:</label>
+            <select id="qaFieldType" onchange="updateQAFieldOptions()">
+                <option value="input">Text Input</option>
+                <option value="textarea">Text Area</option>
+                <option value="select">Dropdown Menu</option>
+                <option value="radio">Radio Buttons</option>
+                <option value="checkbox">Checkboxes</option>
+                <option value="number">Number Input</option>
+                <option value="date">Date Input</option>
+            </select>
+            
+            <div id="qaFieldOptions" style="display: none;">
+                <label for="qaFieldOptionsList">Options (one per line):</label>
+                <textarea id="qaFieldOptionsList" placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
+            </div>
+            
+            <label>
+                <input type="checkbox" id="qaFieldRequired"> Required field
+            </label>
+            
+            <label>
+                <input type="checkbox" id="qaFieldShowInReport" checked> Show in final report
+            </label>
+        </div>
+        <div class="modal-buttons">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('addQANoteFieldModal')">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="addQANoteField()">Add Field</button>
+        </div>
+    </div>
+</div>
+
+<!-- Team Member Modal -->
+<!-- Enhanced Team Member Modal -->
+<div id="teamMemberModal" class="modal">
+    <div class="modal-content">
+        <h3>Add/Select Team Member</h3>
+        <div class="modal-form">
+            <!-- Option to select existing team member -->
+            <div class="form-group">
+                <label for="existingTeamMemberSelect">Select Existing Team Member:</label>
+                <select id="existingTeamMemberSelect" onchange="handleTeamMemberSelection()">
+                    <option value="">-- Select from existing team members --</option>
+                </select>
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0; color: #6c757d; font-weight: 600;">
+                OR
+            </div>
+            
+            <!-- Option to add new team member -->
+            <div class="form-group">
+                <label for="newTeamMemberName">Add New Team Member Name:</label>
+                <input type="text" id="newTeamMemberName" placeholder="Enter new team member name">
+            </div>
+            
+            <div class="form-group">
+                <label for="newTeamMemberEmail">New Team Member Email:</label>
+                <input type="email" id="newTeamMemberEmail" placeholder="Enter new team member email">
+            </div>
+            
+            <div class="form-group">
+                <label for="newTeamMemberRole">Role:</label>
+                <select id="newTeamMemberRole">
+                    <option value="">Select Role</option>
+                    <option value="Project Owner">Project Owner</option>
+                    <option value="Project Analyst">Project Analyst</option>
+                    <option value="Project Manager">Project Manager</option>
+                    <option value="Business Analyst">Business Analyst</option>
+                    <option value="Technical Lead">Technical Lead</option>
+                    <option value="Scrum Master">Scrum Master</option>
+                    <option value="Product Owner">Product Owner</option>
+                    <option value="Quality Assurance Lead">Quality Assurance Lead</option>
+                    <option value="DevOps Engineer">DevOps Engineer</option>
+                    <option value="UI/UX Designer">UI/UX Designer</option>
+                    <option value="Database Administrator">Database Administrator</option>
+                    <option value="Security Analyst">Security Analyst</option>
+                    <option value="System Administrator">System Administrator</option>
+                    <option value="Stakeholder">Stakeholder</option>
+                    <option value="Client Representative">Client Representative</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('teamMemberModal')">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="addSelectedTeamMember()">Add Team Member</button>
+        </div>
+    </div>
+</div>
+
+<!-- QA Note Field Modal -->
+<div id="addQANoteFieldModal" class="modal">
+    <div class="modal-content">
+        <h3>Add QA Note Field</h3>
+        <!-- Similar structure to custom field modal -->
+    </div>
+</div>
+    <!-- Link to the external JavaScript file -->
+    <script src="/static/enhanced_script.js"></script>
+    <script src="/static/Charts.js"></script>
+
+</body>
+</html>
