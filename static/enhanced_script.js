@@ -98,16 +98,25 @@ async function deleteReportDB(id) {
 }
 
 // --- Initialize App ---
-// Update the existing DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', async () => {
+    // Show loading state
+    const portfolioSelect = document.getElementById('portfolioName');
+    const projectSelect = document.getElementById('projectName');
+    
+    if (portfolioSelect) {
+        portfolioSelect.innerHTML = '<option value="">Loading portfolios...</option>';
+    }
+    if (projectSelect) {
+        projectSelect.innerHTML = '<option value="">Loading projects...</option>';
+    }
+    
     // Initial data load
     allReportsCache = await fetchReports();
     dashboardStatsCache = await fetchDashboardStats();
     
     updateDashboardStats(dashboardStatsCache);
-    searchReports(); // Initial render of the reports table
+    searchReports();
 
-    // Set up form and charts
     document.getElementById('reportDate').value = getCurrentDate();
     updateNavigationButtons();
     initializeCharts();
@@ -232,9 +241,6 @@ function updateDashboardStats(stats) {
     document.getElementById('totalTestCases').textContent = overall.totalTestCases || 0;
     document.getElementById('totalIssues').textContent = overall.totalIssues || 0;
     document.getElementById('totalEnhancements').textContent = overall.totalEnhancements || 0;
-    document.getElementById('avgEvaluationScore').textContent = overall.avgEvaluationScore || '0.0';
-    document.getElementById('avgProjectEvaluationScore').textContent = overall.avgProjectEvaluationScore || '0.0';
-
     // Update project-specific metrics
     renderProjectMetrics(stats.projects);
 }
@@ -283,16 +289,8 @@ function renderProjectMetrics(projects) {
                         <span class="metric-value">${project.totalEnhancements}</span>
                         <span class="metric-label">Enhancements</span>
                     </div>
-                    <div class="metric-item">
-                        <span class="metric-value">${project.avgEvaluationScore.toFixed(1)}</span>
-                        <span class="metric-label">Eval Score</span>
-                    </div>
                 </div>
                 <div class="metric-row">
-                    <div class="metric-item">
-                        <span class="metric-value">${project.avgProjectEvaluationScore.toFixed(1)}</span>
-                        <span class="metric-label">Project Score</span>
-                    </div>
                     <div class="metric-item">
                         <span class="metric-value">${formatDate(project.lastReportDate)}</span>
                         <span class="metric-label">Last Report</span>
@@ -354,7 +352,6 @@ async function exportDashboardReport() {
             project.totalUserStories.toString(),
             project.totalTestCases.toString(),
             project.totalIssues.toString(),
-            project.avgEvaluationScore.toFixed(1)
         ]);
         
         doc.autoTable({
@@ -497,6 +494,30 @@ function calculateUserStoryTotal() {
 
 function calculateTestCasesPercentages() {
     const total = calculateTestCasesTotal();
+    
+    // More aggressive update approach
+    const totalField = document.getElementById('totalTestCases');
+    if (totalField) {
+        // Clear any existing placeholder
+        totalField.removeAttribute('placeholder');
+        
+        // Set the value multiple ways
+        totalField.value = total;
+        totalField.setAttribute('value', total);
+        totalField.defaultValue = total;
+        
+        // Force visual refresh
+        totalField.style.display = 'none';
+        totalField.offsetHeight; // Force reflow
+        totalField.style.display = '';
+        
+        // Add a data attribute for debugging
+        totalField.setAttribute('data-calculated-value', total);
+        
+        console.log('Total field updated:', totalField.value, 'Calculated:', total);
+    }
+    
+    // Rest of the function...
     const values = {
         passed: parseInt(document.getElementById('passedTestCases')?.value) || 0,
         passedWithIssues: parseInt(document.getElementById('passedWithIssuesTestCases')?.value) || 0,
@@ -507,18 +528,19 @@ function calculateTestCasesPercentages() {
         notTestable: parseInt(document.getElementById('notTestableTestCases')?.value) || 0,
     };
 
-    // Update total field (readonly)
-    document.getElementById('totalTestCases').value = total;
-    document.getElementById('testCasesMetric').value = total;
+    // Also update the metric field
+    const metricField = document.getElementById('testCasesMetric');
+    if (metricField) {
+        metricField.value = total;
+    }
 
-    // Update percentages
     Object.keys(values).forEach(key => {
         const percentageElement = document.getElementById(`${key}TestCasesPercentage`);
         if (percentageElement) {
             percentageElement.textContent = total > 0 ? `${Math.round((values[key] / total) * 100)}%` : '0%';
         }
     });
-
+    
     updateChart(testCasesChart, Object.values(values));
 }
 
@@ -536,7 +558,7 @@ function calculateIssuesPercentages() {
         low: parseInt(document.getElementById('lowIssues')?.value) || 0,
     };
     
-    // Update total field (readonly)
+    // Update total field (readonly) - THIS WAS MISSING
     document.getElementById('totalIssues').value = total;
     document.getElementById('issuesMetric').value = total;
 
@@ -586,7 +608,7 @@ function calculateEnhancementsPercentages() {
         exists: parseInt(document.getElementById('existsEnhancements')?.value) || 0,
     };
 
-    // Update total field (readonly)
+    // Update total field (readonly) - THIS WAS MISSING
     document.getElementById('totalEnhancements').value = total;
     document.getElementById('enhancementsMetric').value = total;
 
@@ -604,231 +626,6 @@ function calculateEnhancementsPercentages() {
 function calculateEnhancementsTotal() {
     const fields = ['newEnhancements', 'implementedEnhancements', 'existsEnhancements'];
     return fields.reduce((sum, field) => sum + (parseInt(document.getElementById(field)?.value) || 0), 0);
-}
-
-function calculateEvaluationTotals() {
-    const scoreFields = document.querySelectorAll('input[name^="eval_"][name$="_score"]');
-    let total = 0;
-    let count = 0;
-    
-    scoreFields.forEach(field => {
-        const value = parseFloat(field.value);
-        if (!isNaN(value)) {
-            total += value;
-            count++;
-        }
-    });
-    
-    const average = count > 0 ? (total / count).toFixed(2) : '0.00';
-    const totalField = document.getElementById('evaluationTotalScoreField');
-    const metricField = document.getElementById('evaluationTotalScore');
-    
-    if (totalField) totalField.value = average;
-    if (metricField) metricField.value = average;
-}
-
-function calculateProjectEvaluationTotals() {
-    const scoreFields = document.querySelectorAll('input[name^="proj_"][name$="_score"]:not([name="proj_final_score"])');
-    let total = 0;
-    let count = 0;
-    
-    scoreFields.forEach(field => {
-        const value = parseFloat(field.value);
-        if (!isNaN(value)) {
-            total += value;
-            count++;
-        }
-    });
-    
-    const average = count > 0 ? (total / count).toFixed(2) : '0.00';
-    const totalField = document.getElementById('projectEvaluationTotalScoreField');
-    const metricField = document.getElementById('projectEvaluationTotalScore');
-    
-    if (totalField) totalField.value = average;
-    if (metricField) metricField.value = average;
-}
-
-// --- Evaluation Section Functions ---
-function addScoreColumn() {
-    scoreColumnCount++;
-    const headerRow = document.getElementById('evaluationHeader');
-    const table = document.getElementById('evaluationTable');
-    
-    // Add header
-    const newHeader = document.createElement('th');
-    newHeader.textContent = `Score ${scoreColumnCount}`;
-    newHeader.className = 'dynamic-score-column';
-    headerRow.insertBefore(newHeader, headerRow.children[headerRow.children.length - (weightReasonVisible ? 2 : 0)]);
-    
-    // Add cells to each row
-    const rows = table.querySelectorAll('tbody tr');
-    rows.forEach((row, index) => {
-        if (row.querySelector('input[name$="_score"]')) { // Only score rows, not total row
-            const newCell = document.createElement('td');
-            newCell.className = 'dynamic-score-column';
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.name = `eval_score_${scoreColumnCount}_${index}`;
-            input.placeholder = 'Enter score';
-            input.oninput = calculateEvaluationTotals;
-            newCell.appendChild(input);
-            row.insertBefore(newCell, row.children[row.children.length - (weightReasonVisible ? 2 : 0)]);
-        } else {
-            // Total row
-            const newCell = document.createElement('td');
-            newCell.className = 'dynamic-score-column';
-            newCell.textContent = '-';
-            row.insertBefore(newCell, row.children[row.children.length - (weightReasonVisible ? 2 : 0)]);
-        }
-    });
-}
-
-function toggleWeightReason() {
-    weightReasonVisible = !weightReasonVisible;
-    const columns = document.querySelectorAll('.weight-reason-column');
-    const button = document.getElementById('toggleWeightReasonBtn');
-    
-    columns.forEach(col => {
-        col.style.display = weightReasonVisible ? 'table-cell' : 'none';
-    });
-    
-    button.textContent = weightReasonVisible ? 'Hide Weight & Reason' : 'Show Weight & Reason';
-}
-
-// --- Custom Fields Functions ---
-function showAddCustomFieldModal() {
-    showModal('addCustomFieldModal');
-}
-
-function updateCustomFieldOptions() {
-    const type = document.getElementById('customFieldType').value;
-    const optionsDiv = document.getElementById('customFieldOptions');
-    
-    if (type === 'select' || type === 'radio' || type === 'checkbox') {
-        optionsDiv.style.display = 'block';
-    } else {
-        optionsDiv.style.display = 'none';
-    }
-}
-
-function addCustomField() {
-    const name = document.getElementById('customFieldName').value.trim();
-    const type = document.getElementById('customFieldType').value;
-    const required = document.getElementById('customFieldRequired').checked;
-    const showInReport = document.getElementById('customFieldShowInReport').checked;
-    const optionsList = document.getElementById('customFieldOptionsList').value.trim();
-    
-    if (!name) {
-        alert('Please enter a field name.');
-        return;
-    }
-    
-    const options = (type === 'select' || type === 'radio' || type === 'checkbox') && optionsList 
-        ? optionsList.split('\n').map(opt => opt.trim()).filter(opt => opt)
-        : [];
-    
-    const customField = {
-        id: `custom_${Date.now()}`,
-        name,
-        type,
-        required,
-        showInReport,
-        options,
-        value: type === 'checkbox' ? [] : ''
-    };
-    
-    customFieldsData.push(customField);
-    renderCustomFields();
-    closeModal('addCustomFieldModal');
-    
-    // Clear form
-    document.getElementById('customFieldName').value = '';
-    document.getElementById('customFieldType').value = 'input';
-    document.getElementById('customFieldRequired').checked = false;
-    document.getElementById('customFieldShowInReport').checked = true;
-    document.getElementById('customFieldOptionsList').value = '';
-    updateCustomFieldOptions();
-}
-
-function renderCustomFields() {
-    const container = document.getElementById('customFieldsList');
-    
-    if (customFieldsData.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state" style="text-align: center; color: #6c757d; padding: 40px 0;">
-                <div style="font-size: 3em; margin-bottom: 20px;">📝</div>
-                <h3>No Custom Fields Added</h3>
-                <p>Click "Add Custom Field" to create custom fields for this report.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = customFieldsData.map(field => renderCustomFieldHTML(field)).join('');
-}
-
-function renderCustomFieldHTML(field) {
-    let inputHTML = '';
-    
-    switch (field.type) {
-        case 'input':
-            inputHTML = `<input type="text" id="${field.id}" name="${field.id}" placeholder="Enter ${field.name.toLowerCase()}" ${field.required ? 'required' : ''}>`;
-            break;
-        case 'textarea':
-            inputHTML = `<textarea id="${field.id}" name="${field.id}" placeholder="Enter ${field.name.toLowerCase()}" rows="4" ${field.required ? 'required' : ''}></textarea>`;
-            break;
-        case 'number':
-            inputHTML = `<input type="number" id="${field.id}" name="${field.id}" placeholder="Enter ${field.name.toLowerCase()}" ${field.required ? 'required' : ''}>`;
-            break;
-        case 'date':
-            inputHTML = `<input type="date" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>`;
-            break;
-        case 'select':
-            inputHTML = `
-                <select id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>
-                    <option value="">Select ${field.name}</option>
-                    ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                </select>
-            `;
-            break;
-        case 'radio':
-            inputHTML = field.options.map((opt, index) => `
-                <label class="radio-option">
-                    <input type="radio" name="${field.id}" value="${opt}" ${field.required && index === 0 ? 'required' : ''}>
-                    ${opt}
-                </label>
-            `).join('');
-            break;
-        case 'checkbox':
-            inputHTML = field.options.map(opt => `
-                <label class="checkbox-option">
-                    <input type="checkbox" name="${field.id}" value="${opt}">
-                    ${opt}
-                </label>
-            `).join('');
-            break;
-    }
-    
-    return `
-        <div class="custom-field-item">
-            <div class="custom-field-header">
-                <h4>${field.name}</h4>
-                <div class="custom-field-badges">
-                    ${field.required ? '<span class="badge badge-required">Required</span>' : ''}
-                    ${field.showInReport ? '<span class="badge badge-visible">Show in Report</span>' : '<span class="badge badge-hidden">Hidden</span>'}
-                    <button type="button" class="btn-remove-field" onclick="removeCustomField('${field.id}')">Remove</button>
-                </div>
-            </div>
-            <div class="custom-field-input">
-                ${inputHTML}
-            </div>
-        </div>
-    `;
-}
-
-function removeCustomField(fieldId) {
-    customFieldsData = customFieldsData.filter(field => field.id !== fieldId);
-    renderCustomFields();
 }
 
 // --- Dynamic Form Sections (Request, Build, Tester) ---
@@ -941,7 +738,7 @@ function previousSection() { if (currentSection > 0) showSection(currentSection 
 
 function updateNavigationButtons() {
     document.getElementById('prevBtn').disabled = currentSection === 0;
-    const isLastSection = currentSection === 10;
+    const isLastSection = currentSection === 7;
     document.getElementById('nextBtn').style.display = isLastSection ? 'none' : 'inline-block';
     document.getElementById('submitBtn').style.display = isLastSection ? 'inline-block' : 'none';
 }
@@ -1063,13 +860,11 @@ function resetFormData() {
     requestData = [];
     buildData = [];
     testerData = [];
-    customFieldsData = [];
     scoreColumnCount = 0;
     weightReasonVisible = false;
     renderRequestList();
     renderBuildList();
     renderTesterList();
-    renderCustomFields();
     resetAllCharts();
 }
 
@@ -1149,35 +944,12 @@ function loadReportForEditing(report) {
     renderRequestList();
     renderBuildList();
     renderTesterList();
-    renderCustomFields();
-    
-    // Load evaluation data
-    if (report.evaluationData) {
-        Object.entries(report.evaluationData).forEach(([key, value]) => {
-            const element = document.querySelector(`input[name="${key}"]`);
-            if (element) {
-                element.value = value;
-            }
-        });
-    }
-    
-    // Load project evaluation data
-    if (report.projectEvaluationData) {
-        Object.entries(report.projectEvaluationData).forEach(([key, value]) => {
-            const element = document.querySelector(`input[name="${key}"]`);
-            if (element) {
-                element.value = value;
-            }
-        });
-    }
-    
+        
     // Recalculate all totals and charts
     calculatePercentages();
     calculateTestCasesPercentages();
     calculateIssuesPercentages();
     calculateEnhancementsPercentages();
-    calculateEvaluationTotals();
-    calculateProjectEvaluationTotals();
 }
 
 // Form submission handler
@@ -1203,42 +975,6 @@ document.getElementById('qaReportForm').addEventListener('submit', async functio
     reportData.requestData = requestData;
     reportData.buildData = buildData;
     reportData.testerData = testerData;
-
-    // Add evaluation data
-    const evaluationData = {};
-    const projectEvaluationData = {};
-    
-    // Collect evaluation fields
-    document.querySelectorAll('input[name^="eval_"]').forEach(input => {
-        if (input.value.trim()) {
-            evaluationData[input.name] = input.value;
-        }
-    });
-    
-    // Collect project evaluation fields
-    document.querySelectorAll('input[name^="proj_"]').forEach(input => {
-        if (input.value.trim()) {
-            projectEvaluationData[input.name] = input.value;
-        }
-    });
-    
-    reportData.evaluationData = evaluationData;
-    reportData.projectEvaluationData = projectEvaluationData;
-
-    // Add custom fields data
-    const customFields = {};
-    customFieldsData.forEach(field => {
-        const element = document.getElementById(field.id);
-        if (element) {
-            if (field.type === 'checkbox') {
-                const checkedBoxes = document.querySelectorAll(`input[name="${field.id}"]:checked`);
-                customFields[field.id] = Array.from(checkedBoxes).map(cb => cb.value);
-            } else {
-                customFields[field.id] = element.value;
-            }
-        }
-    });
-    reportData.customFields = customFields;
 
     const savedReport = await saveReport(reportData);
     if (savedReport) {
@@ -1317,8 +1053,7 @@ async function exportReportAsPdf(id) {
             ['Total Test Cases', report.totalTestCases || 0],
             ['Total Issues', report.totalIssues || 0],
             ['Total Enhancements', report.totalEnhancements || 0],
-            ['Evaluation Score', report.evaluationTotalScore || 0],
-            ['Project Evaluation Score', report.projectEvaluationTotalScore || 0]
+            ['QA Notes', report.qaNotesText ? 'Available' : 'N/A']
         ],
         styles: { fontSize: 9, cellPadding: 3 },
         headStyles: { fillColor: [66, 133, 244], textColor: 255 }
@@ -1424,8 +1159,6 @@ async function exportReportAsExcel(id) {
         ["Total Test Cases", report.totalTestCases || 0],
         ["Total Issues", report.totalIssues || 0],
         ["Total Enhancements", report.totalEnhancements || 0],
-        ["Evaluation Score", report.evaluationTotalScore || 0],
-        ["Project Evaluation Score", report.projectEvaluationTotalScore || 0],
         ["QA Notes", report.qaNotesText || 'N/A']
     ];
     const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
@@ -1510,40 +1243,6 @@ async function exportReportAsExcel(id) {
         const wsTesters = XLSX.utils.aoa_to_sheet([testerHeaders, ...testersSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsTesters, "Testers");
     }
-
-    // Evaluation Data Sheet
-    if (report.evaluationData && Object.keys(report.evaluationData).length > 0) {
-        const evalHeaders = ["Criteria", "Value"];
-        const evalSheetData = Object.entries(report.evaluationData).map(([key, value]) => [
-            key.replace(/eval_|_score|_weight|_reason/g, '').replace(/_/g, ' '),
-            value
-        ]);
-        const wsEvaluation = XLSX.utils.aoa_to_sheet([evalHeaders, ...evalSheetData]);
-        XLSX.utils.book_append_sheet(workbook, wsEvaluation, "Evaluation");
-    }
-
-    // Project Evaluation Data Sheet
-    if (report.projectEvaluationData && Object.keys(report.projectEvaluationData).length > 0) {
-        const projEvalHeaders = ["Criteria", "Value"];
-        const projEvalSheetData = Object.entries(report.projectEvaluationData).map(([key, value]) => [
-            key.replace(/proj_|_score|_reason/g, '').replace(/_/g, ' '),
-            value
-        ]);
-        const wsProjEvaluation = XLSX.utils.aoa_to_sheet([projEvalHeaders, ...projEvalSheetData]);
-        XLSX.utils.book_append_sheet(workbook, wsProjEvaluation, "Project Evaluation");
-    }
-
-    // Custom Fields Sheet
-    if (report.customFields && Object.keys(report.customFields).length > 0) {
-        const customFieldHeaders = ["Field Name", "Value"];
-        const customFieldsSheetData = Object.entries(report.customFields).map(([key, value]) => [
-            key.replace(/custom_/g, '').replace(/_/g, ' '),
-            Array.isArray(value) ? value.join(', ') : value
-        ]);
-        const wsCustomFields = XLSX.utils.aoa_to_sheet([customFieldHeaders, ...customFieldsSheetData]);
-        XLSX.utils.book_append_sheet(workbook, wsCustomFields, "Custom Fields");
-    }
-
     XLSX.writeFile(workbook, `QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.xlsx`);
 }
 
@@ -2002,9 +1701,6 @@ function renderQANotesFields() {
         return;
     }
     
-    // Add custom QA note fields after the default one
-    const customFieldsHTML = qaNotesFields.map(field => renderCustomFieldHTML(field)).join('');
-    
     // Find the default field and add custom fields after it
     const defaultField = container.querySelector('.custom-field-item');
     if (defaultField && customFieldsHTML) {
@@ -2026,29 +1722,30 @@ function addQANoteField() {
     closeModal('addQANoteFieldModal');
 }
 
-// Missing portfolio and project dropdown population functions
 function populatePortfolioDropdown(portfolios) {
     const select = document.getElementById('portfolioName');
     if (!select) return;
     
-    // Keep existing static options
-    const existingOptions = Array.from(select.options).map(opt => ({ value: opt.value, text: opt.text }));
-    
-    // Clear and rebuild
+    // Clear loading state
     select.innerHTML = '<option value="">Select Portfolio</option>';
     
-    // Add existing static options (skip the first empty option)
-    existingOptions.slice(1).forEach(opt => {
-        if (opt.value) {
-            select.innerHTML += `<option value="${opt.value}">${opt.text}</option>`;
-        }
+    // Add static options first
+    const staticOptions = [
+        { value: 'api-services', text: 'API Services' },
+        { value: 'web-platform', text: 'Web Platform' },
+        { value: 'mobile-app', text: 'Mobile App' },
+        { value: 'data-analytics', text: 'Data Analytics' }
+    ];
+    
+    staticOptions.forEach(opt => {
+        select.innerHTML += `<option value="${opt.value}">${opt.text}</option>`;
     });
     
     // Add dynamic portfolios from database
     portfolios.forEach(portfolio => {
         const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
         // Check if this portfolio already exists in static options
-        const exists = existingOptions.some(opt => opt.value === value);
+        const exists = staticOptions.some(opt => opt.value === value);
         if (!exists) {
             select.innerHTML += `<option value="${value}">${portfolio.name}</option>`;
         }
@@ -2575,14 +2272,6 @@ window.calculateTestCasesPercentages = calculateTestCasesPercentages;
 window.calculateIssuesPercentages = calculateIssuesPercentages;
 window.calculateIssuesStatusPercentages = calculateIssuesStatusPercentages;
 window.calculateEnhancementsPercentages = calculateEnhancementsPercentages;
-window.calculateEvaluationTotals = calculateEvaluationTotals;
-window.calculateProjectEvaluationTotals = calculateProjectEvaluationTotals;
-window.addScoreColumn = addScoreColumn;
-window.toggleWeightReason = toggleWeightReason;
-window.showAddCustomFieldModal = showAddCustomFieldModal;
-window.updateCustomFieldOptions = updateCustomFieldOptions;
-window.addCustomField = addCustomField;
-window.removeCustomField = removeCustomField;
 window.goToPage = goToPage;
 window.exportReportAsPdf = exportReportAsPdf;
 window.exportReportAsExcel = exportReportAsExcel;
