@@ -158,9 +158,15 @@ function removeToast(toast) {
 function updateDashboardStats(stats) {
     if (!stats) return;
 
+    // Check if we are on the dashboard page by looking for a key element
+    const totalReportsEl = document.getElementById('totalReports');
+    if (!totalReportsEl) {
+        return; // Exit if not on the dashboard page
+    }
+
     // Update overall statistics
     const overall = stats.overall;
-    document.getElementById('totalReports').textContent = overall.totalReports || 0;
+    totalReportsEl.textContent = overall.totalReports || 0;
     document.getElementById('completedReports').textContent = overall.completedReports || 0;
     document.getElementById('inProgressReports').textContent = overall.inProgressReports || 0;
     document.getElementById('pendingReports').textContent = overall.pendingReports || 0;
@@ -696,6 +702,42 @@ function removeRequest(index) { requestData.splice(index, 1); renderRequestList(
 function removeBuild(index) { buildData.splice(index, 1); renderBuildList(); showToast('Build removed', 'info'); }
 function removeTester(index) { testerData.splice(index, 1); renderTesterList(); showToast('Tester removed', 'info'); }
 
+function clearAllFields() {
+    if (confirm('Are you sure you want to clear all fields in the form?')) {
+        resetFormData();
+        showToast('All fields have been cleared.', 'info');
+    }
+}
+
+function clearCurrentSection() {
+    if (confirm('Are you sure you want to clear all fields in the current section?')) {
+        const section = document.getElementById(`section-${currentSection}`);
+        if (section) {
+            const inputs = section.querySelectorAll('input:not([readonly]), textarea, select');
+            inputs.forEach(input => {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+            });
+
+            // After clearing, recalculate percentages for relevant sections
+            if (section.id === 'section-3') {
+                calculatePercentages();
+            } else if (section.id === 'section-4') {
+                calculateTestCasesPercentages();
+            } else if (section.id === 'section-5') {
+                calculateIssuesPercentages();
+            } else if (section.id === 'section-6') {
+                calculateEnhancementsPercentages();
+            }
+
+            showToast('Current section fields have been cleared.', 'info');
+        }
+    }
+}
+
 // --- Page Management & Navigation (Simplified for multi-page app) ---
 // The showPage function is no longer needed for navigation between main pages.
 // Browser handles page loads.
@@ -711,6 +753,7 @@ function showSection(sectionIndex) {
 
     currentSection = sectionIndex;
     updateNavigationButtons();
+    window.scrollTo(0, 0);
 }
 
 function nextSection() {
@@ -736,29 +779,14 @@ function backToDashboard() { window.location.href = '/dashboard'; }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
 // --- Reports Table Functions ---
-function searchReports() {
-    const searchQuery = document.getElementById('searchInput')?.value.toLowerCase();
+async function searchReports() {
+    const searchQuery = document.getElementById('searchInput')?.value || '';
+    showReportsLoading();
+    const result = await fetchReports(currentPage, searchQuery);
+    hideReportsLoading();
 
-    const filtered = allReportsCache.filter(report =>
-        Object.values(report).some(value =>
-            String(value).toLowerCase().includes(searchQuery)
-        )
-    );
-
-    // Apply pagination to the filtered results
-    const total = filtered.length;
-    const totalPages = Math.ceil(total / reportsPerPage);
-    const start = (currentPage - 1) * reportsPerPage;
-    const paginatedData = filtered.slice(start, start + reportsPerPage);
-
-    renderReportsTable(paginatedData);
-    renderPagination({
-        total,
-        page: currentPage,
-        totalPages,
-        hasNext: currentPage < totalPages,
-        hasPrev: currentPage > 1
-    });
+    renderReportsTable(result.reports);
+    renderPagination(result);
 }
 
 function renderReportsTable(reports) {
@@ -823,31 +851,48 @@ async function regenerateReport(id) {
 }
 
 async function deleteReport(id) {
-    // Using a custom modal for confirmation instead of browser's confirm()
     const confirmDelete = await new Promise(resolve => {
         const modal = document.createElement('div');
         modal.className = 'modal';
+        modal.style.display = 'block';
+
         modal.innerHTML = `
             <div class="modal-content">
                 <h3>Confirm Deletion</h3>
                 <p>Are you sure you want to delete this report? This action cannot be undone.</p>
                 <div class="modal-buttons">
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove(); resolve(false);">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="this.closest('.modal').remove(); resolve(true);">Delete</button>
+                    <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
                 </div>
             </div>
         `;
+
         document.body.appendChild(modal);
-        modal.style.display = 'block';
+
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const cancelBtn = document.getElementById('cancelDeleteBtn');
+
+        confirmBtn.onclick = () => {
+            modal.remove();
+            resolve(true);
+        };
+
+        cancelBtn.onclick = () => {
+            modal.remove();
+            resolve(false);
+        };
     });
 
     if (confirmDelete) {
         const result = await deleteReportDB(id);
         if (result) {
             allReportsCache = allReportsCache.filter(r => r.id !== id);
-            dashboardStatsCache = await fetchDashboardStats(); // Refresh dashboard cache
-            searchReports(); // Re-render reports table
-            updateDashboardStats(dashboardStatsCache); // Update dashboard UI
+            // Re-fetch dashboard stats if the function exists
+            if (typeof fetchDashboardStats === 'function') {
+                dashboardStatsCache = await fetchDashboardStats();
+                updateDashboardStats(dashboardStatsCache);
+            }
+            searchReports(); // Re-render the reports table
             showToast('Report deleted successfully', 'success');
         } else {
             showToast('Failed to delete report', 'error');
@@ -856,7 +901,7 @@ async function deleteReport(id) {
 }
 
 function viewReport(id) {
-    window.open(`/report/${id}`, '_blank');
+    window.location.href = `/report/${id}`;
 }
 
 // --- Form Handling ---
@@ -995,6 +1040,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.testerData = testerData;
             reportData.teamMemberData = teamMemberData; // Add team member data
             reportData.customFields = customFieldsData; // Add custom fields data
+            reportData.qaNotes = qaNotesData;
 
             const savedReport = await saveReport(reportData);
             if (savedReport) {
@@ -1858,38 +1904,58 @@ function updateQAFieldOptions() {
     }
 }
 
-function addQANoteField() {
-    const name = document.getElementById('qaFieldName').value.trim();
-    const type = document.getElementById('qaFieldType').value;
-    const required = document.getElementById('qaFieldRequired').checked;
-    const showInReport = document.getElementById('qaFieldShowInReport').checked;
-    const optionsListElement = document.getElementById('qaFieldOptionsList');
-    const optionsList = optionsListElement ? optionsListElement.value.trim() : '';
+let qaNotesData = [];
 
-    if (!name) {
-        showToast('Please enter a field name', 'warning');
-        return;
+function showAddQANoteModal() {
+    showModal('addQANoteModal');
+    const noteTextArea = document.getElementById('newQANoteText');
+    if (noteTextArea) {
+        noteTextArea.value = '';
     }
-
-    const options = (type === 'select' || type === 'radio' || type === 'checkbox') && optionsList
-        ? optionsList.split('\n').map(opt => opt.trim()).filter(opt => opt)
-        : [];
-
-    const qaField = {
-        id: `qa_note_${Date.now()}`,
-        name,
-        type,
-        required,
-        showInReport,
-        options,
-        value: type === 'checkbox' ? [] : '' // Initialize value for checkboxes as array, others as empty string
-    };
-
-    qaNotesFields.push(qaField);
-    renderQANotesFields();
-    closeModal('addQANoteFieldModal');
-    showToast('QA note field added successfully!', 'success');
 }
+
+function addQANote() {
+    const noteText = document.getElementById('newQANoteText').value.trim();
+    if (noteText) {
+        qaNotesData.push({ note: noteText });
+        renderQANotesList();
+        updateQANotesCount();
+        closeModal('addQANoteModal');
+    } else {
+        showToast('Please enter a note.', 'warning');
+    }
+}
+
+function removeQANote(index) {
+    qaNotesData.splice(index, 1);
+    renderQANotesList();
+    updateQANotesCount();
+}
+
+function renderQANotesList() {
+    const container = document.getElementById('qaNotesList');
+    if (!container) return;
+
+    if (qaNotesData.length === 0) {
+        container.innerHTML = '<div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>';
+    } else {
+        container.innerHTML = qaNotesData.map((item, index) => `
+            <div class="dynamic-item">
+                <div>${item.note}</div>
+                <button type="button" class="btn-delete" onclick="removeQANote(${index})">Remove</button>
+            </div>
+        `).join('');
+    }
+}
+
+function updateQANotesCount() {
+    const countField = document.getElementById('qaNotesMetric');
+    if (countField) {
+        countField.value = qaNotesData.length;
+    }
+}
+
+// --- Page Management & Navigation (Simplified for multi-page app) ---
 
 function renderQANotesFields() {
     const container = document.getElementById('qaNotesFieldsList');

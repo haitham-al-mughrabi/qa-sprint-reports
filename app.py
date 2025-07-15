@@ -284,9 +284,35 @@ def view_report(report_id):
 
 @app.route('/api/reports', methods=['GET'])
 def get_reports():
-    """Fetches all reports from the database."""
-    reports = Report.query.order_by(Report.id.desc()).all()
-    return jsonify([report.to_dict() for report in reports])
+    """Fetches reports from the database with pagination and search."""
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search_query = request.args.get('search', '', type=str)
+
+    query = Report.query
+
+    if search_query:
+        search_term = f"%{search_query}%"
+        query = query.filter(
+            db.or_(
+                Report.portfolioName.ilike(search_term),
+                Report.projectName.ilike(search_term),
+                Report.sprintNumber.ilike(search_term),
+                Report.reportVersion.ilike(search_term)
+            )
+        )
+
+    pagination = query.order_by(Report.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    reports = pagination.items
+    
+    return jsonify({
+        'reports': [report.to_dict() for report in reports],
+        'total': pagination.total,
+        'page': page,
+        'totalPages': pagination.pages,
+        'hasNext': pagination.has_next,
+        'hasPrev': pagination.has_prev
+    })
 
 @app.route('/api/reports/<int:report_id>', methods=['GET'])
 def get_report(report_id):
@@ -375,9 +401,9 @@ def create_report():
     new_report = Report(
         portfolioName=data.get('portfolioName'),
         projectName=data.get('projectName'),
-        sprintNumber=data.get('sprintNumber'),
+        sprintNumber=int(data.get('sprintNumber') or 0),
         reportVersion=data.get('reportVersion'),
-        cycleNumber=data.get('cycleNumber'),
+        cycleNumber=int(data.get('cycleNumber') or 0),
         reportDate=data.get('reportDate'),
         testSummary=data.get('testSummary'),
         testingStatus=data.get('testingStatus'),
@@ -388,38 +414,38 @@ def create_report():
         testerData=json.dumps(data.get('testerData', [])),
         
         # User Stories
-        passedUserStories=data.get('passedUserStories', 0),
-        passedWithIssuesUserStories=data.get('passedWithIssuesUserStories', 0),
-        failedUserStories=data.get('failedUserStories', 0),
-        blockedUserStories=data.get('blockedUserStories', 0),
-        cancelledUserStories=data.get('cancelledUserStories', 0),
-        deferredUserStories=data.get('deferredUserStories', 0),
-        notTestableUserStories=data.get('notTestableUserStories', 0),
+        passedUserStories=int(data.get('passedUserStories') or 0),
+        passedWithIssuesUserStories=int(data.get('passedWithIssuesUserStories') or 0),
+        failedUserStories=int(data.get('failedUserStories') or 0),
+        blockedUserStories=int(data.get('blockedUserStories') or 0),
+        cancelledUserStories=int(data.get('cancelledUserStories') or 0),
+        deferredUserStories=int(data.get('deferredUserStories') or 0),
+        notTestableUserStories=int(data.get('notTestableUserStories') or 0),
         
         # Test Cases
-        passedTestCases=data.get('passedTestCases', 0),
-        passedWithIssuesTestCases=data.get('passedWithIssuesTestCases', 0),
-        failedTestCases=data.get('failedTestCases', 0),
-        blockedTestCases=data.get('blockedTestCases', 0),
-        cancelledTestCases=data.get('cancelledTestCases', 0),
-        deferredTestCases=data.get('deferredTestCases', 0),
-        notTestableTestCases=data.get('notTestableTestCases', 0),
+        passedTestCases=int(data.get('passedTestCases') or 0),
+        passedWithIssuesTestCases=int(data.get('passedWithIssuesTestCases') or 0),
+        failedTestCases=int(data.get('failedTestCases') or 0),
+        blockedTestCases=int(data.get('blockedTestCases') or 0),
+        cancelledTestCases=int(data.get('cancelledTestCases') or 0),
+        deferredTestCases=int(data.get('deferredTestCases') or 0),
+        notTestableTestCases=int(data.get('notTestableTestCases') or 0),
         
         # Issues
-        criticalIssues=data.get('criticalIssues', 0),
-        highIssues=data.get('highIssues', 0),
-        mediumIssues=data.get('mediumIssues', 0),
-        lowIssues=data.get('lowIssues', 0),
-        newIssues=data.get('newIssues', 0),
-        fixedIssues=data.get('fixedIssues', 0),
-        notFixedIssues=data.get('notFixedIssues', 0),
-        reopenedIssues=data.get('reopenedIssues', 0),
-        deferredIssues=data.get('deferredIssues', 0),
+        criticalIssues=int(data.get('criticalIssues') or 0),
+        highIssues=int(data.get('highIssues') or 0),
+        mediumIssues=int(data.get('mediumIssues') or 0),
+        lowIssues=int(data.get('lowIssues') or 0),
+        newIssues=int(data.get('newIssues') or 0),
+        fixedIssues=int(data.get('fixedIssues') or 0),
+        notFixedIssues=int(data.get('notFixedIssues') or 0),
+        reopenedIssues=int(data.get('reopenedIssues') or 0),
+        deferredIssues=int(data.get('deferredIssues') or 0),
         
         # Enhancements
-        newEnhancements=data.get('newEnhancements', 0),
-        implementedEnhancements=data.get('implementedEnhancements', 0),
-        existsEnhancements=data.get('existsEnhancements', 0),
+        newEnhancements=int(data.get('newEnhancements') or 0),
+        implementedEnhancements=int(data.get('implementedEnhancements') or 0),
+        existsEnhancements=int(data.get('existsEnhancements') or 0),
         
         # Evaluation
         evaluationData=json.dumps(data.get('evaluationData', {})),
@@ -427,7 +453,7 @@ def create_report():
         
         # Other metrics
         evaluationMetric=data.get('evaluationMetric'),
-        qaNotesMetric=data.get('qaNotesMetric', 0),
+        qaNotesMetric=int(data.get('qaNotesMetric') or 0),
         qaNotesText=data.get('qaNotesText'),
         
         # Custom Fields
@@ -800,11 +826,13 @@ def update_report(id):
                   'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues',
                   'notFixedIssues', 'reopenedIssues', 'deferredIssues', 'newEnhancements',
                   'implementedEnhancements', 'existsEnhancements', 'evaluationMetric',
-                  'qaNotesMetric', 'qaNotesText']:
+                  'qaNotesMetric']:
         if field in data:
             setattr(report, field, data[field])
     
     # Update JSON fields
+    if 'qaNotes' in data:
+        report.qaNotes = json.dumps(data['qaNotes'])
     if 'requestData' in data:
         report.requestData = json.dumps(data['requestData'])
     if 'buildData' in data:
@@ -832,6 +860,7 @@ def delete_report(id):
     db.session.delete(report)
     db.session.commit()
     return jsonify({'message': 'Report deleted successfully'}), 200
+
 
 if __name__ == '__main__':
     with app.app_context():

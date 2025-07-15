@@ -94,11 +94,8 @@
                     link.classList.remove('active');
                 }
             });
-            // Fetch and render reports on page load
-            showReportsLoading();
-            allReportsCache = await fetchReports();
-            hideReportsLoading();
-            searchReports(); // Initial render with pagination
+            // Initial data load
+            searchReports();
         });
         
         function showReportsLoading() {

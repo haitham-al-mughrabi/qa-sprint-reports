@@ -164,8 +164,8 @@
                                             <td><small>Sum of all enhancement statuses</small></td>
                                         </tr>
                                         <tr>
-                                            <td><strong><i class="fas fa-chart-bar"></i> QA Notes Count</strong><br><small>Manual entry</small></td>
-                                            <td><input type="number" name="qaNotesMetric" min="0" placeholder="0"></td>
+                                            <td><strong><i class="fas fa-chart-bar"></i> QA Notes Count</strong><br><small>Auto-calculated from section 8</small></td>
+                                            <td><input type="number" name="qaNotesMetric" id="qaNotesMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
                                             <td><small>Number of QA notes</small></td>
                                         </tr>
                                     </tbody>
@@ -515,11 +515,13 @@
                         <!-- Section 8: QA Notes -->
                         <div class="section" id="section-7">
                             <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
-                            
-                            <div class="form-grid">
-                                <div class="form-group full-width">
-                                    <label for="qaNotesText">General Notes</label>
-                                    <textarea id="qaNotesText" name="qaNotesText" placeholder="Add all your QA notes, observations, or comments here..." rows="12"></textarea>
+                            <div class="dynamic-section">
+                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
+                                    <i class="fas fa-clipboard-list"></i> QA Notes
+                                    <button type="button" class="section-btn" onclick="showAddQANoteModal()">+ Add Note</button>
+                                </h3>
+                                <div class="dynamic-list" id="qaNotesList">
+                                    <div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>
                                 </div>
                             </div>
                         </div>
@@ -527,6 +529,8 @@
                         <!-- Navigation Buttons -->
                         <div class="navigation-buttons">
                             <button type="button" class="nav-btn" id="prevBtn" onclick="previousSection()" disabled>← Previous</button>
+                            <button type="button" class="nav-btn clear-btn" id="clearSectionBtn" onclick="clearCurrentSection()">Clear Section</button>
+                            <button type="button" class="nav-btn clear-btn" id="clearAllBtn" onclick="clearAllFields()">Clear All</button>
                             <button type="button" class="nav-btn" id="nextBtn" onclick="nextSection()">Next →</button>
                             <button type="submit" class="nav-btn submit-btn" id="submitBtn" style="display: none;">💾 Save Report</button>
                         </div>
@@ -705,6 +709,23 @@
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('teamMemberModal')">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="addSelectedTeamMember()">Add Team Member</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QA Note Modal -->
+    <div id="addQANoteModal" class="modal">
+        <div class="modal-content">
+            <h3>📝 Add QA Note</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="newQANoteText">Note:</label>
+                    <textarea id="newQANoteText" placeholder="Enter your QA note here..." rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addQANoteModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addQANote()">Add Note</button>
             </div>
         </div>
     </div>

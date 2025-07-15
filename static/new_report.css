@@ -439,10 +439,52 @@ p {
 .dynamic-list { background: var(--surface); border-radius: var(--border-radius); padding: 1rem; border: 1px dashed var(--border); min-height: 100px; transition: var(--transition); }
 .dynamic-list:hover { border-color: var(--primary); }
 .empty-state { text-align: center; color: var(--text-secondary); padding: 2rem; font-style: italic; }
-.dynamic-item { background: var(--background); border: 1px solid var(--border); border-radius: var(--border-radius); padding: 1rem; margin-bottom: 1rem; color: var(--text-primary); transition: var(--transition); }
-.dynamic-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-light); }
-.section-btn { background: var(--success); color: white; border: none; padding: 0.5rem 1rem; border-radius: var(--border-radius); font-weight: 600; cursor: pointer; transition: var(--transition); }
-.section-btn:hover { background: #16a34a; transform: translateY(-2px); }
+.btn-delete {
+    background-color: var(--danger);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+.dynamic-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.dynamic-item {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+.dynamic-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+}
+.section-btn {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.section-btn:hover {
+    background: #16a34a;
+    transform: translateY(-2px);
+}
 
 .navigation-buttons {
     display: flex;

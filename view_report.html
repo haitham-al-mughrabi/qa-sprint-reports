@@ -749,8 +749,10 @@
 
         function renderQANotes(report) {
             const qaNotesContent = document.getElementById('qaNotesContent');
-            if (report.qaNotesText) {
-                qaNotesContent.textContent = report.qaNotesText;
+            const qaNotes = JSON.parse(report.qaNotes || '[]');
+
+            if (qaNotes.length > 0) {
+                qaNotesContent.innerHTML = qaNotes.map(note => `<div class="dynamic-item">${note.note}</div>`).join('');
             } else {
                 qaNotesContent.innerHTML = `<div class="empty-state" style="border: none; padding: 0; background: none;"><h3>No QA Notes</h3><p>No specific QA notes were provided for this report.</p></div>`;
             }
@@ -870,64 +872,60 @@
             return map[status] || 'Pending';
         }
 
-        async function exportCurrentReportAsPdf() {
+        function deleteCurrentReport() {
             if (!currentReport) {
-                // Use a custom message box instead of alert
                 showCustomMessageBox('Report data not loaded yet.');
                 return;
             }
-            
+
+            if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+                fetch(`/api/reports/${currentReport.id}`, { method: 'DELETE' })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = '/reports';
+                        } else {
+                            showCustomMessageBox('Failed to delete report.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting report:', error);
+                        showCustomMessageBox('An error occurred while deleting the report.');
+                    });
+            }
+        }
+
+        async function exportCurrentReportAsPdf() {
+            if (!currentReport) {
+                showCustomMessageBox('Report data not loaded yet.');
+                return;
+            }
+
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF('p', 'pt', 'a4');
+            const margin = 40;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            let yPos = margin;
 
-            // Helper function to add charts as images
-            async function addChartToPDF(chartId, yPosition, title, width = 170, height = 90) {
-                const canvas = document.getElementById(chartId);
-                if (canvas && viewCharts[chartId.replace('ViewChart', '').replace('View', '')]) {
-                    doc.setFontSize(12);
-                    doc.setFont(undefined, 'bold');
-                    doc.text(title, 10, yPosition);
-                    
-                    const imgData = canvas.toDataURL('image/png');
-                    doc.addImage(imgData, 'PNG', 10, yPosition + 5, width, height);
-                    return yPosition + height + 15;
-                }
-                return yPosition;
-            }
-
-            // Helper function to check if we need a new page
-            function checkPageBreak(currentY, requiredSpace = 40) {
-                if (currentY + requiredSpace > 270) {
-                    doc.addPage();
-                    return 20;
-                }
-                return currentY;
-            }
-
-            let yPos = 20;
-
-            // Title and Header
+            // Header
             doc.setFontSize(20);
             doc.setFont(undefined, 'bold');
-            doc.text('QA Testing Report', 105, yPos, { align: 'center' });
-            yPos += 15;
+            doc.text('QA Testing Report', pageWidth / 2, yPos, { align: 'center' });
+            yPos += 25;
 
-            doc.setFontSize(14);
+            doc.setFontSize(12);
             doc.setFont(undefined, 'normal');
-            doc.text(`${currentReport.portfolioName} - Sprint ${currentReport.sprintNumber}`, 105, yPos, { align: 'center' });
-            yPos += 8;
-            doc.text(`${currentReport.projectName} | Version ${currentReport.reportVersion} | ${formatDate(currentReport.reportDate)}`, 105, yPos, { align: 'center' });
-            yPos += 20;
+            doc.text(`${currentReport.portfolioName} - Sprint ${currentReport.sprintNumber}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 15;
+            doc.text(`${currentReport.projectName} | Version ${currentReport.reportVersion} | ${formatDate(currentReport.reportDate)}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 30;
 
-            // Cover Information Section
-            yPos = checkPageBreak(yPos, 60);
+            // General Information
             doc.setFontSize(16);
             doc.setFont(undefined, 'bold');
-            doc.text('General Details', 10, yPos);
-            yPos += 10;
+            doc.text('General Information', margin, yPos);
+            yPos += 20;
 
-            doc.setFontSize(10);
-            doc.setFont(undefined, 'normal');
             const coverData = [
                 ['Portfolio Name', currentReport.portfolioName || 'N/A'],
                 ['Project Name', currentReport.projectName || 'N/A'],
@@ -943,281 +941,47 @@
                 startY: yPos,
                 head: [['Field', 'Value']],
                 body: coverData,
-                styles: { fontSize: 9, cellPadding: 3 },
-                headStyles: { fillColor: [59, 130, 246], textColor: 255 }, // Using primary color
-                columnStyles: { 0: { fontStyle: 'bold' } }
+                theme: 'grid',
+                headStyles: { fillColor: [22, 163, 74] },
+                margin: { left: margin, right: margin }
             });
-            yPos = doc.lastAutoTable.finalY + 15;
+            yPos = doc.lastAutoTable.finalY + 30;
 
-            // Test Summary
-            if (currentReport.testSummary) {
-                yPos = checkPageBreak(yPos, 40);
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text('Test Summary & Status', 10, yPos);
-                yPos += 10;
-                
+            // Charts
+            const chartIds = ['userStoriesViewChart', 'testCasesViewChart', 'issuesPriorityViewChart', 'issuesStatusViewChart', 'enhancementsViewChart'];
+            const chartTitles = ['User Stories Distribution', 'Test Cases Distribution', 'Issues by Priority', 'Issues by Status', 'Enhancements Distribution'];
+
+            for (let i = 0; i < chartIds.length; i++) {
+                const chartId = chartIds[i];
+                const chartTitle = chartTitles[i];
+                const canvas = document.getElementById(chartId);
+
+                if (canvas) {
+                    if (yPos + 250 > pageHeight) {
+                        doc.addPage();
+                        yPos = margin;
+                    }
+
+                    doc.setFontSize(14);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(chartTitle, margin, yPos);
+                    yPos += 20;
+
+                    const imgData = canvas.toDataURL('image/png');
+                    doc.addImage(imgData, 'PNG', margin, yPos, 500, 250);
+                    yPos += 280;
+                }
+            }
+
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
                 doc.setFontSize(10);
-                doc.setFont(undefined, 'normal');
-                const summaryText = doc.splitTextToSize(currentReport.testSummary, 190);
-                doc.text(summaryText, 10, yPos);
-                yPos += summaryText.length * 6 + 15;
+                doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 20, { align: 'center' });
             }
 
-            // Testing Metrics Overview
-            yPos = checkPageBreak(yPos, 50);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Testing Metrics Overview', 10, yPos);
-            yPos += 10;
-
-            const metricsData = [
-                ['Total User Stories', currentReport.totalUserStories || 0],
-                ['Total Test Cases', currentReport.totalTestCases || 0],
-                ['Total Issues', currentReport.totalIssues || 0],
-                ['Total Enhancements', currentReport.totalEnhancements || 0],
-            ];
-
-            doc.autoTable({
-                startY: yPos,
-                head: [['Metric', 'Value']],
-                body: metricsData,
-                styles: { fontSize: 9, cellPadding: 3 },
-                headStyles: { fillColor: [59, 130, 246], textColor: 255 }, // Using primary color
-                columnStyles: { 0: { fontStyle: 'bold' } }
-            });
-            yPos = doc.lastAutoTable.finalY + 20;
-
-            // User Stories Analysis with Chart
-            yPos = checkPageBreak(yPos, 130);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('User Stories Analysis', 10, yPos);
-            yPos += 15;
-
-            // User Stories Table
-            const total = currentReport.totalUserStories || 0;
-            const userStoriesData = [
-                ['Total User Stories', total, '100%'],
-                ['Passed', currentReport.passedUserStories || 0, `${total ? Math.round(((currentReport.passedUserStories || 0) / total) * 100) : 0}%`],
-                ['Passed with Issues', currentReport.passedWithIssuesUserStories || 0, `${total ? Math.round(((currentReport.passedWithIssuesUserStories || 0) / total) * 100) : 0}%`],
-                ['Failed', currentReport.failedUserStories || 0, `${total ? Math.round(((currentReport.failedUserStories || 0) / total) * 100) : 0}%`],
-                ['Blocked', currentReport.blockedUserStories || 0, `${total ? Math.round(((currentReport.blockedUserStories || 0) / total) * 100) : 0}%`],
-                ['Cancelled', currentReport.cancelledUserStories || 0, `${total ? Math.round(((currentReport.cancelledUserStories || 0) / total) * 100) : 0}%`],
-                ['Deferred', currentReport.deferredUserStories || 0, `${total ? Math.round(((currentReport.deferredUserStories || 0) / total) * 100) : 0}%`],
-                ['Not Testable', currentReport.notTestableUserStories || 0, `${total ? Math.round(((currentReport.notTestableUserStories || 0) / total) * 100) : 0}%`]
-            ];
-
-            doc.autoTable({
-                startY: yPos,
-                head: [['Status', 'Count', 'Percentage']],
-                body: userStoriesData,
-                styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
-            });
-            yPos = doc.lastAutoTable.finalY + 10;
-
-            // Add User Stories Chart
-            yPos = await addChartToPDF('userStoriesViewChart', yPos, 'User Stories Distribution Chart');
-
-            // Test Cases Analysis with Chart
-            doc.addPage();
-            yPos = 20;
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Test Cases Analysis', 10, yPos);
-            yPos += 15;
-
-            const testCasesTotal = currentReport.totalTestCases || 0;
-            const testCasesData = [
-                ['Total Test Cases', testCasesTotal, '100%'],
-                ['Passed', currentReport.passedTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.passedTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-                ['Passed with Issues', currentReport.passedWithIssuesTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.passedWithIssuesTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-                ['Failed', currentReport.failedTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.failedTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-                ['Blocked', currentReport.blockedTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.blockedTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-                ['Cancelled', currentReport.cancelledTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.cancelledTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-                ['Deferred', currentReport.deferredTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.deferredTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-                ['Not Testable', currentReport.notTestableTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.notTestableTestCases || 0) / testCasesTotal) * 100) : 0}%`]
-            ];
-
-            doc.autoTable({
-                startY: yPos,
-                head: [['Status', 'Count', 'Percentage']],
-                body: testCasesData,
-                styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
-            });
-            yPos = doc.lastAutoTable.finalY + 10;
-
-            // Add Test Cases Chart
-            yPos = await addChartToPDF('testCasesViewChart', yPos, 'Test Cases Distribution Chart');
-
-            doc.addPage();
-            yPos = 20;
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Issues by Priority', 10, yPos);
-            yPos += 15;
-
-            const issuesTotal = currentReport.totalIssues || 0;
-            const issuesPriorityData = [
-                ['Total Issues', issuesTotal, '100%'],
-                ['Critical', currentReport.criticalIssues || 0, `${issuesTotal ? Math.round(((currentReport.criticalIssues || 0) / issuesTotal) * 100) : 0}%`],
-                ['High', currentReport.highIssues || 0, `${issuesTotal ? Math.round(((currentReport.highIssues || 0) / issuesTotal) * 100) : 0}%`],
-                ['Medium', currentReport.mediumIssues || 0, `${issuesTotal ? Math.round(((currentReport.mediumIssues || 0) / issuesTotal) * 100) : 0}%`],
-                ['Low', currentReport.lowIssues || 0, `${issuesTotal ? Math.round(((currentReport.lowIssues || 0) / issuesTotal) * 100) : 0}%`]
-            ];
-
-            doc.autoTable({
-                startY: yPos,
-                head: [['Priority', 'Count', 'Percentage']],
-                body: issuesPriorityData,
-                styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
-            });
-            yPos = doc.lastAutoTable.finalY + 10;
-
-            yPos = await addChartToPDF('issuesPriorityViewChart', yPos, 'Issues by Priority Chart', 180, 80);
-
-            doc.addPage();
-            yPos = 20;
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Issues by Status', 10, yPos);
-            yPos += 15;
-
-            const issuesStatusData = [
-                ['New', currentReport.newIssues || 0, `${issuesTotal ? Math.round(((currentReport.newIssues || 0) / issuesTotal) * 100) : 0}%`],
-                ['Fixed', currentReport.fixedIssues || 0, `${issuesTotal ? Math.round(((currentReport.fixedIssues || 0) / issuesTotal) * 100) : 0}%`],
-                ['Not Fixed', currentReport.notFixedIssues || 0, `${issuesTotal ? Math.round(((currentReport.notFixedIssues || 0) / issuesTotal) * 100) : 0}%`],
-                ['Re-opened', currentReport.reopenedIssues || 0, `${issuesTotal ? Math.round(((currentReport.reopenedIssues || 0) / issuesTotal) * 100) : 0}%`],
-                ['Deferred', currentReport.deferredIssues || 0, `${issuesTotal ? Math.round(((currentReport.deferredIssues || 0) / issuesTotal) * 100) : 0}%`]
-            ];
-
-            doc.autoTable({
-                startY: yPos,
-                head: [['Status', 'Count', 'Percentage']],
-                body: issuesStatusData,
-                styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
-            });
-            yPos = doc.lastAutoTable.finalY + 10;
-
-            yPos = await addChartToPDF('issuesStatusViewChart', yPos, 'Issues by Status Chart', 180, 80);
-
-            // Enhancements Analysis with Chart
-            yPos = checkPageBreak(yPos, 130);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Enhancements Analysis', 10, yPos);
-            yPos += 15;
-
-            const enhancementsTotal = currentReport.totalEnhancements || 0;
-            const enhancementsData = [
-                ['Total Enhancements', enhancementsTotal, '100%'],
-                ['New', currentReport.newEnhancements || 0, `${enhancementsTotal ? Math.round(((currentReport.newEnhancements || 0) / enhancementsTotal) * 100) : 0}%`],
-                ['Implemented', currentReport.implementedEnhancements || 0, `${enhancementsTotal ? Math.round(((currentReport.implementedEnhancements || 0) / enhancementsTotal) * 100) : 0}%`],
-                ['Exists', currentReport.existsEnhancements || 0, `${enhancementsTotal ? Math.round(((currentReport.existsEnhancements || 0) / enhancementsTotal) * 100) : 0}%`]
-            ];
-
-            doc.autoTable({
-                startY: yPos,
-                head: [['Status', 'Count', 'Percentage']],
-                body: enhancementsData,
-                styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
-            });
-            yPos = doc.lastAutoTable.finalY + 10;
-
-            // Add Enhancements Chart
-            yPos = await addChartToPDF('enhancementsViewChart', yPos, 'Enhancements Distribution Chart');
-
-            // Additional Information
-            if ((currentReport.requestData && currentReport.requestData.length > 0) ||
-                (currentReport.buildData && currentReport.buildData.length > 0) ||
-                (currentReport.testerData && currentReport.testerData.length > 0)) {
-                
-                doc.addPage();
-                yPos = 20;
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text('Additional Information', 10, yPos);
-                yPos += 15;
-
-                // Requests
-                if (currentReport.requestData && currentReport.requestData.length > 0) {
-                    doc.setFontSize(12);
-                    doc.setFont(undefined, 'bold');
-                    doc.text('Request Information', 10, yPos);
-                    yPos += 8;
-
-                    const requestsData = currentReport.requestData.map(req => [req.id, req.url]);
-                    doc.autoTable({
-                        startY: yPos,
-                        head: [['Request ID', 'URL']],
-                        body: requestsData,
-                        styles: { fontSize: 8, cellPadding: 2 },
-                        headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
-                    });
-                    yPos = doc.lastAutoTable.finalY + 15;
-                }
-
-                // Builds
-                if (currentReport.buildData && currentReport.buildData.length > 0) {
-                    yPos = checkPageBreak(yPos, 40);
-                    doc.setFontSize(12);
-                    doc.setFont(undefined, 'bold');
-                    doc.text('Build Information', 10, yPos);
-                    yPos += 8;
-
-                    const buildsData = currentReport.buildData.map(build => [build.requestId, build.environment, build.cycles]);
-                    doc.autoTable({
-                        startY: yPos,
-                        head: [['Request ID', 'Environment', 'Cycles']],
-                        body: buildsData,
-                        styles: { fontSize: 8, cellPadding: 2 },
-                        headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
-                    });
-                    yPos = doc.lastAutoTable.finalY + 15;
-                }
-
-                // Testers
-                if (currentReport.testerData && currentReport.testerData.length > 0) {
-                    yPos = checkPageBreak(yPos, 40);
-                    doc.setFontSize(12);
-                    doc.setFont(undefined, 'bold');
-                    doc.text('Testers', 10, yPos);
-                    yPos += 8;
-
-                    const testersData = currentReport.testerData.map(tester => [tester.name]);
-                    doc.autoTable({
-                        startY: yPos,
-                        head: [['Tester Name']],
-                        body: testersData,
-                        styles: { fontSize: 8, cellPadding: 2 },
-                        headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
-                    });
-                    yPos = doc.lastAutoTable.finalY + 15;
-                }
-            }
-
-
-            // QA Notes
-            if (currentReport.qaNotesText) {
-                yPos = checkPageBreak(yPos, 40);
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text('QA Notes', 10, yPos);
-                yPos += 15;
-
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'normal');
-                const notesText = doc.splitTextToSize(currentReport.qaNotesText, 190);
-                doc.text(notesText, 10, yPos);
-            }
-
-            // Save the PDF
-            doc.save(`QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_Complete.pdf`);
+            doc.save(`QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}.pdf`);
         }
 
         function exportCurrentReportAsExcel() {

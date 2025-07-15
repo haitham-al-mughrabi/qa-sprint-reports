@@ -25,6 +25,12 @@ body {
     color: var(--text-primary);
     overflow-x: hidden;
     padding-top: 70px; /* Space for fixed nav */
+    display: flex;
+    flex-direction: column;
+}
+
+.main-wrapper {
+    flex: 1;
 }
 
 body::before {
