@@ -1,0 +1,807 @@
+/* Variables - From old_style.css */
+:root {
+    --primary: #3b82f6;
+    --secondary: #60a5fa;
+    --accent: #8b5cf6;
+    --success: #22c55e;
+    --warning: #eab308;
+    --danger: #ef4444;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --border-radius-large: 12px;
+    --transition: all 0.3s ease;
+
+    /* RGB values for rgba colors - From style.css for consistency */
+    --primary-rgb: 59, 130, 246;
+    --accent-rgb: 139, 92, 246;
+    --success-rgb: 34, 197, 94;
+}
+
+/* Body - Adapted from old_style.css with padding for fixed nav */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to bottom, var(--background), #1e293b);
+    min-height: 100vh;
+    color: var(--text-primary);
+    overflow-x: hidden;
+    padding-top: 70px; /* Add padding for fixed navigation */
+}
+
+/* Fixed Navigation Header - From style.css for consistency across pages */
+.main-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-light);
+    z-index: 1000;
+    padding: 0.75rem 0;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+}
+
+.nav-brand i {
+    margin-right: 10px;
+    color: var(--accent);
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 15px;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+}
+
+.nav-link i {
+    margin-right: 8px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary);
+}
+
+/* Dashboard Container (used for manage data page) - From old_style.css */
+.dashboard-container {
+    max-width: 1400px; /* From old_style.css */
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem; /* From old_style.css */
+    color: white;
+}
+
+.dashboard-header h1 {
+    font-size: 3rem; /* From old_style.css */
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.dashboard-header p {
+    font-size: 1.2rem; /* From old_style.css */
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+/* Buttons - Reverted to old_style.css styles */
+.btn {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--text-primary);
+}
+
+.btn-primary:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--surface);
+    transform: translateY(-2px);
+}
+
+.action-btn {
+    background: var(--primary);
+    color: var(--text-primary);
+    border: none;
+    padding: 0.75rem 1.5rem; /* Smaller padding from old_style.css */
+    border-radius: var(--border-radius); /* Smaller border-radius from old_style.css */
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.action-btn:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+}
+
+.action-btn.secondary {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+}
+
+.action-btn.secondary:hover {
+    background: var(--primary);
+    color: var(--text-primary);
+}
+
+/* Form Inputs (used in modals) - Reverted to old_style.css transparent/blurred inputs */
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group input[type="url"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1); /* Original transparent background */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Original transparent border */
+    border-radius: var(--border-radius);
+    padding: 1rem; /* Original padding */
+    color: white;
+    font-size: 1rem;
+    transition: var(--transition);
+    backdrop-filter: blur(10px); /* Original blur effect */
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: rgba(79, 172, 254, 0.6);
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-group { /* Basic form group from old_style.css */
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+/* Modals - Reverted to old_style.css styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* Original transparent background */
+    backdrop-filter: blur(8px); /* Original blur effect */
+}
+
+.modal-content {
+    background: var(--background); /* Original background */
+    border: 1px solid var(--border);
+    margin: 5% auto;
+    padding: 2rem;
+    width: 90%;
+    max-width: 600px;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow-heavy);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-content h3 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.modal-form {
+    margin-bottom: 2rem;
+}
+
+.modal-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* Manage Page Specific Styles (Redesign) - Copied directly from old_style.css */
+.tabs-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-large);
+    padding: 0.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    box-shadow: var(--shadow-light);
+}
+
+.tabs {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tab {
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-large);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab.active {
+    background: var(--primary);
+    color: var(--text-primary);
+}
+
+/* Search and Filter */
+.search-filter-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.search-filter-container input,
+.search-filter-container select {
+    flex: 1;
+    min-width: 200px;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.search-filter-container input::placeholder {
+    color: var(--text-secondary);
+}
+
+.search-filter-container input:focus,
+.search-filter-container select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-filter-container select option {
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+/* Small Stat Cards for Manage Page */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card-small {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    text-align: center;
+    transition: var(--transition);
+    box-shadow: var(--shadow-light);
+}
+
+.stat-card-small:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.stat-card-small .icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+}
+
+.stat-card-small h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-card-small p {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+/* Data List Items */
+.data-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.data-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    transition: var(--transition);
+    box-shadow: var(--shadow-light);
+}
+
+.data-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.data-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.data-item-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.data-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.data-item-content p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--border-radius);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--primary);
+}
+
+/* Empty Data State for Manage Page */
+.empty-data-state {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius);
+    border: 1px dashed var(--border);
+}
+
+.empty-data-state .icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+}
+
+.empty-data-state h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-data-state p {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.empty-data-state .action-btn {
+    margin-top: 1rem;
+}
+
+/* Manage Modal specific adjustments */
+.modal.manage-modal .modal-content {
+    max-width: 700px;
+}
+
+.modal.manage-modal .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+/* Loading States - From old_style.css */
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: white;
+}
+
+.spinner {
+    border: 4px solid var(--border);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Pagination - From old_style.css */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.pagination button {
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.pagination button:hover,
+.pagination button.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Mobile Responsive - From old_style.css, adapted for fixed nav */
+.mobile-menu-btn { /* This button is not directly used in manage_data.html, but included for completeness if general mobile styles are needed */
+    display: none;
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1.2rem;
+    z-index: 1001;
+    transition: var(--transition);
+}
+
+.mobile-menu-btn:hover {
+    background: var(--secondary);
+    transform: scale(1.05);
+}
+
+@media (max-width: 1200px) {
+    .main-content { /* Not directly used in manage_data.html, but if general layout is copied */
+        margin-left: 0;
+        padding: 1rem;
+    }
+
+    .sidebar { /* Not directly used in manage_data.html, but if general layout is copied */
+        transform: translateX(-100%);
+    }
+
+    .sidebar.show { /* Not directly used in manage_data.html, but if general layout is copied */
+        transform: translateX(0);
+    }
+
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    .nav-container {
+        padding: 1rem;
+    }
+
+    /* .nav-links { display: none; } - Handled by JS toggle, remove from CSS */
+
+    .dashboard-stats { /* Dashboard style, but general grid might be affected */
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .aggregate-metrics { /* Dashboard style */
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .user-stories-container, /* Create Report style */
+    .issues-container { /* Create Report style */
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .content-area { /* Create Report style */
+        padding: 2rem 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .section-title { /* Manage data uses section-header h2, but general title might be affected */
+        font-size: 1.5rem;
+    }
+
+    .form-grid { /* Create Report style */
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .page-header { /* Reports page style */
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box { /* Reports page style */
+        min-width: auto;
+        width: 100%;
+    }
+
+    .action-buttons { /* Dashboard style */
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .navigation-buttons { /* Create Report style */
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .modal-content {
+        margin: 10% auto;
+        padding: 2rem 1rem;
+        width: 95%;
+    }
+
+    .tabs-container {
+        padding: 0.75rem;
+    }
+
+    .tab {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .search-filter-container {
+        flex-direction: column;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal.manage-modal .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .page { /* Create Report style */
+        padding: 1rem 0.5rem;
+    }
+
+    .dashboard-container {
+        padding: 0 0.5rem;
+    }
+
+    .stat-card, /* Dashboard style */
+    .metric-card { /* Dashboard style */
+        padding: 1.5rem;
+    }
+
+    .stat-card h3 { /* Dashboard style */
+        font-size: 2rem;
+    }
+
+    .data-table th, /* Create Report style */
+    .data-table td { /* Create Report style */
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .reports-table-container { /* Reports page style */
+        padding: 1rem;
+        overflow-x: auto;
+    }
+
+    .table-actions { /* Reports page style */
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
+/* Dark scrollbar - From old_style.css */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary);
+}
+
+/* Smooth transitions for all interactive elements - From old_style.css */
+* {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Custom focus styles - From old_style.css */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.3);
+}
+
+/* Enhanced hover effects for cards - From old_style.css */
+.stat-card:hover, /* Dashboard style */
+.metric-card:hover, /* Dashboard style */
+.project-card:hover { /* Dashboard style */
+    box-shadow: var(--shadow-heavy);
+}
+
+/* Animated background elements - From old_style.css */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 118, 117, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(79, 172, 254, 0.3) 0%, transparent 50%);
+    z-index: -1;
+    animation: backgroundShift 20s ease-in-out infinite;
+}
+
+@keyframes backgroundShift {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Section Header for Manage Data */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--primary);
+}

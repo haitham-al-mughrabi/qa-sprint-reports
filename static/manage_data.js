@@ -200,6 +200,7 @@ function showAddPortfolioModal() {
     editingType = 'portfolio';
     document.getElementById('portfolioName').value = '';
     document.getElementById('portfolioDescription').value = '';
+    document.querySelector('#addPortfolioModal .modal-title').textContent = 'Add New Portfolio';
     showModal('addPortfolioModal');
 }
 
@@ -208,7 +209,9 @@ function showAddProjectModal() {
     editingType = 'project';
     document.getElementById('projectName').value = '';
     document.getElementById('projectDescription').value = '';
+    document.getElementById('projectPortfolio').value = '';
     populatePortfolioDropdown();
+    document.querySelector('#addProjectModal .modal-title').textContent = 'Add New Project';
     showModal('addProjectModal');
 }
 
@@ -217,6 +220,7 @@ function showAddTesterModal() {
     editingType = 'tester';
     document.getElementById('testerName').value = '';
     document.getElementById('testerEmail').value = '';
+    document.querySelector('#addTesterModal .modal-title').textContent = 'Add New Tester';
     showModal('addTesterModal');
 }
 
@@ -226,6 +230,7 @@ function showAddTeamMemberModal() {
     document.getElementById('teamMemberName').value = '';
     document.getElementById('teamMemberEmail').value = '';
     document.getElementById('teamMemberRole').value = '';
+    document.querySelector('#addTeamMemberModal .modal-title').textContent = 'Add New Team Member';
     showModal('addTeamMemberModal');
 }
 
@@ -238,24 +243,14 @@ function closeModal(modalId) {
 }
 
 // Helper Functions
-function populatePortfolioDropdown(portfolios) {
-    const select = document.getElementById('portfolioName');
-    // Keep existing static options
-    const existingOptions = Array.from(select.options).map(opt => ({ value: opt.value, text: opt.text }));
+function populatePortfolioDropdown() {
+    const select = document.getElementById('projectPortfolio');
+    if (!select) return;
     
-    // Clear and rebuild
     select.innerHTML = '<option value="">Select Portfolio</option>';
     
-    // Add existing static options
-    existingOptions.slice(1).forEach(opt => {
-        if (opt.value) {
-            select.innerHTML += `<option value="${opt.value}">${opt.text}</option>`;
-        }
-    });
-    
-    // Add dynamic portfolios
     portfolios.forEach(portfolio => {
-        select.innerHTML += `<option value="${portfolio.name.toLowerCase().replace(/\s+/g, '-')}">${portfolio.name}</option>`;
+        select.innerHTML += `<option value="${portfolio.id}">${portfolio.name}</option>`;
     });
 }
 
@@ -430,19 +425,50 @@ function populateProjectDropdown(projects) {
     });
 }
 
-// CRUD Operations (placeholder functions - you'll need to implement these)
+// CRUD Operations
 async function savePortfolio() {
     const name = document.getElementById('portfolioName').value.trim();
     const description = document.getElementById('portfolioDescription').value.trim();
     
     if (!name) {
-        alert('Please enter a portfolio name');
+        showToast('Please enter a portfolio name', 'warning');
         return;
     }
     
-    // TODO: Implement API call
-    console.log('Saving portfolio:', { name, description });
-    closeModal('addPortfolioModal');
+    try {
+        const method = editingId ? 'PUT' : 'POST';
+        const url = editingId ? `/api/portfolios/${editingId}` : '/api/portfolios';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, description })
+        });
+        
+        if (response.ok) {
+            const savedPortfolio = await response.json();
+            
+            if (editingId) {
+                const index = portfolios.findIndex(p => p.id === editingId);
+                if (index !== -1) portfolios[index] = savedPortfolio;
+                showToast('Portfolio updated successfully!', 'success');
+            } else {
+                portfolios.push(savedPortfolio);
+                showToast('Portfolio created successfully!', 'success');
+            }
+            
+            await loadAllData();
+            updateStats();
+            renderPortfolios();
+            closeModal('addPortfolioModal');
+        } else {
+            const error = await response.json();
+            showToast('Error saving portfolio: ' + (error.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error saving portfolio:', error);
+        showToast('Error saving portfolio', 'error');
+    }
 }
 
 async function saveProject() {
@@ -451,13 +477,44 @@ async function saveProject() {
     const description = document.getElementById('projectDescription').value.trim();
     
     if (!name || !portfolioId) {
-        alert('Please enter project name and select a portfolio');
+        showToast('Please enter project name and select a portfolio', 'warning');
         return;
     }
     
-    // TODO: Implement API call
-    console.log('Saving project:', { name, portfolioId, description });
-    closeModal('addProjectModal');
+    try {
+        const method = editingId ? 'PUT' : 'POST';
+        const url = editingId ? `/api/projects/${editingId}` : '/api/projects';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, portfolio_id: portfolioId, description })
+        });
+        
+        if (response.ok) {
+            const savedProject = await response.json();
+            
+            if (editingId) {
+                const index = projects.findIndex(p => p.id === editingId);
+                if (index !== -1) projects[index] = savedProject;
+                showToast('Project updated successfully!', 'success');
+            } else {
+                projects.push(savedProject);
+                showToast('Project created successfully!', 'success');
+            }
+            
+            await loadAllData();
+            updateStats();
+            renderProjects();
+            closeModal('addProjectModal');
+        } else {
+            const error = await response.json();
+            showToast('Error saving project: ' + (error.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error saving project:', error);
+        showToast('Error saving project', 'error');
+    }
 }
 
 async function saveTester() {
@@ -465,13 +522,44 @@ async function saveTester() {
     const email = document.getElementById('testerEmail').value.trim();
     
     if (!name || !email) {
-        alert('Please enter both name and email');
+        showToast('Please enter both name and email', 'warning');
         return;
     }
     
-    // TODO: Implement API call
-    console.log('Saving tester:', { name, email });
-    closeModal('addTesterModal');
+    try {
+        const method = editingId ? 'PUT' : 'POST';
+        const url = editingId ? `/api/testers/${editingId}` : '/api/testers';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email })
+        });
+        
+        if (response.ok) {
+            const savedTester = await response.json();
+            
+            if (editingId) {
+                const index = testers.findIndex(t => t.id === editingId);
+                if (index !== -1) testers[index] = savedTester;
+                showToast('Tester updated successfully!', 'success');
+            } else {
+                testers.push(savedTester);
+                showToast('Tester created successfully!', 'success');
+            }
+            
+            await loadAllData();
+            updateStats();
+            renderTesters();
+            closeModal('addTesterModal');
+        } else {
+            const error = await response.json();
+            showToast('Error saving tester: ' + (error.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error saving tester:', error);
+        showToast('Error saving tester', 'error');
+    }
 }
 
 async function saveTeamMember() {
@@ -480,13 +568,44 @@ async function saveTeamMember() {
     const role = document.getElementById('teamMemberRole').value;
     
     if (!name || !email || !role) {
-        alert('Please fill in all fields');
+        showToast('Please fill in all fields', 'warning');
         return;
     }
     
-    // TODO: Implement API call
-    console.log('Saving team member:', { name, email, role });
-    closeModal('addTeamMemberModal');
+    try {
+        const method = editingId ? 'PUT' : 'POST';
+        const url = editingId ? `/api/team-members/${editingId}` : '/api/team-members';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, role })
+        });
+        
+        if (response.ok) {
+            const savedMember = await response.json();
+            
+            if (editingId) {
+                const index = teamMembers.findIndex(tm => tm.id === editingId);
+                if (index !== -1) teamMembers[index] = savedMember;
+                showToast('Team member updated successfully!', 'success');
+            } else {
+                teamMembers.push(savedMember);
+                showToast('Team member created successfully!', 'success');
+            }
+            
+            await loadAllData();
+            updateStats();
+            renderTeamMembers();
+            closeModal('addTeamMemberModal');
+        } else {
+            const error = await response.json();
+            showToast('Error saving team member: ' + (error.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error saving team member:', error);
+        showToast('Error saving team member', 'error');
+    }
 }
 
 // Search Functions (placeholder)
@@ -506,45 +625,188 @@ function searchTeamMembers() {
     // TODO: Implement search functionality
 }
 
-// Edit Functions (placeholder)
+// Edit Functions
 function editPortfolio(id) {
-    // TODO: Implement edit functionality
+    const portfolio = portfolios.find(p => p.id === id);
+    if (!portfolio) return;
+    
+    editingId = id;
+    editingType = 'portfolio';
+    
+    document.getElementById('portfolioName').value = portfolio.name || '';
+    document.getElementById('portfolioDescription').value = portfolio.description || '';
+    
+    showModal('addPortfolioModal');
 }
 
 function editProject(id) {
-    // TODO: Implement edit functionality
+    const project = projects.find(p => p.id === id);
+    if (!project) return;
+    
+    editingId = id;
+    editingType = 'project';
+    
+    document.getElementById('projectName').value = project.name || '';
+    document.getElementById('projectDescription').value = project.description || '';
+    
+    populatePortfolioDropdown();
+    document.getElementById('projectPortfolio').value = project.portfolio_id || '';
+    
+    showModal('addProjectModal');
 }
 
 function editTester(id) {
-    // TODO: Implement edit functionality
+    const tester = testers.find(t => t.id === id);
+    if (!tester) return;
+    
+    editingId = id;
+    editingType = 'tester';
+    
+    document.getElementById('testerName').value = tester.name || '';
+    document.getElementById('testerEmail').value = tester.email || '';
+    
+    showModal('addTesterModal');
 }
 
 function editTeamMember(id) {
-    // TODO: Implement edit functionality
+    const member = teamMembers.find(tm => tm.id === id);
+    if (!member) return;
+    
+    editingId = id;
+    editingType = 'teamMember';
+    
+    document.getElementById('teamMemberName').value = member.name || '';
+    document.getElementById('teamMemberEmail').value = member.email || '';
+    document.getElementById('teamMemberRole').value = member.role || '';
+    
+    showModal('addTeamMemberModal');
 }
 
-// Delete Functions (placeholder)
-function deletePortfolio(id) {
-    if (confirm('Are you sure you want to delete this portfolio?')) {
-        // TODO: Implement delete functionality
+// Delete Functions
+async function deletePortfolio(id) {
+    if (!confirm('Are you sure you want to delete this portfolio? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/portfolios/${id}`, { method: 'DELETE' });
+        
+        if (response.ok) {
+            portfolios = portfolios.filter(p => p.id !== id);
+            showToast('Portfolio deleted successfully!', 'success');
+            updateStats();
+            renderPortfolios();
+        } else {
+            const error = await response.json();
+            showToast('Error deleting portfolio: ' + (error.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting portfolio:', error);
+        showToast('Error deleting portfolio', 'error');
     }
 }
 
-function deleteProject(id) {
-    if (confirm('Are you sure you want to delete this project?')) {
-        // TODO: Implement delete functionality
+async function deleteProject(id) {
+    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
+        
+        if (response.ok) {
+            projects = projects.filter(p => p.id !== id);
+            showToast('Project deleted successfully!', 'success');
+            updateStats();
+            renderProjects();
+        } else {
+            const error = await response.json();
+            showToast('Error deleting project: ' + (error.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        showToast('Error deleting project', 'error');
     }
 }
 
-function deleteTester(id) {
-    if (confirm('Are you sure you want to delete this tester?')) {
-        // TODO: Implement delete functionality
+async function deleteTester(id) {
+    if (!confirm('Are you sure you want to delete this tester? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/testers/${id}`, { method: 'DELETE' });
+        
+        if (response.ok) {
+            testers = testers.filter(t => t.id !== id);
+            showToast('Tester deleted successfully!', 'success');
+            updateStats();
+            renderTesters();
+        } else {
+            const error = await response.json();
+            showToast('Error deleting tester: ' + (error.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting tester:', error);
+        showToast('Error deleting tester', 'error');
     }
 }
 
-function deleteTeamMember(id) {
-    if (confirm('Are you sure you want to delete this team member?')) {
-        // TODO: Implement delete functionality
+async function deleteTeamMember(id) {
+    if (!confirm('Are you sure you want to delete this team member? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/team-members/${id}`, { method: 'DELETE' });
+        
+        if (response.ok) {
+            teamMembers = teamMembers.filter(tm => tm.id !== id);
+            showToast('Team member deleted successfully!', 'success');
+            updateStats();
+            renderTeamMembers();
+        } else {
+            const error = await response.json();
+            showToast('Error deleting team member: ' + (error.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting team member:', error);
+        showToast('Error deleting team member', 'error');
+    }
+}
+
+// Toast notification system
+function showToast(message, type = 'info', duration = 5000) {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <div class="toast-icon"></div>
+        <div class="toast-message">${message}</div>
+        <button class="toast-close" onclick="removeToast(this.parentElement)">×</button>
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        removeToast(toast);
+    }, duration);
+}
+
+function removeToast(toast) {
+    if (toast && toast.parentElement) {
+        toast.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.parentElement.removeChild(toast);
+            }
+        }, 300);
     }
 }
 

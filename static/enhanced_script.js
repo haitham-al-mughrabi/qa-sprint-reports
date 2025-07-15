@@ -12,14 +12,14 @@ let dashboardStatsCache = null; // Cache for dashboard statistics
 let requestData = [];
 let buildData = [];
 let testerData = [];
-let customFieldsData = [];
+let customFieldsData = []; // This will be used if custom fields are implemented
 let userStoriesChart = null;
 let testCasesChart = null;
 let issuesPriorityChart = null;
 let issuesStatusChart = null;
 let enhancementsChart = null;
-let scoreColumnCount = 0;
-let weightReasonVisible = false;
+let scoreColumnCount = 0; // Not directly used in this version but kept for consistency
+let weightReasonVisible = false; // Not directly used in this version but kept for consistency
 
 // --- API Communication ---
 const API_URL = '/api/reports';
@@ -97,53 +97,23 @@ async function deleteReportDB(id) {
     }
 }
 
-// --- Initialize App ---
-document.addEventListener('DOMContentLoaded', async () => {
-    // Show loading state
-    const portfolioSelect = document.getElementById('portfolioName');
-    const projectSelect = document.getElementById('projectName');
+// --- Initialize App (for pages that need it) ---
+// This block will now be called by specific page scripts if needed
+// document.addEventListener('DOMContentLoaded', async () => {
+//     // Initial data load
+//     allReportsCache = await fetchReports();
+//     dashboardStatsCache = await fetchDashboardStats();
     
-    if (portfolioSelect) {
-        portfolioSelect.innerHTML = '<option value="">Loading portfolios...</option>';
-    }
-    if (projectSelect) {
-        projectSelect.innerHTML = '<option value="">Loading projects...</option>';
-    }
-    
-    // Initial data load
-    allReportsCache = await fetchReports();
-    dashboardStatsCache = await fetchDashboardStats();
-    
-    updateDashboardStats(dashboardStatsCache);
-    searchReports();
+//     updateDashboardStats(dashboardStatsCache);
+//     searchReports();
 
-    document.getElementById('reportDate').value = getCurrentDate();
-    updateNavigationButtons();
-    initializeCharts();
+//     document.getElementById('reportDate').value = getCurrentDate();
+//     updateNavigationButtons();
+//     initializeCharts();
     
-    // Load dropdown data for portfolios and projects
-    await loadFormDropdownData();
-});
-
-async function loadFormDropdownData() {
-    try {
-        // Load portfolios
-        const portfolioResponse = await fetch('/api/portfolios');
-        if (portfolioResponse.ok) {
-            const portfolios = await portfolioResponse.json();
-            populatePortfolioDropdown(portfolios);
-        }
-        
-        // Load projects
-        const projectResponse = await fetch('/api/projects');
-        if (projectResponse.ok) {
-            const projects = await projectResponse.json();
-            populateProjectDropdown(projects);
-        }
-    } catch (error) {
-        console.error('Error loading form data:', error);
-    }
-}
+//     // Load dropdown data for portfolios and projects
+//     await loadFormDropdownData();
+// });
 
 // Toast notification system
 function showToast(message, type = 'info', duration = 5000) {
@@ -182,47 +152,6 @@ function removeToast(toast) {
         }, 300);
     }
 }
-
-// Toast notification system
-function showToast(message, type = 'info', duration = 5000) {
-    // Create toast container if it doesn't exist
-    let container = document.querySelector('.toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-    }
-    
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <div class="toast-icon"></div>
-        <div class="toast-message">${message}</div>
-        <button class="toast-close" onclick="removeToast(this.parentElement)">×</button>
-    `;
-    
-    container.appendChild(toast);
-    
-    // Auto remove after duration
-    setTimeout(() => {
-        removeToast(toast);
-    }, duration);
-}
-
-function removeToast(toast) {
-    if (toast && toast.parentElement) {
-        toast.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => {
-            if (toast.parentElement) {
-                toast.parentElement.removeChild(toast);
-            }
-        }, 300);
-    }
-}
-
-// Replace all alert() calls with showToast()
-// Update all your existing functions to use showToast instead of alert
 
 
 // --- Dashboard Functions ---
@@ -303,7 +232,7 @@ function renderProjectMetrics(projects) {
 
 async function exportDashboardReport() {
     if (!dashboardStatsCache) {
-        alert('No dashboard data available to export.');
+        showToast('No dashboard data available to export', 'warning');
         return;
     }
 
@@ -640,6 +569,8 @@ function addRequest() {
         requestData.push({ id: requestId, url: requestUrl });
         renderRequestList();
         closeModal('requestModal');
+    } else {
+        showToast('Please enter both Request ID and URL.', 'warning');
     }
 }
 
@@ -652,23 +583,31 @@ function addBuild() {
         buildData.push({ requestId, requestUrl, environment, cycles });
         renderBuildList();
         closeModal('buildModal');
+    } else {
+        showToast('Please fill in all build information fields.', 'warning');
     }
 }
 
-function addTester() {
-    const testerName = document.getElementById('testerName').value.trim();
-    if (testerName) {
-        testerData.push({ name: testerName });
-        renderTesterList();
-        closeModal('testerModal');
-    }
-}
+// addTester function is replaced by addSelectedTester for consistency with team members
+// function addTester() {
+//     const testerName = document.getElementById('testerName').value.trim();
+//     if (testerName) {
+//         testerData.push({ name: testerName });
+//         renderTesterList();
+//         closeModal('testerModal');
+//     }
+// }
 
 function renderDynamicList(containerId, data, renderItemFn, removeFn) {
     const container = document.getElementById(containerId);
     if (!container) return;
     if (data.length === 0) {
-        container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No items added yet.</div>`;
+        // Check if the container is for team members, as it has a slightly different empty state message
+        if (containerId === 'teamMemberList') {
+            container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No team members added yet.</div>`;
+        } else {
+            container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No items added yet. Click "Add Request" to get started.</div>`;
+        }
     } else {
         container.innerHTML = data.map((item, index) => renderItemFn(item, index, removeFn)).join('');
     }
@@ -693,33 +632,19 @@ function renderBuildList() {
 function renderTesterList() {
     renderDynamicList('testerList', testerData, (item, index) => `
         <div class="dynamic-item">
-            <div><strong>Tester:</strong> ${item.name}</div>
+            <div><strong>Name:</strong> ${item.name}<br><strong>Email:</strong> ${item.email}</div>
             <button type="button" class="btn-sm btn-delete" onclick="removeTester(${index})">Remove</button>
         </div>`, removeTester);
 }
 
-function removeRequest(index) { requestData.splice(index, 1); renderRequestList(); }
-function removeBuild(index) { buildData.splice(index, 1); renderBuildList(); }
-function removeTester(index) { testerData.splice(index, 1); renderTesterList(); }
+function removeRequest(index) { requestData.splice(index, 1); renderRequestList(); showToast('Request removed', 'info'); }
+function removeBuild(index) { buildData.splice(index, 1); renderBuildList(); showToast('Build removed', 'info'); }
+function removeTester(index) { testerData.splice(index, 1); renderTesterList(); showToast('Tester removed', 'info'); }
 
-// --- Page Management & Navigation ---
-function showPage(pageId) {
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-    document.querySelector(`.nav-link[onclick="showPage('${pageId}')"]`)?.classList.add('active');
-    
-    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-    document.getElementById(pageId)?.classList.add('active');
-
-    if (pageId === 'reportsPage') {
-        searchReports();
-    } else if (pageId === 'dashboardPage') {
-        // Refresh dashboard data
-        fetchDashboardStats().then(stats => {
-            dashboardStatsCache = stats;
-            updateDashboardStats(stats);
-        });
-    }
-}
+// --- Page Management & Navigation (Simplified for multi-page app) ---
+// The showPage function is no longer needed for navigation between main pages.
+// Browser handles page loads.
+// function showPage(pageId) { ... }
 
 function showSection(sectionIndex) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -733,8 +658,16 @@ function showSection(sectionIndex) {
     updateNavigationButtons();
 }
 
-function nextSection() { if (currentSection < 10) showSection(currentSection + 1); }
-function previousSection() { if (currentSection > 0) showSection(currentSection - 1); }
+function nextSection() { 
+    if (currentSection < 7) { // Max section index is 7 (QA Notes)
+        showSection(currentSection + 1); 
+    }
+}
+function previousSection() { 
+    if (currentSection > 0) { 
+        showSection(currentSection - 1); 
+    }
+}
 
 function updateNavigationButtons() {
     document.getElementById('prevBtn').disabled = currentSection === 0;
@@ -743,12 +676,13 @@ function updateNavigationButtons() {
     document.getElementById('submitBtn').style.display = isLastSection ? 'inline-block' : 'none';
 }
 
-function backToDashboard() { showPage('dashboardPage'); }
+// backToDashboard now redirects to the dashboard page
+function backToDashboard() { window.location.href = '/dashboard'; }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
 // --- Reports Table Functions ---
 function searchReports() {
-    const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+    const searchQuery = document.getElementById('searchInput')?.value.toLowerCase();
     
     const filtered = allReportsCache.filter(report => 
         Object.values(report).some(value => 
@@ -774,6 +708,8 @@ function searchReports() {
 
 function renderReportsTable(reports) {
     const tbody = document.getElementById('reportsTableBody');
+    if (!tbody) return; // Ensure tbody exists
+
     if (reports.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">📋</div><h3>No Reports Found</h3><p>Create a new report or adjust your search.</p></div></td></tr>`;
         return;
@@ -801,6 +737,8 @@ function renderReportsTable(reports) {
 
 function renderPagination(result) {
     const pagination = document.getElementById('pagination');
+    if (!pagination) return; // Ensure pagination element exists
+
     if (result.totalPages <= 1) {
         pagination.innerHTML = '';
         return;
@@ -820,31 +758,44 @@ function goToPage(page) {
 
 // --- Report Actions (CRUD) ---
 function createNewReport() {
-    editingReportId = null;
-    resetFormData();
-    showSection(0);
-    showPage('formPage');
-    document.getElementById('formTitle').textContent = 'Create Enhanced QA Report';
+    // Redirect to the create report page
+    window.location.href = '/create-report';
 }
 
 async function regenerateReport(id) {
-    const report = await fetchReport(id);
-    if (report) {
-        editingReportId = id;
-        loadReportForEditing(report);
-        showPage('formPage');
-        document.getElementById('formTitle').textContent = 'Edit QA Report';
-    }
+    // Redirect to the create report page with the report ID for editing
+    window.location.href = `/create-report?id=${id}`;
 }
 
 async function deleteReport(id) {
-    if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+    // Using a custom modal for confirmation instead of browser's confirm()
+    const confirmDelete = await new Promise(resolve => {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Confirm Deletion</h3>
+                <p>Are you sure you want to delete this report? This action cannot be undone.</p>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove(); resolve(false);">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="this.closest('.modal').remove(); resolve(true);">Delete</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    });
+
+    if (confirmDelete) {
         const result = await deleteReportDB(id);
         if (result) {
             allReportsCache = allReportsCache.filter(r => r.id !== id);
-            dashboardStatsCache = await fetchDashboardStats();
-            searchReports();
-            updateDashboardStats(dashboardStatsCache);
+            dashboardStatsCache = await fetchDashboardStats(); // Refresh dashboard cache
+            searchReports(); // Re-render reports table
+            updateDashboardStats(dashboardStatsCache); // Update dashboard UI
+            showToast('Report deleted successfully', 'success');
+        } else {
+            showToast('Failed to delete report', 'error');
         }
     }
 }
@@ -855,17 +806,27 @@ function viewReport(id) {
 
 // --- Form Handling ---
 function resetFormData() {
-    document.getElementById('qaReportForm').reset();
-    document.getElementById('reportDate').value = getCurrentDate();
-    requestData = [];
-    buildData = [];
-    testerData = [];
-    scoreColumnCount = 0;
-    weightReasonVisible = false;
-    renderRequestList();
-    renderBuildList();
-    renderTesterList();
-    resetAllCharts();
+    const form = document.getElementById('qaReportForm');
+    if (form) {
+        form.reset();
+        document.getElementById('reportDate').value = getCurrentDate();
+        requestData = [];
+        buildData = [];
+        testerData = [];
+        teamMemberData = []; // Reset team member data
+        qaNotesFields = []; // Reset custom QA notes fields
+        customFieldsData = []; // Reset custom fields data
+        
+        renderRequestList();
+        renderBuildList();
+        renderTesterList();
+        renderTeamMemberList(); // Render empty team member list
+        renderQANotesFields(); // Render empty custom QA notes fields
+        
+        resetAllCharts();
+        currentSection = 0; // Reset to first section
+        updateNavigationButtons();
+    }
 }
 
 function resetAllCharts() {
@@ -880,13 +841,13 @@ function resetAllCharts() {
 }
 
 function loadReportForEditing(report) {
-    resetFormData();
+    resetFormData(); // Reset first to clear any previous data
     
     // Basic fields
-    const basicFields = ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'qaNotesText'];
+    const basicFields = ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'qaNotesText', 'releaseNumber'];
     basicFields.forEach(field => {
         const element = document.getElementById(field);
-        if (element && report[field]) {
+        if (element && report[field] !== undefined) {
             element.value = report[field];
         }
     });
@@ -894,7 +855,7 @@ function loadReportForEditing(report) {
     // User Stories
     const userStoryFields = ['passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories', 'blockedUserStories', 'cancelledUserStories', 'deferredUserStories', 'notTestableUserStories'];
     userStoryFields.forEach(field => {
-        const element = document.getElementById(field.replace('UserStories', 'Stories'));
+        const element = document.getElementById(field.replace('UserStories', 'Stories')); // Adjust ID for HTML
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
@@ -931,19 +892,15 @@ function loadReportForEditing(report) {
     requestData = report.requestData || [];
     buildData = report.buildData || [];
     testerData = report.testerData || [];
-    customFieldsData = Object.entries(report.customFields || {}).map(([key, value]) => ({
-        id: key,
-        name: key.replace('custom_', '').replace(/_/g, ' '),
-        value: value,
-        type: 'input', // Default type for loaded data
-        required: false,
-        showInReport: true,
-        options: []
-    }));
+    // Assuming teamMemberData and customFields are part of the report object
+    teamMemberData = report.teamMemberData || []; // Assuming this field exists in your report model
+    customFieldsData = report.customFields || {}; // Assuming this is an object in your report model
     
     renderRequestList();
     renderBuildList();
     renderTesterList();
+    renderTeamMemberList(); // Render team members
+    // renderCustomFields(); // If you have a render function for custom fields
         
     // Recalculate all totals and charts
     calculatePercentages();
@@ -953,47 +910,56 @@ function loadReportForEditing(report) {
 }
 
 // Form submission handler
-document.getElementById('qaReportForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const reportData = {};
-    
-    // Collect form data
-    for (let [key, value] of formData.entries()) {
-        if (key.includes('[]')) {
-            // Handle checkbox arrays
-            const arrayKey = key.replace('[]', '');
-            if (!reportData[arrayKey]) reportData[arrayKey] = [];
-            reportData[arrayKey].push(value);
-        } else {
-            reportData[key] = value;
-        }
-    }
+// This listener should only be active on the create_report.html page
+document.addEventListener('DOMContentLoaded', () => {
+    const qaReportForm = document.getElementById('qaReportForm');
+    if (qaReportForm) {
+        qaReportForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const reportData = {};
+            
+            // Collect form data
+            for (let [key, value] of formData.entries()) {
+                // Handle special cases for array inputs (e.g., checkboxes if any)
+                if (key.endsWith('[]')) {
+                    const arrayKey = key.slice(0, -2);
+                    if (!reportData[arrayKey]) {
+                        reportData[arrayKey] = [];
+                    }
+                    reportData[arrayKey].push(value);
+                } else {
+                    reportData[key] = value;
+                }
+            }
 
-    // Add dynamic data
-    reportData.requestData = requestData;
-    reportData.buildData = buildData;
-    reportData.testerData = testerData;
+            // Add dynamic data (requestData, buildData, testerData, teamMemberData, customFieldsData)
+            reportData.requestData = requestData;
+            reportData.buildData = buildData;
+            reportData.testerData = testerData;
+            reportData.teamMemberData = teamMemberData; // Add team member data
+            reportData.customFields = customFieldsData; // Add custom fields data
 
-    const savedReport = await saveReport(reportData);
-    if (savedReport) {
-        // Refresh local data cache and UI
-        allReportsCache = await fetchReports();
-        dashboardStatsCache = await fetchDashboardStats();
-        updateDashboardStats(dashboardStatsCache);
-        showPage('reportsPage');
-        alert('Report saved successfully!');
-    } else {
-        alert('Failed to save report. Please try again.');
+            const savedReport = await saveReport(reportData);
+            if (savedReport) {
+                showToast('Report saved successfully!', 'success');
+                // Redirect to reports list after saving
+                window.location.href = '/reports';
+            } else {
+                showToast('Failed to save report. Please try again.', 'error');
+            }
+        });
     }
 });
+
 
 // --- Enhanced Export Functions ---
 async function exportReportAsPdf(id) {
     const report = allReportsCache.find(r => r.id === id);
     if (!report) {
         console.error("Report not found for PDF export:", id);
+        showToast('Report not found for PDF export.', 'error');
         return;
     }
 
@@ -1131,12 +1097,14 @@ async function exportReportAsPdf(id) {
     }
 
     doc.save(`QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.pdf`);
+    showToast('PDF report exported successfully!', 'success');
 }
 
 async function exportReportAsExcel(id) {
     const report = allReportsCache.find(r => r.id === id);
     if (!report) {
         console.error("Report not found for Excel export:", id);
+        showToast('Report not found for Excel export.', 'error');
         return;
     }
 
@@ -1244,6 +1212,7 @@ async function exportReportAsExcel(id) {
         XLSX.utils.book_append_sheet(workbook, wsTesters, "Testers");
     }
     XLSX.writeFile(workbook, `QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.xlsx`);
+    showToast('Excel report exported successfully!', 'success');
 }
 
 // --- Modal & Utility Functions ---
@@ -1255,14 +1224,16 @@ function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
     // Clear form inputs
     const modal = document.getElementById(modalId);
-    const inputs = modal.querySelectorAll('input, textarea, select');
-    inputs.forEach(input => {
-        if (input.type === 'checkbox' || input.type === 'radio') {
-            input.checked = false;
-        } else {
-            input.value = '';
-        }
-    });
+    if (modal) { // Check if modal exists before querying
+        const inputs = modal.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            if (input.type === 'checkbox' || input.type === 'radio') {
+                input.checked = false;
+            } else {
+                input.value = '';
+            }
+        });
+    }
 }
 
 function showAddPortfolioModal() {
@@ -1273,25 +1244,75 @@ function showAddProjectModal() {
     showModal('addProjectModal');
 }
 
-function addPortfolio() {
+async function addPortfolio() {
     const name = document.getElementById('newPortfolioName').value.trim();
     if (name) {
-        const select = document.getElementById('portfolioName');
-        const option = new Option(name, name.toLowerCase().replace(/\s+/g, '-'));
-        select.add(option);
-        select.value = option.value;
-        closeModal('addPortfolioModal');
+        try {
+            const response = await fetch('/api/portfolios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name })
+            });
+            if (response.ok) {
+                showToast('Portfolio added successfully!', 'success');
+                loadFormDropdownData(); // Reload dropdowns to include new portfolio
+                closeModal('addPortfolioModal');
+            } else {
+                const error = await response.json();
+                showToast('Error adding portfolio: ' + (error.error || 'Unknown error'), 'error');
+            }
+        } catch (error) {
+            console.error('Error adding portfolio:', error);
+            showToast('Error adding portfolio', 'error');
+        }
+    } else {
+        showToast('Please enter a portfolio name.', 'warning');
     }
 }
 
-function addProject() {
+async function addProject() {
     const name = document.getElementById('newProjectName').value.trim();
-    if (name) {
-        const select = document.getElementById('projectName');
-        const option = new Option(name, name.toLowerCase().replace(/\s+/g, '-'));
-        select.add(option);
-        select.value = option.value;
-        closeModal('addProjectModal');
+    const portfolioSelect = document.getElementById('portfolioName');
+    const portfolioId = portfolioSelect.options[portfolioSelect.selectedIndex].value; // Assuming value is ID or name
+
+    if (!portfolioId) {
+        showToast('Please select a portfolio first.', 'warning');
+        return;
+    }
+
+    // You might need to fetch the actual portfolio ID if your dropdown value is just the name
+    // For now, let's assume the backend can handle name or you pass the ID from a hidden field
+    // For simplicity, I'll assume portfolioId is the name and backend handles mapping or you need to adjust
+    // This part might need refinement based on how your backend expects project creation.
+    // For now, I'll use the selected portfolio's name as a placeholder for portfolio_id if it's not a true ID.
+    // A better approach would be to store portfolio IDs in the option values.
+
+    // Let's adjust to use the actual ID if available, otherwise fallback to name.
+    // The `populatePortfolioDropdown` should store actual IDs in option values.
+    const selectedPortfolioOption = portfolioSelect.options[portfolioSelect.selectedIndex];
+    const actualPortfolioId = selectedPortfolioOption ? selectedPortfolioOption.dataset.id : null; // Assuming data-id attribute for actual ID
+
+    if (name && actualPortfolioId) {
+        try {
+            const response = await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, portfolio_id: actualPortfolioId })
+            });
+            if (response.ok) {
+                showToast('Project added successfully!', 'success');
+                loadFormDropdownData(); // Reload dropdowns to include new project
+                closeModal('addProjectModal');
+            } else {
+                const error = await response.json();
+                showToast('Error adding project: ' + (error.error || 'Unknown error'), 'error');
+            }
+        } catch (error) {
+            console.error('Error adding project:', error);
+            showToast('Error adding project', 'error');
+        }
+    } else {
+        showToast('Please enter a project name and ensure a portfolio is selected.', 'warning');
     }
 }
 
@@ -1363,6 +1384,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function toggleWeightColumn() {
     const columns = document.querySelectorAll('.weight-column');
     const button = document.getElementById('toggleWeightBtn');
+    
+    if (!columns.length || !button) return;
+    
     const isVisible = columns[0].style.display !== 'none';
     
     columns.forEach(col => {
@@ -1375,6 +1399,9 @@ function toggleWeightColumn() {
 function toggleProjectReasonColumn() {
     const columns = document.querySelectorAll('.project-reason-column');
     const button = document.getElementById('toggleProjectReasonBtn');
+    
+    if (!columns.length || !button) return;
+    
     const isVisible = columns[0].style.display !== 'none';
     
     columns.forEach(col => {
@@ -1403,592 +1430,7 @@ async function loadExistingTeamMembers() {
             
             teamMembers.forEach(member => {
                 const option = document.createElement('option');
-                option.value = JSON.stringify(member);
-                option.textContent = `${member.name} - ${member.role} (${member.email})`;
-                select.appendChild(option);
-            });
-        }
-    } catch (error) {
-        console.error('Error loading team members:', error);
-    }
-}
-
-function handleTeamMemberSelection() {
-    const select = document.getElementById('existingTeamMemberSelect');
-    const newNameField = document.getElementById('newTeamMemberName');
-    const newEmailField = document.getElementById('newTeamMemberEmail');
-    const newRoleField = document.getElementById('newTeamMemberRole');
-    
-    if (select.value) {
-        const selectedMember = JSON.parse(select.value);
-        newNameField.value = '';
-        newEmailField.value = '';
-        newRoleField.value = '';
-        newNameField.disabled = true;
-        newEmailField.disabled = true;
-        newRoleField.disabled = true;
-    } else {
-        newNameField.disabled = false;
-        newEmailField.disabled = false;
-        newRoleField.disabled = false;
-    }
-}
-
-function clearTeamMemberForm() {
-    document.getElementById('existingTeamMemberSelect').value = '';
-    document.getElementById('newTeamMemberName').value = '';
-    document.getElementById('newTeamMemberEmail').value = '';
-    document.getElementById('newTeamMemberRole').value = '';
-    document.getElementById('newTeamMemberName').disabled = false;
-    document.getElementById('newTeamMemberEmail').disabled = false;
-    document.getElementById('newTeamMemberRole').disabled = false;
-}
-
-async function addSelectedTeamMember() {
-    const existingSelect = document.getElementById('existingTeamMemberSelect');
-    const newName = document.getElementById('newTeamMemberName').value.trim();
-    const newEmail = document.getElementById('newTeamMemberEmail').value.trim();
-    const newRole = document.getElementById('newTeamMemberRole').value;
-    
-    let memberToAdd = null;
-    
-    if (existingSelect.value) {
-        memberToAdd = JSON.parse(existingSelect.value);
-    } else if (newName && newEmail && newRole) {
-        try {
-            const response = await fetch('/api/team-members', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newName, email: newEmail, role: newRole })
-            });
-            
-            if (response.ok) {
-                memberToAdd = await response.json();
-            } else {
-                const error = await response.json();
-                showToast('Error creating team member: ' + (error.error || 'Unknown error'), 'error');
-                return;
-            }
-        } catch (error) {
-            console.error('Error creating team member:', error);
-            showToast('Error creating team member', 'error');
-            return;
-        }
-    } else {
-        showToast('Please either select an existing team member or provide all details for a new member', 'warning');
-        return;
-    }
-    
-    if (memberToAdd) {
-        const alreadyAdded = teamMemberData.some(tm => tm.email === memberToAdd.email);
-        if (alreadyAdded) {
-            showToast('This team member is already added to the report', 'warning');
-            return;
-        }
-        
-        teamMemberData.push({
-            id: memberToAdd.id,
-            name: memberToAdd.name,
-            email: memberToAdd.email,
-            role: memberToAdd.role
-        });
-        
-        renderTeamMemberList();
-        closeModal('teamMemberModal');
-        showToast('Team member added successfully!', 'success');
-    }
-}
-
-async function loadTeamMembersForSelection() {
-    try {
-        const response = await fetch('/api/team-members');
-        if (response.ok) {
-            const existingMembers = await response.json();
-            // You can populate a dropdown to select existing members
-            // or show suggestions as the user types
-        }
-    } catch (error) {
-        console.error('Error loading team members:', error);
-    }
-}
-
-function addTeamMember() {
-    const name = document.getElementById('teamMemberName').value.trim();
-    const role = document.getElementById('teamMemberRole').value.trim();
-    const email = document.getElementById('teamMemberEmail').value.trim();
-    
-    if (name && role && email) {
-        teamMemberData.push({ name, role, email });
-        renderTeamMemberList();
-        closeModal('teamMemberModal');
-        
-        // Clear form
-        document.getElementById('teamMemberName').value = '';
-        document.getElementById('teamMemberRole').value = '';
-        document.getElementById('teamMemberEmail').value = '';
-    } else {
-        alert('Please fill in all fields');
-    }
-}
-
-function renderTeamMemberList() {
-    const container = document.getElementById('teamMemberList');
-    if (teamMemberData.length === 0) {
-        container.innerHTML = '<div class="empty-state">No team members added yet.</div>';
-        return;
-    }
-    
-    container.innerHTML = teamMemberData.map((member, index) => `
-        <div class="dynamic-item">
-            <div>
-                <strong>Name:</strong> ${member.name}<br>
-                <strong>Role:</strong> <span class="role-badge ${member.role.toLowerCase().replace(/\s+/g, '-')}">${member.role}</span><br>
-                <strong>Email:</strong> ${member.email}
-            </div>
-            <button type="button" class="btn-sm btn-delete" onclick="removeTeamMember(${index})">Remove</button>
-        </div>
-    `).join('');
-}
-
-function removeTeamMember(index) {
-    teamMemberData.splice(index, 1);
-    renderTeamMemberList();
-}
-
-// Enhanced tester management functions
-async function showTesterModal() {
-    await loadExistingTesters();
-    clearTesterForm();
-    showModal('testerModal');
-}
-
-async function loadExistingTesters() {
-    try {
-        const response = await fetch('/api/testers');
-        if (response.ok) {
-            const testers = await response.json();
-            const select = document.getElementById('existingTesterSelect');
-            
-            // Clear existing options except the first one
-            select.innerHTML = '<option value="">-- Select from existing testers --</option>';
-            
-            // Add existing testers as options
-            testers.forEach(tester => {
-                const option = document.createElement('option');
-                option.value = JSON.stringify(tester);
-                option.textContent = `${tester.name} (${tester.email})`;
-                select.appendChild(option);
-            });
-        }
-    } catch (error) {
-        console.error('Error loading testers:', error);
-    }
-}
-
-function handleTesterSelection() {
-    const select = document.getElementById('existingTesterSelect');
-    const newNameField = document.getElementById('newTesterName');
-    const newEmailField = document.getElementById('newTesterEmail');
-    
-    if (select.value) {
-        // If existing tester selected, clear new tester fields
-        newNameField.value = '';
-        newEmailField.value = '';
-        newNameField.disabled = true;
-        newEmailField.disabled = true;
-    } else {
-        // If no existing tester selected, enable new tester fields
-        newNameField.disabled = false;
-        newEmailField.disabled = false;
-    }
-}
-
-function clearTesterForm() {
-    document.getElementById('existingTesterSelect').value = '';
-    document.getElementById('newTesterName').value = '';
-    document.getElementById('newTesterEmail').value = '';
-    document.getElementById('newTesterName').disabled = false;
-    document.getElementById('newTesterEmail').disabled = false;
-}
-
-async function addSelectedTester() {
-    const existingTesterSelect = document.getElementById('existingTesterSelect');
-    const newTesterName = document.getElementById('newTesterName').value.trim();
-    const newTesterEmail = document.getElementById('newTesterEmail').value.trim();
-    
-    let testerToAdd = null;
-    
-    if (existingTesterSelect.value) {
-        // Use existing tester
-        testerToAdd = JSON.parse(existingTesterSelect.value);
-    } else if (newTesterName && newTesterEmail) {
-        // Create new tester
-        try {
-            const response = await fetch('/api/testers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newTesterName, email: newTesterEmail })
-            });
-            
-            if (response.ok) {
-                testerToAdd = await response.json();
-            } else {
-                const error = await response.json();
-                alert('Error creating tester: ' + (error.error || 'Unknown error'));
-                return;
-            }
-        } catch (error) {
-            console.error('Error creating tester:', error);
-            alert('Error creating tester');
-            return;
-        }
-    } else {
-        alert('Please either select an existing tester or provide name and email for a new tester');
-        return;
-    }
-    
-    if (testerToAdd) {
-        // Check if tester already added to this report
-        const alreadyAdded = testerData.some(t => t.email === testerToAdd.email);
-        if (alreadyAdded) {
-            alert('This tester is already added to the report');
-            return;
-        }
-        
-        // Add tester to report
-        testerData.push({
-            id: testerToAdd.id,
-            name: testerToAdd.name,
-            email: testerToAdd.email
-        });
-        
-        renderTesterList();
-        closeModal('testerModal');
-    }
-}
-
-// Update the render function to show email
-function renderTesterList() {
-    const container = document.getElementById('testerList');
-    if (testerData.length === 0) {
-        container.innerHTML = '<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No testers added yet. Click "Add/Select Tester" to get started.</div>';
-        return;
-    }
-    
-    container.innerHTML = testerData.map((tester, index) => `
-        <div class="dynamic-item">
-            <div>
-                <strong>Name:</strong> ${tester.name}<br>
-                <strong>Email:</strong> ${tester.email}
-            </div>
-            <button type="button" class="btn-sm btn-delete" onclick="removeTester(${index})">Remove</button>
-        </div>
-    `).join('');
-}
-
-let qaNotesFields = [];
-
-function showAddQANoteFieldModal() {
-    showModal('addQANoteFieldModal');
-}
-
-function renderQANotesFields() {
-    const container = document.getElementById('qaNotesFieldsList');
-    if (!container) return;
-    
-    if (qaNotesFields.length === 0) {
-        // Keep the default general notes field
-        return;
-    }
-    
-    // Find the default field and add custom fields after it
-    const defaultField = container.querySelector('.custom-field-item');
-    if (defaultField && customFieldsHTML) {
-        defaultField.insertAdjacentHTML('afterend', customFieldsHTML);
-    }
-}
-
-function addQANoteField() {
-    // Similar to addCustomField but for QA notes
-    const fieldData = {
-        id: `qa_note_${Date.now()}`,
-        name: document.getElementById('qaFieldName').value,
-        type: document.getElementById('qaFieldType').value,
-        // ... other properties
-    };
-    
-    qaNotesFields.push(fieldData);
-    renderQANotesFields();
-    closeModal('addQANoteFieldModal');
-}
-
-function populatePortfolioDropdown(portfolios) {
-    const select = document.getElementById('portfolioName');
-    if (!select) return;
-    
-    // Clear loading state
-    select.innerHTML = '<option value="">Select Portfolio</option>';
-    
-    // Add static options first
-    const staticOptions = [
-        { value: 'api-services', text: 'API Services' },
-        { value: 'web-platform', text: 'Web Platform' },
-        { value: 'mobile-app', text: 'Mobile App' },
-        { value: 'data-analytics', text: 'Data Analytics' }
-    ];
-    
-    staticOptions.forEach(opt => {
-        select.innerHTML += `<option value="${opt.value}">${opt.text}</option>`;
-    });
-    
-    // Add dynamic portfolios from database
-    portfolios.forEach(portfolio => {
-        const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
-        // Check if this portfolio already exists in static options
-        const exists = staticOptions.some(opt => opt.value === value);
-        if (!exists) {
-            select.innerHTML += `<option value="${value}">${portfolio.name}</option>`;
-        }
-    });
-}
-
-function populateProjectDropdown(projects) {
-    const select = document.getElementById('projectName');
-    if (!select) return;
-    
-    // Keep existing static options
-    const existingOptions = Array.from(select.options).map(opt => ({ value: opt.value, text: opt.text }));
-    
-    select.innerHTML = '<option value="">Select Project</option>';
-    
-    // Add existing static options (skip the first empty option)
-    existingOptions.slice(1).forEach(opt => {
-        if (opt.value) {
-            select.innerHTML += `<option value="${opt.value}">${opt.text}</option>`;
-        }
-    });
-    
-    // Add dynamic projects from database
-    projects.forEach(project => {
-        const value = project.name.toLowerCase().replace(/\s+/g, '-');
-        // Check if this project already exists in static options
-        const exists = existingOptions.some(opt => opt.value === value);
-        if (!exists) {
-            select.innerHTML += `<option value="${value}">${project.name}</option>`;
-        }
-    });
-}
-
-// Missing form dropdown data loading function
-async function loadFormDropdownData() {
-    try {
-        // Load portfolios
-        const portfolioResponse = await fetch('/api/portfolios');
-        if (portfolioResponse.ok) {
-            const portfolios = await portfolioResponse.json();
-            populatePortfolioDropdown(portfolios);
-        }
-        
-        // Load projects
-        const projectResponse = await fetch('/api/projects');
-        if (projectResponse.ok) {
-            const projects = await projectResponse.json();
-            populateProjectDropdown(projects);
-        }
-    } catch (error) {
-        console.error('Error loading form data:', error);
-        showToast('Error loading form data', 'error');
-    }
-}
-
-// Missing weight column toggle function
-function toggleWeightColumn() {
-    const columns = document.querySelectorAll('.weight-column');
-    const button = document.getElementById('toggleWeightBtn');
-    
-    if (!columns.length || !button) return;
-    
-    const isVisible = columns[0].style.display !== 'none';
-    
-    columns.forEach(col => {
-        col.style.display = isVisible ? 'none' : 'table-cell';
-    });
-    
-    button.textContent = isVisible ? 'Show Weight' : 'Hide Weight';
-}
-
-// Missing project reason column toggle function
-function toggleProjectReasonColumn() {
-    const columns = document.querySelectorAll('.project-reason-column');
-    const button = document.getElementById('toggleProjectReasonBtn');
-    
-    if (!columns.length || !button) return;
-    
-    const isVisible = columns[0].style.display !== 'none';
-    
-    columns.forEach(col => {
-        col.style.display = isVisible ? 'none' : 'table-cell';
-    });
-    
-    button.textContent = isVisible ? 'Show Reason' : 'Hide Reason';
-}
-
-
-function showAddQANoteFieldModal() {
-    // Clear form
-    document.getElementById('qaFieldName').value = '';
-    document.getElementById('qaFieldType').value = 'input';
-    document.getElementById('qaFieldRequired').checked = false;
-    document.getElementById('qaFieldShowInReport').checked = true;
-    document.getElementById('qaFieldOptionsList').value = '';
-    updateQAFieldOptions();
-    showModal('addQANoteFieldModal');
-}
-
-function updateQAFieldOptions() {
-    const type = document.getElementById('qaFieldType').value;
-    const optionsDiv = document.getElementById('qaFieldOptions');
-    
-    if (type === 'select' || type === 'radio' || type === 'checkbox') {
-        optionsDiv.style.display = 'block';
-    } else {
-        optionsDiv.style.display = 'none';
-    }
-}
-
-function addQANoteField() {
-    const name = document.getElementById('qaFieldName').value.trim();
-    const type = document.getElementById('qaFieldType').value;
-    const required = document.getElementById('qaFieldRequired').checked;
-    const showInReport = document.getElementById('qaFieldShowInReport').checked;
-    const optionsList = document.getElementById('qaFieldOptionsList').value.trim();
-    
-    if (!name) {
-        showToast('Please enter a field name', 'warning');
-        return;
-    }
-    
-    const options = (type === 'select' || type === 'radio' || type === 'checkbox') && optionsList 
-        ? optionsList.split('\n').map(opt => opt.trim()).filter(opt => opt)
-        : [];
-    
-    const qaField = {
-        id: `qa_note_${Date.now()}`,
-        name,
-        type,
-        required,
-        showInReport,
-        options,
-        value: type === 'checkbox' ? [] : ''
-    };
-    
-    qaNotesFields.push(qaField);
-    renderQANotesFields();
-    closeModal('addQANoteFieldModal');
-    showToast('QA note field added successfully!', 'success');
-}
-
-function renderQANotesFields() {
-    const container = document.getElementById('qaNotesFieldsList');
-    if (!container) return;
-    
-    // Find the default general notes field
-    const defaultField = container.querySelector('.custom-field-item');
-    
-    // Remove existing custom QA fields (keep default)
-    const customFields = container.querySelectorAll('.qa-field-item');
-    customFields.forEach(field => field.remove());
-    
-    // Add new custom fields
-    qaNotesFields.forEach(field => {
-        const fieldHTML = renderQANoteFieldHTML(field);
-        if (defaultField) {
-            defaultField.insertAdjacentHTML('afterend', fieldHTML);
-        } else {
-            container.innerHTML += fieldHTML;
-        }
-    });
-}
-
-function renderQANoteFieldHTML(field) {
-    let inputHTML = '';
-    
-    switch (field.type) {
-        case 'input':
-            inputHTML = `<input type="text" id="${field.id}" name="${field.id}" placeholder="Enter ${field.name.toLowerCase()}" ${field.required ? 'required' : ''}>`;
-            break;
-        case 'textarea':
-            inputHTML = `<textarea id="${field.id}" name="${field.id}" placeholder="Enter ${field.name.toLowerCase()}" rows="4" ${field.required ? 'required' : ''}></textarea>`;
-            break;
-        case 'number':
-            inputHTML = `<input type="number" id="${field.id}" name="${field.id}" placeholder="Enter ${field.name.toLowerCase()}" ${field.required ? 'required' : ''}>`;
-            break;
-        case 'date':
-            inputHTML = `<input type="date" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>`;
-            break;
-        case 'select':
-            inputHTML = `
-                <select id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>
-                    <option value="">Select ${field.name}</option>
-                    ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                </select>
-            `;
-            break;
-        case 'radio':
-            inputHTML = field.options.map((opt, index) => `
-                <label class="radio-option">
-                    <input type="radio" name="${field.id}" value="${opt}" ${field.required && index === 0 ? 'required' : ''}>
-                    ${opt}
-                </label>
-            `).join('');
-            break;
-        case 'checkbox':
-            inputHTML = field.options.map(opt => `
-                <label class="checkbox-option">
-                    <input type="checkbox" name="${field.id}" value="${opt}">
-                    ${opt}
-                </label>
-            `).join('');
-            break;
-    }
-    
-    return `
-        <div class="qa-field-item">
-            <div class="custom-field-header">
-                <h4>${field.name}</h4>
-                <div class="custom-field-badges">
-                    ${field.required ? '<span class="badge badge-required">Required</span>' : ''}
-                    ${field.showInReport ? '<span class="badge badge-visible">Show in Report</span>' : '<span class="badge badge-hidden">Hidden</span>'}
-                    <button type="button" class="btn-remove-field" onclick="removeQANoteField('${field.id}')">Remove</button>
-                </div>
-            </div>
-            <div class="custom-field-input">
-                ${inputHTML}
-            </div>
-        </div>
-    `;
-}
-
-function removeQANoteField(fieldId) {
-    qaNotesFields = qaNotesFields.filter(field => field.id !== fieldId);
-    renderQANotesFields();
-    showToast('QA note field removed', 'info');
-}
-
-// Enhanced team member management functions (complete implementation)
-
-async function loadExistingTeamMembers() {
-    try {
-        const response = await fetch('/api/team-members');
-        if (response.ok) {
-            const teamMembers = await response.json();
-            const select = document.getElementById('existingTeamMemberSelect');
-            
-            select.innerHTML = '<option value="">-- Select from existing team members --</option>';
-            
-            teamMembers.forEach(member => {
-                const option = document.createElement('option');
-                option.value = JSON.stringify(member);
+                option.value = JSON.stringify(member); // Store full object for easy retrieval
                 option.textContent = `${member.name} - ${member.role} (${member.email})`;
                 select.appendChild(option);
             });
@@ -2125,7 +1567,7 @@ async function loadExistingTesters() {
             
             testers.forEach(tester => {
                 const option = document.createElement('option');
-                option.value = JSON.stringify(tester);
+                option.value = JSON.stringify(tester); // Store full object for easy retrieval
                 option.textContent = `${tester.name} (${tester.email})`;
                 select.appendChild(option);
             });
@@ -2214,34 +1656,218 @@ async function addSelectedTester() {
     }
 }
 
-function renderTesterList() {
-    const container = document.getElementById('testerList');
-    if (!container) return;
+// QA Notes Custom Fields (if implemented in the HTML)
+let qaNotesFields = []; // This will hold the structure for custom QA notes fields
+
+function showAddQANoteFieldModal() {
+    // Clear form
+    document.getElementById('qaFieldName').value = '';
+    document.getElementById('qaFieldType').value = 'input';
+    document.getElementById('qaFieldRequired').checked = false;
+    document.getElementById('qaFieldShowInReport').checked = true;
+    const qaFieldOptionsList = document.getElementById('qaFieldOptionsList');
+    if (qaFieldOptionsList) qaFieldOptionsList.value = '';
+    updateQAFieldOptions();
+    showModal('addQANoteFieldModal');
+}
+
+function updateQAFieldOptions() {
+    const type = document.getElementById('qaFieldType').value;
+    const optionsDiv = document.getElementById('qaFieldOptions');
     
-    if (testerData.length === 0) {
-        container.innerHTML = '<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No testers added yet. Click "Add/Select Tester" to get started.</div>';
+    if (optionsDiv) { // Check if element exists
+        if (type === 'select' || type === 'radio' || type === 'checkbox') {
+            optionsDiv.style.display = 'block';
+        } else {
+            optionsDiv.style.display = 'none';
+        }
+    }
+}
+
+function addQANoteField() {
+    const name = document.getElementById('qaFieldName').value.trim();
+    const type = document.getElementById('qaFieldType').value;
+    const required = document.getElementById('qaFieldRequired').checked;
+    const showInReport = document.getElementById('qaFieldShowInReport').checked;
+    const optionsListElement = document.getElementById('qaFieldOptionsList');
+    const optionsList = optionsListElement ? optionsListElement.value.trim() : '';
+    
+    if (!name) {
+        showToast('Please enter a field name', 'warning');
         return;
     }
     
-    container.innerHTML = testerData.map((tester, index) => `
-        <div class="dynamic-item">
-            <div>
-                <strong>Name:</strong> ${tester.name}<br>
-                <strong>Email:</strong> ${tester.email}
-            </div>
-            <button type="button" class="btn-sm btn-delete" onclick="removeTester(${index})">Remove</button>
-        </div>
-    `).join('');
+    const options = (type === 'select' || type === 'radio' || type === 'checkbox') && optionsList 
+        ? optionsList.split('\n').map(opt => opt.trim()).filter(opt => opt)
+        : [];
+    
+    const qaField = {
+        id: `qa_note_${Date.now()}`,
+        name,
+        type,
+        required,
+        showInReport,
+        options,
+        value: type === 'checkbox' ? [] : '' // Initialize value for checkboxes as array, others as empty string
+    };
+    
+    qaNotesFields.push(qaField);
+    renderQANotesFields();
+    closeModal('addQANoteFieldModal');
+    showToast('QA note field added successfully!', 'success');
 }
 
-function removeTester(index) {
-    testerData.splice(index, 1);
-    renderTesterList();
-    showToast('Tester removed', 'info');
+function renderQANotesFields() {
+    const container = document.getElementById('qaNotesFieldsList');
+    if (!container) return;
+    
+    // Find the default general notes field (if it exists and is not a custom field)
+    // Assuming the general notes textarea is always present and has id 'qaNotesText'
+    // This function will only render *additional* custom QA fields.
+    
+    // Remove existing custom QA fields before re-rendering
+    const existingCustomFields = container.querySelectorAll('.qa-field-item');
+    existingCustomFields.forEach(field => field.remove());
+    
+    // Add new custom fields
+    qaNotesFields.forEach(field => {
+        const fieldHTML = renderQANoteFieldHTML(field);
+        // Append to the container. If you want it after a specific element, you'd need to find that element.
+        // For now, just append to the end of the list.
+        container.insertAdjacentHTML('beforeend', fieldHTML);
+    });
+}
+
+function renderQANoteFieldHTML(field) {
+    let inputHTML = '';
+    
+    switch (field.type) {
+        case 'input':
+            inputHTML = `<input type="text" id="${field.id}" name="custom_${field.id}" placeholder="Enter ${field.name.toLowerCase()}" ${field.required ? 'required' : ''} value="${field.value || ''}">`;
+            break;
+        case 'textarea':
+            inputHTML = `<textarea id="${field.id}" name="custom_${field.id}" placeholder="Enter ${field.name.toLowerCase()}" rows="4" ${field.required ? 'required' : ''}>${field.value || ''}</textarea>`;
+            break;
+        case 'number':
+            inputHTML = `<input type="number" id="${field.id}" name="custom_${field.id}" placeholder="Enter ${field.name.toLowerCase()}" ${field.required ? 'required' : ''} value="${field.value || ''}">`;
+            break;
+        case 'date':
+            inputHTML = `<input type="date" id="${field.id}" name="custom_${field.id}" ${field.required ? 'required' : ''} value="${field.value || ''}">`;
+            break;
+        case 'select':
+            inputHTML = `
+                <select id="${field.id}" name="custom_${field.id}" ${field.required ? 'required' : ''}>
+                    <option value="">Select ${field.name}</option>
+                    ${field.options.map(opt => `<option value="${opt}" ${field.value === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                </select>
+            `;
+            break;
+        case 'radio':
+            inputHTML = field.options.map((opt, index) => `
+                <label class="radio-option">
+                    <input type="radio" name="custom_${field.id}" value="${opt}" ${field.required && index === 0 ? 'required' : ''} ${field.value === opt ? 'checked' : ''}>
+                    ${opt}
+                </label>
+            `).join('');
+            break;
+        case 'checkbox':
+            inputHTML = field.options.map(opt => `
+                <label class="checkbox-option">
+                    <input type="checkbox" name="custom_${field.id}[]" value="${opt}" ${Array.isArray(field.value) && field.value.includes(opt) ? 'checked' : ''}>
+                    ${opt}
+                </label>
+            `).join('');
+            break;
+    }
+    
+    return `
+        <div class="qa-field-item form-group full-width">
+            <div class="custom-field-header">
+                <label for="${field.id}">${field.name}</label>
+                <div class="custom-field-badges">
+                    ${field.required ? '<span class="badge badge-required">Required</span>' : ''}
+                    ${field.showInReport ? '<span class="badge badge-visible">Show in Report</span>' : '<span class="badge badge-hidden">Hidden</span>'}
+                    <button type="button" class="btn-remove-field" onclick="removeQANoteField('${field.id}')">Remove</button>
+                </div>
+            </div>
+            <div class="custom-field-input">
+                ${inputHTML}
+            </div>
+        </div>
+    `;
+}
+
+function removeQANoteField(fieldId) {
+    qaNotesFields = qaNotesFields.filter(field => field.id !== fieldId);
+    renderQANotesFields();
+    showToast('QA note field removed', 'info');
+}
+
+async function populatePortfolioDropdown(portfolios) {
+    const select = document.getElementById('portfolioName');
+    if (!select) return;
+    
+    // Clear loading state
+    select.innerHTML = '<option value="">Select Portfolio</option>';
+    
+    // Add static options first (if any, as per your original HTML)
+    const staticOptions = [
+        { value: 'api-services', text: 'API Services' },
+        { value: 'web-platform', text: 'Web Platform' },
+        { value: 'mobile-app', text: 'Mobile App' },
+        { value: 'data-analytics', text: 'Data Analytics' }
+    ];
+    
+    staticOptions.forEach(opt => {
+        select.innerHTML += `<option value="${opt.value}">${opt.text}</option>`;
+    });
+    
+    // Add dynamic portfolios from database
+    portfolios.forEach(portfolio => {
+        const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
+        // Check if this portfolio already exists in static options
+        const exists = staticOptions.some(opt => opt.value === value);
+        if (!exists) {
+            // Store the actual ID in a data attribute
+            select.innerHTML += `<option value="${value}" data-id="${portfolio.id}">${portfolio.name}</option>`;
+        }
+    });
+}
+
+async function populateProjectDropdown(projects) {
+    const select = document.getElementById('projectName');
+    if (!select) return;
+    
+    // Keep existing static options (if any, from your original HTML)
+    // For a clean slate, you might just clear and re-add.
+    // Assuming you want to clear and re-add based on loaded data.
+    select.innerHTML = '<option value="">Select Project</option>';
+    
+    // Add dynamic projects from database
+    projects.forEach(project => {
+        const value = project.name.toLowerCase().replace(/\s+/g, '-');
+        // Store the actual ID and portfolio ID in data attributes
+        select.innerHTML += `<option value="${value}" data-id="${project.id}" data-portfolio-id="${project.portfolio_id}">${project.name}</option>`;
+    });
+}
+
+// Missing form dropdown data loading function
+async function loadFormDropdownData() {
+    try {
+        const response = await fetch('/api/form-data');
+        if (response.ok) {
+            const data = await response.json();
+            populatePortfolioDropdown(data.portfolios);
+            populateProjectDropdown(data.projects);
+            // You can also load testers and team members here if needed for the form
+        }
+    } catch (error) {
+        console.error('Error loading form data:', error);
+        showToast('Error loading form data', 'error');
+    }
 }
 
 // Make functions globally accessible
-window.showPage = showPage;
 window.createNewReport = createNewReport;
 window.searchReports = searchReports;
 window.viewReport = viewReport;
@@ -2249,7 +1875,7 @@ window.regenerateReport = regenerateReport;
 window.deleteReport = deleteReport;
 window.exportDashboardReport = exportDashboardReport;
 window.toggleSidebar = toggleSidebar;
-window.backToDashboard = backToDashboard;
+window.backToDashboard = backToDashboard; // Now redirects to dashboard HTML
 window.showSection = showSection;
 window.previousSection = previousSection;
 window.nextSection = nextSection;
@@ -2265,7 +1891,7 @@ window.showBuildModal = showBuildModal;
 window.addBuild = addBuild;
 window.removeBuild = removeBuild;
 window.showTesterModal = showTesterModal;
-window.addTester = addTester;
+// window.addTester = addTester; // Replaced by addSelectedTester
 window.removeTester = removeTester;
 window.calculatePercentages = calculatePercentages;
 window.calculateTestCasesPercentages = calculateTestCasesPercentages;
@@ -2275,8 +1901,8 @@ window.calculateEnhancementsPercentages = calculateEnhancementsPercentages;
 window.goToPage = goToPage;
 window.exportReportAsPdf = exportReportAsPdf;
 window.exportReportAsExcel = exportReportAsExcel;
-window.toggleWeightColumn = toggleWeightColumn;
-window.toggleProjectReasonColumn = toggleProjectReasonColumn;
+window.toggleWeightColumn = toggleWeightColumn; // If this is used on a page
+window.toggleProjectReasonColumn = toggleProjectReasonColumn; // If this is used on a page
 window.showAddQANoteFieldModal = showAddQANoteFieldModal;
 window.updateQAFieldOptions = updateQAFieldOptions;
 window.addQANoteField = addQANoteField;
@@ -2289,3 +1915,11 @@ window.handleTesterSelection = handleTesterSelection;
 window.addSelectedTester = addSelectedTester;
 window.showToast = showToast;
 window.removeToast = removeToast;
+window.loadFormDropdownData = loadFormDropdownData; // Make it globally accessible
+window.initializeCharts = initializeCharts; // Make it globally accessible
+window.resetFormData = resetFormData; // Make it globally accessible
+window.fetchReport = fetchReport; // Make it globally accessible for editing
+window.loadReportForEditing = loadReportForEditing; // Make it globally accessible for editing
+window.editingReportId = editingReportId; // Make global variable accessible
+window.allReportsCache = allReportsCache; // Make global variable accessible
+window.dashboardStatsCache = dashboardStatsCache; // Make global variable accessible

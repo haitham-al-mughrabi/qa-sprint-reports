@@ -259,8 +259,23 @@ class Report(db.Model):
 
 @app.route('/')
 def index():
-    """Serves the main HTML page."""
-    return render_template('index.html')
+    """Serves the main HTML landing page."""
+    return render_template('dashboard.html')
+
+@app.route('/dashboard')
+def dashboard_page():
+    """Serves the dashboard HTML page."""
+    return render_template('dashboard.html')
+
+@app.route('/reports')
+def reports_page():
+    """Serves the reports management HTML page."""
+    return render_template('reports.html')
+
+@app.route('/create-report')
+def create_report_page():
+    """Serves the create/edit report HTML page."""
+    return render_template('create_report.html')
 
 @app.route('/report/<int:report_id>')
 def view_report(report_id):

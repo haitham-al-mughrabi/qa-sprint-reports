@@ -8,500 +8,153 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-            position: relative;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .export-buttons {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .export-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid rgba(255,255,255,0.3);
-            padding: 8px 16px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .export-btn:hover {
-            background: rgba(255,255,255,0.3);
-            border-color: rgba(255,255,255,0.5);
-            transform: translateY(-2px);
-        }
-
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid rgba(255,255,255,0.3);
-            padding: 8px 16px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
-            border-color: rgba(255,255,255,0.5);
-        }
-
-        .report-content {
-            padding: 40px;
-        }
-
-        .section {
-            margin-bottom: 40px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
-            border-left: 5px solid #4facfe;
-        }
-
-        .section-title {
-            color: #333;
-            font-size: 1.8em;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #4facfe;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .info-item {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .info-value {
-            font-size: 1.1em;
-            color: #333;
-            word-wrap: break-word;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-
-        .data-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-        }
-
-        .data-table td {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .data-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .data-table tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-
-        .percentage-cell {
-            font-weight: 600;
-            color: #4facfe;
-            text-align: center;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .status-completed {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-in-progress {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-pending {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .charts-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        .chart-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .chart-title {
-            color: #333;
-            font-size: 1.2em;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .chart-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 300px;
-        }
-
-        .dynamic-list {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 15px;
-        }
-
-        .dynamic-item {
-            background: #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 4px solid #4facfe;
-        }
-
-        .dynamic-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .custom-field-item {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .custom-field-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 1.1em;
-        }
-
-        .custom-field-value {
-            color: #666;
-            font-size: 1em;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #666;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4facfe;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #6c757d;
-            font-style: italic;
-            padding: 20px 0;
-        }
-
-        .metric-highlight {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 1.2em;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .charts-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .export-buttons {
-                position: static;
-                margin-top: 20px;
-                justify-content: center;
-            }
-            
-            .back-btn {
-                position: static;
-                margin-bottom: 20px;
-                display: inline-block;
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/static/view_report.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <a href="/" class="back-btn">← Back to Dashboard</a>
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand"><i class="fas fa-chart-line"></i> Sprint Reports System</div>
+            <div class="nav-links">
+                <a href="/" class="nav-link"><i class="fas fa-house"></i> Dashboard</a>
+                <a href="#" class="nav-link active"><i class="fas fa-chart-bar"></i> Reports</a>
+                <a href="/create" class="nav-link"><i class="fas fa-plus"></i> New Report</a>
+                <a href="/manage" class="nav-link"><i class="fas fa-gear"></i> Manage Data</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container card">
+        <div class="dashboard-header">
             <h1 id="reportTitle">Sprint Testing Report</h1>
             <p id="reportSubtitle">Loading report details...</p>
-            <div class="export-buttons">
-                <button class="export-btn" onclick="exportCurrentReportAsPdf()">📄 Export PDF</button>
-                <button class="export-btn" onclick="exportCurrentReportAsExcel()">📊 Export Excel</button>
+            <div class="action-buttons">
+                <button class="action-btn btn-export-pdf" onclick="exportCurrentReportAsPdf()">📄 Export PDF</button>
+                <button class="action-btn btn-export-excel" onclick="exportCurrentReportAsExcel()">📊 Export Excel</button>
             </div>
         </div>
 
-        <div id="loadingSection" class="loading">
+        <div id="loadingSection" class="empty-state loading">
             <div class="spinner"></div>
-            <p>Loading report data...</p>
+            <h3>Loading Report Data...</h3>
+            <p>Please wait while we fetch your report.</p>
         </div>
 
         <div class="report-content" id="reportContent" style="display: none;">
-            <!-- Cover Information Section -->
-            <div class="section">
-                <h2 class="section-title">Cover Information</h2>
+            <div class="section card">
+                <h2 class="section-title">General Information</h2>
                 <div class="info-grid" id="coverInfo">
-                    <!-- Will be populated by JavaScript -->
-                </div>
+                    </div>
             </div>
 
-            <!-- Test Summary Section -->
-            <div class="section">
+            <div class="section card">
                 <h2 class="section-title">Test Summary & Status</h2>
-                <div id="testSummaryContent">
-                    <!-- Will be populated by JavaScript -->
-                </div>
+                <div class="info-grid" id="testSummaryContent">
+                    </div>
             </div>
 
-            <!-- Testing Metrics Section -->
-            <div class="section">
+            <div class="section card">
                 <h2 class="section-title">Testing Metrics Overview</h2>
                 <div class="info-grid" id="metricsOverview">
-                    <!-- Will be populated by JavaScript -->
-                </div>
+                    </div>
             </div>
 
-            <!-- User Stories Section -->
-            <div class="section">
+            <div class="section card">
                 <h2 class="section-title">User Stories Analysis</h2>
                 <div class="charts-container">
-                    <div class="chart-section">
+                    <div class="chart-section card">
                         <h3 class="chart-title">User Stories Summary</h3>
                         <table class="data-table" id="userStoriesViewTable">
-                            <!-- Will be populated by JavaScript -->
-                        </table>
+                            </table>
                     </div>
-                    <div class="chart-section">
+                    <div class="chart-section card">
                         <h3 class="chart-title">User Stories Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="userStoriesViewChart" width="300" height="300"></canvas>
+                            <canvas id="userStoriesViewChart" width="300" height="350"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Test Cases Section -->
-            <div class="section">
+            <div class="section card">
                 <h2 class="section-title">Test Cases Analysis</h2>
                 <div class="charts-container">
-                    <div class="chart-section">
+                    <div class="chart-section card">
                         <h3 class="chart-title">Test Cases Summary</h3>
                         <table class="data-table" id="testCasesViewTable">
-                            <!-- Will be populated by JavaScript -->
-                        </table>
+                            </table>
                     </div>
-                    <div class="chart-section">
+                    <div class="chart-section card">
                         <h3 class="chart-title">Test Cases Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="testCasesViewChart" width="300" height="300"></canvas>
+                            <canvas id="testCasesViewChart" width="300" height="350"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Issues Section -->
-            <div class="section">
-                <h2 class="section-title">Issues Analysis</h2>
+            <div class="section card">
+                <h2 class="section-title">Issues by Priority</h2>
                 <div class="charts-container">
-                    <div class="chart-section">
-                        <h3 class="chart-title">Issues by Priority</h3>
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Issues by Priority Breakdown</h3>
                         <table class="data-table" id="issuesPriorityViewTable">
-                            <!-- Will be populated by JavaScript -->
-                        </table>
-                        <div class="chart-container" style="margin-top: 20px;">
-                            <canvas id="issuesPriorityViewChart" width="300" height="200"></canvas>
-                        </div>
+                            </table>
                     </div>
-                    <div class="chart-section">
-                        <h3 class="chart-title">Issues by Status</h3>
-                        <table class="data-table" id="issuesStatusViewTable">
-                            <!-- Will be populated by JavaScript -->
-                        </table>
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Issues by Priority Chart</h3>
                         <div class="chart-container" style="margin-top: 20px;">
-                            <canvas id="issuesStatusViewChart" width="300" height="200"></canvas>
+                            <canvas id="issuesPriorityViewChart" width="300" height="350"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Enhancements Section -->
-            <div class="section">
+            <div class="section card">
+                <h2 class="section-title">Issues by Status</h2>
+                <div class="charts-container">
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Issues by Status Breakdown</h3>
+                        <table class="data-table" id="issuesStatusViewTable">
+                            </table>
+                    </div>
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Issues by Status Chart</h3>
+                        <div class="chart-container" style="margin-top: 20px;">
+                            <canvas id="issuesStatusViewChart" width="300" height="350"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section card">
                 <h2 class="section-title">Enhancements Analysis</h2>
                 <div class="charts-container">
-                    <div class="chart-section">
+                    <div class="chart-section card">
                         <h3 class="chart-title">Enhancements Summary</h3>
                         <table class="data-table" id="enhancementsViewTable">
-                            <!-- Will be populated by JavaScript -->
-                        </table>
+                            </table>
                     </div>
-                    <div class="chart-section">
+                    <div class="chart-section card">
                         <h3 class="chart-title">Enhancements Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="enhancementsViewChart" width="300" height="300"></canvas>
+                            <canvas id="enhancementsViewChart" width="300" height="350"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Additional Information Section -->
-            <div class="section" id="additionalInfoSection">
+            <div class="section card" id="additionalInfoSection">
                 <h2 class="section-title">Additional Information</h2>
-                <!-- Will be populated by JavaScript -->
-            </div>
-
-            <!-- Evaluation Section -->
-            <div class="section" id="evaluationSection">
-                <h2 class="section-title">Evaluation Results</h2>
-                <!-- Will be populated by JavaScript -->
-            </div>
-
-            <!-- Project Evaluation Section -->
-            <div class="section" id="projectEvaluationSection">
-                <h2 class="section-title">Project Evaluation Results</h2>
-                <!-- Will be populated by JavaScript -->
-            </div>
-
-            <!-- Custom Fields Section -->
-            <div class="section" id="customFieldsSection" style="display: none;">
-                <h2 class="section-title">Custom Fields</h2>
-                <div id="customFieldsContent">
-                    <!-- Will be populated by JavaScript -->
                 </div>
-            </div>
 
-            <!-- QA Notes Section -->
-            <div class="section" id="qaNotesSection">
+            <div class="section card" id="qaNotesSection">
                 <h2 class="section-title">QA Notes</h2>
                 <div class="info-item">
                     <div class="info-label">Additional Notes</div>
                     <div class="info-value" id="qaNotesContent">
-                        <!-- Will be populated by JavaScript -->
-                    </div>
+                        </div>
                 </div>
             </div>
         </div>
@@ -513,6 +166,7 @@
 
         // Get report ID from URL
         const reportId = window.location.pathname.split('/').pop();
+        console.log('Attempting to load report ID:', reportId); // Log the ID being used
 
         // Load report data when page loads
         document.addEventListener('DOMContentLoaded', async () => {
@@ -521,21 +175,33 @@
 
         async function loadReportData(id) {
             try {
-                const response = await fetch(`/api/reports/${id}`);
+                // Ensure the URL is correctly formed and accessible
+                const apiUrl = `/api/reports/${id}`;
+                console.log('Fetching report from:', apiUrl); // Log the full API URL
+
+                const response = await fetch(apiUrl);
+                
                 if (!response.ok) {
+                    // Log detailed error information from the server response
+                    const errorText = await response.text(); // Get response body as text
+                    console.error(`HTTP error! Status: ${response.status}, Status Text: ${response.statusText}, Response Body: ${errorText}`);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                
                 currentReport = await response.json();
+                console.log('Report data loaded successfully:', currentReport); // Log the loaded data
+                
                 renderReportView(currentReport);
                 document.getElementById('loadingSection').style.display = 'none';
                 document.getElementById('reportContent').style.display = 'block';
             } catch (error) {
                 console.error('Error loading report:', error);
                 document.getElementById('loadingSection').innerHTML = `
-                    <div style="color: #dc3545;">
+                    <div class="empty-state">
+                        <span class="icon">⚠️</span>
                         <h3>Error Loading Report</h3>
-                        <p>Failed to load report data. Please try again.</p>
-                        <a href="/" class="export-btn" style="margin-top: 20px; display: inline-block;">← Back to Dashboard</a>
+                        <p>Failed to load report data. Please check the console for more details.</p>
+                        <a href="/" class="action-btn" style="margin-top: 1rem;">← Back to Dashboard</a>
                     </div>
                 `;
             }
@@ -558,14 +224,11 @@
             // Render charts and tables
             renderUserStoriesView(report);
             renderTestCasesView(report);
-            renderIssuesView(report);
+            renderIssuesView(report); // This function now handles both priority and status
             renderEnhancementsView(report);
             
             // Render additional sections
             renderAdditionalInfo(report);
-            renderEvaluationInfo(report);
-            renderProjectEvaluationInfo(report);
-            renderCustomFields(report);
             renderQANotes(report);
         }
 
@@ -589,6 +252,10 @@
                     <div class="info-value">v${report.reportVersion || '1.0'}</div>
                 </div>
                 <div class="info-item">
+                    <div class="info-label">Release Number</div>
+                    <div class="info-value">${report.releaseNumber || 'N/A'}</div>
+                </div>
+                <div class="info-item">
                     <div class="info-label">Cycle Number</div>
                     <div class="info-value">${report.cycleNumber || 'N/A'}</div>
                 </div>
@@ -602,17 +269,15 @@
         function renderTestSummary(report) {
             const testSummaryContent = document.getElementById('testSummaryContent');
             testSummaryContent.innerHTML = `
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">Testing Status</div>
-                        <div class="info-value">
-                            <span class="status-badge status-${getStatusClass(report.testingStatus)}">${getStatusText(report.testingStatus)}</span>
-                        </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <div class="info-label">Testing Status</div>
+                    <div class="info-value">
+                        <span class="status-badge status-${getStatusClass(report.testingStatus)}">${getStatusText(report.testingStatus)}</span>
                     </div>
-                    <div class="info-item" style="grid-column: 1 / -1;">
-                        <div class="info-label">Test Summary</div>
-                        <div class="info-value">${report.testSummary || 'No summary provided'}</div>
-                    </div>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <div class="info-label">Test Summary</div>
+                    <div class="info-value">${report.testSummary || 'No summary provided'}</div>
                 </div>
             `;
         }
@@ -636,14 +301,6 @@
                     <div class="info-label">Total Enhancements</div>
                     <div class="info-value metric-highlight">${report.totalEnhancements || 0}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Evaluation Score</div>
-                    <div class="info-value metric-highlight">${report.evaluationTotalScore || '0.0'}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Project Score</div>
-                    <div class="info-value metric-highlight">${report.projectEvaluationTotalScore || '0.0'}</div>
-                </div>
             `;
         }
 
@@ -660,7 +317,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr style="background: #f0f8ff; font-weight: bold;">
+                    <tr>
                         <td><strong>Total User Stories</strong></td>
                         <td>${total}</td>
                         <td class="percentage-cell">100%</td>
@@ -703,7 +360,7 @@
                 </tbody>
             `;
 
-            // Create chart
+            // Create chart with more vibrant colors
             const ctx = document.getElementById('userStoriesViewChart').getContext('2d');
             if (viewCharts.userStories) viewCharts.userStories.destroy();
             
@@ -721,9 +378,17 @@
                             report.deferredUserStories || 0,
                             report.notTestableUserStories || 0
                         ],
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'],
+                        backgroundColor: [
+                            '#4CAF50', // Green - Passed
+                            '#FFC107', // Amber - Passed with Issues
+                            '#F44336', // Red - Failed
+                            '#9E9E9E', // Grey - Blocked
+                            '#2196F3', // Blue - Cancelled
+                            '#673AB7', // Deep Purple - Deferred
+                            '#00BCD4'  // Cyan - Not Testable
+                        ],
                         borderWidth: 3,
-                        borderColor: '#fff'
+                        borderColor: 'var(--surface)'
                     }]
                 },
                 options: getViewChartOptions()
@@ -743,7 +408,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr style="background: #f0f8ff; font-weight: bold;">
+                    <tr>
                         <td><strong>Total Test Cases</strong></td>
                         <td>${total}</td>
                         <td class="percentage-cell">100%</td>
@@ -786,7 +451,7 @@
                 </tbody>
             `;
 
-            // Create chart
+            // Create chart with more vibrant colors
             const ctx = document.getElementById('testCasesViewChart').getContext('2d');
             if (viewCharts.testCases) viewCharts.testCases.destroy();
             
@@ -804,9 +469,17 @@
                             report.deferredTestCases || 0,
                             report.notTestableTestCases || 0
                         ],
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'],
+                        backgroundColor: [
+                            '#8BC34A', // Light Green - Passed
+                            '#FFEB3B', // Yellow - Passed with Issues
+                            '#E91E63', // Pink - Failed
+                            '#607D8B', // Blue Grey - Blocked
+                            '#9C27B0', // Purple - Cancelled
+                            '#FF5722', // Deep Orange - Deferred
+                            '#795548'  // Brown - Not Testable
+                        ],
                         borderWidth: 3,
-                        borderColor: '#fff'
+                        borderColor: 'var(--surface)'
                     }]
                 },
                 options: getViewChartOptions()
@@ -828,7 +501,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr style="background: #f0f8ff; font-weight: bold;">
+                    <tr>
                         <td><strong>Total Issues</strong></td>
                         <td>${total}</td>
                         <td class="percentage-cell">100%</td>
@@ -894,12 +567,12 @@
                 </tbody>
             `;
 
-            // Priority chart
+            // Priority chart with more vibrant colors
             const priorityCtx = document.getElementById('issuesPriorityViewChart').getContext('2d');
             if (viewCharts.issuesPriority) viewCharts.issuesPriority.destroy();
             
             viewCharts.issuesPriority = new Chart(priorityCtx, {
-                type: 'doughnut',
+                type: 'doughnut', // Changed to doughnut for consistency with other charts
                 data: {
                     labels: ['Critical', 'High', 'Medium', 'Low'],
                     datasets: [{
@@ -909,20 +582,25 @@
                             report.mediumIssues || 0,
                             report.lowIssues || 0
                         ],
-                        backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#28a745'],
+                        backgroundColor: [
+                            '#F44336', // Red - Critical
+                            '#FF9800', // Orange - High
+                            '#FFC107', // Amber - Medium
+                            '#4CAF50'  // Green - Low
+                        ],
                         borderWidth: 3,
-                        borderColor: '#fff'
+                        borderColor: 'var(--surface)'
                     }]
                 },
                 options: getViewChartOptions()
             });
 
-            // Status chart
+            // Status chart with more vibrant colors
             const statusCtx = document.getElementById('issuesStatusViewChart').getContext('2d');
             if (viewCharts.issuesStatus) viewCharts.issuesStatus.destroy();
             
             viewCharts.issuesStatus = new Chart(statusCtx, {
-                type: 'doughnut',
+                type: 'doughnut', // Changed to doughnut for consistency with other charts
                 data: {
                     labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'],
                     datasets: [{
@@ -933,9 +611,15 @@
                             report.reopenedIssues || 0,
                             report.deferredIssues || 0
                         ],
-                        backgroundColor: ['#17a2b8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1'],
+                        backgroundColor: [
+                            '#2196F3', // Blue - New
+                            '#4CAF50', // Green - Fixed
+                            '#E91E63', // Pink - Not Fixed
+                            '#FF5722', // Deep Orange - Re-opened
+                            '#673AB7'  // Deep Purple - Deferred
+                        ],
                         borderWidth: 3,
-                        borderColor: '#fff'
+                        borderColor: 'var(--surface)'
                     }]
                 },
                 options: getViewChartOptions()
@@ -955,7 +639,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr style="background: #f0f8ff; font-weight: bold;">
+                    <tr>
                         <td><strong>Total Enhancements</strong></td>
                         <td>${total}</td>
                         <td class="percentage-cell">100%</td>
@@ -978,7 +662,7 @@
                 </tbody>
             `;
 
-            // Create chart
+            // Create chart with more vibrant colors
             const ctx = document.getElementById('enhancementsViewChart').getContext('2d');
             if (viewCharts.enhancements) viewCharts.enhancements.destroy();
             
@@ -992,9 +676,13 @@
                             report.implementedEnhancements || 0,
                             report.existsEnhancements || 0
                         ],
-                        backgroundColor: ['#17a2b8', '#28a745', '#6c757d'],
+                        backgroundColor: [
+                            '#00BCD4', // Cyan - New
+                            '#4CAF50', // Green - Implemented
+                            '#9E9E9E'  // Grey - Exists
+                        ],
                         borderWidth: 3,
-                        borderColor: '#fff'
+                        borderColor: 'var(--surface)'
                     }]
                 },
                 options: getViewChartOptions()
@@ -1008,7 +696,7 @@
             // Requests
             if (report.requestData && report.requestData.length > 0) {
                 content += `
-                    <h3 style="margin-bottom: 15px; color: #333;">Request Information</h3>
+                    <h3 class="section-title" style="font-size: 1.25rem; margin-top: 1.5rem;">📋 Request Information</h3>
                     <div class="dynamic-list">
                         ${report.requestData.map(req => `
                             <div class="dynamic-item">
@@ -1023,7 +711,7 @@
             // Builds
             if (report.buildData && report.buildData.length > 0) {
                 content += `
-                    <h3 style="margin-bottom: 15px; color: #333; margin-top: 30px;">Build Information</h3>
+                    <h3 class="section-title" style="font-size: 1.25rem; margin-top: 1.5rem;">🏗️ Build Information</h3>
                     <div class="dynamic-list">
                         ${report.buildData.map(build => `
                             <div class="dynamic-item">
@@ -1040,7 +728,7 @@
             // Testers
             if (report.testerData && report.testerData.length > 0) {
                 content += `
-                    <h3 style="margin-bottom: 15px; color: #333; margin-top: 30px;">Tester Information</h3>
+                    <h3 class="section-title" style="font-size: 1.25rem; margin-top: 1.5rem;">🧪 Tester Information</h3>
                     <div class="dynamic-list">
                         ${report.testerData.map(tester => `
                             <div class="dynamic-item">
@@ -1052,123 +740,19 @@
             }
 
             if (!content) {
-                content = '<div class="empty-state">No additional information provided.</div>';
+                content = '<div class="empty-state"><h3>No Additional Information Provided</h3><p>This report does not contain any extra details.</p></div>';
             }
 
             section.innerHTML = `<h2 class="section-title">Additional Information</h2>${content}`;
         }
 
-        function renderEvaluationInfo(report) {
-            const section = document.getElementById('evaluationSection');
-            let content = '';
-
-            if (report.evaluationData && Object.keys(report.evaluationData).length > 0) {
-                content = `
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">Total Evaluation Score</div>
-                            <div class="info-value metric-highlight">${report.evaluationTotalScore || '0.0'}</div>
-                        </div>
-                    </div>
-                    <table class="data-table" style="margin-top: 20px;">
-                        <thead>
-                            <tr>
-                                <th>Criteria</th>
-                                <th>Score</th>
-                                <th>Weight</th>
-                                <th>Reason</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${Object.entries(report.evaluationData).filter(([key]) => key.includes('_score')).map(([key, value]) => {
-                                const baseName = key.replace('eval_', '').replace('_score', '');
-                                const weightKey = `eval_${baseName}_weight`;
-                                const reasonKey = `eval_${baseName}_reason`;
-                                return `
-                                    <tr>
-                                        <td>${baseName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
-                                        <td>${value || 'N/A'}</td>
-                                        <td>${report.evaluationData[weightKey] || 'N/A'}</td>
-                                        <td>${report.evaluationData[reasonKey] || 'N/A'}</td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                `;
-            } else {
-                content = '<div class="empty-state">No evaluation data provided.</div>';
-            }
-
-            section.innerHTML = `<h2 class="section-title">Evaluation Results</h2>${content}`;
-        }
-
-        function renderProjectEvaluationInfo(report) {
-            const section = document.getElementById('projectEvaluationSection');
-            let content = '';
-
-            if (report.projectEvaluationData && Object.keys(report.projectEvaluationData).length > 0) {
-                content = `
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">Total Project Score</div>
-                            <div class="info-value metric-highlight">${report.projectEvaluationTotalScore || '0.0'}</div>
-                        </div>
-                    </div>
-                    <table class="data-table" style="margin-top: 20px;">
-                        <thead>
-                            <tr>
-                                <th>Criteria</th>
-                                <th>Score</th>
-                                <th>Reason</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${Object.entries(report.projectEvaluationData).filter(([key]) => key.includes('_score')).map(([key, value]) => {
-                                const baseName = key.replace('proj_', '').replace('_score', '');
-                                const reasonKey = `proj_${baseName}_reason`;
-                                return `
-                                    <tr>
-                                        <td>${baseName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
-                                        <td>${value || 'N/A'}</td>
-                                        <td>${report.projectEvaluationData[reasonKey] || 'N/A'}</td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                `;
-            } else {
-                content = '<div class="empty-state">No project evaluation data provided.</div>';
-            }
-
-            section.innerHTML = `<h2 class="section-title">Project Evaluation Results</h2>${content}`;
-        }
-
-        function renderCustomFields(report) {
-            const section = document.getElementById('customFieldsSection');
-            
-            if (report.customFields && Object.keys(report.customFields).length > 0) {
-                const content = `
-                    <div id="customFieldsContent">
-                        ${Object.entries(report.customFields).map(([key, value]) => `
-                            <div class="custom-field-item">
-                                <div class="custom-field-name">${key.replace(/custom_/g, '').replace(/_/g, ' ')}</div>
-                                <div class="custom-field-value">${Array.isArray(value) ? value.join(', ') : (value || 'N/A')}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                section.innerHTML = `<h2 class="section-title">Custom Fields</h2>${content}`;
-                section.style.display = 'block';
-            } else {
-                section.style.display = 'none';
-            }
-        }
-
         function renderQANotes(report) {
             const qaNotesContent = document.getElementById('qaNotesContent');
-            qaNotesContent.textContent = report.qaNotesText || 'No additional notes provided.';
+            if (report.qaNotesText) {
+                qaNotesContent.textContent = report.qaNotesText;
+            } else {
+                qaNotesContent.innerHTML = `<div class="empty-state" style="border: none; padding: 0; background: none;"><h3>No QA Notes</h3><p>No specific QA notes were provided for this report.</p></div>`;
+            }
         }
 
         function getViewChartOptions() {
@@ -1178,7 +762,12 @@
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { padding: 15, usePointStyle: true, font: { size: 10 } }
+                        labels: { 
+                            padding: 15, 
+                            usePointStyle: true, 
+                            font: { size: 10 },
+                            color: '#f1f5f9' // Directly set to --text-primary hex value for Chart.js visibility
+                        }
                     },
                     tooltip: {
                         callbacks: {
@@ -1188,6 +777,59 @@
                                 const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
                                 return `${context.label}: ${value} (${percentage}%)`;
                             }
+                        },
+                        titleColor: '#f1f5f9', // Directly set to --text-primary hex value
+                        bodyColor: '#f1f5f9',   // Directly set to --text-primary hex value
+                        backgroundColor: 'var(--surface)',   // Consistent tooltip background
+                        borderColor: 'var(--border)',        // Consistent tooltip border
+                        borderWidth: 1
+                    }
+                }
+            };
+        }
+
+        function getBarChartOptions(yAxisLabel) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y}`;
+                            }
+                        },
+                        titleColor: '#f1f5f9',
+                        bodyColor: '#f1f5f9',
+                        backgroundColor: 'var(--surface)',
+                        borderColor: 'var(--border)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: 'var(--text-secondary)'
+                        },
+                        grid: {
+                            color: 'rgba(51, 65, 85, 0.5)'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: 'var(--text-secondary)'
+                        },
+                        grid: {
+                            color: 'rgba(51, 65, 85, 0.5)'
+                        },
+                        title: {
+                            display: true,
+                            text: yAxisLabel,
+                            color: 'var(--text-primary)'
                         }
                     }
                 }
@@ -1205,7 +847,7 @@
             const map = { 
                 'passed': 'completed', 
                 'passed-with-issues': 'in-progress',
-                'failed': 'pending',
+                'failed': 'pending', // Consider a 'failed' specific class if needed
                 'blocked': 'pending',
                 'cancelled': 'pending',
                 'deferred': 'pending',
@@ -1227,448 +869,362 @@
             return map[status] || 'Pending';
         }
 
-async function exportCurrentReportAsPdf() {
-    if (!currentReport) return;
-    
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    // Helper function to add charts as images
-    async function addChartToPDF(chartId, yPosition, title, width = 180, height = 100) {
-        const canvas = document.getElementById(chartId);
-        if (canvas && viewCharts[chartId.replace('ViewChart', '').replace('View', '')]) {
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'bold');
-            doc.text(title, 10, yPosition);
+        async function exportCurrentReportAsPdf() {
+            if (!currentReport) {
+                // Use a custom message box instead of alert
+                showCustomMessageBox('Report data not loaded yet.');
+                return;
+            }
             
-            const imgData = canvas.toDataURL('image/png');
-            doc.addImage(imgData, 'PNG', 10, yPosition + 5, width, height);
-            return yPosition + height + 15;
-        }
-        return yPosition;
-    }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
 
-    // Helper function to check if we need a new page
-    function checkPageBreak(currentY, requiredSpace = 40) {
-        if (currentY + requiredSpace > 270) {
+            // Helper function to add charts as images
+            async function addChartToPDF(chartId, yPosition, title, width = 180, height = 100) {
+                const canvas = document.getElementById(chartId);
+                if (canvas && viewCharts[chartId.replace('ViewChart', '').replace('View', '')]) {
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(title, 10, yPosition);
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    doc.addImage(imgData, 'PNG', 10, yPosition + 5, width, height);
+                    return yPosition + height + 15;
+                }
+                return yPosition;
+            }
+
+            // Helper function to check if we need a new page
+            function checkPageBreak(currentY, requiredSpace = 40) {
+                if (currentY + requiredSpace > 270) {
+                    doc.addPage();
+                    return 20;
+                }
+                return currentY;
+            }
+
+            let yPos = 20;
+
+            // Title and Header
+            doc.setFontSize(20);
+            doc.setFont(undefined, 'bold');
+            doc.text('QA Testing Report', 105, yPos, { align: 'center' });
+            yPos += 15;
+
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${currentReport.portfolioName} - Sprint ${currentReport.sprintNumber}`, 105, yPos, { align: 'center' });
+            yPos += 8;
+            doc.text(`${currentReport.projectName} | Version ${currentReport.reportVersion} | ${formatDate(currentReport.reportDate)}`, 105, yPos, { align: 'center' });
+            yPos += 20;
+
+            // Cover Information Section
+            yPos = checkPageBreak(yPos, 60);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('General Details', 10, yPos);
+            yPos += 10;
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            const coverData = [
+                ['Portfolio Name', currentReport.portfolioName || 'N/A'],
+                ['Project Name', currentReport.projectName || 'N/A'],
+                ['Sprint Number', `#${currentReport.sprintNumber || 'N/A'}`],
+                ['Report Version', `v${currentReport.reportVersion || '1.0'}`],
+                ['Release Number', currentReport.releaseNumber || 'N/A'],
+                ['Cycle Number', currentReport.cycleNumber || 'N/A'],
+                ['Report Date', formatDate(currentReport.reportDate)],
+                ['Testing Status', getStatusText(currentReport.testingStatus)]
+            ];
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['Field', 'Value']],
+                body: coverData,
+                styles: { fontSize: 9, cellPadding: 3 },
+                headStyles: { fillColor: [59, 130, 246], textColor: 255 }, // Using primary color
+                columnStyles: { 0: { fontStyle: 'bold' } }
+            });
+            yPos = doc.lastAutoTable.finalY + 15;
+
+            // Test Summary
+            if (currentReport.testSummary) {
+                yPos = checkPageBreak(yPos, 40);
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('Test Summary & Status', 10, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                const summaryText = doc.splitTextToSize(currentReport.testSummary, 190);
+                doc.text(summaryText, 10, yPos);
+                yPos += summaryText.length * 6 + 15;
+            }
+
+            // Testing Metrics Overview
+            yPos = checkPageBreak(yPos, 50);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Testing Metrics Overview', 10, yPos);
+            yPos += 10;
+
+            const metricsData = [
+                ['Total User Stories', currentReport.totalUserStories || 0],
+                ['Total Test Cases', currentReport.totalTestCases || 0],
+                ['Total Issues', currentReport.totalIssues || 0],
+                ['Total Enhancements', currentReport.totalEnhancements || 0],
+            ];
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['Metric', 'Value']],
+                body: metricsData,
+                styles: { fontSize: 9, cellPadding: 3 },
+                headStyles: { fillColor: [59, 130, 246], textColor: 255 }, // Using primary color
+                columnStyles: { 0: { fontStyle: 'bold' } }
+            });
+            yPos = doc.lastAutoTable.finalY + 20;
+
+            // User Stories Analysis with Chart
+            yPos = checkPageBreak(yPos, 130);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('User Stories Analysis', 10, yPos);
+            yPos += 15;
+
+            // User Stories Table
+            const total = currentReport.totalUserStories || 0;
+            const userStoriesData = [
+                ['Total User Stories', total, '100%'],
+                ['Passed', currentReport.passedUserStories || 0, `${total ? Math.round(((currentReport.passedUserStories || 0) / total) * 100) : 0}%`],
+                ['Passed with Issues', currentReport.passedWithIssuesUserStories || 0, `${total ? Math.round(((currentReport.passedWithIssuesUserStories || 0) / total) * 100) : 0}%`],
+                ['Failed', currentReport.failedUserStories || 0, `${total ? Math.round(((currentReport.failedUserStories || 0) / total) * 100) : 0}%`],
+                ['Blocked', currentReport.blockedUserStories || 0, `${total ? Math.round(((currentReport.blockedUserStories || 0) / total) * 100) : 0}%`],
+                ['Cancelled', currentReport.cancelledUserStories || 0, `${total ? Math.round(((currentReport.cancelledUserStories || 0) / total) * 100) : 0}%`],
+                ['Deferred', currentReport.deferredUserStories || 0, `${total ? Math.round(((currentReport.deferredUserStories || 0) / total) * 100) : 0}%`],
+                ['Not Testable', currentReport.notTestableUserStories || 0, `${total ? Math.round(((currentReport.notTestableUserStories || 0) / total) * 100) : 0}%`]
+            ];
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['Status', 'Count', 'Percentage']],
+                body: userStoriesData,
+                styles: { fontSize: 8, cellPadding: 2 },
+                headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
+            });
+            yPos = doc.lastAutoTable.finalY + 10;
+
+            // Add User Stories Chart
+            yPos = await addChartToPDF('userStoriesViewChart', yPos, 'User Stories Distribution Chart');
+
+            // Test Cases Analysis with Chart
             doc.addPage();
-            return 20;
-        }
-        return currentY;
-    }
-
-    let yPos = 20;
-
-    // Title and Header
-    doc.setFontSize(20);
-    doc.setFont(undefined, 'bold');
-    doc.text('QA Testing Report', 105, yPos, { align: 'center' });
-    yPos += 15;
-
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'normal');
-    doc.text(`${currentReport.portfolioName} - Sprint ${currentReport.sprintNumber}`, 105, yPos, { align: 'center' });
-    yPos += 8;
-    doc.text(`${currentReport.projectName} | Version ${currentReport.reportVersion} | ${formatDate(currentReport.reportDate)}`, 105, yPos, { align: 'center' });
-    yPos += 20;
-
-    // Cover Information Section
-    yPos = checkPageBreak(yPos, 60);
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text('General Details', 10, yPos);
-    yPos += 10;
-
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    const coverData = [
-        ['Portfolio Name', currentReport.portfolioName || 'N/A'],
-        ['Project Name', currentReport.projectName || 'N/A'],
-        ['Sprint Number', `#${currentReport.sprintNumber || 'N/A'}`],
-        ['Report Version', `v${currentReport.reportVersion || '1.0'}`],
-        ['Release Number', currentReport.releaseNumber || 'N/A'],
-        ['Cycle Number', currentReport.cycleNumber || 'N/A'],
-        ['Report Date', formatDate(currentReport.reportDate)],
-        ['Testing Status', getStatusText(currentReport.testingStatus)]
-    ];
-
-    doc.autoTable({
-        startY: yPos,
-        head: [['Field', 'Value']],
-        body: coverData,
-        styles: { fontSize: 9, cellPadding: 3 },
-        headStyles: { fillColor: [79, 172, 254], textColor: 255 },
-        columnStyles: { 0: { fontStyle: 'bold' } }
-    });
-    yPos = doc.lastAutoTable.finalY + 15;
-
-    // Test Summary
-    if (currentReport.testSummary) {
-        yPos = checkPageBreak(yPos, 40);
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Test Summary & Status', 10, yPos);
-        yPos += 10;
-        
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        const summaryText = doc.splitTextToSize(currentReport.testSummary, 190);
-        doc.text(summaryText, 10, yPos);
-        yPos += summaryText.length * 6 + 15;
-    }
-
-    // Testing Metrics Overview
-    yPos = checkPageBreak(yPos, 50);
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text('Testing Metrics Overview', 10, yPos);
-    yPos += 10;
-
-    const metricsData = [
-        ['Total User Stories', currentReport.totalUserStories || 0],
-        ['Total Test Cases', currentReport.totalTestCases || 0],
-        ['Total Issues', currentReport.totalIssues || 0],
-        ['Total Enhancements', currentReport.totalEnhancements || 0],
-        ['Evaluation Score', currentReport.evaluationTotalScore || '0.0'],
-        ['Project Score', currentReport.projectEvaluationTotalScore || '0.0']
-    ];
-
-    doc.autoTable({
-        startY: yPos,
-        head: [['Metric', 'Value']],
-        body: metricsData,
-        styles: { fontSize: 9, cellPadding: 3 },
-        headStyles: { fillColor: [79, 172, 254], textColor: 255 },
-        columnStyles: { 0: { fontStyle: 'bold' } }
-    });
-    yPos = doc.lastAutoTable.finalY + 20;
-
-    // User Stories Analysis with Chart
-    yPos = checkPageBreak(yPos, 130);
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text('User Stories Analysis', 10, yPos);
-    yPos += 15;
-
-    // User Stories Table
-    const total = currentReport.totalUserStories || 0;
-    const userStoriesData = [
-        ['Total User Stories', total, '100%'],
-        ['Passed', currentReport.passedUserStories || 0, `${total ? Math.round(((currentReport.passedUserStories || 0) / total) * 100) : 0}%`],
-        ['Passed with Issues', currentReport.passedWithIssuesUserStories || 0, `${total ? Math.round(((currentReport.passedWithIssuesUserStories || 0) / total) * 100) : 0}%`],
-        ['Failed', currentReport.failedUserStories || 0, `${total ? Math.round(((currentReport.failedUserStories || 0) / total) * 100) : 0}%`],
-        ['Blocked', currentReport.blockedUserStories || 0, `${total ? Math.round(((currentReport.blockedUserStories || 0) / total) * 100) : 0}%`],
-        ['Cancelled', currentReport.cancelledUserStories || 0, `${total ? Math.round(((currentReport.cancelledUserStories || 0) / total) * 100) : 0}%`],
-        ['Deferred', currentReport.deferredUserStories || 0, `${total ? Math.round(((currentReport.deferredUserStories || 0) / total) * 100) : 0}%`],
-        ['Not Testable', currentReport.notTestableUserStories || 0, `${total ? Math.round(((currentReport.notTestableUserStories || 0) / total) * 100) : 0}%`]
-    ];
-
-    doc.autoTable({
-        startY: yPos,
-        head: [['Status', 'Count', 'Percentage']],
-        body: userStoriesData,
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [40, 167, 69], textColor: 255 }
-    });
-    yPos = doc.lastAutoTable.finalY + 10;
-
-    // Add User Stories Chart
-    yPos = await addChartToPDF('userStoriesViewChart', yPos, 'User Stories Distribution Chart');
-
-    // Test Cases Analysis with Chart
-    doc.addPage();
-    yPos = 20;
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text('Test Cases Analysis', 10, yPos);
-    yPos += 15;
-
-    const testCasesTotal = currentReport.totalTestCases || 0;
-    const testCasesData = [
-        ['Total Test Cases', testCasesTotal, '100%'],
-        ['Passed', currentReport.passedTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.passedTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-        ['Passed with Issues', currentReport.passedWithIssuesTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.passedWithIssuesTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-        ['Failed', currentReport.failedTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.failedTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-        ['Blocked', currentReport.blockedTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.blockedTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-        ['Cancelled', currentReport.cancelledTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.cancelledTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-        ['Deferred', currentReport.deferredTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.deferredTestCases || 0) / testCasesTotal) * 100) : 0}%`],
-        ['Not Testable', currentReport.notTestableTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.notTestableTestCases || 0) / testCasesTotal) * 100) : 0}%`]
-    ];
-
-    doc.autoTable({
-        startY: yPos,
-        head: [['Status', 'Count', 'Percentage']],
-        body: testCasesData,
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [40, 167, 69], textColor: 255 }
-    });
-    yPos = doc.lastAutoTable.finalY + 10;
-
-    // Add Test Cases Chart
-    yPos = await addChartToPDF('testCasesViewChart', yPos, 'Test Cases Distribution Chart');
-
-    // Issues Analysis with Charts
-    doc.addPage();
-    yPos = 20;
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text('Issues Analysis', 10, yPos);
-    yPos += 15;
-
-    // Issues by Priority
-    const issuesTotal = currentReport.totalIssues || 0;
-    const issuesPriorityData = [
-        ['Total Issues', issuesTotal, '100%'],
-        ['Critical', currentReport.criticalIssues || 0, `${issuesTotal ? Math.round(((currentReport.criticalIssues || 0) / issuesTotal) * 100) : 0}%`],
-        ['High', currentReport.highIssues || 0, `${issuesTotal ? Math.round(((currentReport.highIssues || 0) / issuesTotal) * 100) : 0}%`],
-        ['Medium', currentReport.mediumIssues || 0, `${issuesTotal ? Math.round(((currentReport.mediumIssues || 0) / issuesTotal) * 100) : 0}%`],
-        ['Low', currentReport.lowIssues || 0, `${issuesTotal ? Math.round(((currentReport.lowIssues || 0) / issuesTotal) * 100) : 0}%`]
-    ];
-
-    doc.autoTable({
-        startY: yPos,
-        head: [['Priority', 'Count', 'Percentage']],
-        body: issuesPriorityData,
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [220, 53, 69], textColor: 255 }
-    });
-    yPos = doc.lastAutoTable.finalY + 10;
-
-    // Add Issues Priority Chart
-    yPos = await addChartToPDF('issuesPriorityViewChart', yPos, 'Issues by Priority Chart', 180, 80);
-
-    // Issues by Status
-    yPos = checkPageBreak(yPos, 100);
-    const issuesStatusData = [
-        ['New', currentReport.newIssues || 0, `${issuesTotal ? Math.round(((currentReport.newIssues || 0) / issuesTotal) * 100) : 0}%`],
-        ['Fixed', currentReport.fixedIssues || 0, `${issuesTotal ? Math.round(((currentReport.fixedIssues || 0) / issuesTotal) * 100) : 0}%`],
-        ['Not Fixed', currentReport.notFixedIssues || 0, `${issuesTotal ? Math.round(((currentReport.notFixedIssues || 0) / issuesTotal) * 100) : 0}%`],
-        ['Re-opened', currentReport.reopenedIssues || 0, `${issuesTotal ? Math.round(((currentReport.reopenedIssues || 0) / issuesTotal) * 100) : 0}%`],
-        ['Deferred', currentReport.deferredIssues || 0, `${issuesTotal ? Math.round(((currentReport.deferredIssues || 0) / issuesTotal) * 100) : 0}%`]
-    ];
-
-    doc.autoTable({
-        startY: yPos,
-        head: [['Status', 'Count', 'Percentage']],
-        body: issuesStatusData,
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [23, 162, 184], textColor: 255 }
-    });
-    yPos = doc.lastAutoTable.finalY + 10;
-
-    // Add Issues Status Chart
-    yPos = await addChartToPDF('issuesStatusViewChart', yPos, 'Issues by Status Chart', 180, 80);
-
-    // Enhancements Analysis with Chart
-    yPos = checkPageBreak(yPos, 130);
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text('Enhancements Analysis', 10, yPos);
-    yPos += 15;
-
-    const enhancementsTotal = currentReport.totalEnhancements || 0;
-    const enhancementsData = [
-        ['Total Enhancements', enhancementsTotal, '100%'],
-        ['New', currentReport.newEnhancements || 0, `${enhancementsTotal ? Math.round(((currentReport.newEnhancements || 0) / enhancementsTotal) * 100) : 0}%`],
-        ['Implemented', currentReport.implementedEnhancements || 0, `${enhancementsTotal ? Math.round(((currentReport.implementedEnhancements || 0) / enhancementsTotal) * 100) : 0}%`],
-        ['Exists', currentReport.existsEnhancements || 0, `${enhancementsTotal ? Math.round(((currentReport.existsEnhancements || 0) / enhancementsTotal) * 100) : 0}%`]
-    ];
-
-    doc.autoTable({
-        startY: yPos,
-        head: [['Status', 'Count', 'Percentage']],
-        body: enhancementsData,
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [111, 66, 193], textColor: 255 }
-    });
-    yPos = doc.lastAutoTable.finalY + 10;
-
-    // Add Enhancements Chart
-    yPos = await addChartToPDF('enhancementsViewChart', yPos, 'Enhancements Distribution Chart');
-
-    // Additional Information
-    if ((currentReport.requestData && currentReport.requestData.length > 0) ||
-        (currentReport.buildData && currentReport.buildData.length > 0) ||
-        (currentReport.testerData && currentReport.testerData.length > 0)) {
-        
-        doc.addPage();
-        yPos = 20;
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Additional Information', 10, yPos);
-        yPos += 15;
-
-        // Requests
-        if (currentReport.requestData && currentReport.requestData.length > 0) {
-            doc.setFontSize(12);
+            yPos = 20;
+            doc.setFontSize(16);
             doc.setFont(undefined, 'bold');
-            doc.text('Request Information', 10, yPos);
-            yPos += 8;
+            doc.text('Test Cases Analysis', 10, yPos);
+            yPos += 15;
 
-            const requestsData = currentReport.requestData.map(req => [req.id, req.url]);
+            const testCasesTotal = currentReport.totalTestCases || 0;
+            const testCasesData = [
+                ['Total Test Cases', testCasesTotal, '100%'],
+                ['Passed', currentReport.passedTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.passedTestCases || 0) / testCasesTotal) * 100) : 0}%`],
+                ['Passed with Issues', currentReport.passedWithIssuesTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.passedWithIssuesTestCases || 0) / testCasesTotal) * 100) : 0}%`],
+                ['Failed', currentReport.failedTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.failedTestCases || 0) / testCasesTotal) * 100) : 0}%`],
+                ['Blocked', currentReport.blockedTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.blockedTestCases || 0) / testCasesTotal) * 100) : 0}%`],
+                ['Cancelled', currentReport.cancelledTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.cancelledTestCases || 0) / testCasesTotal) * 100) : 0}%`],
+                ['Deferred', currentReport.deferredTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.deferredTestCases || 0) / testCasesTotal) * 100) : 0}%`],
+                ['Not Testable', currentReport.notTestableTestCases || 0, `${testCasesTotal ? Math.round(((currentReport.notTestableTestCases || 0) / testCasesTotal) * 100) : 0}%`]
+            ];
+
             doc.autoTable({
                 startY: yPos,
-                head: [['Request ID', 'URL']],
-                body: requestsData,
+                head: [['Status', 'Count', 'Percentage']],
+                body: testCasesData,
                 styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [100, 180, 250], textColor: 255 }
+                headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
             });
-            yPos = doc.lastAutoTable.finalY + 15;
-        }
+            yPos = doc.lastAutoTable.finalY + 10;
 
-        // Builds
-        if (currentReport.buildData && currentReport.buildData.length > 0) {
-            yPos = checkPageBreak(yPos, 40);
-            doc.setFontSize(12);
+            // Add Test Cases Chart
+            yPos = await addChartToPDF('testCasesViewChart', yPos, 'Test Cases Distribution Chart');
+
+            doc.addPage();
+            yPos = 20;
+            doc.setFontSize(16);
             doc.setFont(undefined, 'bold');
-            doc.text('Build Information', 10, yPos);
-            yPos += 8;
+            doc.text('Issues by Priority', 10, yPos);
+            yPos += 15;
 
-            const buildsData = currentReport.buildData.map(build => [build.requestId, build.environment, build.cycles]);
+            const issuesTotal = currentReport.totalIssues || 0;
+            const issuesPriorityData = [
+                ['Total Issues', issuesTotal, '100%'],
+                ['Critical', currentReport.criticalIssues || 0, `${issuesTotal ? Math.round(((currentReport.criticalIssues || 0) / issuesTotal) * 100) : 0}%`],
+                ['High', currentReport.highIssues || 0, `${issuesTotal ? Math.round(((currentReport.highIssues || 0) / issuesTotal) * 100) : 0}%`],
+                ['Medium', currentReport.mediumIssues || 0, `${issuesTotal ? Math.round(((currentReport.mediumIssues || 0) / issuesTotal) * 100) : 0}%`],
+                ['Low', currentReport.lowIssues || 0, `${issuesTotal ? Math.round(((currentReport.lowIssues || 0) / issuesTotal) * 100) : 0}%`]
+            ];
+
             doc.autoTable({
                 startY: yPos,
-                head: [['Request ID', 'Environment', 'Cycles']],
-                body: buildsData,
+                head: [['Priority', 'Count', 'Percentage']],
+                body: issuesPriorityData,
                 styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [100, 180, 250], textColor: 255 }
+                headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
             });
-            yPos = doc.lastAutoTable.finalY + 15;
-        }
+            yPos = doc.lastAutoTable.finalY + 10;
 
-        // Testers
-        if (currentReport.testerData && currentReport.testerData.length > 0) {
-            yPos = checkPageBreak(yPos, 40);
-            doc.setFontSize(12);
+            yPos = await addChartToPDF('issuesPriorityViewChart', yPos, 'Issues by Priority Chart', 180, 80);
+
+            doc.addPage();
+            yPos = 20;
+            doc.setFontSize(16);
             doc.setFont(undefined, 'bold');
-            doc.text('Testers', 10, yPos);
-            yPos += 8;
+            doc.text('Issues by Status', 10, yPos);
+            yPos += 15;
 
-            const testersData = currentReport.testerData.map(tester => [tester.name]);
+            const issuesStatusData = [
+                ['New', currentReport.newIssues || 0, `${issuesTotal ? Math.round(((currentReport.newIssues || 0) / issuesTotal) * 100) : 0}%`],
+                ['Fixed', currentReport.fixedIssues || 0, `${issuesTotal ? Math.round(((currentReport.fixedIssues || 0) / issuesTotal) * 100) : 0}%`],
+                ['Not Fixed', currentReport.notFixedIssues || 0, `${issuesTotal ? Math.round(((currentReport.notFixedIssues || 0) / issuesTotal) * 100) : 0}%`],
+                ['Re-opened', currentReport.reopenedIssues || 0, `${issuesTotal ? Math.round(((currentReport.reopenedIssues || 0) / issuesTotal) * 100) : 0}%`],
+                ['Deferred', currentReport.deferredIssues || 0, `${issuesTotal ? Math.round(((currentReport.deferredIssues || 0) / issuesTotal) * 100) : 0}%`]
+            ];
+
             doc.autoTable({
                 startY: yPos,
-                head: [['Tester Name']],
-                body: testersData,
+                head: [['Status', 'Count', 'Percentage']],
+                body: issuesStatusData,
                 styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [100, 180, 250], textColor: 255 }
+                headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
             });
-            yPos = doc.lastAutoTable.finalY + 15;
-        }
-    }
+            yPos = doc.lastAutoTable.finalY + 10;
 
-    // Evaluation Results
-    if (currentReport.evaluationData && Object.keys(currentReport.evaluationData).length > 0) {
-        yPos = checkPageBreak(yPos, 60);
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Evaluation Results', 10, yPos);
-        yPos += 15;
+            yPos = await addChartToPDF('issuesStatusViewChart', yPos, 'Issues by Status Chart', 180, 80);
 
-        doc.setFontSize(12);
-        doc.text(`Total Evaluation Score: ${currentReport.evaluationTotalScore || '0.0'}`, 10, yPos);
-        yPos += 15;
+            // Enhancements Analysis with Chart
+            yPos = checkPageBreak(yPos, 130);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Enhancements Analysis', 10, yPos);
+            yPos += 15;
 
-        const evalData = Object.entries(currentReport.evaluationData)
-            .filter(([key]) => key.includes('_score'))
-            .map(([key, value]) => {
-                const baseName = key.replace('eval_', '').replace('_score', '');
-                const weightKey = `eval_${baseName}_weight`;
-                return [
-                    baseName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    value || 'N/A',
-                    currentReport.evaluationData[weightKey] || 'N/A'
-                ];
-            });
+            const enhancementsTotal = currentReport.totalEnhancements || 0;
+            const enhancementsData = [
+                ['Total Enhancements', enhancementsTotal, '100%'],
+                ['New', currentReport.newEnhancements || 0, `${enhancementsTotal ? Math.round(((currentReport.newEnhancements || 0) / enhancementsTotal) * 100) : 0}%`],
+                ['Implemented', currentReport.implementedEnhancements || 0, `${enhancementsTotal ? Math.round(((currentReport.implementedEnhancements || 0) / enhancementsTotal) * 100) : 0}%`],
+                ['Exists', currentReport.existsEnhancements || 0, `${enhancementsTotal ? Math.round(((currentReport.existsEnhancements || 0) / enhancementsTotal) * 100) : 0}%`]
+            ];
 
-        if (evalData.length > 0) {
             doc.autoTable({
                 startY: yPos,
-                head: [['Criteria', 'Score', 'Weight']],
-                body: evalData,
+                head: [['Status', 'Count', 'Percentage']],
+                body: enhancementsData,
                 styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [79, 172, 254], textColor: 255 }
+                headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
             });
-            yPos = doc.lastAutoTable.finalY + 15;
+            yPos = doc.lastAutoTable.finalY + 10;
+
+            // Add Enhancements Chart
+            yPos = await addChartToPDF('enhancementsViewChart', yPos, 'Enhancements Distribution Chart');
+
+            // Additional Information
+            if ((currentReport.requestData && currentReport.requestData.length > 0) ||
+                (currentReport.buildData && currentReport.buildData.length > 0) ||
+                (currentReport.testerData && currentReport.testerData.length > 0)) {
+                
+                doc.addPage();
+                yPos = 20;
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('Additional Information', 10, yPos);
+                yPos += 15;
+
+                // Requests
+                if (currentReport.requestData && currentReport.requestData.length > 0) {
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Request Information', 10, yPos);
+                    yPos += 8;
+
+                    const requestsData = currentReport.requestData.map(req => [req.id, req.url]);
+                    doc.autoTable({
+                        startY: yPos,
+                        head: [['Request ID', 'URL']],
+                        body: requestsData,
+                        styles: { fontSize: 8, cellPadding: 2 },
+                        headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
+                    });
+                    yPos = doc.lastAutoTable.finalY + 15;
+                }
+
+                // Builds
+                if (currentReport.buildData && currentReport.buildData.length > 0) {
+                    yPos = checkPageBreak(yPos, 40);
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Build Information', 10, yPos);
+                    yPos += 8;
+
+                    const buildsData = currentReport.buildData.map(build => [build.requestId, build.environment, build.cycles]);
+                    doc.autoTable({
+                        startY: yPos,
+                        head: [['Request ID', 'Environment', 'Cycles']],
+                        body: buildsData,
+                        styles: { fontSize: 8, cellPadding: 2 },
+                        headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
+                    });
+                    yPos = doc.lastAutoTable.finalY + 15;
+                }
+
+                // Testers
+                if (currentReport.testerData && currentReport.testerData.length > 0) {
+                    yPos = checkPageBreak(yPos, 40);
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Testers', 10, yPos);
+                    yPos += 8;
+
+                    const testersData = currentReport.testerData.map(tester => [tester.name]);
+                    doc.autoTable({
+                        startY: yPos,
+                        head: [['Tester Name']],
+                        body: testersData,
+                        styles: { fontSize: 8, cellPadding: 2 },
+                        headStyles: { fillColor: [59, 130, 246], textColor: 255 } // Using primary color
+                    });
+                    yPos = doc.lastAutoTable.finalY + 15;
+                }
+            }
+
+
+            // QA Notes
+            if (currentReport.qaNotesText) {
+                yPos = checkPageBreak(yPos, 40);
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('QA Notes', 10, yPos);
+                yPos += 15;
+
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                const notesText = doc.splitTextToSize(currentReport.qaNotesText, 190);
+                doc.text(notesText, 10, yPos);
+            }
+
+            // Save the PDF
+            doc.save(`QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_Complete.pdf`);
         }
-    }
 
-    // Project Evaluation Results
-    if (currentReport.projectEvaluationData && Object.keys(currentReport.projectEvaluationData).length > 0) {
-        yPos = checkPageBreak(yPos, 60);
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Project Evaluation Results', 10, yPos);
-        yPos += 15;
-
-        doc.setFontSize(12);
-        doc.text(`Total Project Score: ${currentReport.projectEvaluationTotalScore || '0.0'}`, 10, yPos);
-        yPos += 15;
-
-        const projEvalData = Object.entries(currentReport.projectEvaluationData)
-            .filter(([key]) => key.includes('_score'))
-            .map(([key, value]) => {
-                const baseName = key.replace('proj_', '').replace('_score', '');
-                const reasonKey = `proj_${baseName}_reason`;
-                return [
-                    baseName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    value || 'N/A',
-                    currentReport.projectEvaluationData[reasonKey] || 'N/A'
-                ];
-            });
-
-        if (projEvalData.length > 0) {
-            doc.autoTable({
-                startY: yPos,
-                head: [['Criteria', 'Score', 'Reason']],
-                body: projEvalData,
-                styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [79, 172, 254], textColor: 255 }
-            });
-            yPos = doc.lastAutoTable.finalY + 15;
-        }
-    }
-
-    // Custom Fields
-    if (currentReport.customFields && Object.keys(currentReport.customFields).length > 0) {
-        yPos = checkPageBreak(yPos, 40);
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Custom Fields', 10, yPos);
-        yPos += 15;
-
-        const customFieldsData = Object.entries(currentReport.customFields).map(([key, value]) => [
-            key.replace(/custom_/g, '').replace(/_/g, ' '),
-            Array.isArray(value) ? value.join(', ') : (value || 'N/A')
-        ]);
-
-        doc.autoTable({
-            startY: yPos,
-            head: [['Field Name', 'Value']],
-            body: customFieldsData,
-            styles: { fontSize: 8, cellPadding: 2 },
-            headStyles: { fillColor: [79, 172, 254], textColor: 255 }
-        });
-        yPos = doc.lastAutoTable.finalY + 15;
-    }
-
-    // QA Notes
-    if (currentReport.qaNotesText) {
-        yPos = checkPageBreak(yPos, 40);
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('QA Notes', 10, yPos);
-        yPos += 15;
-
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        const notesText = doc.splitTextToSize(currentReport.qaNotesText, 190);
-        doc.text(notesText, 10, yPos);
-    }
-
-    // Save the PDF
-    doc.save(`QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_Complete.pdf`);
-}
         function exportCurrentReportAsExcel() {
-            if (!currentReport) return;
+            if (!currentReport) {
+                // Use a custom message box instead of alert
+                showCustomMessageBox('Report data not loaded yet.');
+                return;
+            }
             
             // Create comprehensive Excel export similar to the main script
             // but using currentReport data
@@ -1691,8 +1247,6 @@ async function exportCurrentReportAsPdf() {
                 ["Total Test Cases", currentReport.totalTestCases || 0],
                 ["Total Issues", currentReport.totalIssues || 0],
                 ["Total Enhancements", currentReport.totalEnhancements || 0],
-                ["Evaluation Score", currentReport.evaluationTotalScore || 0],
-                ["Project Score", currentReport.projectEvaluationTotalScore || 0],
                 [""],
                 ["Test Summary"],
                 [currentReport.testSummary || 'N/A']
@@ -1702,6 +1256,39 @@ async function exportCurrentReportAsPdf() {
             XLSX.utils.book_append_sheet(workbook, wsSummary, "Report Summary");
 
             XLSX.writeFile(workbook, `QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_View.xlsx`);
+        }
+        // Custom Message Box (instead of alert)
+        function showCustomMessageBox(message) {
+            const messageBox = document.createElement('div');
+            messageBox.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--surface);
+                color: var(--text-primary);
+                padding: 20px;
+                border-radius: var(--border-radius);
+                box-shadow: var(--shadow-heavy);
+                z-index: 9999;
+                text-align: center;
+                max-width: 300px;
+                border: 1px solid var(--border);
+            `;
+            messageBox.innerHTML = `
+                <p>${message}</p>
+                <button onclick="this.parentNode.remove()" style="
+                    background: var(--primary);
+                    color: var(--text-primary);
+                    border: none;
+                    padding: 8px 15px;
+                    border-radius: var(--border-radius);
+                    margin-top: 15px;
+                    cursor: pointer;
+                    transition: var(--transition);
+                ">OK</button>
+            `;
+            document.body.appendChild(messageBox);
         }
     </script>
 </body>

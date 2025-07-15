@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Data - Sprint Reports System</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <!-- Link to the new dedicated stylesheet for manage_data -->
+    <link rel="stylesheet" href="/static/manage_data.css">
 </head>
 <body>
     <!-- Navigation Header -->
     <nav class="main-nav">
         <div class="nav-container">
-            <div class="nav-brand"> Sprint Reports System</div>
+            <div class="nav-brand"><i class="fas fa-chart-line"></i> Sprint Reports System</div>
             <div class="nav-links">
-                <a href="/" class="nav-link">Dashboard</a>
-                <a href="/" class="nav-link" onclick="showPage('reportsPage')">Reports</a>
-                <a href="#" class="nav-link active">Manage Data</a>
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/reports" class="nav-link">Reports</a>
+                <a href="/create-report" class="nav-link">New Report</a>
+                <a href="/manage" class="nav-link active">Manage Data</a>
             </div>
         </div>
     </nav>
@@ -149,7 +151,6 @@
                 </div>
                 
                 <!-- Search and Filter -->
-<!-- Search and Filter for Team Members -->
 <div class="search-filter-container">
     <input type="text" placeholder="Search team members..." id="teamSearch" onkeyup="searchTeamMembers()">
     <select class="filter-select" id="roleFilter" onchange="filterTeamMembers()">
@@ -173,7 +174,6 @@
 </div>
                 
                 <!-- Team Stats -->
-<!-- Team Stats -->
 <div class="stats-grid">
     <div class="stat-card-small">
         <div class="icon">👥</div>
@@ -307,7 +307,6 @@
     </div>
 
     <!-- Add Team Member Modal -->
-<!-- Add Team Member Modal -->
 <div id="addTeamMemberModal" class="modal manage-modal">
     <div class="modal-content">
         <h3>Add New Team Member</h3>
