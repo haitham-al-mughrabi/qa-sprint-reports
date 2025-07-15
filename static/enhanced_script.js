@@ -103,14 +103,14 @@ async function deleteReportDB(id) {
 //     // Initial data load
 //     allReportsCache = await fetchReports();
 //     dashboardStatsCache = await fetchDashboardStats();
-    
+
 //     updateDashboardStats(dashboardStatsCache);
 //     searchReports();
 
 //     document.getElementById('reportDate').value = getCurrentDate();
 //     updateNavigationButtons();
 //     initializeCharts();
-    
+
 //     // Load dropdown data for portfolios and projects
 //     await loadFormDropdownData();
 // });
@@ -124,7 +124,7 @@ function showToast(message, type = 'info', duration = 5000) {
         container.className = 'toast-container';
         document.body.appendChild(container);
     }
-    
+
     // Create toast element
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -133,9 +133,9 @@ function showToast(message, type = 'info', duration = 5000) {
         <div class="toast-message">${message}</div>
         <button class="toast-close" onclick="removeToast(this.parentElement)">×</button>
     `;
-    
+
     container.appendChild(toast);
-    
+
     // Auto remove after duration
     setTimeout(() => {
         removeToast(toast);
@@ -164,7 +164,7 @@ function updateDashboardStats(stats) {
     document.getElementById('completedReports').textContent = overall.completedReports || 0;
     document.getElementById('inProgressReports').textContent = overall.inProgressReports || 0;
     document.getElementById('pendingReports').textContent = overall.pendingReports || 0;
-    
+
     // Update aggregate metrics
     document.getElementById('totalUserStories').textContent = overall.totalUserStories || 0;
     document.getElementById('totalTestCases').textContent = overall.totalTestCases || 0;
@@ -179,7 +179,7 @@ function renderProjectMetrics(projects) {
     if (!projects || projects.length === 0) {
         container.innerHTML = `
             <div class="empty-state" style="text-align: center; color: #6c757d; padding: 40px 0;">
-                <div style="font-size: 3em; margin-bottom: 20px;">📊</div>
+                <div style="font-size: 3em; margin-bottom: 20px;"><i class="fas fa-chart-bar"></i></div>
                 <h3>No Projects Found</h3>
                 <p>Create your first report to see project metrics here.</p>
             </div>
@@ -190,41 +190,96 @@ function renderProjectMetrics(projects) {
     container.innerHTML = projects.map(project => `
         <div class="project-metric-card">
             <div class="project-header">
-                <h3>${project.projectName}</h3>
-                <p class="portfolio-name">${project.portfolioName}</p>
+                <div class="project-title-section">
+                    <div class="project-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div class="project-info">
+                        <h3>${project.projectName}</h3>
+                        <p class="portfolio-name">${project.portfolioName}</p>
+                    </div>
+                </div>
                 <span class="status-badge status-${getStatusClass(project.testingStatus)}">${getStatusText(project.testingStatus)}</span>
             </div>
+
+            <div class="project-summary">
+                <div class="summary-card">
+                    <div class="summary-item">
+                        <div class="summary-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="summary-content">
+                            <span class="summary-value">${project.totalReports}</span>
+                            <span class="summary-label">Reports</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-item">
+                        <div class="summary-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="summary-content">
+                            <span class="summary-value">${formatDate(project.lastReportDate)}</span>
+                            <span class="summary-label">Last Report</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="project-metrics">
-                <div class="metric-row">
-                    <div class="metric-item">
-                        <span class="metric-value">${project.totalReports}</span>
-                        <span class="metric-label">Reports</span>
-                    </div>
-                    <div class="metric-item">
-                        <span class="metric-value">${project.totalUserStories}</span>
-                        <span class="metric-label">User Stories</span>
-                    </div>
-                    <div class="metric-item">
-                        <span class="metric-value">${project.totalTestCases}</span>
-                        <span class="metric-label">Test Cases</span>
-                    </div>
-                </div>
-                <div class="metric-row">
-                    <div class="metric-item">
-                        <span class="metric-value">${project.totalIssues}</span>
-                        <span class="metric-label">Issues</span>
-                    </div>
-                    <div class="metric-item">
-                        <span class="metric-value">${project.totalEnhancements}</span>
-                        <span class="metric-label">Enhancements</span>
-                    </div>
-                </div>
-                <div class="metric-row">
-                    <div class="metric-item">
-                        <span class="metric-value">${formatDate(project.lastReportDate)}</span>
-                        <span class="metric-label">Last Report</span>
+                <div class="metrics-section">
+                    <h4 class="metrics-title">
+                        <i class="fas fa-chart-bar"></i> Testing Metrics
+                    </h4>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-icon">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div class="metric-content">
+                                <span class="metric-value">${project.totalUserStories}</span>
+                                <span class="metric-label">User Stories</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon">
+                                <i class="fas fa-flask"></i>
+                            </div>
+                            <div class="metric-content">
+                                <span class="metric-value">${project.totalTestCases}</span>
+                                <span class="metric-label">Test Cases</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <div class="metrics-section">
+                    <h4 class="metrics-title">
+                        <i class="fas fa-bug"></i> Quality Metrics
+                    </h4>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="metric-content">
+                                <span class="metric-value">${project.totalIssues}</span>
+                                <span class="metric-label">Issues</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon">
+                                <i class="fas fa-magic"></i>
+                            </div>
+                            <div class="metric-content">
+                                <span class="metric-value">${project.totalEnhancements}</span>
+                                <span class="metric-label">Enhancements</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     `).join('');
@@ -238,20 +293,20 @@ async function exportDashboardReport() {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    
+
     let yPos = 20;
-    
+
     // Title
     doc.setFontSize(18);
     doc.setFont(undefined, 'bold');
     doc.text('QA Dashboard Report', 105, yPos, { align: 'center' });
     yPos += 20;
-    
+
     // Overall Statistics
     doc.setFontSize(14);
     doc.text('Overall Statistics', 10, yPos);
     yPos += 10;
-    
+
     const overall = dashboardStatsCache.overall;
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
@@ -260,20 +315,20 @@ async function exportDashboardReport() {
     doc.text(`In Progress: ${overall.inProgressReports}`, 110, yPos);
     doc.text(`Pending: ${overall.pendingReports}`, 160, yPos);
     yPos += 10;
-    
+
     doc.text(`User Stories: ${overall.totalUserStories}`, 10, yPos);
     doc.text(`Test Cases: ${overall.totalTestCases}`, 60, yPos);
     doc.text(`Issues: ${overall.totalIssues}`, 110, yPos);
     doc.text(`Enhancements: ${overall.totalEnhancements}`, 160, yPos);
     yPos += 20;
-    
+
     // Project Metrics Table
     if (dashboardStatsCache.projects && dashboardStatsCache.projects.length > 0) {
         doc.setFontSize(14);
         doc.setFont(undefined, 'bold');
         doc.text('Project Metrics', 10, yPos);
         yPos += 10;
-        
+
         const projectTableData = dashboardStatsCache.projects.map(project => [
             project.projectName,
             project.portfolioName,
@@ -282,7 +337,7 @@ async function exportDashboardReport() {
             project.totalTestCases.toString(),
             project.totalIssues.toString(),
         ]);
-        
+
         doc.autoTable({
             startY: yPos,
             head: [['Project', 'Portfolio', 'Reports', 'Stories', 'Cases', 'Issues', 'Score']],
@@ -291,7 +346,7 @@ async function exportDashboardReport() {
             headStyles: { fillColor: [66, 133, 244], textColor: 255, fontStyle: 'bold' }
         });
     }
-    
+
     doc.save('QA_Dashboard_Report.pdf');
 }
 
@@ -412,7 +467,7 @@ function calculatePercentages() {
             percentageElement.textContent = total > 0 ? `${Math.round((values[key] / total) * 100)}%` : '0%';
         }
     });
-    
+
     updateChart(userStoriesChart, Object.values(values));
 }
 
@@ -423,29 +478,29 @@ function calculateUserStoryTotal() {
 
 function calculateTestCasesPercentages() {
     const total = calculateTestCasesTotal();
-    
+
     // More aggressive update approach
     const totalField = document.getElementById('totalTestCases');
     if (totalField) {
         // Clear any existing placeholder
         totalField.removeAttribute('placeholder');
-        
+
         // Set the value multiple ways
         totalField.value = total;
         totalField.setAttribute('value', total);
         totalField.defaultValue = total;
-        
+
         // Force visual refresh
         totalField.style.display = 'none';
         totalField.offsetHeight; // Force reflow
         totalField.style.display = '';
-        
+
         // Add a data attribute for debugging
         totalField.setAttribute('data-calculated-value', total);
-        
+
         console.log('Total field updated:', totalField.value, 'Calculated:', total);
     }
-    
+
     // Rest of the function...
     const values = {
         passed: parseInt(document.getElementById('passedTestCases')?.value) || 0,
@@ -469,7 +524,7 @@ function calculateTestCasesPercentages() {
             percentageElement.textContent = total > 0 ? `${Math.round((values[key] / total) * 100)}%` : '0%';
         }
     });
-    
+
     updateChart(testCasesChart, Object.values(values));
 }
 
@@ -486,7 +541,7 @@ function calculateIssuesPercentages() {
         medium: parseInt(document.getElementById('mediumIssues')?.value) || 0,
         low: parseInt(document.getElementById('lowIssues')?.value) || 0,
     };
-    
+
     // Update total field (readonly) - THIS WAS MISSING
     document.getElementById('totalIssues').value = total;
     document.getElementById('issuesMetric').value = total;
@@ -649,23 +704,23 @@ function removeTester(index) { testerData.splice(index, 1); renderTesterList(); 
 function showSection(sectionIndex) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById(`section-${sectionIndex}`)?.classList.add('active');
-    
+
     document.querySelectorAll('#sidebar .nav-item').forEach((item, index) => {
         item.classList.toggle('active', index === sectionIndex);
     });
-    
+
     currentSection = sectionIndex;
     updateNavigationButtons();
 }
 
-function nextSection() { 
+function nextSection() {
     if (currentSection < 7) { // Max section index is 7 (QA Notes)
-        showSection(currentSection + 1); 
+        showSection(currentSection + 1);
     }
 }
-function previousSection() { 
-    if (currentSection > 0) { 
-        showSection(currentSection - 1); 
+function previousSection() {
+    if (currentSection > 0) {
+        showSection(currentSection - 1);
     }
 }
 
@@ -683,9 +738,9 @@ function toggleSidebar() { document.getElementById('sidebar').classList.toggle('
 // --- Reports Table Functions ---
 function searchReports() {
     const searchQuery = document.getElementById('searchInput')?.value.toLowerCase();
-    
-    const filtered = allReportsCache.filter(report => 
-        Object.values(report).some(value => 
+
+    const filtered = allReportsCache.filter(report =>
+        Object.values(report).some(value =>
             String(value).toLowerCase().includes(searchQuery)
         )
     );
@@ -724,11 +779,11 @@ function renderReportsTable(reports) {
             <td><span class="status-badge status-${getStatusClass(report.testingStatus)}">${getStatusText(report.testingStatus)}</span></td>
             <td>
                 <div class="action-buttons-cell">
-                    <button class="btn-sm btn-view" onclick="viewReport(${report.id})" title="View Report">👁️</button>
-                    <button class="btn-sm btn-regenerate" onclick="regenerateReport(${report.id})" title="Edit Report">🔄</button>
-                    <button class="btn-sm btn-export-pdf" onclick="exportReportAsPdf(${report.id})" title="Export as PDF">📄</button>
-                    <button class="btn-sm btn-export-excel" onclick="exportReportAsExcel(${report.id})" title="Export as Excel">📊</button>
-                    <button class="btn-sm btn-delete" onclick="deleteReport(${report.id})" title="Delete Report">🗑️</button>
+                    <button class="btn-sm btn-view" onclick="viewReport(${report.id})" title="View Report"><i class="fas fa-eye"></i></button>
+                    <button class="btn-sm btn-regenerate" onclick="regenerateReport(${report.id})" title="Edit Report"><i class="fas fa-edit"></i></button>
+                    <button class="btn-sm btn-export-pdf" onclick="exportReportAsPdf(${report.id})" title="Export as PDF"><i class="fas fa-file-pdf"></i></button>
+                    <button class="btn-sm btn-export-excel" onclick="exportReportAsExcel(${report.id})" title="Export as Excel"><i class="fas fa-file-excel"></i></button>
+                    <button class="btn-sm btn-delete" onclick="deleteReport(${report.id})" title="Delete Report"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </td>
         </tr>
@@ -816,13 +871,13 @@ function resetFormData() {
         teamMemberData = []; // Reset team member data
         qaNotesFields = []; // Reset custom QA notes fields
         customFieldsData = []; // Reset custom fields data
-        
+
         renderRequestList();
         renderBuildList();
         renderTesterList();
         renderTeamMemberList(); // Render empty team member list
         renderQANotesFields(); // Render empty custom QA notes fields
-        
+
         resetAllCharts();
         currentSection = 0; // Reset to first section
         updateNavigationButtons();
@@ -842,7 +897,7 @@ function resetAllCharts() {
 
 function loadReportForEditing(report) {
     resetFormData(); // Reset first to clear any previous data
-    
+
     // Basic fields
     const basicFields = ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'qaNotesText', 'releaseNumber'];
     basicFields.forEach(field => {
@@ -851,7 +906,7 @@ function loadReportForEditing(report) {
             element.value = report[field];
         }
     });
-    
+
     // User Stories
     const userStoryFields = ['passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories', 'blockedUserStories', 'cancelledUserStories', 'deferredUserStories', 'notTestableUserStories'];
     userStoryFields.forEach(field => {
@@ -860,7 +915,7 @@ function loadReportForEditing(report) {
             element.value = report[field];
         }
     });
-    
+
     // Test Cases
     const testCaseFields = ['passedTestCases', 'passedWithIssuesTestCases', 'failedTestCases', 'blockedTestCases', 'cancelledTestCases', 'deferredTestCases', 'notTestableTestCases'];
     testCaseFields.forEach(field => {
@@ -869,7 +924,7 @@ function loadReportForEditing(report) {
             element.value = report[field];
         }
     });
-    
+
     // Issues
     const issueFields = ['criticalIssues', 'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredIssues'];
     issueFields.forEach(field => {
@@ -878,7 +933,7 @@ function loadReportForEditing(report) {
             element.value = report[field];
         }
     });
-    
+
     // Enhancements
     const enhancementFields = ['newEnhancements', 'implementedEnhancements', 'existsEnhancements'];
     enhancementFields.forEach(field => {
@@ -887,7 +942,7 @@ function loadReportForEditing(report) {
             element.value = report[field];
         }
     });
-    
+
     // Dynamic data
     requestData = report.requestData || [];
     buildData = report.buildData || [];
@@ -895,13 +950,13 @@ function loadReportForEditing(report) {
     // Assuming teamMemberData and customFields are part of the report object
     teamMemberData = report.teamMemberData || []; // Assuming this field exists in your report model
     customFieldsData = report.customFields || {}; // Assuming this is an object in your report model
-    
+
     renderRequestList();
     renderBuildList();
     renderTesterList();
     renderTeamMemberList(); // Render team members
     // renderCustomFields(); // If you have a render function for custom fields
-        
+
     // Recalculate all totals and charts
     calculatePercentages();
     calculateTestCasesPercentages();
@@ -916,10 +971,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (qaReportForm) {
         qaReportForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const formData = new FormData(this);
             const reportData = {};
-            
+
             // Collect form data
             for (let [key, value] of formData.entries()) {
                 // Handle special cases for array inputs (e.g., checkboxes if any)
@@ -944,6 +999,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const savedReport = await saveReport(reportData);
             if (savedReport) {
                 showToast('Report saved successfully!', 'success');
+                // Clear localStorage when form is submitted successfully
+                clearFormDataOnSubmit();
                 // Redirect to reports list after saving
                 window.location.href = '/reports';
             } else {
@@ -995,7 +1052,7 @@ async function exportReportAsPdf(id) {
     // Report Header
     addTitle("QA Testing Report", 18);
     addText(`Generated on: ${new Date().toLocaleDateString()}`, 150);
-    
+
     // Cover Information
     addSection("Cover Information");
     addText(`Portfolio: ${report.portfolioName || 'N/A'}`);
@@ -1190,6 +1247,123 @@ async function exportReportAsExcel(id) {
     const wsEnhancements = XLSX.utils.aoa_to_sheet(enhancementsData);
     XLSX.utils.book_append_sheet(workbook, wsEnhancements, "Enhancements");
 
+    // Evaluation Data Sheet
+    if (report.evaluationData && Object.keys(report.evaluationData).length > 0) {
+        const evaluationHeaders = ["Evaluation Criteria", "Score", "Weight", "Weighted Score"];
+        const evaluationSheetData = [];
+
+        for (const [key, value] of Object.entries(report.evaluationData)) {
+            if (key.includes('_score')) {
+                const criteriaName = key.replace('_score', '').replace(/_/g, ' ').toUpperCase();
+                const weightKey = key.replace('_score', '_weight');
+                const weight = report.evaluationData[weightKey] || 1;
+                const weightedScore = (value || 0) * weight;
+                evaluationSheetData.push([criteriaName, value || 0, weight, weightedScore]);
+            }
+        }
+
+        if (evaluationSheetData.length > 0) {
+            evaluationSheetData.unshift(["", "", "", ""]);
+            evaluationSheetData.unshift(["TOTAL EVALUATION SCORE", "", "", report.evaluationTotalScore || 0]);
+            const wsEvaluation = XLSX.utils.aoa_to_sheet([evaluationHeaders, ...evaluationSheetData]);
+            XLSX.utils.book_append_sheet(workbook, wsEvaluation, "Evaluation");
+        }
+    }
+
+    // Project Evaluation Data Sheet
+    if (report.projectEvaluationData && Object.keys(report.projectEvaluationData).length > 0) {
+        const projectEvalHeaders = ["Project Evaluation Criteria", "Score", "Weight", "Weighted Score"];
+        const projectEvalSheetData = [];
+
+        for (const [key, value] of Object.entries(report.projectEvaluationData)) {
+            if (key.includes('_score')) {
+                const criteriaName = key.replace('_score', '').replace(/_/g, ' ').toUpperCase();
+                const weightKey = key.replace('_score', '_weight');
+                const weight = report.projectEvaluationData[weightKey] || 1;
+                const weightedScore = (value || 0) * weight;
+                projectEvalSheetData.push([criteriaName, value || 0, weight, weightedScore]);
+            }
+        }
+
+        if (projectEvalSheetData.length > 0) {
+            projectEvalSheetData.unshift(["", "", "", ""]);
+            projectEvalSheetData.unshift(["TOTAL PROJECT EVALUATION SCORE", "", "", report.projectEvaluationTotalScore || 0]);
+            const wsProjectEval = XLSX.utils.aoa_to_sheet([projectEvalHeaders, ...projectEvalSheetData]);
+            XLSX.utils.book_append_sheet(workbook, wsProjectEval, "Project Evaluation");
+        }
+    }
+
+    // Custom Fields Sheet
+    if (report.customFields && Object.keys(report.customFields).length > 0) {
+        const customFieldHeaders = ["Field Name", "Value"];
+        const customFieldsSheetData = [];
+
+        for (const [key, value] of Object.entries(report.customFields)) {
+            const fieldName = key.replace(/_/g, ' ').toUpperCase();
+            customFieldsSheetData.push([fieldName, value || 'N/A']);
+        }
+
+        const wsCustomFields = XLSX.utils.aoa_to_sheet([customFieldHeaders, ...customFieldsSheetData]);
+        XLSX.utils.book_append_sheet(workbook, wsCustomFields, "Custom Fields");
+    }
+
+    // Detailed Metrics Sheet
+    const detailedMetricsData = [
+        ["Metric Category", "Metric", "Value"],
+        ["", "", ""],
+        ["USER STORIES METRICS", "", ""],
+        ["Passed", "Count", report.passedUserStories || 0],
+        ["Passed with Issues", "Count", report.passedWithIssuesUserStories || 0],
+        ["Failed", "Count", report.failedUserStories || 0],
+        ["Blocked", "Count", report.blockedUserStories || 0],
+        ["Cancelled", "Count", report.cancelledUserStories || 0],
+        ["Deferred", "Count", report.deferredUserStories || 0],
+        ["Not Testable", "Count", report.notTestableUserStories || 0],
+        ["Total", "Count", report.totalUserStories || 0],
+        ["", "", ""],
+        ["TEST CASES METRICS", "", ""],
+        ["Passed", "Count", report.passedTestCases || 0],
+        ["Passed with Issues", "Count", report.passedWithIssuesTestCases || 0],
+        ["Failed", "Count", report.failedTestCases || 0],
+        ["Blocked", "Count", report.blockedTestCases || 0],
+        ["Cancelled", "Count", report.cancelledTestCases || 0],
+        ["Deferred", "Count", report.deferredTestCases || 0],
+        ["Not Testable", "Count", report.notTestableTestCases || 0],
+        ["Total", "Count", report.totalTestCases || 0],
+        ["", "", ""],
+        ["ISSUES METRICS", "", ""],
+        ["Critical Priority", "Count", report.criticalIssues || 0],
+        ["High Priority", "Count", report.highIssues || 0],
+        ["Medium Priority", "Count", report.mediumIssues || 0],
+        ["Low Priority", "Count", report.lowIssues || 0],
+        ["New Status", "Count", report.newIssues || 0],
+        ["Fixed Status", "Count", report.fixedIssues || 0],
+        ["Not Fixed Status", "Count", report.notFixedIssues || 0],
+        ["Re-opened Status", "Count", report.reopenedIssues || 0],
+        ["Deferred Status", "Count", report.deferredIssues || 0],
+        ["Total", "Count", report.totalIssues || 0],
+        ["", "", ""],
+        ["ENHANCEMENTS METRICS", "", ""],
+        ["New", "Count", report.newEnhancements || 0],
+        ["Implemented", "Count", report.implementedEnhancements || 0],
+        ["Exists", "Count", report.existsEnhancements || 0],
+        ["Total", "Count", report.totalEnhancements || 0],
+        ["", "", ""],
+        ["CALCULATED METRICS", "", ""],
+        ["User Stories Metric", "Auto-calculated", report.userStoriesMetric || 0],
+        ["Test Cases Metric", "Auto-calculated", report.testCasesMetric || 0],
+        ["Issues Metric", "Auto-calculated", report.issuesMetric || 0],
+        ["Enhancements Metric", "Auto-calculated", report.enhancementsMetric || 0],
+        ["QA Notes Metric", "Count", report.qaNotesMetric || 0],
+        ["Evaluation Metric", "Text", report.evaluationMetric || 'N/A'],
+        ["", "", ""],
+        ["TIMESTAMPS", "", ""],
+        ["Created At", "DateTime", report.createdAt || 'N/A'],
+        ["Updated At", "DateTime", report.updatedAt || 'N/A']
+    ];
+    const wsDetailedMetrics = XLSX.utils.aoa_to_sheet(detailedMetricsData);
+    XLSX.utils.book_append_sheet(workbook, wsDetailedMetrics, "Detailed Metrics");
+
     // Dynamic Data Sheets
     if (report.requestData && report.requestData.length > 0) {
         const requestHeaders = ["Request ID", "URL"];
@@ -1216,11 +1390,11 @@ async function exportReportAsExcel(id) {
 }
 
 // --- Modal & Utility Functions ---
-function showModal(modalId) { 
-    document.getElementById(modalId).style.display = 'block'; 
+function showModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
 }
 
-function closeModal(modalId) { 
+function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
     // Clear form inputs
     const modal = document.getElementById(modalId);
@@ -1297,7 +1471,7 @@ async function addProject() {
             const response = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name, portfolio_id: actualPortfolioId })
+                body: JSON.stringify({ name: newName, portfolio_id: actualPortfolioId })
             });
             if (response.ok) {
                 showToast('Project added successfully!', 'success');
@@ -1324,14 +1498,14 @@ function getCurrentDate() {
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     // Handles both 'dd-mm-yyyy' and ISO strings
-    const date = new Date(dateString.includes('-') && dateString.length === 10 ? 
+    const date = new Date(dateString.includes('-') && dateString.length === 10 ?
         dateString.split('-').reverse().join('-') : dateString);
     return isNaN(date) ? 'Invalid Date' : date.toLocaleDateString('en-GB');
 }
 
 function getStatusClass(status) {
-    const map = { 
-        'passed': 'completed', 
+    const map = {
+        'passed': 'completed',
         'passed-with-issues': 'in-progress',
         'failed': 'pending',
         'blocked': 'pending',
@@ -1343,14 +1517,14 @@ function getStatusClass(status) {
 }
 
 function getStatusText(status) {
-    const map = { 
-        'passed': 'Passed', 
-        'passed-with-issues': 'Passed w/ Issues', 
-        'failed': 'Failed', 
-        'blocked': 'Blocked', 
-        'cancelled': 'Cancelled', 
-        'deferred': 'Deferred', 
-        'not-testable': 'Not Testable' 
+    const map = {
+        'passed': 'Passed',
+        'passed-with-issues': 'Passed w/ Issues',
+        'failed': 'Failed',
+        'blocked': 'Blocked',
+        'cancelled': 'Cancelled',
+        'deferred': 'Deferred',
+        'not-testable': 'Not Testable'
     };
     return map[status] || 'Pending';
 }
@@ -1384,30 +1558,30 @@ document.addEventListener('DOMContentLoaded', function() {
 function toggleWeightColumn() {
     const columns = document.querySelectorAll('.weight-column');
     const button = document.getElementById('toggleWeightBtn');
-    
+
     if (!columns.length || !button) return;
-    
+
     const isVisible = columns[0].style.display !== 'none';
-    
+
     columns.forEach(col => {
         col.style.display = isVisible ? 'none' : 'table-cell';
     });
-    
+
     button.textContent = isVisible ? 'Show Weight' : 'Hide Weight';
 }
 
 function toggleProjectReasonColumn() {
     const columns = document.querySelectorAll('.project-reason-column');
     const button = document.getElementById('toggleProjectReasonBtn');
-    
+
     if (!columns.length || !button) return;
-    
+
     const isVisible = columns[0].style.display !== 'none';
-    
+
     columns.forEach(col => {
         col.style.display = isVisible ? 'none' : 'table-cell';
     });
-    
+
     button.textContent = isVisible ? 'Show Reason' : 'Hide Reason';
 }
 
@@ -1425,9 +1599,9 @@ async function loadExistingTeamMembers() {
         if (response.ok) {
             const teamMembers = await response.json();
             const select = document.getElementById('existingTeamMemberSelect');
-            
+
             select.innerHTML = '<option value="">-- Select from existing team members --</option>';
-            
+
             teamMembers.forEach(member => {
                 const option = document.createElement('option');
                 option.value = JSON.stringify(member); // Store full object for easy retrieval
@@ -1446,7 +1620,7 @@ function handleTeamMemberSelection() {
     const newNameField = document.getElementById('newTeamMemberName');
     const newEmailField = document.getElementById('newTeamMemberEmail');
     const newRoleField = document.getElementById('newTeamMemberRole');
-    
+
     if (select.value) {
         newNameField.value = '';
         newEmailField.value = '';
@@ -1476,9 +1650,9 @@ async function addSelectedTeamMember() {
     const newName = document.getElementById('newTeamMemberName').value.trim();
     const newEmail = document.getElementById('newTeamMemberEmail').value.trim();
     const newRole = document.getElementById('newTeamMemberRole').value;
-    
+
     let memberToAdd = null;
-    
+
     if (existingSelect.value) {
         memberToAdd = JSON.parse(existingSelect.value);
     } else if (newName && newEmail && newRole) {
@@ -1488,7 +1662,7 @@ async function addSelectedTeamMember() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: newName, email: newEmail, role: newRole })
             });
-            
+
             if (response.ok) {
                 memberToAdd = await response.json();
                 showToast('New team member created and added!', 'success');
@@ -1506,21 +1680,21 @@ async function addSelectedTeamMember() {
         showToast('Please either select an existing team member or provide all details for a new member', 'warning');
         return;
     }
-    
+
     if (memberToAdd) {
         const alreadyAdded = teamMemberData.some(tm => tm.email === memberToAdd.email);
         if (alreadyAdded) {
             showToast('This team member is already added to the report', 'warning');
             return;
         }
-        
+
         teamMemberData.push({
             id: memberToAdd.id,
             name: memberToAdd.name,
             email: memberToAdd.email,
             role: memberToAdd.role
         });
-        
+
         renderTeamMemberList();
         closeModal('teamMemberModal');
         showToast('Team member added successfully!', 'success');
@@ -1530,12 +1704,12 @@ async function addSelectedTeamMember() {
 function renderTeamMemberList() {
     const container = document.getElementById('teamMemberList');
     if (!container) return;
-    
+
     if (teamMemberData.length === 0) {
         container.innerHTML = '<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No team members added yet. Click "Add Team Member" to get started.</div>';
         return;
     }
-    
+
     container.innerHTML = teamMemberData.map((member, index) => `
         <div class="dynamic-item">
             <div>
@@ -1562,9 +1736,9 @@ async function loadExistingTesters() {
         if (response.ok) {
             const testers = await response.json();
             const select = document.getElementById('existingTesterSelect');
-            
+
             select.innerHTML = '<option value="">-- Select from existing testers --</option>';
-            
+
             testers.forEach(tester => {
                 const option = document.createElement('option');
                 option.value = JSON.stringify(tester); // Store full object for easy retrieval
@@ -1582,7 +1756,7 @@ function handleTesterSelection() {
     const select = document.getElementById('existingTesterSelect');
     const newNameField = document.getElementById('newTesterName');
     const newEmailField = document.getElementById('newTesterEmail');
-    
+
     if (select.value) {
         newNameField.value = '';
         newEmailField.value = '';
@@ -1606,9 +1780,9 @@ async function addSelectedTester() {
     const existingTesterSelect = document.getElementById('existingTesterSelect');
     const newTesterName = document.getElementById('newTesterName').value.trim();
     const newTesterEmail = document.getElementById('newTesterEmail').value.trim();
-    
+
     let testerToAdd = null;
-    
+
     if (existingTesterSelect.value) {
         testerToAdd = JSON.parse(existingTesterSelect.value);
     } else if (newTesterName && newTesterEmail) {
@@ -1618,7 +1792,7 @@ async function addSelectedTester() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: newTesterName, email: newTesterEmail })
             });
-            
+
             if (response.ok) {
                 testerToAdd = await response.json();
                 showToast('New tester created and added!', 'success');
@@ -1636,20 +1810,20 @@ async function addSelectedTester() {
         showToast('Please either select an existing tester or provide name and email for a new tester', 'warning');
         return;
     }
-    
+
     if (testerToAdd) {
         const alreadyAdded = testerData.some(t => t.email === testerToAdd.email);
         if (alreadyAdded) {
             showToast('This tester is already added to the report', 'warning');
             return;
         }
-        
+
         testerData.push({
             id: testerToAdd.id,
             name: testerToAdd.name,
             email: testerToAdd.email
         });
-        
+
         renderTesterList();
         closeModal('testerModal');
         showToast('Tester added successfully!', 'success');
@@ -1674,7 +1848,7 @@ function showAddQANoteFieldModal() {
 function updateQAFieldOptions() {
     const type = document.getElementById('qaFieldType').value;
     const optionsDiv = document.getElementById('qaFieldOptions');
-    
+
     if (optionsDiv) { // Check if element exists
         if (type === 'select' || type === 'radio' || type === 'checkbox') {
             optionsDiv.style.display = 'block';
@@ -1691,16 +1865,16 @@ function addQANoteField() {
     const showInReport = document.getElementById('qaFieldShowInReport').checked;
     const optionsListElement = document.getElementById('qaFieldOptionsList');
     const optionsList = optionsListElement ? optionsListElement.value.trim() : '';
-    
+
     if (!name) {
         showToast('Please enter a field name', 'warning');
         return;
     }
-    
-    const options = (type === 'select' || type === 'radio' || type === 'checkbox') && optionsList 
+
+    const options = (type === 'select' || type === 'radio' || type === 'checkbox') && optionsList
         ? optionsList.split('\n').map(opt => opt.trim()).filter(opt => opt)
         : [];
-    
+
     const qaField = {
         id: `qa_note_${Date.now()}`,
         name,
@@ -1710,7 +1884,7 @@ function addQANoteField() {
         options,
         value: type === 'checkbox' ? [] : '' // Initialize value for checkboxes as array, others as empty string
     };
-    
+
     qaNotesFields.push(qaField);
     renderQANotesFields();
     closeModal('addQANoteFieldModal');
@@ -1720,15 +1894,15 @@ function addQANoteField() {
 function renderQANotesFields() {
     const container = document.getElementById('qaNotesFieldsList');
     if (!container) return;
-    
+
     // Find the default general notes field (if it exists and is not a custom field)
     // Assuming the general notes textarea is always present and has id 'qaNotesText'
     // This function will only render *additional* custom QA fields.
-    
+
     // Remove existing custom QA fields before re-rendering
     const existingCustomFields = container.querySelectorAll('.qa-field-item');
     existingCustomFields.forEach(field => field.remove());
-    
+
     // Add new custom fields
     qaNotesFields.forEach(field => {
         const fieldHTML = renderQANoteFieldHTML(field);
@@ -1740,13 +1914,13 @@ function renderQANotesFields() {
 
 function renderQANoteFieldHTML(field) {
     let inputHTML = '';
-    
+
     switch (field.type) {
         case 'input':
             inputHTML = `<input type="text" id="${field.id}" name="custom_${field.id}" placeholder="Enter ${field.name.toLowerCase()}" ${field.required ? 'required' : ''} value="${field.value || ''}">`;
             break;
         case 'textarea':
-            inputHTML = `<textarea id="${field.id}" name="custom_${field.id}" placeholder="Enter ${field.name.toLowerCase()}" rows="4" ${field.required ? 'required' : ''}>${field.value || ''}</textarea>`;
+            inputHTML = `<textarea id="${field.id}" name="custom_${field.id}" placeholder="Enter ${field.name.toLowerCase()}" rows="4" ${field.required ? 'required' : ''}>${field.value || ''}</textarea>`.trim();
             break;
         case 'number':
             inputHTML = `<input type="number" id="${field.id}" name="custom_${field.id}" placeholder="Enter ${field.name.toLowerCase()}" ${field.required ? 'required' : ''} value="${field.value || ''}">`;
@@ -1760,7 +1934,7 @@ function renderQANoteFieldHTML(field) {
                     <option value="">Select ${field.name}</option>
                     ${field.options.map(opt => `<option value="${opt}" ${field.value === opt ? 'selected' : ''}>${opt}</option>`).join('')}
                 </select>
-            `;
+            `.trim();
             break;
         case 'radio':
             inputHTML = field.options.map((opt, index) => `
@@ -1779,7 +1953,7 @@ function renderQANoteFieldHTML(field) {
             `).join('');
             break;
     }
-    
+
     return `
         <div class="qa-field-item form-group full-width">
             <div class="custom-field-header">
@@ -1794,7 +1968,7 @@ function renderQANoteFieldHTML(field) {
                 ${inputHTML}
             </div>
         </div>
-    `;
+    `.trim();
 }
 
 function removeQANoteField(fieldId) {
@@ -1806,10 +1980,10 @@ function removeQANoteField(fieldId) {
 async function populatePortfolioDropdown(portfolios) {
     const select = document.getElementById('portfolioName');
     if (!select) return;
-    
+
     // Clear loading state
     select.innerHTML = '<option value="">Select Portfolio</option>';
-    
+
     // Add static options first (if any, as per your original HTML)
     const staticOptions = [
         { value: 'api-services', text: 'API Services' },
@@ -1817,11 +1991,11 @@ async function populatePortfolioDropdown(portfolios) {
         { value: 'mobile-app', text: 'Mobile App' },
         { value: 'data-analytics', text: 'Data Analytics' }
     ];
-    
+
     staticOptions.forEach(opt => {
         select.innerHTML += `<option value="${opt.value}">${opt.text}</option>`;
     });
-    
+
     // Add dynamic portfolios from database
     portfolios.forEach(portfolio => {
         const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
@@ -1837,12 +2011,12 @@ async function populatePortfolioDropdown(portfolios) {
 async function populateProjectDropdown(projects) {
     const select = document.getElementById('projectName');
     if (!select) return;
-    
+
     // Keep existing static options (if any, from your original HTML)
     // For a clean slate, you might just clear and re-add.
     // Assuming you want to clear and re-add based on loaded data.
     select.innerHTML = '<option value="">Select Project</option>';
-    
+
     // Add dynamic projects from database
     projects.forEach(project => {
         const value = project.name.toLowerCase().replace(/\s+/g, '-');
@@ -1923,3 +2097,200 @@ window.loadReportForEditing = loadReportForEditing; // Make it globally accessib
 window.editingReportId = editingReportId; // Make global variable accessible
 window.allReportsCache = allReportsCache; // Make global variable accessible
 window.dashboardStatsCache = dashboardStatsCache; // Make global variable accessible
+
+// --- LocalStorage Functions ---
+const FORM_DATA_KEY = 'qaReportFormData';
+const FORM_ARRAYS_KEY = 'qaReportFormArrays';
+
+function saveFormDataToLocalStorage() {
+    try {
+        const form = document.getElementById('qaReportForm');
+        if (!form) return;
+
+        const formData = new FormData(form);
+        const formObject = {};
+
+        // Save form fields
+        for (let [key, value] of formData.entries()) {
+            formObject[key] = value;
+        }
+
+        // Save additional form elements that might not be in FormData
+        const additionalFields = [
+            'reportDate', 'portfolioName', 'projectName', 'sprintNumber',
+            'reportVersion', 'cycleNumber', 'releaseNumber', 'testSummary',
+            'testingStatus', 'qaNotesText'
+        ];
+
+        additionalFields.forEach(fieldId => {
+            const element = document.getElementById(fieldId);
+            if (element) {
+                formObject[fieldId] = element.value;
+            }
+        });
+
+        // Save calculated totals
+        const calculatedFields = [
+            'totalStories', 'totalTestCases', 'totalIssues', 'totalEnhancements'
+        ];
+
+        calculatedFields.forEach(fieldId => {
+            const element = document.getElementById(fieldId);
+            if (element) {
+                formObject[fieldId] = element.value;
+            }
+        });
+
+        localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formObject));
+
+        // Save arrays (requests, builds, testers, team members)
+        const arrayData = {
+            requestData: requestData,
+            buildData: buildData,
+            testerData: testerData,
+            teamMemberData: teamMemberData
+        };
+
+        localStorage.setItem(FORM_ARRAYS_KEY, JSON.stringify(arrayData));
+
+        console.log('Form data saved to localStorage');
+    } catch (error) {
+        console.error('Error saving form data to localStorage:', error);
+    }
+}
+
+function loadFormDataFromLocalStorage() {
+    try {
+        const savedFormData = localStorage.getItem(FORM_DATA_KEY);
+        const savedArrayData = localStorage.getItem(FORM_ARRAYS_KEY);
+
+        if (savedFormData) {
+            const formObject = JSON.parse(savedFormData);
+
+            // Load form fields
+            Object.keys(formObject).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = formObject[key];
+                }
+            });
+
+            // Trigger calculations after loading data
+            setTimeout(() => {
+                if (typeof calculatePercentages === 'function') calculatePercentages();
+                if (typeof calculateTestCasesPercentages === 'function') calculateTestCasesPercentages();
+                if (typeof calculateIssuesPercentages === 'function') calculateIssuesPercentages();
+                if (typeof calculateIssuesStatusPercentages === 'function') calculateIssuesStatusPercentages();
+                if (typeof calculateEnhancementsPercentages === 'function') calculateEnhancementsPercentages();
+                if (typeof updateAutoCalculatedFields === 'function') updateAutoCalculatedFields();
+            }, 500);
+        }
+
+        if (savedArrayData) {
+            const arrayObject = JSON.parse(savedArrayData);
+
+            // Load arrays
+            if (arrayObject.requestData) {
+                requestData = arrayObject.requestData;
+                renderRequestList();
+            }
+
+            if (arrayObject.buildData) {
+                buildData = arrayObject.buildData;
+                renderBuildList();
+            }
+
+            if (arrayObject.testerData) {
+                testerData = arrayObject.testerData;
+                renderTesterList();
+            }
+
+            if (arrayObject.teamMemberData) {
+                teamMemberData = arrayObject.teamMemberData;
+                renderTeamMemberList();
+            }
+        }
+
+        console.log('Form data loaded from localStorage');
+    } catch (error) {
+        console.error('Error loading form data from localStorage:', error);
+    }
+}
+
+function clearFormDataFromLocalStorage() {
+    try {
+        localStorage.removeItem(FORM_DATA_KEY);
+        localStorage.removeItem(FORM_ARRAYS_KEY);
+        console.log('Form data cleared from localStorage');
+    } catch (error) {
+        console.error('Error clearing form data from localStorage:', error);
+    }
+}
+
+// Auto-save functionality
+let autoSaveTimeout;
+function autoSaveFormData() {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(() => {
+        saveFormDataToLocalStorage();
+    }, 1000); // Save after 1 second of inactivity
+}
+
+// Add event listeners for auto-save
+function setupAutoSave() {
+    const form = document.getElementById('qaReportForm');
+    if (form) {
+        form.addEventListener('input', autoSaveFormData);
+        form.addEventListener('change', autoSaveFormData);
+    }
+}
+
+// Clear localStorage when form is submitted successfully
+function clearFormDataOnSubmit() {
+    clearFormDataFromLocalStorage();
+}
+
+// Override the existing arrays when they're modified
+const originalAddRequest = window.addRequest;
+const originalAddBuild = window.addBuild;
+const originalAddSelectedTester = window.addSelectedTester;
+const originalAddSelectedTeamMember = window.addSelectedTeamMember;
+
+if (typeof originalAddRequest === 'function') {
+    window.addRequest = function(...args) {
+        const result = originalAddRequest.apply(this, args);
+        autoSaveFormData();
+        return result;
+    };
+}
+
+if (typeof originalAddBuild === 'function') {
+    window.addBuild = function(...args) {
+        const result = originalAddBuild.apply(this, args);
+        autoSaveFormData();
+        return result;
+    };
+}
+
+if (typeof originalAddSelectedTester === 'function') {
+    window.addSelectedTester = function(...args) {
+        const result = originalAddSelectedTester.apply(this, args);
+        autoSaveFormData();
+        return result;
+    };
+}
+
+if (typeof originalAddSelectedTeamMember === 'function') {
+    window.addSelectedTeamMember = function(...args) {
+        const result = originalAddSelectedTeamMember.apply(this, args);
+        autoSaveFormData();
+        return result;
+    };
+}
+
+// Make functions globally accessible
+window.saveFormDataToLocalStorage = saveFormDataToLocalStorage;
+window.loadFormDataFromLocalStorage = loadFormDataFromLocalStorage;
+window.clearFormDataFromLocalStorage = clearFormDataFromLocalStorage;
+window.setupAutoSave = setupAutoSave;
+window.clearFormDataOnSubmit = clearFormDataOnSubmit;

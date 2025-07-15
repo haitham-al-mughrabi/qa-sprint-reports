@@ -17,27 +17,28 @@
     <!-- Navigation Header -->
     <nav class="main-nav">
         <div class="nav-container">
-            <div class="nav-brand"><i class="fas fa-chart-line"></i> Sprint Reports System</div>
+            <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div class="nav-links">
-                <a href="#" class="nav-link active" onclick="showPage('dashboardPage')"><i class="fas fa-house"></i> Dashboard</a>
-                <a href="#" class="nav-link" onclick="showPage('reportsPage')"><i class="fas fa-chart-bar"></i> Reports</a>
-                <a href="#" class="nav-link" onclick="createNewReport()"><i class="fas fa-plus"></i> New Report</a>
-                <a href="/manage" class="nav-link"><i class="fas fa-gear"></i> Manage Data</a>
+                <a href="/dashboard" class="nav-link active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
+                <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
             </div>
         </div>
     </nav>
 
-    <!-- Enhanced Dashboard Page -->
-    <div id="dashboardPage" class="page active">
-        <div class="dashboard-container">
-            <div class="dashboard-header">
-                <h1>Sprint Reports Dashboard</h1>
-                <p>Comprehensive Quality Assurance Management System</p>
-            </div>
+    <div class="main-wrapper">
+        <!-- Enhanced Dashboard Page -->
+        <div id="dashboardPage" class="page active">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h1>Sprint Reports Dashboard</h1>
+                    <p>Comprehensive Quality Assurance Management System</p>
+                </div>
 
             <!-- Overall Statistics -->
             <div class="dashboard-section">
-                <h2 class="section-title">📈 Overall Statistics</h2>
+                <h2 class="section-title"><i class="fas fa-chart-line"></i> Overall Statistics</h2>
                 <div class="dashboard-stats">
                     <div class="stat-card">
                         <div class="icon"><i class="fas fa-clipboard"></i></div>
@@ -96,18 +97,18 @@
 
             <!-- Project-Specific Metrics -->
             <div class="dashboard-section">
-                <h2 class="section-title">🚀 Project Metrics</h2>
+                <h2 class="section-title"><i class="fas fa-rocket"></i> Project Metrics</h2>
                 <div id="projectMetrics" class="project-metrics-container">
                     <!-- Project cards will be dynamically generated here -->
                 </div>
             </div>
 
             <div class="quick-actions">
-                <h2 style="margin-bottom: 30px; color: white; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">⚡ Quick Actions</h2>
+                <h2 style="margin-bottom: 30px; color: white; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);"><i class="fas fa-bolt"></i> Quick Actions</h2>
                 <div class="action-buttons">
-                    <button class="action-btn" onclick="createNewReport()">➕ Create New Report</button>
-                    <button class="action-btn secondary" onclick="showPage('reportsPage')">📊 View All Reports</button>
-                    <button class="action-btn secondary" onclick="exportDashboardReport()">📄 Export Dashboard Report</button>
+                    <button class="action-btn" onclick="createNewReport()"><i class="fas fa-plus-circle"></i> Create New Report</button>
+                    <button class="action-btn secondary" onclick="showPage('reportsPage')"><i class="fas fa-chart-bar"></i> View All Reports</button>
+                    <button class="action-btn secondary" onclick="exportDashboardReport()"><i class="fas fa-file-export"></i> Export Dashboard Report</button>
                 </div>
             </div>
         </div>
@@ -238,7 +239,7 @@
 
                         <!-- Section 2: Test Summary -->
                         <div class="section" id="section-1">
-                            <h2 class="section-title">📊 Test Summary & Status</h2>
+                            <h2 class="section-title"><i class="fas fa-chart-bar"></i> Test Summary & Status</h2>
                             <div class="form-grid">
                                 <div class="form-group full-width">
                                     <label for="testSummary">Test Summary</label>
@@ -261,7 +262,7 @@
                             </div>
 
                             <div class="table-container">
-                                <h3 style="margin-bottom: 20px; color: white; font-size: 1.4em;">📈 Testing Metrics (Auto-Calculated)</h3>
+                                <h3 style="margin-bottom: 20px; color: white; font-size: 1.4em;"><i class="fas fa-chart-line"></i> Testing Metrics (Auto-Calculated)</h3>
                                 <table class="data-table">
                                     <thead>
                                         <tr>
@@ -287,12 +288,12 @@
                                             <td><small>Sum of all issue priorities</small></td>
                                         </tr>
                                         <tr>
-                                            <td><strong>⚡ Enhancements</strong><br><small>Auto-calculated from section 7</small></td>
+                                            <td><strong><i class="fas fa-bolt"></i> Enhancements</strong><br><small>Auto-calculated from section 7</small></td>
                                             <td><input type="number" id="enhancementsMetric" name="enhancementsMetric" readonly class="readonly-field"></td>
                                             <td><small>Sum of all enhancement statuses</small></td>
                                         </tr>
                                         <tr>
-                                            <td><strong>📊 QA Notes Count</strong><br><small>Manual entry</small></td>
+                                            <td><strong><i class="fas fa-chart-bar"></i> QA Notes Count</strong><br><small>Manual entry</small></td>
                                             <td><input type="number" name="qaNotesMetric" min="0" placeholder="0"></td>
                                             <td><small>Number of QA notes</small></td>
                                         </tr>
@@ -352,7 +353,7 @@
                             
                             <div class="user-stories-container">
                                 <div class="stories-table-section">
-                                    <h3 style="margin-bottom: 20px; color: white;">📊 User Stories Summary</h3>
+                                    <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i> User Stories Summary</h3>
                                     <table class="data-table" id="userStoriesTable">
                                         <thead>
                                             <tr>
@@ -407,7 +408,7 @@
                                 </div>
 
                                 <div class="chart-section">
-                                    <h3 style="margin-bottom: 20px; color: white; text-align: center;">📈 User Stories Distribution</h3>
+                                    <h3 style="margin-bottom: 20px; color: white; text-align: center;"><i class="fas fa-chart-line"></i> User Stories Distribution</h3>
                                     <div class="chart-container">
                                         <canvas id="userStoriesChart" width="400" height="400"></canvas>
                                     </div>
@@ -421,7 +422,7 @@
                             
                             <div class="user-stories-container">
                                 <div class="stories-table-section">
-                                    <h3 style="margin-bottom: 20px; color: white;">📊 Test Cases Summary</h3>
+                                    <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i> Test Cases Summary</h3>
                                     <table class="data-table" id="testCasesTable">
                                         <thead>
                                             <tr>
@@ -476,7 +477,7 @@
                                 </div>
 
                                 <div class="chart-section">
-                                    <h3 style="margin-bottom: 20px; color: white; text-align: center;">📈 Test Cases Distribution</h3>
+                                    <h3 style="margin-bottom: 20px; color: white; text-align: center;"><i class="fas fa-chart-line"></i> Test Cases Distribution</h3>
                                     <div class="chart-container">
                                         <canvas id="testCasesChart" width="400" height="400"></canvas>
                                     </div>
@@ -533,7 +534,7 @@
                                 </div>
 
                                 <div class="issues-status-section">
-                                    <h3 style="margin-bottom: 20px; color: white;">📊 Issues by Status</h3>
+                                    <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i> Issues by Status</h3>
                                     <table class="data-table" id="issuesStatusTable">
                                         <thead>
                                             <tr>
@@ -579,11 +580,11 @@
 
                         <!-- Section 7: Enhancements -->
                         <div class="section" id="section-6">
-                            <h2 class="section-title">⚡ Enhancements Analysis</h2>
+                            <h2 class="section-title"><i class="fas fa-bolt"></i> Enhancements Analysis</h2>
                             
                             <div class="user-stories-container">
                                 <div class="stories-table-section">
-                                    <h3 style="margin-bottom: 20px; color: white;">📊 Enhancements Summary</h3>
+                                    <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i> Enhancements Summary</h3>
                                     <table class="data-table" id="enhancementsTable">
                                         <thead>
                                             <tr>
@@ -618,7 +619,7 @@
                                 </div>
 
                                 <div class="chart-section">
-                                    <h3 style="margin-bottom: 20px; color: white; text-align: center;">📈 Enhancements Distribution</h3>
+                                    <h3 style="margin-bottom: 20px; color: white; text-align: center;"><i class="fas fa-chart-line"></i> Enhancements Distribution</h3>
                                     <div class="chart-container">
                                         <canvas id="enhancementsChart" width="400" height="400"></canvas>
                                     </div>
@@ -671,7 +672,7 @@
     <!-- Project Modal -->
     <div id="addProjectModal" class="modal">
         <div class="modal-content">
-            <h3>🚀 Add New Project</h3>
+            <h3><i class="fas fa-rocket"></i> Add New Project</h3>
             <div class="modal-form">
                 <div class="form-group">
                     <label for="newProjectName">Project Name:</label>
@@ -799,12 +800,12 @@
                     <select id="newTeamMemberRole">
                         <option value="">Select Role</option>
                         <option value="Project Owner">👑 Project Owner</option>
-                        <option value="Project Analyst">📊 Project Analyst</option>
+                        <option value="Project Analyst"><i class="fas fa-chart-bar"></i> Project Analyst</option>
                         <option value="Project Manager">🎯 Project Manager</option>
                         <option value="Business Analyst">💼 Business Analyst</option>
-                        <option value="Technical Lead">⚡ Technical Lead</option>
+                        <option value="Technical Lead"><i class="fas fa-bolt"></i> Technical Lead</option>
                         <option value="Scrum Master">🏃 Scrum Master</option>
-                        <option value="Product Owner">🚀 Product Owner</option>
+                        <option value="Product Owner"><i class="fas fa-rocket"></i> Product Owner</option>
                         <option value="Quality Assurance Lead">🔍 Quality Assurance Lead</option>
                         <option value="DevOps Engineer">🔧 DevOps Engineer</option>
                         <option value="UI/UX Designer">🎨 UI/UX Designer</option>
@@ -822,6 +823,14 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">Made by <span class="highlight">Haitham Al-Mughrabi</span>. All rights reserved © 2024</p>
+        </div>
+    </footer>
 
     <!-- Link to the external JavaScript files -->
     <script src="/static/enhanced_script.js"></script>

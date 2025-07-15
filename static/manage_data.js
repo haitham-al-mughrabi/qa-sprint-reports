@@ -104,7 +104,7 @@ function renderProjects() {
     if (projects.length === 0) {
         container.innerHTML = `
             <div class="empty-data-state">
-                <div class="icon">🚀</div>
+                <div class="icon"><i class="fas fa-rocket"></i></div>
                 <h3>No Projects Found</h3>
                 <p>Create your first project to get started.</p>
                 <button class="action-btn" onclick="showAddProjectModal()">+ Add Project</button>

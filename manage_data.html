@@ -4,955 +4,377 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Data - Sprint Reports System</title>
-    <!-- Link to the new dedicated stylesheet for manage_data -->
+    <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/manage_data.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <!-- Navigation Header -->
     <nav class="main-nav">
         <div class="nav-container">
-            <div class="nav-brand"><i class="fas fa-chart-line"></i> Sprint Reports System</div>
+            <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div class="nav-links">
-                <a href="/dashboard" class="nav-link">Dashboard</a>
-                <a href="/reports" class="nav-link">Reports</a>
-                <a href="/create-report" class="nav-link">New Report</a>
-                <a href="/manage" class="nav-link active">Manage Data</a>
+                <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
+                <a href="/manage" class="nav-link active"><i class="fas fa-cogs"></i> Manage Data</a>
             </div>
         </div>
     </nav>
 
-    <div class="dashboard-container">
-        <div class="dashboard-header">
+    <div class="main-wrapper">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
             <h1>Manage System Data</h1>
-            <p>Manage portfolios, projects, testers, and team members</p>
+            <p>Administer portfolios, projects, testers, and team members</p>
         </div>
 
-        <!-- Tabs -->
         <div class="tabs-container">
             <div class="tabs">
-                <button class="tab active" onclick="showTab('portfolios')">Portfolios</button>
-                <button class="tab" onclick="showTab('projects')">Projects</button>
-                <button class="tab" onclick="showTab('testers')">Testers</button>
-                <button class="tab" onclick="showTab('team')">Team Members</button>
+                <button class="tab active" onclick="showTab('portfolios')"><i class="fas fa-briefcase"></i> Portfolios</button>
+                <button class="tab" onclick="showTab('projects')"><i class="fas fa-project-diagram"></i> Projects</button>
+                <button class="tab" onclick="showTab('testers')"><i class="fas fa-user-cog"></i> Testers</button>
+                <button class="tab" onclick="showTab('team')"><i class="fas fa-users"></i> Team</button>
             </div>
         </div>
 
         <!-- Portfolio Management -->
         <div id="portfolios" class="tab-content active">
-            <div class="section">
-                <div class="section-header">
-                    <h2>Portfolio Management</h2>
-                    <button class="action-btn" onclick="showAddPortfolioModal()">+ Add Portfolio</button>
-                </div>
-                
-                <!-- Search and Filter -->
-                <div class="search-filter-container">
-                    <input type="text" placeholder="Search portfolios..." id="portfolioSearch" onkeyup="searchPortfolios()">
-                </div>
-                
-                <!-- Portfolio Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card-small">
-                        <div class="icon">📁</div>
-                        <h3 id="totalPortfolios">0</h3>
-                        <p>Total Portfolios</p>
-                    </div>
-                </div>
-                
-                <!-- Portfolio List -->
-                <div id="portfoliosList" class="data-list">
-                    <div class="empty-data-state">
-                        <div class="icon">📁</div>
-                        <h3>No Portfolios Found</h3>
-                        <p>Create your first portfolio to get started.</p>
-                        <button class="action-btn" onclick="showAddPortfolioModal()">+ Add Portfolio</button>
-                    </div>
+            <div class="section-header">
+                <h2>Portfolio Management</h2>
+                <button class="action-btn" onclick="showAddPortfolioModal()"><i class="fas fa-plus-circle"></i> Add Portfolio</button>
+            </div>
+            <div class="search-filter-container">
+                 <input type="text" placeholder="Search portfolios..." id="portfolioSearch" onkeyup="displayPortfolios()">
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card-small">
+                    <div class="icon-bg"><i class="fas fa-briefcase"></i></div>
+                    <h3 id="totalPortfolios">0</h3>
+                    <p>Total Portfolios</p>
                 </div>
             </div>
+            <div id="portfoliosList" class="data-list"></div>
         </div>
 
         <!-- Project Management -->
         <div id="projects" class="tab-content">
-            <div class="section">
-                <div class="section-header">
-                    <h2>Project Management</h2>
-                    <button class="action-btn" onclick="showAddProjectModal()">+ Add Project</button>
-                </div>
-                
-                <!-- Search and Filter -->
-                <div class="search-filter-container">
-                    <input type="text" placeholder="Search projects..." id="projectSearch" onkeyup="searchProjects()">
-                    <select class="filter-select" id="portfolioFilter" onchange="filterProjects()">
-                        <option value="">All Portfolios</option>
-                    </select>
-                </div>
-                
-                <!-- Project Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card-small">
-                        <div class="icon">🚀</div>
-                        <h3 id="totalProjects">0</h3>
-                        <p>Total Projects</p>
-                    </div>
-                </div>
-                
-                <!-- Project List -->
-                <div id="projectsList" class="data-list">
-                    <div class="empty-data-state">
-                        <div class="icon">🚀</div>
-                        <h3>No Projects Found</h3>
-                        <p>Create your first project to get started.</p>
-                        <button class="action-btn" onclick="showAddProjectModal()">+ Add Project</button>
-                    </div>
+            <div class="section-header">
+                <h2>Project Management</h2>
+                <button class="action-btn" onclick="showAddProjectModal()"><i class="fas fa-plus-circle"></i> Add Project</button>
+            </div>
+             <div class="search-filter-container">
+                <input type="text" placeholder="Search projects..." id="projectSearch" onkeyup="displayProjects()">
+                <select class="filter-select" id="portfolioFilter" onchange="displayProjects()"><option value="">All Portfolios</option></select>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card-small">
+                    <div class="icon-bg"><i class="fas fa-project-diagram"></i></div>
+                    <h3 id="totalProjects">0</h3>
+                    <p>Total Projects</p>
                 </div>
             </div>
+            <div id="projectsList" class="data-list"></div>
         </div>
 
         <!-- Tester Management -->
         <div id="testers" class="tab-content">
-            <div class="section">
-                <div class="section-header">
-                    <h2>Tester Management</h2>
-                    <button class="action-btn" onclick="showAddTesterModal()">+ Add Tester</button>
-                </div>
-                
-                <!-- Search and Filter -->
-                <div class="search-filter-container">
-                    <input type="text" placeholder="Search testers..." id="testerSearch" onkeyup="searchTesters()">
-                </div>
-                
-                <!-- Tester Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card-small">
-                        <div class="icon">🧪</div>
-                        <h3 id="totalTesters">0</h3>
-                        <p>Total Testers</p>
-                    </div>
-                </div>
-                
-                <!-- Tester List -->
-                <div id="testersList" class="data-list">
-                    <div class="empty-data-state">
-                        <div class="icon">🧪</div>
-                        <h3>No Testers Found</h3>
-                        <p>Add testers to your system.</p>
-                        <button class="action-btn" onclick="showAddTesterModal()">+ Add Tester</button>
-                    </div>
+            <div class="section-header">
+                <h2>Tester Management</h2>
+                <button class="action-btn" onclick="showAddTesterModal()"><i class="fas fa-plus-circle"></i> Add Tester</button>
+            </div>
+             <div class="search-filter-container">
+                <input type="text" placeholder="Search testers..." id="testerSearch" onkeyup="displayTesters()">
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card-small">
+                    <div class="icon-bg"><i class="fas fa-user-cog"></i></div>
+                    <h3 id="totalTesters">0</h3>
+                    <p>Total Testers</p>
                 </div>
             </div>
+            <div id="testersList" class="data-list"></div>
         </div>
 
         <!-- Team Member Management -->
         <div id="team" class="tab-content">
-            <div class="section">
-                <div class="section-header">
-                    <h2>Team Member Management</h2>
-                    <button class="action-btn" onclick="showAddTeamMemberModal()">+ Add Team Member</button>
-                </div>
-                
-                <!-- Search and Filter -->
-<div class="search-filter-container">
-    <input type="text" placeholder="Search team members..." id="teamSearch" onkeyup="searchTeamMembers()">
-    <select class="filter-select" id="roleFilter" onchange="filterTeamMembers()">
-        <option value="">All Roles</option>
-        <option value="Project Owner">Project Owner</option>
-        <option value="Project Analyst">Project Analyst</option>
-        <option value="Project Manager">Project Manager</option>
-        <option value="Business Analyst">Business Analyst</option>
-        <option value="Technical Lead">Technical Lead</option>
-        <option value="Scrum Master">Scrum Master</option>
-        <option value="Product Owner">Product Owner</option>
-        <option value="Quality Assurance Lead">Quality Assurance Lead</option>
-        <option value="DevOps Engineer">DevOps Engineer</option>
-        <option value="UI/UX Designer">UI/UX Designer</option>
-        <option value="Database Administrator">Database Administrator</option>
-        <option value="Security Analyst">Security Analyst</option>
-        <option value="System Administrator">System Administrator</option>
-        <option value="Stakeholder">Stakeholder</option>
-        <option value="Client Representative">Client Representative</option>
-    </select>
-</div>
-                
-                <!-- Team Stats -->
-<div class="stats-grid">
-    <div class="stat-card-small">
-        <div class="icon">👥</div>
-        <h3 id="totalTeamMembers">0</h3>
-        <p>Total Team Members</p>
-    </div>
-    <div class="stat-card-small">
-        <div class="icon">👤</div>
-        <h3 id="projectOwners">0</h3>
-        <p>Project Owners</p>
-    </div>
-    <div class="stat-card-small">
-        <div class="icon">📊</div>
-        <h3 id="projectAnalysts">0</h3>
-        <p>Project Analysts</p>
-    </div>
-    <div class="stat-card-small">
-        <div class="icon">🎯</div>
-        <h3 id="projectManagers">0</h3>
-        <p>Project Managers</p>
-    </div>
-    <div class="stat-card-small">
-        <div class="icon">💼</div>
-        <h3 id="businessAnalysts">0</h3>
-        <p>Business Analysts</p>
-    </div>
-    <div class="stat-card-small">
-        <div class="icon">⚡</div>
-        <h3 id="technicalLeads">0</h3>
-        <p>Technical Leads</p>
-    </div>
-    <div class="stat-card-small">
-        <div class="icon">🏃</div>
-        <h3 id="scrumMasters">0</h3>
-        <p>Scrum Masters</p>
-    </div>
-    <div class="stat-card-small">
-        <div class="icon">🚀</div>
-        <h3 id="productOwners">0</h3>
-        <p>Product Owners</p>
-    </div>
-</div>
-                
-                <!-- Team Member List -->
-                <div id="teamMembersList" class="data-list">
-                    <div class="empty-data-state">
-                        <div class="icon">👥</div>
-                        <h3>No Team Members Found</h3>
-                        <p>Add team members to your system.</p>
-                        <button class="action-btn" onclick="showAddTeamMemberModal()">+ Add Team Member</button>
-                    </div>
-                </div>
+            <div class="section-header">
+                <h2>Team Member Management</h2>
+                <button class="action-btn" onclick="showAddTeamMemberModal()"><i class="fas fa-plus-circle"></i> Add Team Member</button>
             </div>
+            <div class="search-filter-container">
+                <input type="text" placeholder="Search team members..." id="teamSearch" onkeyup="displayTeamMembers()">
+                <select class="filter-select" id="roleFilter" onchange="displayTeamMembers()"><option value="">All Roles</option></select>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card-small"><div class="icon-bg"><i class="fas fa-users"></i></div><h3 id="totalTeamMembers">0</h3><p>Total Team</p></div>
+                <div class="stat-card-small"><div class="icon-bg"><i class="fas fa-crown"></i></div><h3 id="projectOwners">0</h3><p>Project Owners</p></div>
+                <div class="stat-card-small"><div class="icon-bg"><i class="fas fa-user-graduate"></i></div><h3 id="projectAnalysts">0</h3><p>Analysts</p></div>
+                <div class="stat-card-small"><div class="icon-bg"><i class="fas fa-user-tie"></i></div><h3 id="projectManagers">0</h3><p>Managers</p></div>
+            </div>
+            <div id="teamMembersList" class="data-list"></div>
         </div>
     </div>
 
     <!-- Modals -->
-    <!-- Add Portfolio Modal -->
     <div id="addPortfolioModal" class="modal manage-modal">
         <div class="modal-content">
-            <h3>Add New Portfolio</h3>
+            <div class="modal-header">
+                <div class="icon-bg"><i class="fas fa-briefcase"></i></div>
+                <h3>Add New Portfolio</h3>
+            </div>
             <div class="modal-form">
-                <div class="form-group">
-                    <label for="portfolioName">Portfolio Name:</label>
-                    <input type="text" id="portfolioName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="portfolioDescription">Description:</label>
-                    <textarea id="portfolioDescription" rows="4"></textarea>
-                </div>
+                <div class="form-group"><label for="portfolioName">Portfolio Name:</label><input type="text" id="portfolioName" required></div>
+                <div class="form-group"><label for="portfolioDescription">Description:</label><textarea id="portfolioDescription" rows="4"></textarea></div>
             </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('addPortfolioModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="savePortfolio()">Save</button>
-            </div>
+            <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addPortfolioModal')">Cancel</button><button type="button" class="btn btn-primary" onclick="savePortfolio()">Save</button></div>
         </div>
     </div>
 
-    <!-- Add Project Modal -->
     <div id="addProjectModal" class="modal manage-modal">
         <div class="modal-content">
-            <h3>Add New Project</h3>
+            <div class="modal-header">
+                <div class="icon-bg"><i class="fas fa-project-diagram"></i></div>
+                <h3>Add New Project</h3>
+            </div>
             <div class="modal-form">
-                <div class="form-group">
-                    <label for="projectName">Project Name:</label>
-                    <input type="text" id="projectName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="projectPortfolio">Portfolio:</label>
-                    <select id="projectPortfolio" required>
-                        <option value="">Select Portfolio</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="projectDescription">Description:</label>
-                    <textarea id="projectDescription" rows="4"></textarea>
-                </div>
+                <div class="form-group"><label for="projectName">Project Name:</label><input type="text" id="projectName" required></div>
+                <div class="form-group"><label for="projectPortfolio">Portfolio:</label><select id="projectPortfolio" required><option value="">Select Portfolio</option></select></div>
+                <div class="form-group"><label for="projectDescription">Description:</label><textarea id="projectDescription" rows="4"></textarea></div>
             </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('addProjectModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveProject()">Save</button>
-            </div>
+            <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addProjectModal')">Cancel</button><button type="button" class="btn btn-primary" onclick="saveProject()">Save</button></div>
         </div>
     </div>
 
-    <!-- Add Tester Modal -->
     <div id="addTesterModal" class="modal manage-modal">
         <div class="modal-content">
-            <h3>Add New Tester</h3>
-            <div class="modal-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="testerName">Name:</label>
-                        <input type="text" id="testerName" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="testerEmail">Email:</label>
-                        <input type="email" id="testerEmail" required>
-                    </div>
-                </div>
+            <div class="modal-header">
+                <div class="icon-bg"><i class="fas fa-user-cog"></i></div>
+                <h3>Add New Tester</h3>
             </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('addTesterModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveTester()">Save</button>
-            </div>
+            <div class="modal-form"><div class="form-row"><div class="form-group"><label for="testerName">Name:</label><input type="text" id="testerName" required></div><div class="form-group"><label for="testerEmail">Email:</label><input type="email" id="testerEmail" required></div></div></div>
+            <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addTesterModal')">Cancel</button><button type="button" class="btn btn-primary" onclick="saveTester()">Save</button></div>
         </div>
     </div>
 
-    <!-- Add Team Member Modal -->
-<div id="addTeamMemberModal" class="modal manage-modal">
-    <div class="modal-content">
-        <h3>Add New Team Member</h3>
-        <div class="modal-form">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="teamMemberName">Name:</label>
-                    <input type="text" id="teamMemberName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="teamMemberEmail">Email:</label>
-                    <input type="email" id="teamMemberEmail" required>
-                </div>
+    <div id="addTeamMemberModal" class="modal manage-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="icon-bg"><i class="fas fa-users"></i></div>
+                <h3>Add New Team Member</h3>
             </div>
-            
-            <div class="form-group">
-                <label for="teamMemberRole">Role:</label>
-                <select id="teamMemberRole" required>
-                    <option value="">Select Role</option>
-                    <option value="Project Owner">Project Owner</option>
-                    <option value="Project Analyst">Project Analyst</option>
-                    <option value="Project Manager">Project Manager</option>
-                    <option value="Business Analyst">Business Analyst</option>
-                    <option value="Technical Lead">Technical Lead</option>
-                    <option value="Scrum Master">Scrum Master</option>
-                    <option value="Product Owner">Product Owner</option>
-                    <option value="Quality Assurance Lead">Quality Assurance Lead</option>
-                    <option value="DevOps Engineer">DevOps Engineer</option>
-                    <option value="UI/UX Designer">UI/UX Designer</option>
-                    <option value="Database Administrator">Database Administrator</option>
-                    <option value="Security Analyst">Security Analyst</option>
-                    <option value="System Administrator">System Administrator</option>
-                    <option value="Stakeholder">Stakeholder</option>
-                    <option value="Client Representative">Client Representative</option>
-                </select>
+            <div class="modal-form">
+                <div class="form-row"><div class="form-group"><label for="teamMemberName">Name:</label><input type="text" id="teamMemberName" required></div><div class="form-group"><label for="teamMemberEmail">Email:</label><input type="email" id="teamMemberEmail" required></div></div>
+                <div class="form-group"><label for="teamMemberRole">Role:</label><select id="teamMemberRole" required><option value="">Select Role</option></select></div>
             </div>
-        </div>
-        <div class="modal-buttons">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('addTeamMemberModal')">Cancel</button>
-            <button type="button" class="btn btn-primary" onclick="saveTeamMember()">Save</button>
+            <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addTeamMemberModal')">Cancel</button><button type="button" class="btn btn-primary" onclick="saveTeamMember()">Save</button></div>
         </div>
     </div>
-</div>
 
     <script>
-let portfolios = [];
-let projects = [];
-let testers = [];
-let teamMembers = [];
-let editingId = null;
-let editingType = null;
+        let portfolios = [];
+        let projects = [];
+        let testers = [];
+        let teamMembers = [];
+        let editingId = null;
 
-// Initialize the page
-document.addEventListener('DOMContentLoaded', async () => {
-    await loadAllData();
-    updateStats();
-    renderAllLists();
-});
+        const roles = ["Project Owner", "Project Analyst", "Project Manager", "Business Analyst", "Technical Lead", "Scrum Master", "Product Owner", "Quality Assurance Lead", "DevOps Engineer", "UI/UX Designer", "Database Administrator", "Security Analyst", "System Administrator", "Stakeholder", "Client Representative"];
 
-// Load all data from API
-async function loadAllData() {
-    try {
-        // Load portfolios
-        const portfolioResponse = await fetch('/api/portfolios');
-        if (portfolioResponse.ok) {
-            portfolios = await portfolioResponse.json();
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupRoleFilters();
+            await loadAllData();
+            updateAll();
+        });
+
+        function setupRoleFilters() {
+            const roleFilter = document.getElementById('roleFilter');
+            const teamMemberRole = document.getElementById('teamMemberRole');
+            roles.forEach(role => {
+                roleFilter.innerHTML += `<option value="${role}">${role}</option>`;
+                teamMemberRole.innerHTML += `<option value="${role}">${role}</option>`;
+            });
         }
 
-        // Load projects
-        const projectResponse = await fetch('/api/projects');
-        if (projectResponse.ok) {
-            projects = await projectResponse.json();
-        }
-
-        // Load testers
-        const testerResponse = await fetch('/api/testers');
-        if (testerResponse.ok) {
-            testers = await testerResponse.json();
-        }
-
-        // Load team members
-        const teamResponse = await fetch('/api/team-members');
-        if (teamResponse.ok) {
-            teamMembers = await teamResponse.json();
-        }
-    } catch (error) {
-        console.error('Error loading data:', error);
-    }
-}
-
-// Update statistics
-function updateStats() {
-    document.getElementById('totalPortfolios').textContent = portfolios.length;
-    document.getElementById('totalProjects').textContent = projects.length;
-    document.getElementById('totalTesters').textContent = testers.length;
-    document.getElementById('totalTeamMembers').textContent = teamMembers.length;
-    
-    // Update role counts
-    document.getElementById('projectOwners').textContent = teamMembers.filter(tm => tm.role === 'Project Owner').length;
-    document.getElementById('projectAnalysts').textContent = teamMembers.filter(tm => tm.role === 'Project Analyst').length;
-    document.getElementById('projectManagers').textContent = teamMembers.filter(tm => tm.role === 'Project Manager').length;
-    document.getElementById('businessAnalysts').textContent = teamMembers.filter(tm => tm.role === 'Business Analyst').length;
-    document.getElementById('technicalLeads').textContent = teamMembers.filter(tm => tm.role === 'Technical Lead').length;
-    document.getElementById('scrumMasters').textContent = teamMembers.filter(tm => tm.role === 'Scrum Master').length;
-    document.getElementById('productOwners').textContent = teamMembers.filter(tm => tm.role === 'Product Owner').length;
-}
-
-// Render all lists
-function renderAllLists() {
-    renderPortfolios();
-    renderProjects();
-    renderTesters();
-    renderTeamMembers();
-}
-
-// Toast notification system
-function showToast(message, type = 'info', duration = 5000) {
-    // Create toast container if it doesn't exist
-    let container = document.querySelector('.toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-    }
-    
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <div class="toast-icon"></div>
-        <div class="toast-message">${message}</div>
-        <button class="toast-close" onclick="removeToast(this.parentElement)">×</button>
-    `;
-    
-    container.appendChild(toast);
-    
-    // Auto remove after duration
-    setTimeout(() => {
-        removeToast(toast);
-    }, duration);
-}
-
-function removeToast(toast) {
-    if (toast && toast.parentElement) {
-        toast.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => {
-            if (toast.parentElement) {
-                toast.parentElement.removeChild(toast);
+        async function loadAllData() {
+            try {
+                [portfolios, projects, testers, teamMembers] = await Promise.all([
+                    fetch('/api/portfolios').then(res => res.ok ? res.json() : []),
+                    fetch('/api/projects').then(res => res.ok ? res.json() : []),
+                    fetch('/api/testers').then(res => res.ok ? res.json() : []),
+                    fetch('/api/team-members').then(res => res.ok ? res.json() : [])
+                ]);
+            } catch (error) {
+                console.error("Failed to load data:", error);
+                alert("Failed to load system data. Please check the console for errors.");
             }
-        }, 300);
-    }
-}
+        }
+        
+        function updateAll() {
+            updateStats();
+            displayAllLists();
+            populatePortfolioFilter();
+        }
 
-// Render portfolios
-function renderPortfolios() {
-    const container = document.getElementById('portfoliosList');
-    if (portfolios.length === 0) {
-        container.innerHTML = `
-            <div class="empty-data-state">
-                <div class="icon">📁</div>
-                <h3>No Portfolios Found</h3>
-                <p>Create your first portfolio to get started.</p>
-                <button class="action-btn" onclick="showAddPortfolioModal()">+ Add Portfolio</button>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = portfolios.map(portfolio => `
-        <div class="data-item portfolio">
-            <div class="data-item-header">
-                <h3 class="data-item-title">${portfolio.name}</h3>
-                <div class="data-item-actions">
-                    <button class="btn-edit" onclick="editPortfolio(${portfolio.id})">Edit</button>
-                    <button class="btn-delete" onclick="deletePortfolio(${portfolio.id})">Delete</button>
-                </div>
-            </div>
-            <div class="data-item-content">
-                <p>${portfolio.description || 'No description provided'}</p>
-                <div class="project-count">
-                    ${projects.filter(p => p.portfolio_id === portfolio.id).length} Projects
-                </div>
-            </div>
+        function updateStats() {
+            document.getElementById('totalPortfolios').textContent = portfolios.length;
+            document.getElementById('totalProjects').textContent = projects.length;
+            document.getElementById('totalTesters').textContent = testers.length;
+            document.getElementById('totalTeamMembers').textContent = teamMembers.length;
+            document.getElementById('projectOwners').textContent = teamMembers.filter(tm => tm.role === 'Project Owner').length;
+            document.getElementById('projectAnalysts').textContent = teamMembers.filter(tm => tm.role === 'Project Analyst').length;
+            document.getElementById('projectManagers').textContent = teamMembers.filter(tm => tm.role === 'Project Manager').length;
+        }
+
+        // --- DISPLAY & RENDER FUNCTIONS ---
+        function displayAllLists() {
+            displayPortfolios();
+            displayProjects();
+            displayTesters();
+            displayTeamMembers();
+        }
+
+        function renderList(type, data, renderer, emptyIcon, emptyTitle, emptyText) {
+            const container = document.getElementById(`${type}List`);
+            if (data.length === 0) {
+                container.innerHTML = `<div class="empty-data-state">
+                    <div class="icon-bg"><i class="fas ${emptyIcon}"></i></div>
+                    <h3>${emptyTitle}</h3>
+                    <p>${emptyText}</p>
+                </div>`;
+                return;
+            }
+            container.innerHTML = data.map(renderer).join('');
+        }
+
+        // Portfolios
+        function displayPortfolios() {
+            const searchTerm = document.getElementById('portfolioSearch')?.value.toLowerCase() || '';
+            const filtered = portfolios.filter(p => p.name.toLowerCase().includes(searchTerm));
+            renderList('portfolios', filtered, renderPortfolio, 'fa-folder-open', 'No Portfolios Found', 'Add a portfolio to get started.');
+        }
+        const renderPortfolio = p => `<div class="data-item"><div class="data-item-header"><h3 class="data-item-title">${p.name}</h3><div class="data-item-actions"><button class="btn-edit" onclick="editPortfolio(${p.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteItem('portfolios', ${p.id})"><i class="fas fa-trash"></i></button></div></div><div class="data-item-content"><p>${p.description || 'No description'}</p><p><strong>Projects:</strong> ${projects.filter(proj => proj.portfolio_id === p.id).length}</p></div></div>`;
+
+        // Projects
+        function displayProjects() {
+            const searchTerm = document.getElementById('projectSearch')?.value.toLowerCase() || '';
+            const portfolioId = document.getElementById('portfolioFilter')?.value;
+            let filtered = projects;
+            if (portfolioId) {
+                filtered = filtered.filter(p => p.portfolio_id == portfolioId);
+            }
+            if (searchTerm) {
+                filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm));
+            }
+            renderList('projects', filtered, renderProject, 'fa-rocket', 'No Projects Found', 'Add a project to get started.');
+        }
+        const renderProject = p => `<div class="data-item"><div class="data-item-header"><h3 class="data-item-title">${p.name}</h3><div class="data-item-actions"><button class="btn-edit" onclick="editProject(${p.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteItem('projects', ${p.id})"><i class="fas fa-trash"></i></button></div></div><div class="data-item-content"><p><strong>Portfolio:</strong> ${portfolios.find(pf => pf.id === p.portfolio_id)?.name || 'N/A'}</p><p>${p.description || 'No description'}</p></div></div>`;
+
+        // Testers
+        function displayTesters() {
+            const searchTerm = document.getElementById('testerSearch')?.value.toLowerCase() || '';
+            const filtered = testers.filter(t => t.name.toLowerCase().includes(searchTerm) || t.email.toLowerCase().includes(searchTerm));
+            renderList('testers', filtered, renderTester, 'fa-vial', 'No Testers Found', 'Add a tester to the system.');
+        }
+        const renderTester = t => `<div class="data-item"><div class="data-item-header"><h3 class="data-item-title">${t.name}</h3><div class="data-item-actions"><button class="btn-edit" onclick="editTester(${t.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteItem('testers', ${t.id})"><i class="fas fa-trash"></i></button></div></div><div class="data-item-content"><p><strong>Email:</strong> ${t.email}</p></div></div>`;
+
+        // Team Members
+        function displayTeamMembers() {
+            const searchTerm = document.getElementById('teamSearch')?.value.toLowerCase() || '';
+            const role = document.getElementById('roleFilter')?.value;
+            let filtered = teamMembers;
+            if (role) {
+                filtered = filtered.filter(m => m.role === role);
+            }
+            if (searchTerm) {
+                filtered = filtered.filter(m => m.name.toLowerCase().includes(searchTerm) || m.email.toLowerCase().includes(searchTerm));
+            }
+            renderList('teamMembers', filtered, renderTeamMember, 'fa-users', 'No Team Members Found', 'Add a team member to the system.');
+        }
+        const renderTeamMember = m => `<div class="data-item"><div class="data-item-header"><h3 class="data-item-title">${m.name}</h3><div class="data-item-actions"><button class="btn-edit" onclick="editTeamMember(${m.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteItem('team-members', ${m.id})"><i class="fas fa-trash"></i></button></div></div><div class="data-item-content"><p><strong>Email:</strong> ${m.email}</p><span class="role-badge">${m.role}</span></div></div>`;
+
+        // --- TABS & MODALS ---
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function showModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+        function populatePortfolioDropdown(selectedId = '') {
+            const select = document.getElementById('projectPortfolio');
+            select.innerHTML = '<option value="">Select Portfolio</option>' + portfolios.map(p => `<option value="${p.id}" ${p.id == selectedId ? 'selected' : ''}>${p.name}</option>`).join('');
+        }
+        function populatePortfolioFilter() {
+            const select = document.getElementById('portfolioFilter');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">All Portfolios</option>' + portfolios.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            select.value = currentValue;
+        }
+
+        // --- CRUD OPERATIONS ---
+        // Show Modals for Adding
+        function showAddPortfolioModal() { editingId=null; document.getElementById('portfolioName').value=''; document.getElementById('portfolioDescription').value=''; showModal('addPortfolioModal'); }
+        function showAddProjectModal() { editingId=null; document.getElementById('projectName').value=''; document.getElementById('projectDescription').value=''; populatePortfolioDropdown(); showModal('addProjectModal'); }
+        function showAddTesterModal() { editingId=null; document.getElementById('testerName').value=''; document.getElementById('testerEmail').value=''; showModal('addTesterModal'); }
+        function showAddTeamMemberModal() { editingId=null; document.getElementById('teamMemberName').value=''; document.getElementById('teamMemberEmail').value=''; document.getElementById('teamMemberRole').value=''; showModal('addTeamMemberModal'); }
+
+        // Show Modals for Editing
+        function editPortfolio(id) { const p = portfolios.find(i=>i.id===id); if(!p) return; editingId=id; document.getElementById('portfolioName').value=p.name; document.getElementById('portfolioDescription').value=p.description; showModal('addPortfolioModal'); }
+        function editProject(id) { const p = projects.find(i=>i.id===id); if(!p) return; editingId=id; document.getElementById('projectName').value=p.name; document.getElementById('projectDescription').value=p.description; populatePortfolioDropdown(p.portfolio_id); showModal('addProjectModal'); }
+        function editTester(id) { const t = testers.find(i=>i.id===id); if(!t) return; editingId=id; document.getElementById('testerName').value=t.name; document.getElementById('testerEmail').value=t.email; showModal('addTesterModal'); }
+        function editTeamMember(id) { const m = teamMembers.find(i=>i.id===id); if(!m) return; editingId=id; document.getElementById('teamMemberName').value=m.name; document.getElementById('teamMemberEmail').value=m.email; document.getElementById('teamMemberRole').value=m.role; showModal('addTeamMemberModal'); }
+
+        // Save Data (Create/Update)
+        async function saveData(type, body, modalId) {
+            const url = editingId ? `/api/${type}/${editingId}` : `/api/${type}`;
+            const method = editingId ? 'PUT' : 'POST';
+            try {
+                const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                if(response.ok) {
+                    await loadAllData();
+                    updateAll();
+                    closeModal(modalId);
+                } else { 
+                    alert(`Failed to save ${type}.`); 
+                }
+            } catch (error) {
+                console.error(`Error saving ${type}:`, error);
+                alert(`An error occurred while saving ${type}.`);
+            }
+            editingId = null;
+        }
+
+        function savePortfolio() { const name=document.getElementById('portfolioName').value, description=document.getElementById('portfolioDescription').value; if(name) saveData('portfolios', {name, description}, 'addPortfolioModal'); }
+        function saveProject() { const name=document.getElementById('projectName').value, portfolio_id=document.getElementById('projectPortfolio').value, description=document.getElementById('projectDescription').value; if(name && portfolio_id) saveData('projects', {name, portfolio_id, description}, 'addProjectModal'); }
+        function saveTester() { const name=document.getElementById('testerName').value, email=document.getElementById('testerEmail').value; if(name && email) saveData('testers', {name, email}, 'addTesterModal'); }
+        function saveTeamMember() { const name=document.getElementById('teamMemberName').value, email=document.getElementById('teamMemberEmail').value, role=document.getElementById('teamMemberRole').value; if(name && email && role) saveData('team-members', {name, email, role}, 'addTeamMemberModal'); }
+
+        // Delete Data
+        async function deleteItem(type, id) {
+            if (!confirm('Are you sure you want to delete this item?')) return;
+            try {
+                const response = await fetch(`/api/${type}/${id}`, { method: 'DELETE' });
+                if(response.ok) { 
+                    await loadAllData(); 
+                    updateAll(); 
+                } 
+                else { alert(`Failed to delete ${type}.`); }
+            } catch (error) {
+                console.error(`Error deleting ${type}:`, error);
+                alert(`An error occurred while deleting ${type}.`);
+            }
+        }
+    </script>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">Made by <span class="highlight">Haitham Al-Mughrabi</span>. All rights reserved © 2024</p>
         </div>
-    `).join('');
-}
-
-// Render projects
-function renderProjects() {
-    const container = document.getElementById('projectsList');
-    if (projects.length === 0) {
-        container.innerHTML = `
-            <div class="empty-data-state">
-                <div class="icon">🚀</div>
-                <h3>No Projects Found</h3>
-                <p>Create your first project to get started.</p>
-                <button class="action-btn" onclick="showAddProjectModal()">+ Add Project</button>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = projects.map(project => {
-        const portfolio = portfolios.find(p => p.id === project.portfolio_id);
-        return `
-            <div class="data-item project">
-                <div class="data-item-header">
-                    <h3 class="data-item-title">${project.name}</h3>
-                    <div class="data-item-actions">
-                        <button class="btn-edit" onclick="editProject(${project.id})">Edit</button>
-                        <button class="btn-delete" onclick="deleteProject(${project.id})">Delete</button>
-                    </div>
-                </div>
-                <div class="data-item-content">
-                    <p><strong>Portfolio:</strong> ${portfolio ? portfolio.name : 'Unknown'}</p>
-                    <p>${project.description || 'No description provided'}</p>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// Render testers
-function renderTesters() {
-    const container = document.getElementById('testersList');
-    if (testers.length === 0) {
-        container.innerHTML = `
-            <div class="empty-data-state">
-                <div class="icon">🧪</div>
-                <h3>No Testers Found</h3>
-                <p>Add testers to your system.</p>
-                <button class="action-btn" onclick="showAddTesterModal()">+ Add Tester</button>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = testers.map(tester => `
-        <div class="data-item tester">
-            <div class="data-item-header">
-                <h3 class="data-item-title">${tester.name}</h3>
-                <div class="data-item-actions">
-                    <button class="btn-edit" onclick="editTester(${tester.id})">Edit</button>
-                    <button class="btn-delete" onclick="deleteTester(${tester.id})">Delete</button>
-                </div>
-            </div>
-            <div class="data-item-content">
-                <p><strong>Email:</strong> ${tester.email}</p>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Render team members
-function renderTeamMembers() {
-    const container = document.getElementById('teamMembersList');
-    if (teamMembers.length === 0) {
-        container.innerHTML = `
-            <div class="empty-data-state">
-                <div class="icon">👥</div>
-                <h3>No Team Members Found</h3>
-                <p>Add team members to your system.</p>
-                <button class="action-btn" onclick="showAddTeamMemberModal()">+ Add Team Member</button>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = teamMembers.map(member => `
-        <div class="data-item team-member">
-            <div class="data-item-header">
-                <h3 class="data-item-title">${member.name}</h3>
-                <div class="data-item-actions">
-                    <button class="btn-edit" onclick="editTeamMember(${member.id})">Edit</button>
-                    <button class="btn-delete" onclick="deleteTeamMember(${member.id})">Delete</button>
-                </div>
-            </div>
-            <div class="data-item-content">
-                <p><strong>Email:</strong> ${member.email}</p>
-                <span class="role-badge ${member.role.toLowerCase().replace(/\s+/g, '-')}">${member.role}</span>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Tab Management
-function showTab(tabName) {
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    
-    document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
-    document.getElementById(tabName).classList.add('active');
-    
-    if (tabName === 'projects') {
-        populatePortfolioFilter();
-    }
-}
-
-// Modal functions
-function showAddPortfolioModal() {
-    editingId = null;
-    editingType = 'portfolio';
-    document.getElementById('portfolioName').value = '';
-    document.getElementById('portfolioDescription').value = '';
-    showModal('addPortfolioModal');
-}
-
-function showAddProjectModal() {
-    editingId = null;
-    editingType = 'project';
-    document.getElementById('projectName').value = '';
-    document.getElementById('projectDescription').value = '';
-    populatePortfolioDropdown();
-    showModal('addProjectModal');
-}
-
-function showAddTesterModal() {
-    editingId = null;
-    editingType = 'tester';
-    document.getElementById('testerName').value = '';
-    document.getElementById('testerEmail').value = '';
-    showModal('addTesterModal');
-}
-
-function showAddTeamMemberModal() {
-    editingId = null;
-    editingType = 'teamMember';
-    document.getElementById('teamMemberName').value = '';
-    document.getElementById('teamMemberEmail').value = '';
-    document.getElementById('teamMemberRole').value = '';
-    showModal('addTeamMemberModal');
-}
-
-function showModal(modalId) {
-    document.getElementById(modalId).style.display = 'block';
-}
-
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-}
-
-function populatePortfolioDropdown() {
-    const select = document.getElementById('projectPortfolio');
-    select.innerHTML = '<option value="">Select Portfolio</option>';
-    portfolios.forEach(portfolio => {
-        select.innerHTML += `<option value="${portfolio.id}">${portfolio.name}</option>`;
-    });
-}
-
-function populatePortfolioFilter() {
-    const select = document.getElementById('portfolioFilter');
-    select.innerHTML = '<option value="">All Portfolios</option>';
-    portfolios.forEach(portfolio => {
-        select.innerHTML += `<option value="${portfolio.id}">${portfolio.name}</option>`;
-    });
-}
-
-// SAVE FUNCTIONS - ACTUAL API CALLS
-async function savePortfolio() {
-    const name = document.getElementById('portfolioName').value.trim();
-    const description = document.getElementById('portfolioDescription').value.trim();
-    
-    if (!name) {
-        showToast('Please enter a portfolio name', 'warning');
-        return;
-    }
-    
-    try {
-        const method = editingId ? 'PUT' : 'POST';
-        const url = editingId ? `/api/portfolios/${editingId}` : '/api/portfolios';
-        
-        const response = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, description })
-        });
-        
-        if (response.ok) {
-            await loadAllData();
-            updateStats();
-            renderAllLists();
-            closeModal('addPortfolioModal');
-            showToast(editingId ? 'Portfolio updated successfully!' : 'Portfolio created successfully!', 'success');
-            editingId = null;
-        } else {
-            const error = await response.json();
-            showToast('Error: ' + (error.error || 'Failed to save portfolio'), 'error');
-        }
-    } catch (error) {
-        console.error('Error saving portfolio:', error);
-        showToast('Error saving portfolio', 'error');
-    }
-}
-async function saveProject() {
-    const name = document.getElementById('projectName').value.trim();
-    const portfolio_id = parseInt(document.getElementById('projectPortfolio').value);
-    const description = document.getElementById('projectDescription').value.trim();
-    
-    if (!name || !portfolio_id) {
-        showToast('Please enter project name and select a portfolio', 'warning');
-        return;
-    }
-    
-    try {
-        const method = editingId ? 'PUT' : 'POST';
-        const url = editingId ? `/api/projects/${editingId}` : '/api/projects';
-        
-        const response = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, portfolio_id, description })
-        });
-        
-        if (response.ok) {
-            await loadAllData();
-            updateStats();
-            renderAllLists();
-            closeModal('addProjectModal');
-            showToast(editingId ? 'Project updated successfully!' : 'Project created successfully!', 'success');
-            editingId = null;
-        } else {
-            const error = await response.json();
-            showToast('Error: ' + (error.error || 'Failed to save project'), 'error');
-        }
-    } catch (error) {
-        console.error('Error saving project:', error);
-        showToast('Error saving project', 'error');
-    }
-}
-async function saveTester() {
-    const name = document.getElementById('testerName').value.trim();
-    const email = document.getElementById('testerEmail').value.trim();
-    
-    if (!name || !email) {
-        showToast('Please enter both name and email', 'warning');
-        return;
-    }
-    
-    try {
-        const method = editingId ? 'PUT' : 'POST';
-        const url = editingId ? `/api/testers/${editingId}` : '/api/testers';
-        
-        const response = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email })
-        });
-        
-        if (response.ok) {
-            await loadAllData();
-            updateStats();
-            renderAllLists();
-            closeModal('addTesterModal');
-            showToast(editingId ? 'Tester updated successfully!' : 'Tester created successfully!', 'success');
-            editingId = null;
-        } else {
-            const error = await response.json();
-            showToast('Error: ' + (error.error || 'Failed to save tester'), 'error');
-        }
-    } catch (error) {
-        console.error('Error saving tester:', error);
-        showToast('Error saving tester', 'error');
-    }
-}
-async function saveTeamMember() {
-    const name = document.getElementById('teamMemberName').value.trim();
-    const email = document.getElementById('teamMemberEmail').value.trim();
-    const role = document.getElementById('teamMemberRole').value;
-    
-    if (!name || !email || !role) {
-        showToast('Please fill in all fields', 'warning');
-        return;
-    }
-    
-    try {
-        const method = editingId ? 'PUT' : 'POST';
-        const url = editingId ? `/api/team-members/${editingId}` : '/api/team-members';
-        
-        const response = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, role })
-        });
-        
-        if (response.ok) {
-            await loadAllData();
-            updateStats();
-            renderAllLists();
-            closeModal('addTeamMemberModal');
-            showToast(editingId ? 'Team member updated successfully!' : 'Team member created successfully!', 'success');
-            editingId = null;
-        } else {
-            const error = await response.json();
-            showToast('Error: ' + (error.error || 'Failed to save team member'), 'error');
-        }
-    } catch (error) {
-        console.error('Error saving team member:', error);
-        showToast('Error saving team member', 'error');
-    }
-}
-// DELETE FUNCTIONS
-async function deletePortfolio(id) {
-    if (!confirm('Are you sure you want to delete this portfolio?')) return;
-    
-    try {
-        const response = await fetch(`/api/portfolios/${id}`, { method: 'DELETE' });
-        if (response.ok) {
-            await loadAllData();
-            updateStats();
-            renderAllLists();
-            showToast('Portfolio deleted successfully!', 'success');
-        } else {
-            const error = await response.json();
-            showToast('Error: ' + (error.error || 'Failed to delete portfolio'), 'error');
-        }
-    } catch (error) {
-        console.error('Error deleting portfolio:', error);
-        showToast('Error deleting portfolio', 'error');
-    }
-}
-
-async function deleteProject(id) {
-    if (!confirm('Are you sure you want to delete this project?')) return;
-    
-    try {
-        const response = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
-        if (response.ok) {
-            await loadAllData();
-            updateStats();
-            renderAllLists();
-            showToast('Project deleted successfully!', 'success');
-        } else {
-            const error = await response.json();
-            showToast('Error deleting project', 'error');
-        }
-    } catch (error) {
-        console.error('Error deleting project:', error);
-        showToast('Error deleting project', 'error');
-    }
-}
-
-async function deleteTester(id) {
-    if (!confirm('Are you sure you want to delete this tester?')) return;
-    
-    try {
-        const response = await fetch(`/api/testers/${id}`, { method: 'DELETE' });
-        if (response.ok) {
-            await loadAllData();
-            updateStats();
-            renderAllLists();
-            showToast('Tester deleted successfully!', 'success');
-        } else {
-            showToast('Error deleting tester', 'error');
-        }
-    } catch (error) {
-        console.error('Error deleting tester:', error);
-        showToast('Error deleting tester', 'error');
-    }
-}
-
-async function deleteTeamMember(id) {
-    if (!confirm('Are you sure you want to delete this team member?')) return;
-    
-    try {
-        const response = await fetch(`/api/team-members/${id}`, { method: 'DELETE' });
-        if (response.ok) {
-            await loadAllData();
-            updateStats();
-            renderAllLists();
-            showToast('Team member deleted successfully!', 'success');
-        } else {
-            showToast('Error deleting team member', 'error');
-        }
-    } catch (error) {
-        console.error('Error deleting team member:', error);
-        showToast('Error deleting team member', 'error');
-    }
-}
-
-
-// EDIT FUNCTIONS
-async function editPortfolio(id) {
-    const portfolio = portfolios.find(p => p.id === id);
-    if (portfolio) {
-        editingId = id;
-        editingType = 'portfolio';
-        document.getElementById('portfolioName').value = portfolio.name;
-        document.getElementById('portfolioDescription').value = portfolio.description || '';
-        showModal('addPortfolioModal');
-    }
-}
-
-async function editProject(id) {
-    const project = projects.find(p => p.id === id);
-    if (project) {
-        editingId = id;
-        editingType = 'project';
-        document.getElementById('projectName').value = project.name;
-        document.getElementById('projectDescription').value = project.description || '';
-        populatePortfolioDropdown();
-        document.getElementById('projectPortfolio').value = project.portfolio_id;
-        showModal('addProjectModal');
-    }
-}
-
-async function editTester(id) {
-    const tester = testers.find(t => t.id === id);
-    if (tester) {
-        editingId = id;
-        editingType = 'tester';
-        document.getElementById('testerName').value = tester.name;
-        document.getElementById('testerEmail').value = tester.email;
-        showModal('addTesterModal');
-    }
-}
-
-async function editTeamMember(id) {
-    const member = teamMembers.find(tm => tm.id === id);
-    if (member) {
-        editingId = id;
-        editingType = 'teamMember';
-        document.getElementById('teamMemberName').value = member.name;
-        document.getElementById('teamMemberEmail').value = member.email;
-        document.getElementById('teamMemberRole').value = member.role;
-        showModal('addTeamMemberModal');
-    }
-}
-
-// Search functions (placeholder)
-function searchPortfolios() { }
-function searchProjects() { }
-function searchTesters() { }
-function searchTeamMembers() { }
-function filterProjects() { }
-function filterTeamMembers() { }
-
-// Modal close on outside click
-window.onclick = function(event) {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-}
-</script>
+    </footer>
 </body>
 </html>

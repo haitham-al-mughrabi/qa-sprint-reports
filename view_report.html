@@ -15,23 +15,24 @@
 <body>
     <nav class="main-nav">
         <div class="nav-container">
-            <div class="nav-brand"><i class="fas fa-chart-line"></i> Sprint Reports System</div>
+            <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div class="nav-links">
-                <a href="/" class="nav-link"><i class="fas fa-house"></i> Dashboard</a>
-                <a href="#" class="nav-link active"><i class="fas fa-chart-bar"></i> Reports</a>
-                <a href="/create" class="nav-link"><i class="fas fa-plus"></i> New Report</a>
-                <a href="/manage" class="nav-link"><i class="fas fa-gear"></i> Manage Data</a>
+                <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="/reports" class="nav-link active"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
+                <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
             </div>
         </div>
     </nav>
 
-    <div class="container card">
-        <div class="dashboard-header">
+    <div class="main-wrapper">
+        <div class="container card">
+            <div class="dashboard-header">
             <h1 id="reportTitle">Sprint Testing Report</h1>
             <p id="reportSubtitle">Loading report details...</p>
-            <div class="action-buttons">
-                <button class="action-btn btn-export-pdf" onclick="exportCurrentReportAsPdf()">📄 Export PDF</button>
-                <button class="action-btn btn-export-excel" onclick="exportCurrentReportAsExcel()">📊 Export Excel</button>
+            <div class="header-actions">
+                <button class="action-btn btn-export-pdf" onclick="exportCurrentReportAsPdf()"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                <button class="action-btn btn-export-excel" onclick="exportCurrentReportAsExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
             </div>
         </div>
 
@@ -71,7 +72,7 @@
                     <div class="chart-section card">
                         <h3 class="chart-title">User Stories Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="userStoriesViewChart" width="300" height="350"></canvas>
+                            <canvas id="userStoriesViewChart" width="400" height="300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -88,7 +89,7 @@
                     <div class="chart-section card">
                         <h3 class="chart-title">Test Cases Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="testCasesViewChart" width="300" height="350"></canvas>
+                            <canvas id="testCasesViewChart" width="400" height="300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -105,7 +106,7 @@
                     <div class="chart-section card">
                         <h3 class="chart-title">Issues by Priority Chart</h3>
                         <div class="chart-container" style="margin-top: 20px;">
-                            <canvas id="issuesPriorityViewChart" width="300" height="350"></canvas>
+                            <canvas id="issuesPriorityViewChart" width="400" height="300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -122,7 +123,7 @@
                     <div class="chart-section card">
                         <h3 class="chart-title">Issues by Status Chart</h3>
                         <div class="chart-container" style="margin-top: 20px;">
-                            <canvas id="issuesStatusViewChart" width="300" height="350"></canvas>
+                            <canvas id="issuesStatusViewChart" width="400" height="300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -139,7 +140,7 @@
                     <div class="chart-section card">
                         <h3 class="chart-title">Enhancements Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="enhancementsViewChart" width="300" height="350"></canvas>
+                            <canvas id="enhancementsViewChart" width="400" height="300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -880,7 +881,7 @@
             const doc = new jsPDF();
 
             // Helper function to add charts as images
-            async function addChartToPDF(chartId, yPosition, title, width = 180, height = 100) {
+            async function addChartToPDF(chartId, yPosition, title, width = 170, height = 90) {
                 const canvas = document.getElementById(chartId);
                 if (canvas && viewCharts[chartId.replace('ViewChart', '').replace('View', '')]) {
                     doc.setFontSize(12);
@@ -1221,41 +1222,139 @@
 
         function exportCurrentReportAsExcel() {
             if (!currentReport) {
-                // Use a custom message box instead of alert
                 showCustomMessageBox('Report data not loaded yet.');
                 return;
             }
             
-            // Create comprehensive Excel export similar to the main script
-            // but using currentReport data
+            // Use the same comprehensive Excel export as the main function
             const workbook = XLSX.utils.book_new();
 
-            // Summary sheet with all data
+            // Summary Sheet
             const summaryData = [
-                ["QA Testing Report"],
-                [""],
-                ["Cover Information"],
-                ["Portfolio", currentReport.portfolioName || 'N/A'],
-                ["Project", currentReport.projectName || 'N/A'],
-                ["Sprint", currentReport.sprintNumber || 'N/A'],
-                ["Version", currentReport.reportVersion || 'N/A'],
-                ["Date", formatDate(currentReport.reportDate)],
-                ["Status", getStatusText(currentReport.testingStatus)],
-                [""],
-                ["Testing Metrics"],
+                ["Field", "Value"],
+                ["Portfolio Name", currentReport.portfolioName || 'N/A'],
+                ["Project Name", currentReport.projectName || 'N/A'],
+                ["Sprint Number", currentReport.sprintNumber || 'N/A'],
+                ["Report Version", currentReport.reportVersion || 'N/A'],
+                ["Cycle Number", currentReport.cycleNumber || 'N/A'],
+                ["Report Date", formatDate(currentReport.reportDate)],
+                ["Testing Status", getStatusText(currentReport.testingStatus)],
+                ["Test Summary", currentReport.testSummary || 'N/A'],
+                ["", ""],
+                ["METRICS", ""],
                 ["Total User Stories", currentReport.totalUserStories || 0],
                 ["Total Test Cases", currentReport.totalTestCases || 0],
                 ["Total Issues", currentReport.totalIssues || 0],
                 ["Total Enhancements", currentReport.totalEnhancements || 0],
-                [""],
-                ["Test Summary"],
-                [currentReport.testSummary || 'N/A']
+                ["QA Notes", currentReport.qaNotesText || 'N/A']
             ];
-
             const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-            XLSX.utils.book_append_sheet(workbook, wsSummary, "Report Summary");
+            XLSX.utils.book_append_sheet(workbook, wsSummary, "Summary");
 
-            XLSX.writeFile(workbook, `QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_View.xlsx`);
+            // User Stories Sheet
+            const userStoriesData = [
+                ["Status", "Count", "Percentage"],
+                ["Passed", currentReport.passedUserStories || 0, currentReport.totalUserStories ? Math.round(((currentReport.passedUserStories || 0) / currentReport.totalUserStories) * 100) : 0],
+                ["Passed with Issues", currentReport.passedWithIssuesUserStories || 0, currentReport.totalUserStories ? Math.round(((currentReport.passedWithIssuesUserStories || 0) / currentReport.totalUserStories) * 100) : 0],
+                ["Failed", currentReport.failedUserStories || 0, currentReport.totalUserStories ? Math.round(((currentReport.failedUserStories || 0) / currentReport.totalUserStories) * 100) : 0],
+                ["Blocked", currentReport.blockedUserStories || 0, currentReport.totalUserStories ? Math.round(((currentReport.blockedUserStories || 0) / currentReport.totalUserStories) * 100) : 0],
+                ["Cancelled", currentReport.cancelledUserStories || 0, currentReport.totalUserStories ? Math.round(((currentReport.cancelledUserStories || 0) / currentReport.totalUserStories) * 100) : 0],
+                ["Deferred", currentReport.deferredUserStories || 0, currentReport.totalUserStories ? Math.round(((currentReport.deferredUserStories || 0) / currentReport.totalUserStories) * 100) : 0],
+                ["Not Testable", currentReport.notTestableUserStories || 0, currentReport.totalUserStories ? Math.round(((currentReport.notTestableUserStories || 0) / currentReport.totalUserStories) * 100) : 0]
+            ];
+            const wsUserStories = XLSX.utils.aoa_to_sheet(userStoriesData);
+            XLSX.utils.book_append_sheet(workbook, wsUserStories, "User Stories");
+
+            // Test Cases Sheet
+            const testCasesData = [
+                ["Status", "Count", "Percentage"],
+                ["Passed", currentReport.passedTestCases || 0, currentReport.totalTestCases ? Math.round(((currentReport.passedTestCases || 0) / currentReport.totalTestCases) * 100) : 0],
+                ["Passed with Issues", currentReport.passedWithIssuesTestCases || 0, currentReport.totalTestCases ? Math.round(((currentReport.passedWithIssuesTestCases || 0) / currentReport.totalTestCases) * 100) : 0],
+                ["Failed", currentReport.failedTestCases || 0, currentReport.totalTestCases ? Math.round(((currentReport.failedTestCases || 0) / currentReport.totalTestCases) * 100) : 0],
+                ["Blocked", currentReport.blockedTestCases || 0, currentReport.totalTestCases ? Math.round(((currentReport.blockedTestCases || 0) / currentReport.totalTestCases) * 100) : 0],
+                ["Cancelled", currentReport.cancelledTestCases || 0, currentReport.totalTestCases ? Math.round(((currentReport.cancelledTestCases || 0) / currentReport.totalTestCases) * 100) : 0],
+                ["Deferred", currentReport.deferredTestCases || 0, currentReport.totalTestCases ? Math.round(((currentReport.deferredTestCases || 0) / currentReport.totalTestCases) * 100) : 0],
+                ["Not Testable", currentReport.notTestableTestCases || 0, currentReport.totalTestCases ? Math.round(((currentReport.notTestableTestCases || 0) / currentReport.totalTestCases) * 100) : 0]
+            ];
+            const wsTestCases = XLSX.utils.aoa_to_sheet(testCasesData);
+            XLSX.utils.book_append_sheet(workbook, wsTestCases, "Test Cases");
+
+            // Issues Sheet
+            const issuesData = [
+                ["Priority/Status", "Count", "Percentage"],
+                ["", "", ""],
+                ["PRIORITY BREAKDOWN", "", ""],
+                ["Critical", currentReport.criticalIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.criticalIssues || 0) / currentReport.totalIssues) * 100) : 0],
+                ["High", currentReport.highIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.highIssues || 0) / currentReport.totalIssues) * 100) : 0],
+                ["Medium", currentReport.mediumIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.mediumIssues || 0) / currentReport.totalIssues) * 100) : 0],
+                ["Low", currentReport.lowIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.lowIssues || 0) / currentReport.totalIssues) * 100) : 0],
+                ["", "", ""],
+                ["STATUS BREAKDOWN", "", ""],
+                ["New", currentReport.newIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.newIssues || 0) / currentReport.totalIssues) * 100) : 0],
+                ["Fixed", currentReport.fixedIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.fixedIssues || 0) / currentReport.totalIssues) * 100) : 0],
+                ["Not Fixed", currentReport.notFixedIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.notFixedIssues || 0) / currentReport.totalIssues) * 100) : 0],
+                ["Re-opened", currentReport.reopenedIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.reopenedIssues || 0) / currentReport.totalIssues) * 100) : 0],
+                ["Deferred", currentReport.deferredIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.deferredIssues || 0) / currentReport.totalIssues) * 100) : 0]
+            ];
+            const wsIssues = XLSX.utils.aoa_to_sheet(issuesData);
+            XLSX.utils.book_append_sheet(workbook, wsIssues, "Issues");
+
+            // Enhancements Sheet
+            const enhancementsData = [
+                ["Status", "Count", "Percentage"],
+                ["New", currentReport.newEnhancements || 0, currentReport.totalEnhancements ? Math.round(((currentReport.newEnhancements || 0) / currentReport.totalEnhancements) * 100) : 0],
+                ["Implemented", currentReport.implementedEnhancements || 0, currentReport.totalEnhancements ? Math.round(((currentReport.implementedEnhancements || 0) / currentReport.totalEnhancements) * 100) : 0],
+                ["Exists", currentReport.existsEnhancements || 0, currentReport.totalEnhancements ? Math.round(((currentReport.existsEnhancements || 0) / currentReport.totalEnhancements) * 100) : 0]
+            ];
+            const wsEnhancements = XLSX.utils.aoa_to_sheet(enhancementsData);
+            XLSX.utils.book_append_sheet(workbook, wsEnhancements, "Enhancements");
+
+            // Add all the additional sheets like in the main function
+            if (currentReport.evaluationData && Object.keys(currentReport.evaluationData).length > 0) {
+                const evaluationHeaders = ["Evaluation Criteria", "Score", "Weight", "Weighted Score"];
+                const evaluationSheetData = [];
+                
+                for (const [key, value] of Object.entries(currentReport.evaluationData)) {
+                    if (key.includes('_score')) {
+                        const criteriaName = key.replace('_score', '').replace(/_/g, ' ').toUpperCase();
+                        const weightKey = key.replace('_score', '_weight');
+                        const weight = currentReport.evaluationData[weightKey] || 1;
+                        const weightedScore = (value || 0) * weight;
+                        evaluationSheetData.push([criteriaName, value || 0, weight, weightedScore]);
+                    }
+                }
+                
+                if (evaluationSheetData.length > 0) {
+                    evaluationSheetData.unshift(["", "", "", ""]);
+                    evaluationSheetData.unshift(["TOTAL EVALUATION SCORE", "", "", currentReport.evaluationTotalScore || 0]);
+                    const wsEvaluation = XLSX.utils.aoa_to_sheet([evaluationHeaders, ...evaluationSheetData]);
+                    XLSX.utils.book_append_sheet(workbook, wsEvaluation, "Evaluation");
+                }
+            }
+
+            // Dynamic Data Sheets
+            if (currentReport.requestData && currentReport.requestData.length > 0) {
+                const requestHeaders = ["Request ID", "URL"];
+                const requestsSheetData = currentReport.requestData.map(req => [req.id, req.url]);
+                const wsRequests = XLSX.utils.aoa_to_sheet([requestHeaders, ...requestsSheetData]);
+                XLSX.utils.book_append_sheet(workbook, wsRequests, "Requests");
+            }
+
+            if (currentReport.buildData && currentReport.buildData.length > 0) {
+                const buildHeaders = ["Request ID", "URL", "Environment", "Cycles"];
+                const buildsSheetData = currentReport.buildData.map(build => [build.requestId, build.requestUrl, build.environment, build.cycles]);
+                const wsBuilds = XLSX.utils.aoa_to_sheet([buildHeaders, ...buildsSheetData]);
+                XLSX.utils.book_append_sheet(workbook, wsBuilds, "Builds");
+            }
+
+            if (currentReport.testerData && currentReport.testerData.length > 0) {
+                const testerHeaders = ["Tester Name"];
+                const testersSheetData = currentReport.testerData.map(tester => [tester.name]);
+                const wsTesters = XLSX.utils.aoa_to_sheet([testerHeaders, ...testersSheetData]);
+                XLSX.utils.book_append_sheet(workbook, wsTesters, "Testers");
+            }
+
+            XLSX.writeFile(workbook, `QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_Complete.xlsx`);
         }
         // Custom Message Box (instead of alert)
         function showCustomMessageBox(message) {
@@ -1291,5 +1390,13 @@
             document.body.appendChild(messageBox);
         }
     </script>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">Made by <span class="highlight">Haitham Al-Mughrabi</span>. All rights reserved © 2024</p>
+        </div>
+    </footer>
 </body>
 </html>
