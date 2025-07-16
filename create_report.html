@@ -62,18 +62,17 @@
                         <div class="section active" id="section-0">
                             <h2 class="section-title"><i class="fas fa-file-alt"></i> General Details</h2>
                             
-                            <!-- Two Column Layout -->
-                            <div class="general-details-columns">
-                                <!-- Left Column: Portfolio & Project Information -->
-                                <div class="general-details-column">
-                                    <div class="subsection subsection-equal-height">
-                                        <h3 class="subsection-title"><i class="fas fa-folder-open"></i> Portfolio & Project Information</h3>
+                            <!-- Three Section Layout -->
+                            <div class="general-details-grid">
+                                <!-- Section 1: Project Details -->
+                                <div class="detail-section">
+                                    <div class="subsection">
+                                        <h3 class="subsection-title"><i class="fas fa-folder-open"></i> Project Details</h3>
                                         
-                                        <!-- Portfolio Section -->
                                         <div class="stacked-form-section">
                                             <div class="form-field-vertical">
                                                 <label for="portfolioName" class="field-label">Portfolio Name</label>
-                                                <select id="portfolioName" name="portfolioName" class="field-input" required>
+                                                <select id="portfolioName" name="portfolioName" class="field-input">
                                                 </select>
                                                 <button type="button" class="add-btn-vertical" onclick="showAddPortfolioModal()">
                                                     <i class="fas fa-plus"></i> Add New Portfolio
@@ -82,10 +81,9 @@
                                             
                                             <div class="field-divider"></div>
                                             
-                                            <!-- Project Section -->
                                             <div class="form-field-vertical">
                                                 <label for="projectName" class="field-label">Project Name</label>
-                                                <select id="projectName" name="projectName" class="field-input" required>
+                                                <select id="projectName" name="projectName" class="field-input" onchange="onProjectSelection()">
                                                     <option value="">Select Project</option>
                                                 </select>
                                                 <button type="button" class="add-btn-vertical" onclick="showAddProjectModal()">
@@ -96,49 +94,48 @@
                                     </div>
                                 </div>
 
-                                <!-- Right Column: Sprint & Release + Report Information -->
-                                <div class="general-details-column">
-                                    <div class="subsection subsection-equal-height">
-                                        <!-- Sprint & Release Information -->
-                                        <div class="subsection-group">
-                                            <h3 class="subsection-title"><i class="fas fa-running"></i> Sprint & Release Information</h3>
-                                            <div class="form-grid">
-                                                <div class="form-group">
-                                                    <label for="sprintNumber">Sprint Number</label>
-                                                    <input type="number" id="sprintNumber" name="sprintNumber" min="1" placeholder="Enter sprint number" required>
-                                                </div>
+                                <!-- Section 2: Sprint & Release Information -->
+                                <div class="detail-section">
+                                    <div class="subsection">
+                                        <h3 class="subsection-title"><i class="fas fa-running"></i> Sprint & Release Information</h3>
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label for="sprintNumber">Sprint Number</label>
+                                                <input type="number" id="sprintNumber" name="sprintNumber" min="1" placeholder="Enter sprint number">
+                                            </div>
 
-                                                <div class="form-group">
-                                                    <label for="cycleNumber">Cycle Number</label>
-                                                    <input type="number" id="cycleNumber" name="cycleNumber" min="1" placeholder="Enter cycle number" required>
-                                                </div>
+                                            <div class="form-group">
+                                                <label for="cycleNumber">Cycle Number</label>
+                                                <input type="number" id="cycleNumber" name="cycleNumber" min="1" placeholder="Enter cycle number">
+                                            </div>
 
-                                                <div class="form-group">
-                                                    <label for="releaseNumber">Release Number</label>
-                                                    <input type="text" id="releaseNumber" name="releaseNumber" placeholder="e.g., R1.0, R2.1" required>
-                                                </div>
+                                            <div class="form-group">
+                                                <label for="releaseNumber">Release Number</label>
+                                                <input type="text" id="releaseNumber" name="releaseNumber" placeholder="e.g., R1.0, R2.1">
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
 
-                                        <!-- Report Information -->
-                                        <div class="subsection-group">
-                                            <h3 class="subsection-title"><i class="fas fa-file-text"></i> Report Information</h3>
-                                            <div class="form-grid">
-                                                <div class="form-group full-width">
-                                                    <label for="reportName">Report Name</label>
-                                                    <input type="text" id="reportName" name="reportName" placeholder="Enter custom report name (e.g., Enhanced QA Report, Sprint Testing Report)" onInput="updateReportTitle()">
-                                                    <small class="field-hint">Leave blank to use default name</small>
-                                                </div>
+                                <!-- Section 3: Report Information -->
+                                <div class="detail-section">
+                                    <div class="subsection">
+                                        <h3 class="subsection-title"><i class="fas fa-file-text"></i> Report Information</h3>
+                                        <div class="form-grid">
+                                            <div class="form-group full-width">
+                                                <label for="reportName">Report Name</label>
+                                                <input type="text" id="reportName" name="reportName" placeholder="Enter custom report name" onInput="updateReportTitle()">
+                                                <small class="field-hint">Leave blank to use default name</small>
+                                            </div>
 
-                                                <div class="form-group">
-                                                    <label for="reportVersion">Report Version</label>
-                                                    <input type="text" id="reportVersion" name="reportVersion" placeholder="e.g., 1.0, 2.1" required>
-                                                </div>
+                                            <div class="form-group">
+                                                <label for="reportVersion">Report Version</label>
+                                                <input type="text" id="reportVersion" name="reportVersion" placeholder="e.g., 1.0, 2.1">
+                                            </div>
 
-                                                <div class="form-group">
-                                                    <label for="reportDate">Report Date (dd-mm-yyyy)</label>
-                                                    <input type="text" id="reportDate" name="reportDate" pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy" required>
-                                                </div>
+                                            <div class="form-group">
+                                                <label for="reportDate">Report Date (dd-mm-yyyy)</label>
+                                                <input type="text" id="reportDate" name="reportDate" pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy">
                                             </div>
                                         </div>
                                     </div>
@@ -152,12 +149,12 @@
                             <div class="form-grid">
                                 <div class="form-group full-width">
                                     <label for="testSummary">Test Summary</label>
-                                    <textarea id="testSummary" name="testSummary" placeholder="Provide a comprehensive summary of the testing activities..." rows="6" required></textarea>
+                                    <textarea id="testSummary" name="testSummary" placeholder="Provide a comprehensive summary of the testing activities..." rows="6"></textarea>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="testingStatus">Testing Status</label>
-                                    <select id="testingStatus" name="testingStatus" required>
+                                    <select id="testingStatus" name="testingStatus">
                                         <option value="">Select Status</option>
                                         <option value="passed"><i class="fas fa-check-circle"></i> Passed</option>
                                         <option value="passed-with-issues"><i class="fas fa-exclamation-triangle"></i> Passed with Issues</option>
@@ -793,6 +790,59 @@
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('addQANoteModal')">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="addQANote()">Add Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-Load Project Data Modal -->
+    <div id="autoLoadDataModal" class="modal">
+        <div class="modal-content auto-load-modal">
+            <h3><i class="fas fa-download"></i> Load Previous Project Data</h3>
+            <p class="modal-description">We found previous reports for this project. Would you like to auto-fill the form with data from the latest report?</p>
+            
+            <div class="data-preview" id="dataPreview">
+                <!-- Data preview will be populated by JavaScript -->
+            </div>
+            
+            <div class="data-selection">
+                <h4>Select data to load:</h4>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="loadSprintData" checked>
+                        <span class="checkmark"></span>
+                        Sprint & Release Information
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="loadReportData" checked>
+                        <span class="checkmark"></span>
+                        Report Information
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="loadTesters" checked>
+                        <span class="checkmark"></span>
+                        Tester(s) Information
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="loadTeamMembers" checked>
+                        <span class="checkmark"></span>
+                        Team Members
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="loadRequestData">
+                        <span class="checkmark"></span>
+                        Request Information
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="loadBuildData">
+                        <span class="checkmark"></span>
+                        Build Information
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('autoLoadDataModal')">Skip</button>
+                <button type="button" class="btn btn-primary" onclick="loadSelectedData()">Load Selected Data</button>
             </div>
         </div>
     </div>

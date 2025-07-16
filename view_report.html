@@ -27,12 +27,35 @@
 
     <div class="main-wrapper">
         <div class="container card">
-            <div class="dashboard-header">
-            <h1 id="reportTitle">Sprint Testing Report</h1>
-            <p id="reportSubtitle">Loading report details...</p>
-            <div class="header-actions">
-                <button class="action-btn btn-export-pdf" onclick="exportCurrentReportAsPdf()"><i class="fas fa-file-pdf"></i> Export PDF</button>
-                <button class="action-btn btn-export-excel" onclick="exportCurrentReportAsExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+            <div class="view-report-header">
+                <div class="header-content">
+                    <h1 id="reportTitle">Sprint Testing Report</h1>
+                    <p id="reportSubtitle">Loading report details...</p>
+                </div>
+                <div class="header-actions">
+                    <div class="action-group">
+                        <button class="action-btn btn-back" onclick="window.location.href='/reports'">
+                            <i class="fas fa-arrow-left"></i> Back to Reports
+                        </button>
+                        <button class="action-btn btn-edit" onclick="editCurrentReport()" id="editReportBtn">
+                            <i class="fas fa-edit"></i> Edit Report
+                        </button>
+                        <button class="action-btn btn-delete" onclick="deleteCurrentReport()" id="deleteReportBtn">
+                            <i class="fas fa-trash-alt"></i> Delete Report
+                        </button>
+                    </div>
+                    <div class="export-group">
+                        <button class="action-btn btn-export-pdf" onclick="exportCurrentReportAsPdf()">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                        <button class="action-btn btn-export-excel" onclick="exportCurrentReportAsExcel()">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                        <button class="action-btn btn-export-styled-pdf" onclick="exportStyledReportAsPdf()">
+                            <i class="fas fa-file-pdf"></i> Styled PDF
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -872,6 +895,16 @@
             return map[status] || 'Pending';
         }
 
+        function editCurrentReport() {
+            if (!currentReport) {
+                showCustomMessageBox('Report data not loaded yet.');
+                return;
+            }
+            
+            // Redirect to create report page with edit mode
+            window.location.href = `/create-report?id=${currentReport.id}`;
+        }
+
         function deleteCurrentReport() {
             if (!currentReport) {
                 showCustomMessageBox('Report data not loaded yet.');
@@ -882,7 +915,10 @@
                 fetch(`/api/reports/${currentReport.id}`, { method: 'DELETE' })
                     .then(response => {
                         if (response.ok) {
-                            window.location.href = '/reports';
+                            showCustomMessageBox('Report deleted successfully!');
+                            setTimeout(() => {
+                                window.location.href = '/reports';
+                            }, 1500);
                         } else {
                             showCustomMessageBox('Failed to delete report.');
                         }
@@ -1120,6 +1156,662 @@
 
             XLSX.writeFile(workbook, `QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_Complete.xlsx`);
         }
+
+        async function exportStyledReportAsPdf() {
+            if (!currentReport) {
+                showCustomMessageBox('Report data not loaded yet.');
+                return;
+            }
+
+            // Get the view report page content
+            const reportContent = document.querySelector('.container');
+            if (!reportContent) {
+                showCustomMessageBox('Report content not found.');
+                return;
+            }
+
+            // Capture charts as images
+            const chartImages = {};
+            try {
+                const userStoriesChart = Chart.getChart('userStoriesViewChart');
+                const testCasesChart = Chart.getChart('testCasesViewChart');
+                const issuesPriorityChart = Chart.getChart('issuesPriorityViewChart');
+                const issuesStatusChart = Chart.getChart('issuesStatusViewChart');
+                const enhancementsChart = Chart.getChart('enhancementsViewChart');
+
+                if (userStoriesChart) {
+                    chartImages.userStories = userStoriesChart.toBase64Image('image/png', 1.0);
+                }
+                if (testCasesChart) {
+                    chartImages.testCases = testCasesChart.toBase64Image('image/png', 1.0);
+                }
+                if (issuesPriorityChart) {
+                    chartImages.issuesPriority = issuesPriorityChart.toBase64Image('image/png', 1.0);
+                }
+                if (issuesStatusChart) {
+                    chartImages.issuesStatus = issuesStatusChart.toBase64Image('image/png', 1.0);
+                }
+                if (enhancementsChart) {
+                    chartImages.enhancements = enhancementsChart.toBase64Image('image/png', 1.0);
+                }
+            } catch (error) {
+                console.log('Some charts may not be available:', error);
+            }
+
+            // Create a new window for the styled PDF export
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>QA Report - ${currentReport.portfolioName} Sprint ${currentReport.sprintNumber}</title>
+                    <style>
+                        * { box-sizing: border-box; margin: 0; padding: 0; }
+                        body { 
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                            line-height: 1.4; 
+                            color: #2d3748; 
+                            background: white;
+                            padding: 0;
+                            font-size: 14px;
+                        }
+                        
+                        .page-container {
+                            max-width: 210mm;
+                            margin: 0 auto;
+                            padding: 20mm;
+                            min-height: 297mm;
+                        }
+                        
+                        .header { 
+                            text-align: center; 
+                            margin-bottom: 40px; 
+                            padding: 30px 0;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            border-radius: 15px;
+                            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                        }
+                        
+                        .header h1 { 
+                            font-size: 2.8em; 
+                            margin-bottom: 10px;
+                            font-weight: 700;
+                            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                        }
+                        
+                        .header .subtitle { 
+                            font-size: 1.3em; 
+                            font-weight: 400;
+                            margin-bottom: 5px;
+                            opacity: 0.9;
+                        }
+                        
+                        .header .project-info { 
+                            font-size: 1.1em; 
+                            font-weight: 300;
+                            opacity: 0.8;
+                        }
+                        
+                        .executive-summary {
+                            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                            border-radius: 12px;
+                            padding: 25px;
+                            margin: 30px 0;
+                            border-left: 5px solid #667eea;
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+                        }
+                        
+                        .executive-summary h2 {
+                            color: #2d3748;
+                            font-size: 1.8em;
+                            margin-bottom: 20px;
+                            font-weight: 600;
+                        }
+                        
+                        .metrics-grid {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                            gap: 20px;
+                            margin: 20px 0;
+                        }
+                        
+                        .metric-card {
+                            background: white;
+                            border-radius: 10px;
+                            padding: 20px;
+                            text-align: center;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                            border: 1px solid #e2e8f0;
+                        }
+                        
+                        .metric-card .metric-value {
+                            font-size: 2.2em;
+                            font-weight: 700;
+                            color: #667eea;
+                            margin-bottom: 8px;
+                        }
+                        
+                        .metric-card .metric-label {
+                            font-size: 0.9em;
+                            color: #64748b;
+                            font-weight: 500;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+                        
+                        .section {
+                            margin: 40px 0;
+                            page-break-inside: avoid;
+                        }
+                        
+                        .section-title {
+                            font-size: 1.6em;
+                            font-weight: 600;
+                            color: #2d3748;
+                            margin-bottom: 20px;
+                            padding-bottom: 10px;
+                            border-bottom: 3px solid #667eea;
+                        }
+                        
+                        .info-grid {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                            gap: 15px;
+                            margin: 20px 0;
+                        }
+                        
+                        .info-item {
+                            background: #f8fafc;
+                            padding: 15px;
+                            border-radius: 8px;
+                            border-left: 4px solid #667eea;
+                        }
+                        
+                        .info-label {
+                            font-weight: 600;
+                            color: #4a5568;
+                            font-size: 0.9em;
+                            margin-bottom: 5px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+                        
+                        .info-value {
+                            font-size: 1.1em;
+                            color: #2d3748;
+                            font-weight: 500;
+                        }
+                        
+                        .chart-section {
+                            display: flex;
+                            align-items: flex-start;
+                            gap: 30px;
+                            margin: 30px 0;
+                            page-break-inside: avoid;
+                        }
+                        
+                        .chart-container {
+                            flex: 1;
+                            text-align: center;
+                        }
+                        
+                        .chart-container img {
+                            max-width: 100%;
+                            height: auto;
+                            border-radius: 8px;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                        }
+                        
+                        .data-table {
+                            flex: 1;
+                            border-collapse: collapse;
+                            width: 100%;
+                            font-size: 0.9em;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                        }
+                        
+                        .data-table th {
+                            background: #667eea;
+                            color: white;
+                            padding: 12px;
+                            text-align: left;
+                            font-weight: 600;
+                            font-size: 0.85em;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+                        
+                        .data-table td {
+                            padding: 10px 12px;
+                            border-bottom: 1px solid #e2e8f0;
+                            background: white;
+                        }
+                        
+                        .data-table tr:nth-child(even) td {
+                            background: #f8fafc;
+                        }
+                        
+                        .percentage-cell {
+                            text-align: center;
+                            font-weight: 600;
+                            color: #667eea;
+                        }
+                        
+                        .test-summary {
+                            background: linear-gradient(135deg, #fef7e7 0%, #fef3c7 100%);
+                            border-radius: 12px;
+                            padding: 25px;
+                            margin: 30px 0;
+                            border-left: 5px solid #f59e0b;
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+                        }
+                        
+                        .test-summary h3 {
+                            color: #92400e;
+                            font-size: 1.4em;
+                            margin-bottom: 15px;
+                            font-weight: 600;
+                        }
+                        
+                        .test-summary p {
+                            color: #78350f;
+                            line-height: 1.6;
+                            font-size: 1em;
+                        }
+                        
+                        .qa-notes {
+                            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                            border-radius: 12px;
+                            padding: 25px;
+                            margin: 30px 0;
+                            border-left: 5px solid #0ea5e9;
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+                        }
+                        
+                        .qa-notes h3 {
+                            color: #0c4a6e;
+                            font-size: 1.4em;
+                            margin-bottom: 15px;
+                            font-weight: 600;
+                        }
+                        
+                        .qa-notes p {
+                            color: #164e63;
+                            line-height: 1.6;
+                            font-size: 1em;
+                        }
+                        
+                        .footer {
+                            margin-top: 50px;
+                            padding-top: 20px;
+                            border-top: 2px solid #e2e8f0;
+                            text-align: center;
+                            color: #64748b;
+                            font-size: 0.9em;
+                        }
+                        
+                        @media print {
+                            .page-container { 
+                                margin: 0; 
+                                padding: 15mm;
+                                max-width: none;
+                            }
+                            .section { 
+                                page-break-inside: avoid; 
+                            }
+                            .chart-section { 
+                                page-break-inside: avoid; 
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="page-container">
+                        <!-- Header -->
+                        <div class="header">
+                            <h1>QA Testing Report</h1>
+                            <div class="subtitle">${currentReport.portfolioName} - Sprint ${currentReport.sprintNumber}</div>
+                            <div class="project-info">${currentReport.projectName} | Version ${currentReport.reportVersion} | ${formatDate(currentReport.reportDate)}</div>
+                        </div>
+                        
+                        <!-- Executive Summary -->
+                        <div class="executive-summary">
+                            <h2>Executive Summary</h2>
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-value">${currentReport.totalUserStories || 0}</div>
+                                    <div class="metric-label">User Stories</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">${currentReport.totalTestCases || 0}</div>
+                                    <div class="metric-label">Test Cases</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">${currentReport.totalIssues || 0}</div>
+                                    <div class="metric-label">Issues</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">${currentReport.totalEnhancements || 0}</div>
+                                    <div class="metric-label">Enhancements</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- General Information -->
+                        <div class="section">
+                            <h2 class="section-title">General Information</h2>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Portfolio</div>
+                                    <div class="info-value">${currentReport.portfolioName || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Project</div>
+                                    <div class="info-value">${currentReport.projectName || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Sprint Number</div>
+                                    <div class="info-value">#${currentReport.sprintNumber || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Report Version</div>
+                                    <div class="info-value">v${currentReport.reportVersion || '1.0'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Release Number</div>
+                                    <div class="info-value">${currentReport.releaseNumber || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Cycle Number</div>
+                                    <div class="info-value">${currentReport.cycleNumber || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Report Date</div>
+                                    <div class="info-value">${formatDate(currentReport.reportDate)}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Testing Status</div>
+                                    <div class="info-value">${getStatusText(currentReport.testingStatus)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- User Stories Analysis -->
+                        <div class="section">
+                            <h2 class="section-title">User Stories Analysis</h2>
+                            <div class="chart-section">
+                                <div class="chart-container">
+                                    <h3>Distribution Overview</h3>
+                                    ${chartImages.userStories ? `<img src="${chartImages.userStories}" alt="User Stories Chart">` : '<p>Chart not available</p>'}
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th>Count</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Total</strong></td>
+                                            <td>${currentReport.totalUserStories || 0}</td>
+                                            <td class="percentage-cell">100%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Passed</td>
+                                            <td>${currentReport.passedUserStories || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalUserStories ? Math.round(((currentReport.passedUserStories || 0) / currentReport.totalUserStories) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Passed with Issues</td>
+                                            <td>${currentReport.passedWithIssuesUserStories || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalUserStories ? Math.round(((currentReport.passedWithIssuesUserStories || 0) / currentReport.totalUserStories) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Failed</td>
+                                            <td>${currentReport.failedUserStories || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalUserStories ? Math.round(((currentReport.failedUserStories || 0) / currentReport.totalUserStories) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Blocked</td>
+                                            <td>${currentReport.blockedUserStories || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalUserStories ? Math.round(((currentReport.blockedUserStories || 0) / currentReport.totalUserStories) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Other</td>
+                                            <td>${(currentReport.cancelledUserStories || 0) + (currentReport.deferredUserStories || 0) + (currentReport.notTestableUserStories || 0)}</td>
+                                            <td class="percentage-cell">${currentReport.totalUserStories ? Math.round((((currentReport.cancelledUserStories || 0) + (currentReport.deferredUserStories || 0) + (currentReport.notTestableUserStories || 0)) / currentReport.totalUserStories) * 100) : 0}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Test Cases Analysis -->
+                        <div class="section">
+                            <h2 class="section-title">Test Cases Analysis</h2>
+                            <div class="chart-section">
+                                <div class="chart-container">
+                                    <h3>Distribution Overview</h3>
+                                    ${chartImages.testCases ? `<img src="${chartImages.testCases}" alt="Test Cases Chart">` : '<p>Chart not available</p>'}
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th>Count</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Total</strong></td>
+                                            <td>${currentReport.totalTestCases || 0}</td>
+                                            <td class="percentage-cell">100%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Passed</td>
+                                            <td>${currentReport.passedTestCases || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalTestCases ? Math.round(((currentReport.passedTestCases || 0) / currentReport.totalTestCases) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Passed with Issues</td>
+                                            <td>${currentReport.passedWithIssuesTestCases || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalTestCases ? Math.round(((currentReport.passedWithIssuesTestCases || 0) / currentReport.totalTestCases) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Failed</td>
+                                            <td>${currentReport.failedTestCases || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalTestCases ? Math.round(((currentReport.failedTestCases || 0) / currentReport.totalTestCases) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Blocked</td>
+                                            <td>${currentReport.blockedTestCases || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalTestCases ? Math.round(((currentReport.blockedTestCases || 0) / currentReport.totalTestCases) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Other</td>
+                                            <td>${(currentReport.cancelledTestCases || 0) + (currentReport.deferredTestCases || 0) + (currentReport.notTestableTestCases || 0)}</td>
+                                            <td class="percentage-cell">${currentReport.totalTestCases ? Math.round((((currentReport.cancelledTestCases || 0) + (currentReport.deferredTestCases || 0) + (currentReport.notTestableTestCases || 0)) / currentReport.totalTestCases) * 100) : 0}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Issues Analysis -->
+                        <div class="section">
+                            <h2 class="section-title">Issues Analysis</h2>
+                            <div class="chart-section">
+                                <div class="chart-container">
+                                    <h3>Priority Distribution</h3>
+                                    ${chartImages.issuesPriority ? `<img src="${chartImages.issuesPriority}" alt="Issues Priority Chart">` : '<p>Chart not available</p>'}
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Priority</th>
+                                            <th>Count</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Total</strong></td>
+                                            <td>${currentReport.totalIssues || 0}</td>
+                                            <td class="percentage-cell">100%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Critical</td>
+                                            <td>${currentReport.criticalIssues || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalIssues ? Math.round(((currentReport.criticalIssues || 0) / currentReport.totalIssues) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>High</td>
+                                            <td>${currentReport.highIssues || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalIssues ? Math.round(((currentReport.highIssues || 0) / currentReport.totalIssues) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Medium</td>
+                                            <td>${currentReport.mediumIssues || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalIssues ? Math.round(((currentReport.mediumIssues || 0) / currentReport.totalIssues) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Low</td>
+                                            <td>${currentReport.lowIssues || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalIssues ? Math.round(((currentReport.lowIssues || 0) / currentReport.totalIssues) * 100) : 0}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="chart-section">
+                                <div class="chart-container">
+                                    <h3>Status Distribution</h3>
+                                    ${chartImages.issuesStatus ? `<img src="${chartImages.issuesStatus}" alt="Issues Status Chart">` : '<p>Chart not available</p>'}
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th>Count</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>New</td>
+                                            <td>${currentReport.newIssues || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalIssues ? Math.round(((currentReport.newIssues || 0) / currentReport.totalIssues) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Fixed</td>
+                                            <td>${currentReport.fixedIssues || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalIssues ? Math.round(((currentReport.fixedIssues || 0) / currentReport.totalIssues) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Not Fixed</td>
+                                            <td>${currentReport.notFixedIssues || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalIssues ? Math.round(((currentReport.notFixedIssues || 0) / currentReport.totalIssues) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Re-opened</td>
+                                            <td>${currentReport.reopenedIssues || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalIssues ? Math.round(((currentReport.reopenedIssues || 0) / currentReport.totalIssues) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Deferred</td>
+                                            <td>${currentReport.deferredIssues || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalIssues ? Math.round(((currentReport.deferredIssues || 0) / currentReport.totalIssues) * 100) : 0}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Enhancements Analysis -->
+                        <div class="section">
+                            <h2 class="section-title">Enhancements Analysis</h2>
+                            <div class="chart-section">
+                                <div class="chart-container">
+                                    <h3>Distribution Overview</h3>
+                                    ${chartImages.enhancements ? `<img src="${chartImages.enhancements}" alt="Enhancements Chart">` : '<p>Chart not available</p>'}
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th>Count</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Total</strong></td>
+                                            <td>${currentReport.totalEnhancements || 0}</td>
+                                            <td class="percentage-cell">100%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>New</td>
+                                            <td>${currentReport.newEnhancements || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalEnhancements ? Math.round(((currentReport.newEnhancements || 0) / currentReport.totalEnhancements) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Implemented</td>
+                                            <td>${currentReport.implementedEnhancements || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalEnhancements ? Math.round(((currentReport.implementedEnhancements || 0) / currentReport.totalEnhancements) * 100) : 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Exists</td>
+                                            <td>${currentReport.existsEnhancements || 0}</td>
+                                            <td class="percentage-cell">${currentReport.totalEnhancements ? Math.round(((currentReport.existsEnhancements || 0) / currentReport.totalEnhancements) * 100) : 0}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Test Summary -->
+                        ${currentReport.testSummary ? `
+                        <div class="test-summary">
+                            <h3>Test Summary</h3>
+                            <p>${currentReport.testSummary}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- QA Notes -->
+                        ${currentReport.qaNotesText ? `
+                        <div class="qa-notes">
+                            <h3>QA Notes</h3>
+                            <p>${currentReport.qaNotesText}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Footer -->
+                        <div class="footer">
+                            <p>Generated on ${new Date().toLocaleDateString('en-GB')} | Sprint Reports System</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+
+            // Close the document and trigger print
+            printWindow.document.close();
+            
+            // Wait for the content to load, then print
+            printWindow.onload = function() {
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+            };
+        }
+
         // Custom Message Box (instead of alert)
         function showCustomMessageBox(message) {
             const messageBox = document.createElement('div');
@@ -1146,9 +1838,8 @@
                     border: none;
                     padding: 8px 15px;
                     border-radius: var(--border-radius);
-                    margin-top: 15px;
                     cursor: pointer;
-                    transition: var(--transition);
+                    margin-top: 10px;
                 ">OK</button>
             `;
             document.body.appendChild(messageBox);

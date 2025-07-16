@@ -538,6 +538,56 @@ class TeamMember(db.Model):
         if self.role not in self.VALID_ROLES:
             raise ValueError(f"Invalid role: {self.role}")
 
+# --- Statistical Cache Models ---
+class DashboardStats(db.Model):
+    """Cache for overall dashboard statistics"""
+    id = db.Column(db.Integer, primary_key=True)
+    total_reports = db.Column(db.Integer, default=0)
+    completed_reports = db.Column(db.Integer, default=0)
+    in_progress_reports = db.Column(db.Integer, default=0)
+    pending_reports = db.Column(db.Integer, default=0)
+    total_user_stories = db.Column(db.Integer, default=0)
+    total_test_cases = db.Column(db.Integer, default=0)
+    total_issues = db.Column(db.Integer, default=0)
+    total_enhancements = db.Column(db.Integer, default=0)
+    avg_evaluation_score = db.Column(db.Float, default=0.0)
+    avg_project_evaluation_score = db.Column(db.Float, default=0.0)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PortfolioStats(db.Model):
+    """Cache for portfolio-level statistics"""
+    id = db.Column(db.Integer, primary_key=True)
+    portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'), nullable=False)
+    portfolio_name = db.Column(db.String(100), nullable=False)
+    total_reports = db.Column(db.Integer, default=0)
+    total_projects = db.Column(db.Integer, default=0)
+    total_user_stories = db.Column(db.Integer, default=0)
+    total_test_cases = db.Column(db.Integer, default=0)
+    total_issues = db.Column(db.Integer, default=0)
+    total_enhancements = db.Column(db.Integer, default=0)
+    avg_evaluation_score = db.Column(db.Float, default=0.0)
+    avg_project_evaluation_score = db.Column(db.Float, default=0.0)
+    last_report_date = db.Column(db.String(50))
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+
+class ProjectStats(db.Model):
+    """Cache for project-level statistics"""
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'), nullable=False)
+    portfolio_name = db.Column(db.String(100), nullable=False)
+    project_name = db.Column(db.String(100), nullable=False)
+    total_reports = db.Column(db.Integer, default=0)
+    total_user_stories = db.Column(db.Integer, default=0)
+    total_test_cases = db.Column(db.Integer, default=0)
+    total_issues = db.Column(db.Integer, default=0)
+    total_enhancements = db.Column(db.Integer, default=0)
+    avg_evaluation_score = db.Column(db.Float, default=0.0)
+    avg_project_evaluation_score = db.Column(db.Float, default=0.0)
+    last_report_date = db.Column(db.String(50))
+    latest_testing_status = db.Column(db.String(50))
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+
 # Add API routes for CRUD operations
 @app.route('/api/portfolios', methods=['GET', 'POST'])
 def manage_portfolios():
@@ -828,6 +878,82 @@ def get_form_data():
         'team_members': [{'id': tm.id, 'name': tm.name, 'email': tm.email, 'role': tm.role} for tm in team_members]
     })
 
+@app.route('/api/projects/<portfolio_name>/<project_name>/latest-data', methods=['GET'])
+def get_latest_project_data(portfolio_name, project_name):
+    """Get latest report data for a specific project to auto-populate new reports"""
+    try:
+        # Get the latest report for this project
+        latest_report = Report.query.filter_by(
+            portfolioName=portfolio_name,
+            projectName=project_name
+        ).order_by(Report.id.desc()).first()
+        
+        if not latest_report:
+            # No previous reports - return default values
+            from datetime import datetime
+            today = datetime.now().strftime('%d-%m-%Y')
+            return jsonify({
+                'hasData': False,
+                'defaultValues': {
+                    'sprintNumber': 1,
+                    'cycleNumber': 1,
+                    'releaseNumber': '1.0',
+                    'reportVersion': '1.0', 
+                    'reportDate': today,
+                    'testerData': [],
+                    'teamMembers': []
+                }
+            })
+        
+        # Parse existing data
+        tester_data = json.loads(latest_report.testerData or '[]')
+        request_data = json.loads(latest_report.requestData or '[]') 
+        build_data = json.loads(latest_report.buildData or '[]')
+        
+        # Get team members from request data if available
+        team_members = []
+        for req in request_data:
+            if 'assignedTo' in req:
+                team_members.append(req['assignedTo'])
+        
+        return jsonify({
+            'hasData': True,
+            'latestData': {
+                'sprintNumber': latest_report.sprintNumber or 1,
+                'cycleNumber': latest_report.cycleNumber or 1,
+                'releaseNumber': latest_report.releaseNumber or '1.0',
+                'reportVersion': latest_report.reportVersion or '1.0',
+                'reportDate': latest_report.reportDate,
+                'testerData': tester_data,
+                'teamMembers': team_members,
+                'requestData': request_data,
+                'buildData': build_data
+            },
+            'suggestedValues': {
+                'sprintNumber': (latest_report.sprintNumber or 1) + 1,
+                'cycleNumber': (latest_report.cycleNumber or 1) + 1,
+                'releaseNumber': latest_report.releaseNumber or '1.0',
+                'reportVersion': latest_report.reportVersion or '1.0'
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error getting latest project data: {e}")
+        from datetime import datetime
+        today = datetime.now().strftime('%d-%m-%Y')
+        return jsonify({
+            'hasData': False,
+            'defaultValues': {
+                'sprintNumber': 1,
+                'cycleNumber': 1,
+                'releaseNumber': '1.0',
+                'reportVersion': '1.0',
+                'reportDate': today,
+                'testerData': [],
+                'teamMembers': []
+            }
+        })
+
 # Add route for manage data page
 @app.route('/manage')
 def manage_data_page():
@@ -887,6 +1013,194 @@ def delete_report(id):
     db.session.delete(report)
     db.session.commit()
     return jsonify({'message': 'Report deleted successfully'}), 200
+
+# --- Statistical Cache Update Functions ---
+def update_stats_cache():
+    """Update all statistical cache tables"""
+    from sqlalchemy import func
+    try:
+        # Update Dashboard Stats
+        dashboard_stats = DashboardStats.query.first()
+        if not dashboard_stats:
+            dashboard_stats = DashboardStats()
+            db.session.add(dashboard_stats)
+        
+        # Calculate overall stats
+        total_reports = db.session.query(func.count(Report.id)).scalar()
+        completed_reports = db.session.query(func.count(Report.id)).filter(Report.testingStatus == 'passed').scalar()
+        in_progress_reports = db.session.query(func.count(Report.id)).filter(Report.testingStatus == 'passed-with-issues').scalar()
+        
+        aggregate_result = db.session.query(
+            func.sum(Report.totalUserStories).label('total_user_stories'),
+            func.sum(Report.totalTestCases).label('total_test_cases'),
+            func.sum(Report.totalIssues).label('total_issues'),
+            func.sum(Report.totalEnhancements).label('total_enhancements'),
+            func.avg(Report.evaluationTotalScore).label('avg_evaluation_score'),
+            func.avg(Report.projectEvaluationTotalScore).label('avg_project_evaluation_score')
+        ).first()
+        
+        dashboard_stats.total_reports = total_reports
+        dashboard_stats.completed_reports = completed_reports or 0
+        dashboard_stats.in_progress_reports = in_progress_reports or 0
+        dashboard_stats.pending_reports = total_reports - (completed_reports or 0) - (in_progress_reports or 0)
+        dashboard_stats.total_user_stories = aggregate_result.total_user_stories or 0
+        dashboard_stats.total_test_cases = aggregate_result.total_test_cases or 0
+        dashboard_stats.total_issues = aggregate_result.total_issues or 0
+        dashboard_stats.total_enhancements = aggregate_result.total_enhancements or 0
+        dashboard_stats.avg_evaluation_score = aggregate_result.avg_evaluation_score or 0
+        dashboard_stats.avg_project_evaluation_score = aggregate_result.avg_project_evaluation_score or 0
+        dashboard_stats.last_updated = datetime.utcnow()
+        
+        # Update Portfolio Stats
+        portfolios = Portfolio.query.all()
+        for portfolio in portfolios:
+            portfolio_stats = PortfolioStats.query.filter_by(portfolio_id=portfolio.id).first()
+            if not portfolio_stats:
+                portfolio_stats = PortfolioStats(portfolio_id=portfolio.id, portfolio_name=portfolio.name)
+                db.session.add(portfolio_stats)
+            
+            # Get stats for this portfolio
+            portfolio_aggregate = db.session.query(
+                func.count(Report.id).label('total_reports'),
+                func.sum(Report.totalUserStories).label('total_user_stories'),
+                func.sum(Report.totalTestCases).label('total_test_cases'),
+                func.sum(Report.totalIssues).label('total_issues'),
+                func.sum(Report.totalEnhancements).label('total_enhancements'),
+                func.avg(Report.evaluationTotalScore).label('avg_evaluation_score'),
+                func.avg(Report.projectEvaluationTotalScore).label('avg_project_evaluation_score'),
+                func.max(Report.reportDate).label('last_report_date')
+            ).filter(Report.portfolioName == portfolio.name).first()
+            
+            project_count = Project.query.filter_by(portfolio_id=portfolio.id).count()
+            
+            portfolio_stats.portfolio_name = portfolio.name
+            portfolio_stats.total_reports = portfolio_aggregate.total_reports or 0
+            portfolio_stats.total_projects = project_count
+            portfolio_stats.total_user_stories = portfolio_aggregate.total_user_stories or 0
+            portfolio_stats.total_test_cases = portfolio_aggregate.total_test_cases or 0
+            portfolio_stats.total_issues = portfolio_aggregate.total_issues or 0
+            portfolio_stats.total_enhancements = portfolio_aggregate.total_enhancements or 0
+            portfolio_stats.avg_evaluation_score = portfolio_aggregate.avg_evaluation_score or 0
+            portfolio_stats.avg_project_evaluation_score = portfolio_aggregate.avg_project_evaluation_score or 0
+            portfolio_stats.last_report_date = portfolio_aggregate.last_report_date
+            portfolio_stats.last_updated = datetime.utcnow()
+        
+        # Update Project Stats
+        projects = Project.query.all()
+        for project in projects:
+            project_stats = ProjectStats.query.filter_by(project_id=project.id).first()
+            if not project_stats:
+                project_stats = ProjectStats(
+                    project_id=project.id, 
+                    portfolio_id=project.portfolio_id,
+                    portfolio_name=project.portfolio.name,
+                    project_name=project.name
+                )
+                db.session.add(project_stats)
+            
+            # Get stats for this project
+            project_aggregate = db.session.query(
+                func.count(Report.id).label('total_reports'),
+                func.sum(Report.totalUserStories).label('total_user_stories'),
+                func.sum(Report.totalTestCases).label('total_test_cases'),
+                func.sum(Report.totalIssues).label('total_issues'),
+                func.sum(Report.totalEnhancements).label('total_enhancements'),
+                func.avg(Report.evaluationTotalScore).label('avg_evaluation_score'),
+                func.avg(Report.projectEvaluationTotalScore).label('avg_project_evaluation_score'),
+                func.max(Report.reportDate).label('last_report_date')
+            ).filter(Report.portfolioName == project.portfolio.name, Report.projectName == project.name).first()
+            
+            # Get latest testing status
+            latest_report = Report.query.filter_by(
+                portfolioName=project.portfolio.name, 
+                projectName=project.name
+            ).order_by(Report.reportDate.desc()).first()
+            
+            project_stats.portfolio_name = project.portfolio.name
+            project_stats.project_name = project.name
+            project_stats.total_reports = project_aggregate.total_reports or 0
+            project_stats.total_user_stories = project_aggregate.total_user_stories or 0
+            project_stats.total_test_cases = project_aggregate.total_test_cases or 0
+            project_stats.total_issues = project_aggregate.total_issues or 0
+            project_stats.total_enhancements = project_aggregate.total_enhancements or 0
+            project_stats.avg_evaluation_score = project_aggregate.avg_evaluation_score or 0
+            project_stats.avg_project_evaluation_score = project_aggregate.avg_project_evaluation_score or 0
+            project_stats.last_report_date = project_aggregate.last_report_date
+            project_stats.latest_testing_status = latest_report.testingStatus if latest_report else 'pending'
+            project_stats.last_updated = datetime.utcnow()
+        
+        db.session.commit()
+        print("Statistics cache updated successfully")
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating stats cache: {e}")
+
+# Optimized API endpoints
+@app.route('/api/portfolios/minimal', methods=['GET'])
+def get_portfolios_minimal():
+    """Get minimal portfolio data for fast loading"""
+    portfolios = Portfolio.query.with_entities(Portfolio.id, Portfolio.name).all()
+    return jsonify([{'id': p.id, 'name': p.name} for p in portfolios])
+
+@app.route('/api/projects/by-portfolio/<int:portfolio_id>', methods=['GET'])
+def get_projects_by_portfolio(portfolio_id):
+    """Get projects for a specific portfolio"""
+    projects = Project.query.filter_by(portfolio_id=portfolio_id).with_entities(Project.id, Project.name).all()
+    return jsonify([{'id': p.id, 'name': p.name} for p in projects])
+
+@app.route('/api/dashboard/stats/cached', methods=['GET'])
+def get_cached_dashboard_stats():
+    """Get dashboard statistics from cache tables"""
+    try:
+        # Try to get from cache first
+        dashboard_stats = DashboardStats.query.first()
+        if not dashboard_stats:
+            # If no cache exists, update it
+            update_stats_cache()
+            dashboard_stats = DashboardStats.query.first()
+        
+        # Get project stats from cache
+        project_stats = ProjectStats.query.all()
+        
+        overall_stats = {
+            'totalReports': dashboard_stats.total_reports,
+            'completedReports': dashboard_stats.completed_reports,
+            'inProgressReports': dashboard_stats.in_progress_reports,
+            'pendingReports': dashboard_stats.pending_reports,
+            'totalUserStories': dashboard_stats.total_user_stories,
+            'totalTestCases': dashboard_stats.total_test_cases,
+            'totalIssues': dashboard_stats.total_issues,
+            'totalEnhancements': dashboard_stats.total_enhancements,
+            'avgEvaluationScore': round(dashboard_stats.avg_evaluation_score, 2),
+            'avgProjectEvaluationScore': round(dashboard_stats.avg_project_evaluation_score, 2)
+        }
+        
+        projects_data = []
+        for ps in project_stats:
+            projects_data.append({
+                'portfolioName': ps.portfolio_name,
+                'projectName': ps.project_name,
+                'totalReports': ps.total_reports,
+                'totalUserStories': ps.total_user_stories,
+                'totalTestCases': ps.total_test_cases,
+                'totalIssues': ps.total_issues,
+                'totalEnhancements': ps.total_enhancements,
+                'avgEvaluationScore': round(ps.avg_evaluation_score, 2),
+                'avgProjectEvaluationScore': round(ps.avg_project_evaluation_score, 2),
+                'lastReportDate': ps.last_report_date,
+                'testingStatus': ps.latest_testing_status
+            })
+        
+        return jsonify({
+            'overall': overall_stats,
+            'projects': projects_data
+        })
+        
+    except Exception as e:
+        # Fallback to original method if cache fails
+        print(f"Cache retrieval failed, falling back to original method: {e}")
+        return get_dashboard_stats()
 
 
 if __name__ == '__main__':

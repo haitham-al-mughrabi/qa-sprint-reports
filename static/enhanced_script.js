@@ -7,6 +7,8 @@ let currentPage = 1;
 const reportsPerPage = 10;
 let allReportsCache = []; // Cache for all reports to avoid re-fetching
 let dashboardStatsCache = null; // Cache for dashboard statistics with structure: {data: object, cacheTime: number}
+// Auto-save functionality
+let autoSaveTimeout = null;
 
 // Form-specific variables
 let requestData = [];
@@ -24,6 +26,11 @@ let weightReasonVisible = false; // Not directly used in this version but kept f
 // --- API Communication ---
 const API_URL = '/api/reports';
 const DASHBOARD_API_URL = '/api/dashboard/stats';
+
+// --- LocalStorage Constants ---
+const FORM_DATA_KEY = 'qaReportFormData';
+const FORM_ARRAYS_KEY = 'qaReportFormArrays';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 async function fetchReports() {
     try {
@@ -635,7 +642,10 @@ function calculateEnhancementsTotal() {
 // --- Dynamic Form Sections (Request, Build, Tester) ---
 function showRequestModal() { showModal('requestModal'); }
 function showBuildModal() { showModal('buildModal'); }
-function showTesterModal() { showModal('testerModal'); }
+function showTesterModal() { 
+    loadExistingTesters(); // Load testers when modal opens
+    showModal('testerModal'); 
+}
 
 function addRequest() {
     const requestId = document.getElementById('requestId').value.trim();
@@ -790,7 +800,11 @@ function updateNavigationButtons() {
 
 // backToDashboard now redirects to the dashboard page
 function backToDashboard() { window.location.href = '/dashboard'; }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function toggleSidebar() { 
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('open');
+    sidebar.classList.toggle('show'); // Also toggle 'show' for compatibility
+}
 
 // --- Reports Table Functions ---
 // Debounced search to reduce API calls
@@ -846,8 +860,6 @@ function renderReportsTable(reports) {
                 <div class="action-buttons-cell">
                     <button class="btn-sm btn-view" onclick="viewReport(${report.id})" title="View Report"><i class="fas fa-eye"></i></button>
                     <button class="btn-sm btn-regenerate" onclick="regenerateReport(${report.id})" title="Edit Report"><i class="fas fa-edit"></i></button>
-                    <button class="btn-sm btn-export-pdf" onclick="exportReportAsPdf(${report.id})" title="Export as PDF"><i class="fas fa-file-pdf"></i></button>
-                    <button class="btn-sm btn-export-excel" onclick="exportReportAsExcel(${report.id})" title="Export as Excel"><i class="fas fa-file-excel"></i></button>
                     <button class="btn-sm btn-delete" onclick="deleteReport(${report.id})" title="Delete Report"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </td>
@@ -1511,10 +1523,33 @@ async function addPortfolio() {
                 body: JSON.stringify({ name: name })
             });
             if (response.ok) {
-                showToast('Portfolio added successfully!', 'success');
+                const newPortfolio = await response.json();
+                showToast('Portfolio added successfully! Now please add a project to this portfolio.', 'success');
                 invalidateAllCaches(); // Clear caches since data changed
-                loadFormDropdownData(); // Reload dropdowns to include new portfolio
+                
+                // Reload portfolios and select the new one
+                await loadPortfoliosOnly();
+                
+                // Select the newly created portfolio
+                const portfolioSelect = document.getElementById('portfolioName');
+                if (portfolioSelect) {
+                    // Find and select the new portfolio option
+                    const portfolioValue = name.toLowerCase().replace(/\s+/g, '-');
+                    portfolioSelect.value = portfolioValue;
+                    
+                    // Trigger the change event to load projects for this portfolio
+                    const changeEvent = new Event('change', { bubbles: true });
+                    portfolioSelect.dispatchEvent(changeEvent);
+                }
+                
                 closeModal('addPortfolioModal');
+                
+                // Force user to add a project by showing the project modal
+                setTimeout(() => {
+                    showToast('Please add a project to the new portfolio before proceeding.', 'info');
+                    showAddProjectModal();
+                }, 500);
+                
             } else {
                 const error = await response.json();
                 showToast('Error adding portfolio: ' + (error.error || 'Unknown error'), 'error');
@@ -1531,36 +1566,41 @@ async function addPortfolio() {
 async function addProject() {
     const name = document.getElementById('newProjectName').value.trim();
     const portfolioSelect = document.getElementById('portfolioName');
-    const portfolioId = portfolioSelect.options[portfolioSelect.selectedIndex].value; // Assuming value is ID or name
-
-    if (!portfolioId) {
+    
+    if (!portfolioSelect.value) {
         showToast('Please select a portfolio first.', 'warning');
         return;
     }
 
-    // You might need to fetch the actual portfolio ID if your dropdown value is just the name
-    // For now, let's assume the backend can handle name or you pass the ID from a hidden field
-    // For simplicity, I'll assume portfolioId is the name and backend handles mapping or you need to adjust
-    // This part might need refinement based on how your backend expects project creation.
-    // For now, I'll use the selected portfolio's name as a placeholder for portfolio_id if it's not a true ID.
-    // A better approach would be to store portfolio IDs in the option values.
-
-    // Let's adjust to use the actual ID if available, otherwise fallback to name.
-    // The `populatePortfolioDropdown` should store actual IDs in option values.
     const selectedPortfolioOption = portfolioSelect.options[portfolioSelect.selectedIndex];
-    const actualPortfolioId = selectedPortfolioOption ? selectedPortfolioOption.dataset.id : null; // Assuming data-id attribute for actual ID
+    const actualPortfolioId = selectedPortfolioOption ? selectedPortfolioOption.dataset.id : null;
 
     if (name && actualPortfolioId) {
         try {
             const response = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newName, portfolio_id: actualPortfolioId })
+                body: JSON.stringify({ name: name, portfolio_id: actualPortfolioId })
             });
             if (response.ok) {
+                const newProject = await response.json();
                 showToast('Project added successfully!', 'success');
                 invalidateAllCaches(); // Clear caches since data changed
-                loadFormDropdownData(); // Reload dropdowns to include new project
+                
+                // Reload projects for the current portfolio
+                await loadProjectsForPortfolio(actualPortfolioId);
+                
+                // Select the newly created project
+                const projectSelect = document.getElementById('projectName');
+                if (projectSelect) {
+                    const projectValue = name.toLowerCase().replace(/\s+/g, '-');
+                    projectSelect.value = projectValue;
+                    
+                    // Trigger the change event to enable remaining fields
+                    const changeEvent = new Event('change', { bubbles: true });
+                    projectSelect.dispatchEvent(changeEvent);
+                }
+                
                 closeModal('addProjectModal');
             } else {
                 const error = await response.json();
@@ -1943,6 +1983,29 @@ function updateQAFieldOptions() {
     }
 }
 
+function addQANoteField() {
+    const name = document.getElementById('qaFieldName').value.trim();
+    const type = document.getElementById('qaFieldType').value;
+    const required = document.getElementById('qaFieldRequired').checked;
+    const showInReport = document.getElementById('qaFieldShowInReport').checked;
+    
+    if (!name) {
+        showToast('Please enter a field name.', 'warning');
+        return;
+    }
+    
+    // This is a simplified implementation
+    // In a full implementation, you would add this field to customFieldsData
+    // and dynamically create form elements
+    showToast('QA field functionality is not fully implemented in this version.', 'info');
+    closeModal('addQANoteFieldModal');
+}
+
+function removeQANoteField(index) {
+    // This is a placeholder function for removing custom QA fields
+    showToast('QA field removal functionality is not fully implemented in this version.', 'info');
+}
+
 let qaNotesData = [];
 
 function showAddQANoteModal() {
@@ -2133,7 +2196,6 @@ async function populateProjectDropdown(projects) {
 // Caching for form dropdown data
 let formDataCache = null;
 let formDataCacheTime = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 // Cache invalidation function
 function invalidateAllCaches() {
@@ -2143,32 +2205,347 @@ function invalidateAllCaches() {
     allReportsCache = [];
 }
 
-// Missing form dropdown data loading function with caching
-async function loadFormDropdownData() {
-    try {
-        // Check if we have cached data that's still valid
-        if (formDataCache && formDataCacheTime && (Date.now() - formDataCacheTime) < CACHE_DURATION) {
-            populatePortfolioDropdown(formDataCache.portfolios);
-            populateProjectDropdown(formDataCache.projects);
-            return;
-        }
+// Global variable to store latest project data for auto-loading
+let latestProjectData = null;
 
-        const response = await fetch('/api/form-data');
+// Function called when project is selected
+async function onProjectSelection() {
+    const portfolioSelect = document.getElementById('portfolioName');
+    const projectSelect = document.getElementById('projectName');
+    
+    if (!portfolioSelect.value || !projectSelect.value) {
+        return;
+    }
+    
+    const portfolioName = portfolioSelect.options[portfolioSelect.selectedIndex].text;
+    const projectName = projectSelect.options[projectSelect.selectedIndex].text;
+    
+    try {
+        const response = await fetch(`/api/projects/${encodeURIComponent(portfolioName)}/${encodeURIComponent(projectName)}/latest-data`);
         if (response.ok) {
             const data = await response.json();
             
-            // Cache the data
-            formDataCache = data;
-            formDataCacheTime = Date.now();
-            
-            populatePortfolioDropdown(data.portfolios);
-            populateProjectDropdown(data.projects);
-            // You can also load testers and team members here if needed for the form
+            if (data.hasData) {
+                latestProjectData = data;
+                showAutoLoadModal(data);
+            } else {
+                // No previous data, set defaults
+                setDefaultValues(data.defaultValues);
+            }
         }
+    } catch (error) {
+        console.error('Error fetching latest project data:', error);
+        setDefaultValues();
+    }
+}
+
+// Function to show the auto-load modal with data preview
+function showAutoLoadModal(data) {
+    const modal = document.getElementById('autoLoadDataModal');
+    const preview = document.getElementById('dataPreview');
+    
+    // Build data preview
+    const latestData = data.latestData;
+    const suggestedValues = data.suggestedValues;
+    
+    let previewHTML = `
+        <h4>Latest Report Data:</h4>
+        <div class="data-preview-item">
+            <span class="data-preview-label">Sprint Number:</span>
+            <span class="data-preview-value">${latestData.sprintNumber} → Suggested: ${suggestedValues.sprintNumber}</span>
+        </div>
+        <div class="data-preview-item">
+            <span class="data-preview-label">Cycle Number:</span>
+            <span class="data-preview-value">${latestData.cycleNumber} → Suggested: ${suggestedValues.cycleNumber}</span>
+        </div>
+        <div class="data-preview-item">
+            <span class="data-preview-label">Release Number:</span>
+            <span class="data-preview-value">${latestData.releaseNumber}</span>
+        </div>
+        <div class="data-preview-item">
+            <span class="data-preview-label">Report Version:</span>
+            <span class="data-preview-value">${latestData.reportVersion}</span>
+        </div>
+        <div class="data-preview-item">
+            <span class="data-preview-label">Testers:</span>
+            <span class="data-preview-value">${latestData.testerData.length} tester(s)</span>
+        </div>
+        <div class="data-preview-item">
+            <span class="data-preview-label">Team Members:</span>
+            <span class="data-preview-value">${latestData.teamMembers.length} member(s)</span>
+        </div>
+    `;
+    
+    preview.innerHTML = previewHTML;
+    showModal('autoLoadDataModal');
+}
+
+// Function to load selected data
+function loadSelectedData() {
+    if (!latestProjectData) return;
+    
+    const latestData = latestProjectData.latestData;
+    const suggestedValues = latestProjectData.suggestedValues;
+    
+    // Check which data types to load
+    const loadSprintData = document.getElementById('loadSprintData').checked;
+    const loadReportData = document.getElementById('loadReportData').checked;
+    const loadTesters = document.getElementById('loadTesters').checked;
+    const loadTeamMembers = document.getElementById('loadTeamMembers').checked;
+    const loadRequestData = document.getElementById('loadRequestData').checked;
+    const loadBuildData = document.getElementById('loadBuildData').checked;
+    
+    // Load Sprint & Release Information
+    if (loadSprintData) {
+        document.getElementById('sprintNumber').value = suggestedValues.sprintNumber;
+        document.getElementById('cycleNumber').value = suggestedValues.cycleNumber;
+        document.getElementById('releaseNumber').value = latestData.releaseNumber;
+    }
+    
+    // Load Report Information
+    if (loadReportData) {
+        document.getElementById('reportVersion').value = latestData.reportVersion;
+        // Set today's date
+        const today = new Date();
+        const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+        document.getElementById('reportDate').value = formattedDate;
+    }
+    
+    // Load Testers
+    if (loadTesters && latestData.testerData.length > 0) {
+        // Clear existing testers
+        testerData = [];
+        latestData.testerData.forEach(tester => {
+            testerData.push(tester);
+        });
+        updateTesterList();
+    }
+    
+    // Load Team Members  
+    if (loadTeamMembers && latestData.teamMembers.length > 0) {
+        // This would need to be implemented based on how team members are stored
+        console.log('Loading team members:', latestData.teamMembers);
+    }
+    
+    // Load Request Data
+    if (loadRequestData && latestData.requestData.length > 0) {
+        requestData = [...latestData.requestData];
+        updateRequestList();
+    }
+    
+    // Load Build Data
+    if (loadBuildData && latestData.buildData.length > 0) {
+        buildData = [...latestData.buildData];
+        updateBuildList();
+    }
+    
+    closeModal('autoLoadDataModal');
+    showToast('Data loaded successfully!', 'success');
+}
+
+// Function to set default values for new projects
+function setDefaultValues(defaults) {
+    const today = new Date();
+    const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+    
+    if (defaults) {
+        document.getElementById('sprintNumber').value = defaults.sprintNumber;
+        document.getElementById('cycleNumber').value = defaults.cycleNumber;
+        document.getElementById('releaseNumber').value = defaults.releaseNumber;
+        document.getElementById('reportVersion').value = defaults.reportVersion;
+        document.getElementById('reportDate').value = defaults.reportDate;
+    } else {
+        // Fallback defaults
+        document.getElementById('sprintNumber').value = 1;
+        document.getElementById('cycleNumber').value = 1;
+        document.getElementById('releaseNumber').value = '1.0';
+        document.getElementById('reportVersion').value = '1.0';
+        document.getElementById('reportDate').value = formattedDate;
+    }
+}
+
+// Missing form dropdown data loading function with caching
+// Progressive form loading - starts with only portfolios
+async function loadFormDropdownData() {
+    try {
+        console.log('Loading minimal portfolio data for progressive form loading...');
+        await loadPortfoliosOnly();
+        disableFormFieldsExceptPortfolio();
+        setupProgressiveFormHandlers();
     } catch (error) {
         console.error('Error loading form data:', error);
         showToast('Error loading form data', 'error');
     }
+}
+
+// Load only portfolios for fast initial loading
+async function loadPortfoliosOnly() {
+    try {
+        const response = await fetch('/api/portfolios/minimal');
+        if (response.ok) {
+            const portfolios = await response.json();
+            populatePortfolioDropdown(portfolios);
+        } else {
+            throw new Error('Failed to load portfolios');
+        }
+    } catch (error) {
+        console.error('Error loading portfolios:', error);
+        showToast('Error loading portfolios', 'error');
+    }
+}
+
+// Load projects for a specific portfolio
+async function loadProjectsForPortfolio(portfolioId) {
+    try {
+        console.log('Loading projects for portfolio:', portfolioId);
+        const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
+        if (response.ok) {
+            const projects = await response.json();
+            populateProjectDropdownFiltered(projects);
+            enableProjectField();
+        } else {
+            throw new Error('Failed to load projects');
+        }
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        showToast('Error loading projects', 'error');
+    }
+}
+
+// Disable all form fields except Portfolio Name
+function disableFormFieldsExceptPortfolio() {
+    const fieldsToDisable = [
+        'projectName', 'sprintNumber', 'cycleNumber', 'releaseNumber',
+        'reportName', 'reportVersion', 'reportDate'
+    ];
+    
+    fieldsToDisable.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.disabled = true;
+            field.style.opacity = '0.5';
+            field.style.cursor = 'not-allowed';
+        }
+    });
+    
+    // Also disable the project dropdown initially
+    const projectSelect = document.getElementById('projectName');
+    if (projectSelect) {
+        projectSelect.innerHTML = '<option value="">Select Portfolio first</option>';
+        projectSelect.disabled = true;
+        projectSelect.style.opacity = '0.5';
+        projectSelect.style.cursor = 'not-allowed';
+    }
+}
+
+// Enable project field after portfolio is selected
+function enableProjectField() {
+    const projectSelect = document.getElementById('projectName');
+    if (projectSelect) {
+        projectSelect.disabled = false;
+        projectSelect.style.opacity = '1';
+        projectSelect.style.cursor = 'pointer';
+    }
+}
+
+// Enable all remaining fields after project is selected
+function enableAllRemainingFields() {
+    const fieldsToEnable = [
+        'sprintNumber', 'cycleNumber', 'releaseNumber',
+        'reportName', 'reportVersion', 'reportDate'
+    ];
+    
+    fieldsToEnable.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.disabled = false;
+            field.style.opacity = '1';
+            field.style.cursor = 'auto';
+        }
+    });
+}
+
+// Setup event handlers for progressive form loading
+function setupProgressiveFormHandlers() {
+    const portfolioSelect = document.getElementById('portfolioName');
+    const projectSelect = document.getElementById('projectName');
+    
+    if (portfolioSelect) {
+        // Remove existing event listeners
+        portfolioSelect.removeEventListener('change', onPortfolioChange);
+        portfolioSelect.addEventListener('change', onPortfolioChange);
+    }
+    
+    if (projectSelect) {
+        // Remove existing event listeners
+        projectSelect.removeEventListener('change', onProjectChangeProgressive);
+        projectSelect.addEventListener('change', onProjectChangeProgressive);
+    }
+}
+
+// Handle portfolio selection
+async function onPortfolioChange(event) {
+    const selectedOption = event.target.selectedOptions[0];
+    if (selectedOption && selectedOption.value && selectedOption.dataset.id) {
+        const portfolioId = selectedOption.dataset.id;
+        await loadProjectsForPortfolio(portfolioId);
+        
+        // Clear project selection when portfolio changes
+        const projectSelect = document.getElementById('projectName');
+        if (projectSelect) {
+            projectSelect.value = '';
+        }
+        
+        // Keep other fields disabled until project is selected
+        disableFieldsAfterPortfolio();
+    } else {
+        // If no portfolio selected, disable everything
+        disableFormFieldsExceptPortfolio();
+    }
+}
+
+// Handle project selection in progressive mode
+async function onProjectChangeProgressive(event) {
+    if (event.target.value) {
+        enableAllRemainingFields();
+        
+        // Call existing project selection logic for auto-population
+        if (typeof onProjectSelection === 'function') {
+            await onProjectSelection();
+        }
+    } else {
+        disableFieldsAfterPortfolio();
+    }
+}
+
+// Disable fields that require project selection
+function disableFieldsAfterPortfolio() {
+    const fieldsToDisable = [
+        'sprintNumber', 'cycleNumber', 'releaseNumber',
+        'reportName', 'reportVersion', 'reportDate'
+    ];
+    
+    fieldsToDisable.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.disabled = true;
+            field.style.opacity = '0.5';
+            field.style.cursor = 'not-allowed';
+        }
+    });
+}
+
+// Enhanced project dropdown population for filtered projects
+function populateProjectDropdownFiltered(projects) {
+    const select = document.getElementById('projectName');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Select Project</option>';
+    
+    projects.forEach(project => {
+        const value = project.name.toLowerCase().replace(/\s+/g, '-');
+        select.innerHTML += `<option value="${value}" data-id="${project.id}">${project.name}</option>`;
+    });
 }
 
 // Make functions globally accessible
@@ -2221,18 +2598,24 @@ window.addSelectedTester = addSelectedTester;
 window.showToast = showToast;
 window.removeToast = removeToast;
 window.loadFormDropdownData = loadFormDropdownData; // Make it globally accessible
+window.loadPortfoliosOnly = loadPortfoliosOnly;
+window.loadProjectsForPortfolio = loadProjectsForPortfolio;
+window.onPortfolioChange = onPortfolioChange;
+window.onProjectChangeProgressive = onProjectChangeProgressive;
+window.enableAllRemainingFields = enableAllRemainingFields;
+window.populateProjectDropdownFiltered = populateProjectDropdownFiltered;
 window.initializeCharts = initializeCharts; // Make it globally accessible
 window.resetFormData = resetFormData; // Make it globally accessible
 window.invalidateAllCaches = invalidateAllCaches; // Make cache invalidation globally accessible
 window.fetchReport = fetchReport; // Make it globally accessible for editing
 window.loadReportForEditing = loadReportForEditing; // Make it globally accessible for editing
+window.onProjectSelection = onProjectSelection; // Make project selection handler globally accessible
+window.loadSelectedData = loadSelectedData; // Make data loading function globally accessible
 window.editingReportId = editingReportId; // Make global variable accessible
 window.allReportsCache = allReportsCache; // Make global variable accessible
 window.dashboardStatsCache = dashboardStatsCache; // Make global variable accessible
 
 // --- LocalStorage Functions ---
-const FORM_DATA_KEY = 'qaReportFormData';
-const FORM_ARRAYS_KEY = 'qaReportFormArrays';
 
 function saveFormDataToLocalStorage() {
     try {
@@ -2285,7 +2668,7 @@ function saveFormDataToLocalStorage() {
 
         localStorage.setItem(FORM_ARRAYS_KEY, JSON.stringify(arrayData));
 
-        console.log('Form data saved to localStorage');
+        console.log('Form data saved to localStorage:', Object.keys(formObject).length, 'fields');
     } catch (error) {
         console.error('Error saving form data to localStorage:', error);
     }
@@ -2293,10 +2676,12 @@ function saveFormDataToLocalStorage() {
 
 function loadFormDataFromLocalStorage() {
     try {
+        console.log('Loading form data from localStorage...');
         const savedFormData = localStorage.getItem(FORM_DATA_KEY);
         const savedArrayData = localStorage.getItem(FORM_ARRAYS_KEY);
 
         if (savedFormData) {
+            console.log('Found saved form data, loading...');
             const formObject = JSON.parse(savedFormData);
 
             // Load form fields
@@ -2306,6 +2691,7 @@ function loadFormDataFromLocalStorage() {
                     element.value = formObject[key];
                 }
             });
+            console.log('Loaded', Object.keys(formObject).length, 'form fields');
 
             // Trigger calculations after loading data
             setTimeout(() => {
@@ -2316,9 +2702,12 @@ function loadFormDataFromLocalStorage() {
                 if (typeof calculateEnhancementsPercentages === 'function') calculateEnhancementsPercentages();
                 if (typeof updateAutoCalculatedFields === 'function') updateAutoCalculatedFields();
             }, 500);
+        } else {
+            console.log('No saved form data found in localStorage');
         }
 
         if (savedArrayData) {
+            console.log('Found saved array data, loading...');
             const arrayObject = JSON.parse(savedArrayData);
 
             // Load arrays
@@ -2341,6 +2730,8 @@ function loadFormDataFromLocalStorage() {
                 teamMemberData = arrayObject.teamMemberData;
                 renderTeamMemberList();
             }
+        } else {
+            console.log('No saved array data found');
         }
 
         console.log('Form data loaded from localStorage');
@@ -2359,11 +2750,12 @@ function clearFormDataFromLocalStorage() {
     }
 }
 
-// Auto-save functionality
-let autoSaveTimeout;
 function autoSaveFormData() {
-    clearTimeout(autoSaveTimeout);
+    if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+    }
     autoSaveTimeout = setTimeout(() => {
+        console.log('Auto-saving form data...');
         saveFormDataToLocalStorage();
     }, 1000); // Save after 1 second of inactivity
 }
@@ -2372,8 +2764,11 @@ function autoSaveFormData() {
 function setupAutoSave() {
     const form = document.getElementById('qaReportForm');
     if (form) {
+        console.log('Setting up autosave on form');
         form.addEventListener('input', autoSaveFormData);
         form.addEventListener('change', autoSaveFormData);
+    } else {
+        console.error('qaReportForm not found - autosave not set up');
     }
 }
 

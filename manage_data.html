@@ -302,6 +302,40 @@
 
         function showModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        
+        // Simple toast notification function
+        function showToast(message, type = 'info') {
+            // Create toast element if it doesn't exist
+            let toast = document.getElementById('toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                toast.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; z-index: 10000;
+                    padding: 12px 20px; border-radius: 5px; color: white;
+                    font-weight: bold; opacity: 0; transition: opacity 0.3s;
+                `;
+                document.body.appendChild(toast);
+            }
+            
+            // Set background color based on type
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545', 
+                warning: '#ffc107',
+                info: '#17a2b8'
+            };
+            toast.style.backgroundColor = colors[type] || colors.info;
+            
+            // Show toast
+            toast.textContent = message;
+            toast.style.opacity = '1';
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 3000);
+        }
 
         function populatePortfolioDropdown(selectedId = '') {
             const select = document.getElementById('projectPortfolio');
@@ -317,7 +351,22 @@
         // --- CRUD OPERATIONS ---
         // Show Modals for Adding
         function showAddPortfolioModal() { editingId=null; document.getElementById('portfolioName').value=''; document.getElementById('portfolioDescription').value=''; showModal('addPortfolioModal'); }
-        function showAddProjectModal() { editingId=null; document.getElementById('projectName').value=''; document.getElementById('projectDescription').value=''; populatePortfolioDropdown(); showModal('addProjectModal'); }
+        function showAddProjectModal() { 
+            editingId=null; 
+            document.getElementById('projectName').value=''; 
+            document.getElementById('projectDescription').value=''; 
+            populatePortfolioDropdown(); 
+            
+            // If no portfolios exist, prompt user to create one first
+            if (portfolios.length === 0) {
+                closeModal('addProjectModal');
+                showToast('Please create a portfolio first before adding projects.', 'warning');
+                showAddPortfolioModal();
+                return;
+            }
+            
+            showModal('addProjectModal'); 
+        }
         function showAddTesterModal() { editingId=null; document.getElementById('testerName').value=''; document.getElementById('testerEmail').value=''; showModal('addTesterModal'); }
         function showAddTeamMemberModal() { editingId=null; document.getElementById('teamMemberName').value=''; document.getElementById('teamMemberEmail').value=''; document.getElementById('teamMemberRole').value=''; showModal('addTeamMemberModal'); }
 
@@ -337,17 +386,38 @@
                     await loadAllData();
                     updateAll();
                     closeModal(modalId);
+                    return true; // Success
                 } else { 
                     alert(`Failed to save ${type}.`); 
+                    return false; // Failure
                 }
             } catch (error) {
                 console.error(`Error saving ${type}:`, error);
                 alert(`An error occurred while saving ${type}.`);
+                return false; // Failure
+            } finally {
+                editingId = null;
             }
-            editingId = null;
         }
 
-        function savePortfolio() { const name=document.getElementById('portfolioName').value, description=document.getElementById('portfolioDescription').value; if(name) saveData('portfolios', {name, description}, 'addPortfolioModal'); }
+        async function savePortfolio() { 
+            const name=document.getElementById('portfolioName').value;
+            const description=document.getElementById('portfolioDescription').value;
+            if(name) {
+                const result = await saveData('portfolios', {name, description}, 'addPortfolioModal');
+                if (result && !editingId) {
+                    // If it's a new portfolio (not editing), offer to add a project
+                    setTimeout(() => {
+                        showToast('Portfolio created! Would you like to add a project to this portfolio?', 'info');
+                        setTimeout(() => {
+                            if (confirm('Would you like to add a project to the new portfolio?')) {
+                                showAddProjectModal();
+                            }
+                        }, 1000);
+                    }, 500);
+                }
+            }
+        }
         function saveProject() { const name=document.getElementById('projectName').value, portfolio_id=document.getElementById('projectPortfolio').value, description=document.getElementById('projectDescription').value; if(name && portfolio_id) saveData('projects', {name, portfolio_id, description}, 'addProjectModal'); }
         function saveTester() { const name=document.getElementById('testerName').value, email=document.getElementById('testerEmail').value; if(name && email) saveData('testers', {name, email}, 'addTesterModal'); }
         function saveTeamMember() { const name=document.getElementById('teamMemberName').value, email=document.getElementById('teamMemberEmail').value, role=document.getElementById('teamMemberRole').value; if(name && email && role) saveData('team-members', {name, email, role}, 'addTeamMemberModal'); }
