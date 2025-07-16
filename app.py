@@ -77,27 +77,15 @@ class Report(db.Model):
     implementedEnhancements = db.Column(db.Integer, default=0)
     existsEnhancements = db.Column(db.Integer, default=0)
     
-    # Evaluation Data - REMOVED
-    # evaluationData = db.Column(db.Text, default='{}')  # JSON for flexible evaluation criteria
-    # evaluationTotalScore = db.Column(db.Float, default=0.0)
-    
-    # Project Evaluation Data - REMOVED
-    # projectEvaluationData = db.Column(db.Text, default='{}')  # JSON for project evaluation
-    # projectEvaluationTotalScore = db.Column(db.Float, default=0.0)
     
     # Testing Metrics (calculated fields)
     userStoriesMetric = db.Column(db.Integer, default=0)  # Auto-calculated from user stories
     testCasesMetric = db.Column(db.Integer, default=0)   # Auto-calculated from test cases
     issuesMetric = db.Column(db.Integer, default=0)      # Auto-calculated from issues
     enhancementsMetric = db.Column(db.Integer, default=0) # Auto-calculated from enhancements
-    # Evaluation Metric
-    evaluationMetric = db.Column(db.String(255))
     
     # QA Notes
     qaNotesText = db.Column(db.Text)
-    
-    # Custom Fields - REMOVED
-    # customFields = db.Column(db.Text, default='{}')
     
     # Metadata
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
@@ -145,41 +133,6 @@ class Report(db.Model):
             (self.existsEnhancements or 0)
         )
         self.enhancementsMetric = self.totalEnhancements
-
-    def calculate_evaluation_scores(self):
-        """Calculate evaluation total scores - REMOVED"""
-        # Evaluation calculation - REMOVED
-        # try:
-        #     # Calculate Evaluation Total Score
-        #     evaluation_data = json.loads(self.evaluationData or '{}')
-        #     eval_total = 0
-        #     eval_count = 0
-        #     for key, value in evaluation_data.items():
-        #         if key.endswith('_score') and value:
-        #             try:
-        #                 eval_total += float(value)
-        #                 eval_count += 1
-        #             except (ValueError, TypeError):
-        #                 pass
-        #     self.evaluationTotalScore = eval_total / eval_count if eval_count > 0 else 0
-        #     
-        #     # Calculate Project Evaluation Total Score
-        #     project_eval_data = json.loads(self.projectEvaluationData or '{}')
-        #     proj_total = 0
-        #     proj_count = 0
-        #     for key, value in project_eval_data.items():
-        #         if key.endswith('_score') and value:
-        #             try:
-        #                 proj_total += float(value)
-        #                 proj_count += 1
-        #             except (ValueError, TypeError):
-        #                 pass
-        #     self.projectEvaluationTotalScore = proj_total / proj_count if proj_count > 0 else 0
-        #     
-        # except json.JSONDecodeError:
-        #     self.evaluationTotalScore = 0
-        #     self.projectEvaluationTotalScore = 0
-        pass
 
     def to_dict(self):
         """Converts the Report object to a dictionary for JSON serialization."""
@@ -240,22 +193,12 @@ class Report(db.Model):
             'implementedEnhancements': self.implementedEnhancements,
             'existsEnhancements': self.existsEnhancements,
             
-            # Evaluation - REMOVED
-            # 'evaluationData': json.loads(self.evaluationData or '{}'),
-            # 'evaluationTotalScore': self.evaluationTotalScore,
-            # 'projectEvaluationData': json.loads(self.projectEvaluationData or '{}'),
-            # 'projectEvaluationTotalScore': self.projectEvaluationTotalScore,
-            
             # Metrics
             'userStoriesMetric': self.userStoriesMetric,
             'testCasesMetric': self.testCasesMetric,
             'issuesMetric': self.issuesMetric,
             'enhancementsMetric': self.enhancementsMetric,
-            'evaluationMetric': self.evaluationMetric,
             'qaNotesText': self.qaNotesText,
-            
-            # Custom Fields - REMOVED
-            # 'customFields': json.loads(self.customFields or '{}'),
             
             # Metadata
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
@@ -368,8 +311,6 @@ def get_dashboard_stats():
         func.sum(Report.reopenedIssues).label('reopened_issues'),
         func.sum(Report.deferredIssues).label('deferred_issues'),
         func.sum(Report.totalEnhancements).label('total_enhancements'),
-        func.avg(Report.evaluationTotalScore).label('avg_evaluation_score'),
-        func.avg(Report.projectEvaluationTotalScore).label('avg_project_evaluation_score')
     ).first()
     
     # Project-specific metrics using optimized query
@@ -381,8 +322,6 @@ def get_dashboard_stats():
         func.sum(Report.totalTestCases).label('totalTestCases'),
         func.sum(Report.totalIssues).label('totalIssues'),
         func.sum(Report.totalEnhancements).label('totalEnhancements'),
-        func.avg(Report.evaluationTotalScore).label('avgEvaluationScore'),
-        func.avg(Report.projectEvaluationTotalScore).label('avgProjectEvaluationScore'),
         func.max(Report.reportDate).label('lastReportDate')
     ).group_by(Report.portfolioName, Report.projectName).all()
     
@@ -415,8 +354,6 @@ def get_dashboard_stats():
             'totalTestCases': stat.totalTestCases or 0,
             'totalIssues': stat.totalIssues or 0,
             'totalEnhancements': stat.totalEnhancements or 0,
-            'avgEvaluationScore': round(stat.avgEvaluationScore or 0, 2),
-            'avgProjectEvaluationScore': round(stat.avgProjectEvaluationScore or 0, 2),
             'lastReportDate': stat.lastReportDate,
             'testingStatus': 'pending'  # Will be updated below
         }
@@ -460,8 +397,6 @@ def get_dashboard_stats():
             'reopenedIssues': aggregate_result.reopened_issues or 0,
             'deferredIssues': aggregate_result.deferred_issues or 0,
             'totalEnhancements': aggregate_result.total_enhancements or 0,
-            'avgEvaluationScore': round(aggregate_result.avg_evaluation_score or 0, 2),
-            'avgProjectEvaluationScore': round(aggregate_result.avg_project_evaluation_score or 0, 2)
         },
         'projects': list(projects.values())
     })
@@ -533,21 +468,13 @@ def create_report():
             implementedEnhancements=int(data.get('implementedEnhancements') or 0),
             existsEnhancements=int(data.get('existsEnhancements') or 0),
             
-            # Evaluation - REMOVED
-            # evaluationData=json.dumps(data.get('evaluationData', {})),
-            # projectEvaluationData=json.dumps(data.get('projectEvaluationData', {})),
-            
             # Other metrics
-            evaluationMetric=data.get('evaluationMetric'),
             qaNotesText=data.get('qaNotesText'),
             
-            # Custom Fields - REMOVED
-            # customFields=json.dumps(data.get('customFields', {}))
         )
         
         # Calculate totals and scores
         new_report.calculate_totals()
-        new_report.calculate_evaluation_scores()
         
         db.session.add(new_report)
         db.session.commit()
@@ -613,8 +540,6 @@ class DashboardStats(db.Model):
     total_test_cases = db.Column(db.Integer, default=0)
     total_issues = db.Column(db.Integer, default=0)
     total_enhancements = db.Column(db.Integer, default=0)
-    avg_evaluation_score = db.Column(db.Float, default=0.0)
-    avg_project_evaluation_score = db.Column(db.Float, default=0.0)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
 
 class PortfolioStats(db.Model):
@@ -628,8 +553,6 @@ class PortfolioStats(db.Model):
     total_test_cases = db.Column(db.Integer, default=0)
     total_issues = db.Column(db.Integer, default=0)
     total_enhancements = db.Column(db.Integer, default=0)
-    avg_evaluation_score = db.Column(db.Float, default=0.0)
-    avg_project_evaluation_score = db.Column(db.Float, default=0.0)
     last_report_date = db.Column(db.String(50))
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -645,8 +568,6 @@ class ProjectStats(db.Model):
     total_test_cases = db.Column(db.Integer, default=0)
     total_issues = db.Column(db.Integer, default=0)
     total_enhancements = db.Column(db.Integer, default=0)
-    avg_evaluation_score = db.Column(db.Float, default=0.0)
-    avg_project_evaluation_score = db.Column(db.Float, default=0.0)
     last_report_date = db.Column(db.String(50))
     latest_testing_status = db.Column(db.String(50))
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
@@ -1036,7 +957,7 @@ def update_report(id):
                   'deferredTestCases', 'notTestableTestCases', 'criticalIssues',
                   'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues',
                   'notFixedIssues', 'reopenedIssues', 'deferredIssues', 'newEnhancements',
-                  'implementedEnhancements', 'existsEnhancements', 'evaluationMetric', 'qaNotesText']:
+                  'implementedEnhancements', 'existsEnhancements', 'qaNotesText']:
         if field in data:
             setattr(report, field, data[field])
     
@@ -1049,17 +970,10 @@ def update_report(id):
         report.testerData = json.dumps(data['testerData'])
     if 'teamMemberData' in data:
         report.teamMemberData = json.dumps(data['teamMemberData'])
-    # Evaluation and Custom Fields - REMOVED
-    # if 'evaluationData' in data:
-    #     report.evaluationData = json.dumps(data['evaluationData'])
-    # if 'projectEvaluationData' in data:
-    #     report.projectEvaluationData = json.dumps(data['projectEvaluationData'])
-    # if 'customFields' in data:
-    #     report.customFields = json.dumps(data['customFields'])
+
 
     # Recalculate totals and scores
     report.calculate_totals()
-    report.calculate_evaluation_scores()
     
     db.session.commit()
     return jsonify(report.to_dict())
@@ -1092,9 +1006,7 @@ def update_stats_cache():
             func.sum(Report.totalUserStories).label('total_user_stories'),
             func.sum(Report.totalTestCases).label('total_test_cases'),
             func.sum(Report.totalIssues).label('total_issues'),
-            func.sum(Report.totalEnhancements).label('total_enhancements'),
-            func.avg(Report.evaluationTotalScore).label('avg_evaluation_score'),
-            func.avg(Report.projectEvaluationTotalScore).label('avg_project_evaluation_score')
+            func.sum(Report.totalEnhancements).label('total_enhancements')
         ).first()
         
         dashboard_stats.total_reports = total_reports
@@ -1105,8 +1017,6 @@ def update_stats_cache():
         dashboard_stats.total_test_cases = aggregate_result.total_test_cases or 0
         dashboard_stats.total_issues = aggregate_result.total_issues or 0
         dashboard_stats.total_enhancements = aggregate_result.total_enhancements or 0
-        dashboard_stats.avg_evaluation_score = aggregate_result.avg_evaluation_score or 0
-        dashboard_stats.avg_project_evaluation_score = aggregate_result.avg_project_evaluation_score or 0
         dashboard_stats.last_updated = datetime.utcnow()
         
         # Update Portfolio Stats
@@ -1124,8 +1034,6 @@ def update_stats_cache():
                 func.sum(Report.totalTestCases).label('total_test_cases'),
                 func.sum(Report.totalIssues).label('total_issues'),
                 func.sum(Report.totalEnhancements).label('total_enhancements'),
-                func.avg(Report.evaluationTotalScore).label('avg_evaluation_score'),
-                func.avg(Report.projectEvaluationTotalScore).label('avg_project_evaluation_score'),
                 func.max(Report.reportDate).label('last_report_date')
             ).filter(Report.portfolioName == portfolio.name).first()
             
@@ -1138,8 +1046,6 @@ def update_stats_cache():
             portfolio_stats.total_test_cases = portfolio_aggregate.total_test_cases or 0
             portfolio_stats.total_issues = portfolio_aggregate.total_issues or 0
             portfolio_stats.total_enhancements = portfolio_aggregate.total_enhancements or 0
-            portfolio_stats.avg_evaluation_score = portfolio_aggregate.avg_evaluation_score or 0
-            portfolio_stats.avg_project_evaluation_score = portfolio_aggregate.avg_project_evaluation_score or 0
             portfolio_stats.last_report_date = portfolio_aggregate.last_report_date
             portfolio_stats.last_updated = datetime.utcnow()
         
@@ -1163,8 +1069,6 @@ def update_stats_cache():
                 func.sum(Report.totalTestCases).label('total_test_cases'),
                 func.sum(Report.totalIssues).label('total_issues'),
                 func.sum(Report.totalEnhancements).label('total_enhancements'),
-                func.avg(Report.evaluationTotalScore).label('avg_evaluation_score'),
-                func.avg(Report.projectEvaluationTotalScore).label('avg_project_evaluation_score'),
                 func.max(Report.reportDate).label('last_report_date')
             ).filter(Report.portfolioName == project.portfolio.name, Report.projectName == project.name).first()
             
@@ -1181,8 +1085,6 @@ def update_stats_cache():
             project_stats.total_test_cases = project_aggregate.total_test_cases or 0
             project_stats.total_issues = project_aggregate.total_issues or 0
             project_stats.total_enhancements = project_aggregate.total_enhancements or 0
-            project_stats.avg_evaluation_score = project_aggregate.avg_evaluation_score or 0
-            project_stats.avg_project_evaluation_score = project_aggregate.avg_project_evaluation_score or 0
             project_stats.last_report_date = project_aggregate.last_report_date
             project_stats.latest_testing_status = latest_report.testingStatus if latest_report else 'pending'
             project_stats.last_updated = datetime.utcnow()
@@ -1229,10 +1131,7 @@ def get_cached_dashboard_stats():
             'totalUserStories': dashboard_stats.total_user_stories,
             'totalTestCases': dashboard_stats.total_test_cases,
             'totalIssues': dashboard_stats.total_issues,
-            'totalEnhancements': dashboard_stats.total_enhancements,
-            'avgEvaluationScore': round(dashboard_stats.avg_evaluation_score, 2),
-            'avgProjectEvaluationScore': round(dashboard_stats.avg_project_evaluation_score, 2)
-        }
+            'totalEnhancements': dashboard_stats.total_enhancements        }
         
         projects_data = []
         for ps in project_stats:
@@ -1244,8 +1143,6 @@ def get_cached_dashboard_stats():
                 'totalTestCases': ps.total_test_cases,
                 'totalIssues': ps.total_issues,
                 'totalEnhancements': ps.total_enhancements,
-                'avgEvaluationScore': round(ps.avg_evaluation_score, 2),
-                'avgProjectEvaluationScore': round(ps.avg_project_evaluation_score, 2),
                 'lastReportDate': ps.last_report_date,
                 'testingStatus': ps.latest_testing_status
             })
@@ -1297,8 +1194,6 @@ def get_project_stats(project_id):
                 'testCaseSuccessRate': 0,
                 'issueFixRate': 0,
                 'enhancementCompletionRate': 0,
-                'avgEvaluationScore': 0,
-                'avgProjectEvaluationScore': 0,
                 'passedUserStories': 0,
                 'passedTestCases': 0,
                 'fixedIssues': 0,
@@ -1335,10 +1230,6 @@ def get_project_stats(project_id):
     issue_fix_rate = (fixed_issues / total_issues * 100) if total_issues > 0 else 0
     enhancement_completion_rate = (implemented_enhancements / total_enhancements * 100) if total_enhancements > 0 else 0
     
-    # Calculate average evaluation scores
-    avg_evaluation_score = sum(r.evaluationTotalScore for r in reports) / len(reports) if reports else 0
-    avg_project_evaluation_score = sum(r.projectEvaluationTotalScore for r in reports) / len(reports) if reports else 0
-
     # Get unique testers
     testers = []
     tester_emails = set()
@@ -1441,8 +1332,6 @@ def get_project_stats(project_id):
             'testCaseSuccessRate': round(test_case_success_rate, 2),
             'issueFixRate': round(issue_fix_rate, 2),
             'enhancementCompletionRate': round(enhancement_completion_rate, 2),
-            'avgEvaluationScore': round(avg_evaluation_score, 2),
-            'avgProjectEvaluationScore': round(avg_project_evaluation_score, 2),
             'passedUserStories': passed_user_stories,
             'passedTestCases': passed_test_cases,
             'fixedIssues': fixed_issues,
@@ -1490,5 +1379,5 @@ if __name__ == '__main__':
         db.create_all()
         # Handle migration for existing databases
         migrate_database()
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5000)
 

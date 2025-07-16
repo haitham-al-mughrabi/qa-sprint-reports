@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
+    <link rel="stylesheet" href="/static/rtl-support.css">
 </head>
 <body>
     <!-- Navigation Header -->
@@ -21,16 +22,19 @@
             <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div style="display: flex; align-items: center;">
                 <div class="nav-links">
-                    <a href="/dashboard" class="nav-link active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
-                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
-                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
+                    <a href="/dashboard" class="nav-link active"><i class="fas fa-tachometer-alt"></i> <span data-i18n="nav_dashboard">Dashboard</span></a>
+                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> <span data-i18n="nav_reports">Reports</span></a>
+                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> <span data-i18n="nav_new_report">New Report</span></a>
+                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> <span data-i18n="nav_manage_data">Manage Data</span></a>
+                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> <span data-i18n="nav_project_statistics">Project Statistics</span></a>
                 </div>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <i class="fas fa-sun" id="theme-icon"></i>
-                    <span id="theme-text">Light</span>
-                </button>
+                <div class="nav-controls">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-sun" id="theme-icon"></i>
+                        <span id="theme-text" data-i18n="theme_light">Light</span>
+                    </button>
+                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -39,13 +43,13 @@
     <div id="dashboardPage" class="page active">
         <div class="dashboard-container">
             <div class="dashboard-header">
-                <h1>Sprint Reports Dashboard</h1>
-                <p>Comprehensive Quality Assurance Management System</p>
+                <h1 data-i18n="dashboard_title">Sprint Reports Dashboard</h1>
+                <p data-i18n="dashboard_subtitle">Comprehensive Quality Assurance Management System</p>
             </div>
 
             <!-- Overall Statistics -->
             <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-chart-line"></i> Overall Statistics</h2>
+                <h2 class="section-title"><i class="fas fa-chart-line"></i> <span data-i18n="overall_statistics">Overall Statistics</span></h2>
                 <div class="dashboard-stats">
                     <div class="stat-card">
                         <div class="icon"><i class="fas fa-file-alt"></i></div>
@@ -155,6 +159,8 @@
 
     <!-- Link to the external JavaScript files -->
     <script src="/static/theme-manager.js"></script>
+    <script src="/static/translations.js"></script>
+    <script src="/static/language-manager.js"></script>
     <script src="/static/enhanced_script.js"></script>
     <script src="/static/Charts.js"></script>
     <script src="/static/dashboard_charts.js"></script>

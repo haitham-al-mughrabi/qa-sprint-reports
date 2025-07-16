@@ -14,6 +14,7 @@ let autoSaveTimeout = null;
 let requestData = [];
 let buildData = [];
 let testerData = [];
+let qaNoteFieldsData = []; // New: for custom QA note fields
 // let customFieldsData = []; // This will be used if custom fields are implemented - REMOVED
 let userStoriesChart = null;
 let testCasesChart = null;
@@ -962,12 +963,14 @@ function resetFormData() {
         buildData = [];
         testerData = [];
         teamMemberData = []; // Reset team member data
+        qaNoteFieldsData = []; // Reset custom QA note fields
         // customFieldsData = []; // Reset custom fields data - REMOVED
 
         renderRequestList();
         renderBuildList();
         renderTesterList();
         renderTeamMemberList(); // Render empty team member list
+        renderQANoteFieldsList(); // Render empty QA note fields list
 
         resetAllCharts();
         currentSection = 0; // Reset to first section
@@ -1040,12 +1043,14 @@ function loadReportForEditing(report) {
     testerData = report.testerData || [];
     // Assuming teamMemberData are part of the report object
     teamMemberData = report.teamMemberData || []; // Assuming this field exists in your report model
+    qaNoteFieldsData = report.qaNoteFieldsData || []; // Load custom QA note fields
     // customFieldsData = report.customFields || {}; // Assuming this is an object in your report model - REMOVED
 
     renderRequestList();
     renderBuildList();
     renderTesterList();
     renderTeamMemberList(); // Render team members
+    renderQANoteFieldsList(); // Render custom QA note fields
     // renderCustomFields(); // If you have a render function for custom fields
 
     // Recalculate all totals and charts
@@ -1085,6 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.buildData = buildData;
             reportData.testerData = testerData;
             reportData.teamMemberData = teamMemberData; // Add team member data
+            reportData.qaNoteFieldsData = qaNoteFieldsData; // Add custom QA note fields
             // reportData.customFields = customFieldsData; // Add custom fields data - REMOVED
             reportData.qaNotesText = document.getElementById('newQANoteText').value;
 
@@ -1352,67 +1358,6 @@ async function exportReportAsExcel(id) {
     const wsEnhancements = XLSX.utils.aoa_to_sheet(enhancementsData);
     XLSX.utils.book_append_sheet(workbook, wsEnhancements, "Enhancements");
 
-    // Evaluation Data Sheet
-    // Evaluation Data - REMOVED
-    // if (report.evaluationData && Object.keys(report.evaluationData).length > 0) {
-    //     const evaluationHeaders = ["Evaluation Criteria", "Score", "Weight", "Weighted Score"];
-    //     const evaluationSheetData = [];
-
-    //     for (const [key, value] of Object.entries(report.evaluationData)) {
-    //         if (key.includes('_score')) {
-    //             const criteriaName = key.replace('_score', '').replace(/_/g, ' ').toUpperCase();
-    //             const weightKey = key.replace('_score', '_weight');
-    //             const weight = report.evaluationData[weightKey] || 1;
-    //             const weightedScore = (value || 0) * weight;
-    //             evaluationSheetData.push([criteriaName, value || 0, weight, weightedScore]);
-    //         }
-    //     }
-
-    //     if (evaluationSheetData.length > 0) {
-    //         evaluationSheetData.unshift(["", "", "", ""]);
-    //         evaluationSheetData.unshift(["TOTAL EVALUATION SCORE", "", "", report.evaluationTotalScore || 0]);
-    //         const wsEvaluation = XLSX.utils.aoa_to_sheet([evaluationHeaders, ...evaluationSheetData]);
-    //         XLSX.utils.book_append_sheet(workbook, wsEvaluation, "Evaluation");
-    //     }
-    // }
-
-    // Project Evaluation Data Sheet - REMOVED
-    // if (report.projectEvaluationData && Object.keys(report.projectEvaluationData).length > 0) {
-    //     const projectEvalHeaders = ["Project Evaluation Criteria", "Score", "Weight", "Weighted Score"];
-    //     const projectEvalSheetData = [];
-
-    //     for (const [key, value] of Object.entries(report.projectEvaluationData)) {
-    //         if (key.includes('_score')) {
-    //             const criteriaName = key.replace('_score', '').replace(/_/g, ' ').toUpperCase();
-    //             const weightKey = key.replace('_score', '_weight');
-    //             const weight = report.projectEvaluationData[weightKey] || 1;
-    //             const weightedScore = (value || 0) * weight;
-    //             projectEvalSheetData.push([criteriaName, value || 0, weight, weightedScore]);
-    //         }
-    //     }
-
-    //     if (projectEvalSheetData.length > 0) {
-    //         projectEvalSheetData.unshift(["", "", "", ""]);
-    //         projectEvalSheetData.unshift(["TOTAL PROJECT EVALUATION SCORE", "", "", report.projectEvaluationTotalScore || 0]);
-    //         const wsProjectEval = XLSX.utils.aoa_to_sheet([projectEvalHeaders, ...projectEvalSheetData]);
-    //         XLSX.utils.book_append_sheet(workbook, wsProjectEval, "Project Evaluation");
-    //     }
-    // }
-
-    // Custom Fields Sheet - REMOVED
-    // if (report.customFields && Object.keys(report.customFields).length > 0) {
-    //     const customFieldHeaders = ["Field Name", "Value"];
-    //     const customFieldsSheetData = [];
-
-    //     for (const [key, value] of Object.entries(report.customFields)) {
-    //         const fieldName = key.replace(/_/g, ' ').toUpperCase();
-    //         customFieldsSheetData.push([fieldName, value || 'N/A']);
-    //     }
-
-    //     const wsCustomFields = XLSX.utils.aoa_to_sheet([customFieldHeaders, ...customFieldsSheetData]);
-    //     XLSX.utils.book_append_sheet(workbook, wsCustomFields, "Custom Fields");
-    // }
-
     // Detailed Metrics Sheet
     const detailedMetricsData = [
         ["Metric Category", "Metric", "Value"],
@@ -1461,7 +1406,6 @@ async function exportReportAsExcel(id) {
         ["Issues Metric", "Auto-calculated", report.issuesMetric || 0],
         ["Enhancements Metric", "Auto-calculated", report.enhancementsMetric || 0],
         ["QA Notes Metric", "Count", report.qaNotesMetric || 0],
-        ["Evaluation Metric", "Text", report.evaluationMetric || 'N/A'],
         ["", "", ""],
         ["TIMESTAMPS", "", ""],
         ["Created At", "DateTime", report.createdAt || 'N/A'],
@@ -1682,6 +1626,11 @@ window.onclick = function(event) {
         }
     });
 }
+
+// Expose functions to the global scope
+window.showAddQANoteFieldModal = showAddQANoteFieldModal;
+window.updateQAFieldOptions = updateQAFieldOptions;
+window.addQANoteField = addQANoteField;
 
 // Date format validation
 document.addEventListener('DOMContentLoaded', function() {
@@ -2000,6 +1949,62 @@ function addQANote() {
         showToast('Please enter a note.', 'warning');
     }
 }
+
+// Functions for custom QA Note Fields
+function showAddQANoteFieldModal() {
+    showModal('addQANoteFieldModal');
+    // Clear the form fields when opening the modal
+    document.getElementById('qaFieldName').value = '';
+    document.getElementById('qaFieldValue').value = '';
+}
+
+// This function is a placeholder. In a real scenario, it might populate a dropdown
+// with predefined field names or allow editing existing ones.
+function updateQAFieldOptions() {
+    // For now, this function doesn't do anything as there are no predefined options.
+    // It's kept to fulfill the request.
+    console.log("updateQAFieldOptions called. No predefined options to update.");
+}
+
+function addQANoteField() {
+    const fieldName = document.getElementById('qaFieldName').value.trim();
+    const fieldValue = document.getElementById('qaFieldValue').value.trim();
+
+    if (fieldName && fieldValue) {
+        qaNoteFieldsData.push({ name: fieldName, value: fieldValue });
+        renderQANoteFieldsList();
+        closeModal('addQANoteFieldModal');
+        showToast('QA Note Field added successfully!', 'success');
+    } else {
+        showToast('Please enter both a field name and a field value.', 'warning');
+    }
+}
+
+function renderQANoteFieldsList() {
+    const container = document.getElementById('qaNoteFieldsList');
+    if (!container) return;
+
+    if (qaNoteFieldsData.length === 0) {
+        container.innerHTML = '<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No custom QA fields added yet.</div>';
+        return;
+    }
+
+    container.innerHTML = qaNoteFieldsData.map((field, index) => `
+        <div class="dynamic-item">
+            <div>
+                <strong>${field.name}:</strong> ${field.value}
+            </div>
+            <button type="button" class="btn-sm btn-delete" onclick="removeQANoteField(${index})">Remove</button>
+        </div>
+    `).join('');
+}
+
+function removeQANoteField(index) {
+    qaNoteFieldsData.splice(index, 1);
+    renderQANoteFieldsList();
+    showToast('QA Note Field removed', 'info');
+}
+
 
 function removeQANote(index) {
     qaNotesData.splice(index, 1);

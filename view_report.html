@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/static/view_report.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
+    <link rel="stylesheet" href="/static/rtl-support.css">
 </head>
 <body>
     <nav class="main-nav">
@@ -25,10 +26,13 @@
                     <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
                     <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
                 </div>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <i class="fas fa-sun" id="theme-icon"></i>
-                    <span id="theme-text">Light</span>
-                </button>
+                <div class="nav-controls">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-sun" id="theme-icon"></i>
+                        <span id="theme-text" data-i18n="theme_light">Light</span>
+                    </button>
+                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -182,11 +186,12 @@
                 </div>
 
             <div class="dashboard-section" id="qaNotesSection">
-                <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
+                <h2 class="section-title"><i class="fas fa-sticky-note"></i> <span data-i18n="qa_notes">QA Notes</span></h2>
                 <div class="info-item">
-                    <div class="info-label">Additional Notes</div>
+                    <div class="info-label" data-i18n="additional_notes">Additional Notes</div>
                     <div class="info-value" id="qaNotesContent">
-                        </div>
+                        <!-- QA Notes content will be loaded dynamically -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -196,6 +201,9 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script src="/static/theme-manager.js"></script>
+    <script src="/static/translations.js"></script>
+    <script src="/static/language-manager.js"></script>
+    <script src="/static/translations-helper.js"></script>
     <script>
         let currentReport = null;
         let viewCharts = {};
@@ -872,7 +880,15 @@
             if (qaNotesText.trim()) {
                 qaNotesContent.innerHTML = `<div class="dynamic-item">${qaNotesText}</div>`;
             } else {
-                qaNotesContent.innerHTML = `<div class="empty-state" style="border: none; padding: 0; background: none;"><h3>No QA Notes</h3><p>No specific QA notes were provided for this report.</p></div>`;
+                qaNotesContent.innerHTML = `<div class="empty-state" style="border: none; padding: 0; background: none;">
+                    <h3 data-i18n="no_qa_notes">No QA Notes</h3>
+                    <p data-i18n="no_qa_notes_provided">No specific QA notes were provided for this report.</p>
+                </div>`;
+            }
+            
+            // Apply translations to the newly added content
+            if (window.translateDynamicContent) {
+                window.translateDynamicContent(qaNotesContent);
             }
         }
 

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/static/new_report.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
+    <link rel="stylesheet" href="/static/rtl-support.css">
 </head>
 <body>
     <!-- Navigation Header -->
@@ -27,10 +28,13 @@
                     <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
                     <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
                 </div>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <i class="fas fa-sun" id="theme-icon"></i>
-                    <span id="theme-text">Light</span>
-                </button>
+                <div class="nav-controls">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-sun" id="theme-icon"></i>
+                        <span id="theme-text" data-i18n="theme_light">Light</span>
+                    </button>
+                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -861,6 +865,8 @@
 
     <!-- Link to the external JavaScript files -->
     <script src="/static/theme-manager.js"></script>
+    <script src="/static/translations.js"></script>
+    <script src="/static/language-manager.js"></script>
     <script src="/static/enhanced_script.js"></script>
     <script src="/static/Charts.js"></script>
     <script>

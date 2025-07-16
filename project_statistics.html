@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/project_statistics.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
+    <link rel="stylesheet" href="/static/rtl-support.css">
 </head>
 <body>
     <!-- Navigation Header -->
@@ -24,10 +25,13 @@
                     <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
                     <a href="/project-statistics" class="nav-link active"><i class="fas fa-chart-pie"></i> Project Statistics</a>
                 </div>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <i class="fas fa-sun" id="theme-icon"></i>
-                    <span id="theme-text">Light</span>
-                </button>
+                <div class="nav-controls">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-sun" id="theme-icon"></i>
+                        <span id="theme-text" data-i18n="theme_light">Light</span>
+                    </button>
+                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -36,67 +40,67 @@
     <div id="projectStatisticsPage" class="page active">
         <div class="dashboard-container">
             <div class="dashboard-header">
-                <h1>Project Statistics</h1>
-                <p>Detailed statistics for a selected project</p>
+                <h1 data-i18n="project_statistics">Project Statistics</h1>
+                <p data-i18n="detailed_statistics">Detailed statistics for a selected project</p>
             </div>
 
             <!-- Project Selection -->
             <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-filter"></i> Select Project</h2>
+                <h2 class="section-title"><i class="fas fa-filter"></i> <span data-i18n="select_project">Select Project</span></h2>
                 <div class="project-selection-container">
                     <div class="searchable-dropdown">
-                        <input type="text" id="projectSearchInput" placeholder="Search for a project..." onkeyup="filterProjects()">
+                        <input type="text" id="projectSearchInput" data-i18n-placeholder="search_for_project" placeholder="Search for a project..." onkeyup="filterProjects()">
                         <div class="dropdown-content" id="projectDropdownContent"></div>
                     </div>
-                    <button id="loadProjectStatsBtn" class="btn btn-primary">Load Stats</button>
+                    <button id="loadProjectStatsBtn" class="btn btn-primary" data-i18n="load_stats">Load Stats</button>
                 </div>
             </div>
 
             <div id="projectStatsContent" style="display: none;">
                 <!-- Overall Statistics -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-chart-line"></i> Overall Statistics</h2>
+                    <h2 class="section-title"><i class="fas fa-chart-line"></i> <span data-i18n="overall_statistics">Overall Statistics</span></h2>
                     <div class="dashboard-stats" id="projectStatsOverall"></div>
                 </div>
 
                 <!-- Success Rates -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-percentage"></i> Success Rates</h2>
+                    <h2 class="section-title"><i class="fas fa-percentage"></i> <span data-i18n="success_rates">Success Rates</span></h2>
                     <div class="success-rates-grid" id="successRates"></div>
                 </div>
 
                 <!-- Quality Metrics -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-award"></i> Quality Metrics</h2>
+                    <h2 class="section-title"><i class="fas fa-award"></i> <span data-i18n="quality_metrics">Quality Metrics</span></h2>
                     <div class="quality-metrics-grid" id="qualityMetrics"></div>
                 </div>
 
                 <!-- Charts Section -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-chart-pie"></i> Visual Insights</h2>
+                    <h2 class="section-title"><i class="fas fa-chart-pie"></i> <span data-i18n="visual_insights">Visual Insights</span></h2>
                     <div class="charts-grid">
                         <div class="chart-card">
-                            <h3>User Stories Distribution</h3>
+                            <h3 data-i18n="user_stories_distribution">User Stories Distribution</h3>
                             <canvas id="projectUserStoriesChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3>Test Cases Distribution</h3>
+                            <h3 data-i18n="test_cases_distribution">Test Cases Distribution</h3>
                             <canvas id="projectTestCasesChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3>Issues by Priority</h3>
+                            <h3 data-i18n="issues_by_priority">Issues by Priority</h3>
                             <canvas id="projectIssuesPriorityChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3>Issues by Status</h3>
+                            <h3 data-i18n="issues_by_status">Issues by Status</h3>
                             <canvas id="projectIssuesStatusChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3>Success Rates Overview</h3>
+                            <h3 data-i18n="success_rates_overview">Success Rates Overview</h3>
                             <canvas id="projectSuccessRatesChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3>Quality Trends</h3>
+                            <h3 data-i18n="quality_trends">Quality Trends</h3>
                             <canvas id="projectQualityTrendsChart"></canvas>
                         </div>
                     </div>
@@ -104,19 +108,19 @@
 
                 <!-- Testers Section -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-users"></i> Testers</h2>
+                    <h2 class="section-title"><i class="fas fa-users"></i> <span data-i18n="testers">Testers</span></h2>
                     <div id="projectTesters" class="testers-grid"></div>
                 </div>
 
                 <!-- Reports Section -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-file-alt"></i> Reports</h2>
+                    <h2 class="section-title"><i class="fas fa-file-alt"></i> <span data-i18n="reports">Reports</span></h2>
                     <div id="projectReports" class="reports-grid"></div>
                 </div>
 
                 <!-- Monthly/Quarterly Stats -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Monthly & Quarterly Stats</h2>
+                    <h2 class="section-title"><i class="fas fa-calendar-alt"></i> <span data-i18n="monthly_quarterly_stats">Monthly & Quarterly Stats</span></h2>
                     <div id="projectTimeStats" class="time-stats-grid"></div>
                 </div>
             </div>
@@ -124,6 +128,8 @@
     </div>
 
     <script src="/static/theme-manager.js"></script>
+    <script src="/static/translations.js"></script>
+    <script src="/static/language-manager.js"></script>
     <script src="/static/project_statistics.js"></script>
     <script>
         // Initialize theme on page load

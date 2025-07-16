@@ -67,10 +67,20 @@ class ThemeManager {
         if (themeIcon && themeText) {
             if (theme === 'light') {
                 themeIcon.className = 'fas fa-moon';
-                themeText.textContent = 'Dark';
+                // Use language manager if available
+                if (window.languageManager) {
+                    themeText.textContent = window.languageManager.translate('theme_dark');
+                } else {
+                    themeText.textContent = 'Dark';
+                }
             } else {
                 themeIcon.className = 'fas fa-sun';
-                themeText.textContent = 'Light';
+                // Use language manager if available
+                if (window.languageManager) {
+                    themeText.textContent = window.languageManager.translate('theme_light');
+                } else {
+                    themeText.textContent = 'Light';
+                }
             }
         }
     }
