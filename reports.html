@@ -12,17 +12,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/unified-nav.css">
 </head>
 <body>
     <!-- Navigation Header -->
     <nav class="main-nav">
         <div class="nav-container">
             <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
-            <div class="nav-links">
-                <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                <a href="/reports" class="nav-link active"><i class="fas fa-chart-line"></i> Reports</a>
-                <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
-                <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
+            <div style="display: flex; align-items: center;">
+                <div class="nav-links">
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="/reports" class="nav-link active"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
+                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
+                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -74,18 +82,21 @@
     </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <p class="footer-text">Made by <span class="highlight">Haitham Al-Mughrabi</span>. All rights reserved © 2024</p>
-        </div>
-    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
 
     <!-- Link to the external JavaScript files -->
+    <script src="/static/theme-manager.js"></script>
     <script src="/static/enhanced_script.js"></script>
     <script src="/static/Charts.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize theme first
+            if (window.themeManager) {
+                window.themeManager.init();
+            }
+            
             // Set active class for navigation
             document.querySelectorAll('.nav-link').forEach(link => {
                 if (link.getAttribute('href') === window.location.pathname) {

@@ -14,7 +14,7 @@ let autoSaveTimeout = null;
 let requestData = [];
 let buildData = [];
 let testerData = [];
-let customFieldsData = []; // This will be used if custom fields are implemented
+// let customFieldsData = []; // This will be used if custom fields are implemented - REMOVED
 let userStoriesChart = null;
 let testCasesChart = null;
 let issuesPriorityChart = null;
@@ -27,10 +27,7 @@ let weightReasonVisible = false; // Not directly used in this version but kept f
 const API_URL = '/api/reports';
 const DASHBOARD_API_URL = '/api/dashboard/stats';
 
-// --- LocalStorage Constants ---
-const FORM_DATA_KEY = 'qaReportFormData';
-const FORM_ARRAYS_KEY = 'qaReportFormArrays';
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
 
 async function fetchReports() {
     try {
@@ -654,6 +651,7 @@ function addRequest() {
         requestData.push({ id: requestId, url: requestUrl });
         renderRequestList();
         closeModal('requestModal');
+        showToast('Request added successfully!', 'success');
     } else {
         showToast('Please enter both Request ID and URL.', 'warning');
     }
@@ -668,6 +666,7 @@ function addBuild() {
         buildData.push({ requestId, requestUrl, environment, cycles });
         renderBuildList();
         closeModal('buildModal');
+        showToast('Build added successfully!', 'success');
     } else {
         showToast('Please fill in all build information fields.', 'warning');
     }
@@ -850,7 +849,7 @@ function renderReportsTable(reports) {
     }
     tbody.innerHTML = reports.map(report => `
         <tr>
-            <td><strong>${report.portfolioName || 'N/A'} - Sprint ${report.sprintNumber || 'N/A'}</strong><br><small>v${report.reportVersion || '1.0'}</small></td>
+            <td><strong>${report.portfolioName || 'N/A'} - Sprint ${report.sprintNumber || 'N/A'}</strong><br><small>v${report.reportVersion || '1.0'} | R${report.releaseNumber || 'N/A'}</small></td>
             <td>${report.projectName || 'N/A'}</td>
             <td>${report.portfolioName || 'N/A'}</td>
             <td>#${report.sprintNumber || 'N/A'}</td>
@@ -963,14 +962,12 @@ function resetFormData() {
         buildData = [];
         testerData = [];
         teamMemberData = []; // Reset team member data
-        qaNotesFields = []; // Reset custom QA notes fields
-        customFieldsData = []; // Reset custom fields data
+        // customFieldsData = []; // Reset custom fields data - REMOVED
 
         renderRequestList();
         renderBuildList();
         renderTesterList();
         renderTeamMemberList(); // Render empty team member list
-        renderQANotesFields(); // Render empty custom QA notes fields
 
         resetAllCharts();
         currentSection = 0; // Reset to first section
@@ -993,7 +990,7 @@ function loadReportForEditing(report) {
     resetFormData(); // Reset first to clear any previous data
 
     // Basic fields
-    const basicFields = ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'qaNotesText', 'releaseNumber'];
+    const basicFields = ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'qaNotesText', 'releaseNumber'];
     basicFields.forEach(field => {
         const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
@@ -1041,9 +1038,9 @@ function loadReportForEditing(report) {
     requestData = report.requestData || [];
     buildData = report.buildData || [];
     testerData = report.testerData || [];
-    // Assuming teamMemberData and customFields are part of the report object
+    // Assuming teamMemberData are part of the report object
     teamMemberData = report.teamMemberData || []; // Assuming this field exists in your report model
-    customFieldsData = report.customFields || {}; // Assuming this is an object in your report model
+    // customFieldsData = report.customFields || {}; // Assuming this is an object in your report model - REMOVED
 
     renderRequestList();
     renderBuildList();
@@ -1083,19 +1080,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Add dynamic data (requestData, buildData, testerData, teamMemberData, customFieldsData)
+            // Add dynamic data (requestData, buildData, testerData, teamMemberData)
             reportData.requestData = requestData;
             reportData.buildData = buildData;
             reportData.testerData = testerData;
             reportData.teamMemberData = teamMemberData; // Add team member data
-            reportData.customFields = customFieldsData; // Add custom fields data
-            reportData.qaNotes = qaNotesData;
+            // reportData.customFields = customFieldsData; // Add custom fields data - REMOVED
+            reportData.qaNotesText = document.getElementById('newQANoteText').value;
 
             const savedReport = await saveReport(reportData);
             if (savedReport) {
                 showToast('Report saved successfully!', 'success');
-                // Clear localStorage when form is submitted successfully
-                clearFormDataOnSubmit();
+                
                 // Redirect to reports list after saving
                 window.location.href = '/reports';
             } else {
@@ -1154,6 +1150,9 @@ async function exportReportAsPdf(id) {
     addText(`Project: ${report.projectName || 'N/A'}`);
     addText(`Sprint: ${report.sprintNumber || 'N/A'} | Version: ${report.reportVersion || 'N/A'} | Cycle: ${report.cycleNumber || 'N/A'}`);
     addText(`Report Date: ${formatDate(report.reportDate)} | Status: ${getStatusText(report.testingStatus)}`);
+    if (report.reportName) {
+        addText(`Report Name: ${report.reportName}`);
+    }
 
     // Test Summary
     if (report.testSummary) {
@@ -1217,6 +1216,16 @@ async function exportReportAsPdf(id) {
         addDataTable("Testers", testersData, ['Tester Name']);
     }
 
+    // Team Members
+    if (report.teamMemberData && report.teamMemberData.length > 0) {
+        const teamMembersData = report.teamMemberData.map(member => [
+            member.name,
+            member.role,
+            member.email
+        ]);
+        addDataTable("Team Members", teamMembersData, ['Name', 'Role', 'Email']);
+    }
+
     // User Stories Breakdown
     if (report.totalUserStories > 0) {
         addSection("User Stories Breakdown");
@@ -1269,6 +1278,7 @@ async function exportReportAsExcel(id) {
         ["Project Name", report.projectName || 'N/A'],
         ["Sprint Number", report.sprintNumber || 'N/A'],
         ["Report Version", report.reportVersion || 'N/A'],
+        ["Report Name", report.reportName || 'N/A'],
         ["Cycle Number", report.cycleNumber || 'N/A'],
         ["Report Date", formatDate(report.reportDate)],
         ["Testing Status", getStatusText(report.testingStatus)],
@@ -1343,64 +1353,65 @@ async function exportReportAsExcel(id) {
     XLSX.utils.book_append_sheet(workbook, wsEnhancements, "Enhancements");
 
     // Evaluation Data Sheet
-    if (report.evaluationData && Object.keys(report.evaluationData).length > 0) {
-        const evaluationHeaders = ["Evaluation Criteria", "Score", "Weight", "Weighted Score"];
-        const evaluationSheetData = [];
+    // Evaluation Data - REMOVED
+    // if (report.evaluationData && Object.keys(report.evaluationData).length > 0) {
+    //     const evaluationHeaders = ["Evaluation Criteria", "Score", "Weight", "Weighted Score"];
+    //     const evaluationSheetData = [];
 
-        for (const [key, value] of Object.entries(report.evaluationData)) {
-            if (key.includes('_score')) {
-                const criteriaName = key.replace('_score', '').replace(/_/g, ' ').toUpperCase();
-                const weightKey = key.replace('_score', '_weight');
-                const weight = report.evaluationData[weightKey] || 1;
-                const weightedScore = (value || 0) * weight;
-                evaluationSheetData.push([criteriaName, value || 0, weight, weightedScore]);
-            }
-        }
+    //     for (const [key, value] of Object.entries(report.evaluationData)) {
+    //         if (key.includes('_score')) {
+    //             const criteriaName = key.replace('_score', '').replace(/_/g, ' ').toUpperCase();
+    //             const weightKey = key.replace('_score', '_weight');
+    //             const weight = report.evaluationData[weightKey] || 1;
+    //             const weightedScore = (value || 0) * weight;
+    //             evaluationSheetData.push([criteriaName, value || 0, weight, weightedScore]);
+    //         }
+    //     }
 
-        if (evaluationSheetData.length > 0) {
-            evaluationSheetData.unshift(["", "", "", ""]);
-            evaluationSheetData.unshift(["TOTAL EVALUATION SCORE", "", "", report.evaluationTotalScore || 0]);
-            const wsEvaluation = XLSX.utils.aoa_to_sheet([evaluationHeaders, ...evaluationSheetData]);
-            XLSX.utils.book_append_sheet(workbook, wsEvaluation, "Evaluation");
-        }
-    }
+    //     if (evaluationSheetData.length > 0) {
+    //         evaluationSheetData.unshift(["", "", "", ""]);
+    //         evaluationSheetData.unshift(["TOTAL EVALUATION SCORE", "", "", report.evaluationTotalScore || 0]);
+    //         const wsEvaluation = XLSX.utils.aoa_to_sheet([evaluationHeaders, ...evaluationSheetData]);
+    //         XLSX.utils.book_append_sheet(workbook, wsEvaluation, "Evaluation");
+    //     }
+    // }
 
-    // Project Evaluation Data Sheet
-    if (report.projectEvaluationData && Object.keys(report.projectEvaluationData).length > 0) {
-        const projectEvalHeaders = ["Project Evaluation Criteria", "Score", "Weight", "Weighted Score"];
-        const projectEvalSheetData = [];
+    // Project Evaluation Data Sheet - REMOVED
+    // if (report.projectEvaluationData && Object.keys(report.projectEvaluationData).length > 0) {
+    //     const projectEvalHeaders = ["Project Evaluation Criteria", "Score", "Weight", "Weighted Score"];
+    //     const projectEvalSheetData = [];
 
-        for (const [key, value] of Object.entries(report.projectEvaluationData)) {
-            if (key.includes('_score')) {
-                const criteriaName = key.replace('_score', '').replace(/_/g, ' ').toUpperCase();
-                const weightKey = key.replace('_score', '_weight');
-                const weight = report.projectEvaluationData[weightKey] || 1;
-                const weightedScore = (value || 0) * weight;
-                projectEvalSheetData.push([criteriaName, value || 0, weight, weightedScore]);
-            }
-        }
+    //     for (const [key, value] of Object.entries(report.projectEvaluationData)) {
+    //         if (key.includes('_score')) {
+    //             const criteriaName = key.replace('_score', '').replace(/_/g, ' ').toUpperCase();
+    //             const weightKey = key.replace('_score', '_weight');
+    //             const weight = report.projectEvaluationData[weightKey] || 1;
+    //             const weightedScore = (value || 0) * weight;
+    //             projectEvalSheetData.push([criteriaName, value || 0, weight, weightedScore]);
+    //         }
+    //     }
 
-        if (projectEvalSheetData.length > 0) {
-            projectEvalSheetData.unshift(["", "", "", ""]);
-            projectEvalSheetData.unshift(["TOTAL PROJECT EVALUATION SCORE", "", "", report.projectEvaluationTotalScore || 0]);
-            const wsProjectEval = XLSX.utils.aoa_to_sheet([projectEvalHeaders, ...projectEvalSheetData]);
-            XLSX.utils.book_append_sheet(workbook, wsProjectEval, "Project Evaluation");
-        }
-    }
+    //     if (projectEvalSheetData.length > 0) {
+    //         projectEvalSheetData.unshift(["", "", "", ""]);
+    //         projectEvalSheetData.unshift(["TOTAL PROJECT EVALUATION SCORE", "", "", report.projectEvaluationTotalScore || 0]);
+    //         const wsProjectEval = XLSX.utils.aoa_to_sheet([projectEvalHeaders, ...projectEvalSheetData]);
+    //         XLSX.utils.book_append_sheet(workbook, wsProjectEval, "Project Evaluation");
+    //     }
+    // }
 
-    // Custom Fields Sheet
-    if (report.customFields && Object.keys(report.customFields).length > 0) {
-        const customFieldHeaders = ["Field Name", "Value"];
-        const customFieldsSheetData = [];
+    // Custom Fields Sheet - REMOVED
+    // if (report.customFields && Object.keys(report.customFields).length > 0) {
+    //     const customFieldHeaders = ["Field Name", "Value"];
+    //     const customFieldsSheetData = [];
 
-        for (const [key, value] of Object.entries(report.customFields)) {
-            const fieldName = key.replace(/_/g, ' ').toUpperCase();
-            customFieldsSheetData.push([fieldName, value || 'N/A']);
-        }
+    //     for (const [key, value] of Object.entries(report.customFields)) {
+    //         const fieldName = key.replace(/_/g, ' ').toUpperCase();
+    //         customFieldsSheetData.push([fieldName, value || 'N/A']);
+    //     }
 
-        const wsCustomFields = XLSX.utils.aoa_to_sheet([customFieldHeaders, ...customFieldsSheetData]);
-        XLSX.utils.book_append_sheet(workbook, wsCustomFields, "Custom Fields");
-    }
+    //     const wsCustomFields = XLSX.utils.aoa_to_sheet([customFieldHeaders, ...customFieldsSheetData]);
+    //     XLSX.utils.book_append_sheet(workbook, wsCustomFields, "Custom Fields");
+    // }
 
     // Detailed Metrics Sheet
     const detailedMetricsData = [
@@ -1479,6 +1490,13 @@ async function exportReportAsExcel(id) {
         const testersSheetData = report.testerData.map(tester => [tester.name]);
         const wsTesters = XLSX.utils.aoa_to_sheet([testerHeaders, ...testersSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsTesters, "Testers");
+    }
+
+    if (report.teamMemberData && report.teamMemberData.length > 0) {
+        const teamMemberHeaders = ["Name", "Email", "Role"];
+        const teamMembersSheetData = report.teamMemberData.map(member => [member.name, member.email, member.role]);
+        const wsTeamMembers = XLSX.utils.aoa_to_sheet([teamMemberHeaders, ...teamMembersSheetData]);
+        XLSX.utils.book_append_sheet(workbook, wsTeamMembers, "Team Members");
     }
     XLSX.writeFile(workbook, `QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.xlsx`);
     showToast('Excel report exported successfully!', 'success');
@@ -1956,55 +1974,9 @@ async function addSelectedTester() {
 }
 
 // QA Notes Custom Fields (if implemented in the HTML)
-let qaNotesFields = []; // This will hold the structure for custom QA notes fields
 
-function showAddQANoteFieldModal() {
-    // Clear form
-    document.getElementById('qaFieldName').value = '';
-    document.getElementById('qaFieldType').value = 'input';
-    document.getElementById('qaFieldRequired').checked = false;
-    document.getElementById('qaFieldShowInReport').checked = true;
-    const qaFieldOptionsList = document.getElementById('qaFieldOptionsList');
-    if (qaFieldOptionsList) qaFieldOptionsList.value = '';
-    updateQAFieldOptions();
-    showModal('addQANoteFieldModal');
-}
-
-function updateQAFieldOptions() {
-    const type = document.getElementById('qaFieldType').value;
-    const optionsDiv = document.getElementById('qaFieldOptions');
-
-    if (optionsDiv) { // Check if element exists
-        if (type === 'select' || type === 'radio' || type === 'checkbox') {
-            optionsDiv.style.display = 'block';
-        } else {
-            optionsDiv.style.display = 'none';
-        }
-    }
-}
-
-function addQANoteField() {
-    const name = document.getElementById('qaFieldName').value.trim();
-    const type = document.getElementById('qaFieldType').value;
-    const required = document.getElementById('qaFieldRequired').checked;
-    const showInReport = document.getElementById('qaFieldShowInReport').checked;
-    
-    if (!name) {
-        showToast('Please enter a field name.', 'warning');
-        return;
-    }
-    
-    // This is a simplified implementation
-    // In a full implementation, you would add this field to customFieldsData
-    // and dynamically create form elements
-    showToast('QA field functionality is not fully implemented in this version.', 'info');
-    closeModal('addQANoteFieldModal');
-}
-
-function removeQANoteField(index) {
     // This is a placeholder function for removing custom QA fields
-    showToast('QA field removal functionality is not fully implemented in this version.', 'info');
-}
+    
 
 let qaNotesData = [];
 
@@ -2023,6 +1995,7 @@ function addQANote() {
         renderQANotesList();
         updateQANotesCount();
         closeModal('addQANoteModal');
+        showToast('QA note added successfully!', 'success');
     } else {
         showToast('Please enter a note.', 'warning');
     }
@@ -2605,6 +2578,43 @@ window.onProjectChangeProgressive = onProjectChangeProgressive;
 window.enableAllRemainingFields = enableAllRemainingFields;
 window.populateProjectDropdownFiltered = populateProjectDropdownFiltered;
 window.initializeCharts = initializeCharts; // Make it globally accessible
+
+// Theme Toggle Functionality
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    updateThemeButton(newTheme);
+}
+
+function updateThemeButton(theme) {
+    const themeIcon = document.getElementById('theme-icon');
+    const themeText = document.getElementById('theme-text');
+    
+    if (theme === 'light') {
+        themeIcon.className = 'fas fa-moon';
+        themeText.textContent = 'Dark';
+    } else {
+        themeIcon.className = 'fas fa-sun';
+        themeText.textContent = 'Light';
+    }
+}
+
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeButton(savedTheme);
+}
+
+// Initialize theme on page load
+document.addEventListener('DOMContentLoaded', initializeTheme);
+
+// Make theme functions globally accessible
+window.toggleTheme = toggleTheme;
+window.initializeTheme = initializeTheme;
 window.resetFormData = resetFormData; // Make it globally accessible
 window.invalidateAllCaches = invalidateAllCaches; // Make cache invalidation globally accessible
 window.fetchReport = fetchReport; // Make it globally accessible for editing
@@ -2773,9 +2783,7 @@ function setupAutoSave() {
 }
 
 // Clear localStorage when form is submitted successfully
-function clearFormDataOnSubmit() {
-    clearFormDataFromLocalStorage();
-}
+
 
 // Override the existing arrays when they're modified
 const originalAddRequest = window.addRequest;
@@ -2816,8 +2824,6 @@ if (typeof originalAddSelectedTeamMember === 'function') {
 }
 
 // Make functions globally accessible
-window.saveFormDataToLocalStorage = saveFormDataToLocalStorage;
-window.loadFormDataFromLocalStorage = loadFormDataFromLocalStorage;
-window.clearFormDataFromLocalStorage = clearFormDataFromLocalStorage;
+
 window.setupAutoSave = setupAutoSave;
 window.clearFormDataOnSubmit = clearFormDataOnSubmit;

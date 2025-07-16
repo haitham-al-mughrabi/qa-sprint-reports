@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Statistics - Sprint Reports System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/project_statistics.css">
+    <link rel="stylesheet" href="/static/unified-nav.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
+            <div style="display: flex; align-items: center;">
+                <div class="nav-links">
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
+                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
+                    <a href="/project-statistics" class="nav-link active"><i class="fas fa-chart-pie"></i> Project Statistics</a>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Project Statistics Page -->
+    <div id="projectStatisticsPage" class="page active">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>Project Statistics</h1>
+                <p>Detailed statistics for a selected project</p>
+            </div>
+
+            <!-- Project Selection -->
+            <div class="dashboard-section">
+                <h2 class="section-title"><i class="fas fa-filter"></i> Select Project</h2>
+                <div class="project-selection-container">
+                    <div class="searchable-dropdown">
+                        <input type="text" id="projectSearchInput" placeholder="Search for a project..." onkeyup="filterProjects()">
+                        <div class="dropdown-content" id="projectDropdownContent"></div>
+                    </div>
+                    <button id="loadProjectStatsBtn" class="btn btn-primary">Load Stats</button>
+                </div>
+            </div>
+
+            <div id="projectStatsContent" style="display: none;">
+                <!-- Overall Statistics -->
+                <div class="dashboard-section">
+                    <h2 class="section-title"><i class="fas fa-chart-line"></i> Overall Statistics</h2>
+                    <div class="dashboard-stats" id="projectStatsOverall"></div>
+                </div>
+
+                <!-- Success Rates -->
+                <div class="dashboard-section">
+                    <h2 class="section-title"><i class="fas fa-percentage"></i> Success Rates</h2>
+                    <div class="success-rates-grid" id="successRates"></div>
+                </div>
+
+                <!-- Quality Metrics -->
+                <div class="dashboard-section">
+                    <h2 class="section-title"><i class="fas fa-award"></i> Quality Metrics</h2>
+                    <div class="quality-metrics-grid" id="qualityMetrics"></div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="dashboard-section">
+                    <h2 class="section-title"><i class="fas fa-chart-pie"></i> Visual Insights</h2>
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>User Stories Distribution</h3>
+                            <canvas id="projectUserStoriesChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Test Cases Distribution</h3>
+                            <canvas id="projectTestCasesChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Issues by Priority</h3>
+                            <canvas id="projectIssuesPriorityChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Issues by Status</h3>
+                            <canvas id="projectIssuesStatusChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Success Rates Overview</h3>
+                            <canvas id="projectSuccessRatesChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Quality Trends</h3>
+                            <canvas id="projectQualityTrendsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testers Section -->
+                <div class="dashboard-section">
+                    <h2 class="section-title"><i class="fas fa-users"></i> Testers</h2>
+                    <div id="projectTesters" class="testers-grid"></div>
+                </div>
+
+                <!-- Reports Section -->
+                <div class="dashboard-section">
+                    <h2 class="section-title"><i class="fas fa-file-alt"></i> Reports</h2>
+                    <div id="projectReports" class="reports-grid"></div>
+                </div>
+
+                <!-- Monthly/Quarterly Stats -->
+                <div class="dashboard-section">
+                    <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Monthly & Quarterly Stats</h2>
+                    <div id="projectTimeStats" class="time-stats-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/theme-manager.js"></script>
+    <script src="/static/project_statistics.js"></script>
+    <script>
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize theme first
+            if (window.themeManager) {
+                window.themeManager.init();
+            }
+        });
+    </script>
+</body>
+</html>

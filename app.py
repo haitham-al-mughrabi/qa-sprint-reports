@@ -24,7 +24,9 @@ class Report(db.Model):
     projectName = db.Column(db.String(100), nullable=False)
     sprintNumber = db.Column(db.Integer, nullable=False)
     reportVersion = db.Column(db.String(50))
+    reportName = db.Column(db.String(255)) # New field for custom report name
     cycleNumber = db.Column(db.Integer)
+    releaseNumber = db.Column(db.String(50)) # Add missing releaseNumber field
     reportDate = db.Column(db.String(50))
     
     # Test Summary
@@ -35,6 +37,7 @@ class Report(db.Model):
     requestData = db.Column(db.Text, default='[]')
     buildData = db.Column(db.Text, default='[]')
     testerData = db.Column(db.Text, default='[]')
+    teamMemberData = db.Column(db.Text, default='[]') # New field for team member data
     
     # User Stories Data (detailed breakdown)
     totalUserStories = db.Column(db.Integer, default=0)
@@ -74,27 +77,27 @@ class Report(db.Model):
     implementedEnhancements = db.Column(db.Integer, default=0)
     existsEnhancements = db.Column(db.Integer, default=0)
     
-    # Evaluation Data
-    evaluationData = db.Column(db.Text, default='{}')  # JSON for flexible evaluation criteria
-    evaluationTotalScore = db.Column(db.Float, default=0.0)
+    # Evaluation Data - REMOVED
+    # evaluationData = db.Column(db.Text, default='{}')  # JSON for flexible evaluation criteria
+    # evaluationTotalScore = db.Column(db.Float, default=0.0)
     
-    # Project Evaluation Data
-    projectEvaluationData = db.Column(db.Text, default='{}')  # JSON for project evaluation
-    projectEvaluationTotalScore = db.Column(db.Float, default=0.0)
+    # Project Evaluation Data - REMOVED
+    # projectEvaluationData = db.Column(db.Text, default='{}')  # JSON for project evaluation
+    # projectEvaluationTotalScore = db.Column(db.Float, default=0.0)
     
     # Testing Metrics (calculated fields)
     userStoriesMetric = db.Column(db.Integer, default=0)  # Auto-calculated from user stories
     testCasesMetric = db.Column(db.Integer, default=0)   # Auto-calculated from test cases
     issuesMetric = db.Column(db.Integer, default=0)      # Auto-calculated from issues
     enhancementsMetric = db.Column(db.Integer, default=0) # Auto-calculated from enhancements
+    # Evaluation Metric
     evaluationMetric = db.Column(db.String(255))
-    qaNotesMetric = db.Column(db.Integer, default=0)
     
     # QA Notes
     qaNotesText = db.Column(db.Text)
     
-    # Custom Fields (JSON storage for flexibility)
-    customFields = db.Column(db.Text, default='{}')
+    # Custom Fields - REMOVED
+    # customFields = db.Column(db.Text, default='{}')
     
     # Metadata
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
@@ -144,37 +147,39 @@ class Report(db.Model):
         self.enhancementsMetric = self.totalEnhancements
 
     def calculate_evaluation_scores(self):
-        """Calculate evaluation total scores"""
-        try:
-            # Calculate Evaluation Total Score
-            evaluation_data = json.loads(self.evaluationData or '{}')
-            eval_total = 0
-            eval_count = 0
-            for key, value in evaluation_data.items():
-                if key.endswith('_score') and value:
-                    try:
-                        eval_total += float(value)
-                        eval_count += 1
-                    except (ValueError, TypeError):
-                        pass
-            self.evaluationTotalScore = eval_total / eval_count if eval_count > 0 else 0
-            
-            # Calculate Project Evaluation Total Score
-            project_eval_data = json.loads(self.projectEvaluationData or '{}')
-            proj_total = 0
-            proj_count = 0
-            for key, value in project_eval_data.items():
-                if key.endswith('_score') and value:
-                    try:
-                        proj_total += float(value)
-                        proj_count += 1
-                    except (ValueError, TypeError):
-                        pass
-            self.projectEvaluationTotalScore = proj_total / proj_count if proj_count > 0 else 0
-            
-        except json.JSONDecodeError:
-            self.evaluationTotalScore = 0
-            self.projectEvaluationTotalScore = 0
+        """Calculate evaluation total scores - REMOVED"""
+        # Evaluation calculation - REMOVED
+        # try:
+        #     # Calculate Evaluation Total Score
+        #     evaluation_data = json.loads(self.evaluationData or '{}')
+        #     eval_total = 0
+        #     eval_count = 0
+        #     for key, value in evaluation_data.items():
+        #         if key.endswith('_score') and value:
+        #             try:
+        #                 eval_total += float(value)
+        #                 eval_count += 1
+        #             except (ValueError, TypeError):
+        #                 pass
+        #     self.evaluationTotalScore = eval_total / eval_count if eval_count > 0 else 0
+        #     
+        #     # Calculate Project Evaluation Total Score
+        #     project_eval_data = json.loads(self.projectEvaluationData or '{}')
+        #     proj_total = 0
+        #     proj_count = 0
+        #     for key, value in project_eval_data.items():
+        #         if key.endswith('_score') and value:
+        #             try:
+        #                 proj_total += float(value)
+        #                 proj_count += 1
+        #             except (ValueError, TypeError):
+        #                 pass
+        #     self.projectEvaluationTotalScore = proj_total / proj_count if proj_count > 0 else 0
+        #     
+        # except json.JSONDecodeError:
+        #     self.evaluationTotalScore = 0
+        #     self.projectEvaluationTotalScore = 0
+        pass
 
     def to_dict(self):
         """Converts the Report object to a dictionary for JSON serialization."""
@@ -184,7 +189,9 @@ class Report(db.Model):
             'projectName': self.projectName,
             'sprintNumber': self.sprintNumber,
             'reportVersion': self.reportVersion,
+            'reportName': self.reportName,
             'cycleNumber': self.cycleNumber,
+            'releaseNumber': self.releaseNumber,
             'reportDate': self.reportDate,
             'testSummary': self.testSummary,
             'testingStatus': self.testingStatus,
@@ -193,6 +200,7 @@ class Report(db.Model):
             'requestData': json.loads(self.requestData or '[]'),
             'buildData': json.loads(self.buildData or '[]'),
             'testerData': json.loads(self.testerData or '[]'),
+            'teamMemberData': json.loads(self.teamMemberData or '[]'),
             
             # User Stories
             'totalUserStories': self.totalUserStories,
@@ -232,11 +240,11 @@ class Report(db.Model):
             'implementedEnhancements': self.implementedEnhancements,
             'existsEnhancements': self.existsEnhancements,
             
-            # Evaluation
-            'evaluationData': json.loads(self.evaluationData or '{}'),
-            'evaluationTotalScore': self.evaluationTotalScore,
-            'projectEvaluationData': json.loads(self.projectEvaluationData or '{}'),
-            'projectEvaluationTotalScore': self.projectEvaluationTotalScore,
+            # Evaluation - REMOVED
+            # 'evaluationData': json.loads(self.evaluationData or '{}'),
+            # 'evaluationTotalScore': self.evaluationTotalScore,
+            # 'projectEvaluationData': json.loads(self.projectEvaluationData or '{}'),
+            # 'projectEvaluationTotalScore': self.projectEvaluationTotalScore,
             
             # Metrics
             'userStoriesMetric': self.userStoriesMetric,
@@ -244,11 +252,10 @@ class Report(db.Model):
             'issuesMetric': self.issuesMetric,
             'enhancementsMetric': self.enhancementsMetric,
             'evaluationMetric': self.evaluationMetric,
-            'qaNotesMetric': self.qaNotesMetric,
             'qaNotesText': self.qaNotesText,
             
-            # Custom Fields
-            'customFields': json.loads(self.customFields or '{}'),
+            # Custom Fields - REMOVED
+            # 'customFields': json.loads(self.customFields or '{}'),
             
             # Metadata
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
@@ -335,19 +342,35 @@ def get_dashboard_stats():
     # Get aggregate metrics with database aggregation
     aggregate_result = db.session.query(
         func.sum(Report.totalUserStories).label('total_user_stories'),
+        func.sum(Report.passedUserStories).label('passed_user_stories'),
+        func.sum(Report.passedWithIssuesUserStories).label('passed_with_issues_user_stories'),
+        func.sum(Report.failedUserStories).label('failed_user_stories'),
+        func.sum(Report.blockedUserStories).label('blocked_user_stories'),
+        func.sum(Report.cancelledUserStories).label('cancelled_user_stories'),
+        func.sum(Report.deferredUserStories).label('deferred_user_stories'),
+        func.sum(Report.notTestableUserStories).label('not_testable_user_stories'),
         func.sum(Report.totalTestCases).label('total_test_cases'),
+        func.sum(Report.passedTestCases).label('passed_test_cases'),
+        func.sum(Report.passedWithIssuesTestCases).label('passed_with_issues_test_cases'),
+        func.sum(Report.failedTestCases).label('failed_test_cases'),
+        func.sum(Report.blockedTestCases).label('blocked_test_cases'),
+        func.sum(Report.cancelledTestCases).label('cancelled_test_cases'),
+        func.sum(Report.deferredTestCases).label('deferred_test_cases'),
+        func.sum(Report.notTestableTestCases).label('not_testable_test_cases'),
         func.sum(Report.totalIssues).label('total_issues'),
+        func.sum(Report.criticalIssues).label('critical_issues'),
+        func.sum(Report.highIssues).label('high_issues'),
+        func.sum(Report.mediumIssues).label('medium_issues'),
+        func.sum(Report.lowIssues).label('low_issues'),
+        func.sum(Report.newIssues).label('new_issues'),
+        func.sum(Report.fixedIssues).label('fixed_issues'),
+        func.sum(Report.notFixedIssues).label('not_fixed_issues'),
+        func.sum(Report.reopenedIssues).label('reopened_issues'),
+        func.sum(Report.deferredIssues).label('deferred_issues'),
         func.sum(Report.totalEnhancements).label('total_enhancements'),
         func.avg(Report.evaluationTotalScore).label('avg_evaluation_score'),
         func.avg(Report.projectEvaluationTotalScore).label('avg_project_evaluation_score')
     ).first()
-    
-    total_user_stories = aggregate_result.total_user_stories or 0
-    total_test_cases = aggregate_result.total_test_cases or 0
-    total_issues = aggregate_result.total_issues or 0
-    total_enhancements = aggregate_result.total_enhancements or 0
-    avg_evaluation_score = aggregate_result.avg_evaluation_score or 0
-    avg_project_evaluation_score = aggregate_result.avg_project_evaluation_score or 0
     
     # Project-specific metrics using optimized query
     project_stats = db.session.query(
@@ -410,12 +433,35 @@ def get_dashboard_stats():
             'completedReports': completed_reports,
             'inProgressReports': in_progress_reports,
             'pendingReports': pending_reports,
-            'totalUserStories': total_user_stories,
-            'totalTestCases': total_test_cases,
-            'totalIssues': total_issues,
-            'totalEnhancements': total_enhancements,
-            'avgEvaluationScore': round(avg_evaluation_score, 2),
-            'avgProjectEvaluationScore': round(avg_project_evaluation_score, 2)
+            'totalUserStories': aggregate_result.total_user_stories or 0,
+            'passedUserStories': aggregate_result.passed_user_stories or 0,
+            'passedWithIssuesUserStories': aggregate_result.passed_with_issues_user_stories or 0,
+            'failedUserStories': aggregate_result.failed_user_stories or 0,
+            'blockedUserStories': aggregate_result.blocked_user_stories or 0,
+            'cancelledUserStories': aggregate_result.cancelled_user_stories or 0,
+            'deferredUserStories': aggregate_result.deferred_user_stories or 0,
+            'notTestableUserStories': aggregate_result.not_testable_user_stories or 0,
+            'totalTestCases': aggregate_result.total_test_cases or 0,
+            'passedTestCases': aggregate_result.passed_test_cases or 0,
+            'passedWithIssuesTestCases': aggregate_result.passed_with_issues_test_cases or 0,
+            'failedTestCases': aggregate_result.failed_test_cases or 0,
+            'blockedTestCases': aggregate_result.blocked_test_cases or 0,
+            'cancelledTestCases': aggregate_result.cancelled_test_cases or 0,
+            'deferredTestCases': aggregate_result.deferred_test_cases or 0,
+            'notTestableTestCases': aggregate_result.not_testable_test_cases or 0,
+            'totalIssues': aggregate_result.total_issues or 0,
+            'criticalIssues': aggregate_result.critical_issues or 0,
+            'highIssues': aggregate_result.high_issues or 0,
+            'mediumIssues': aggregate_result.medium_issues or 0,
+            'lowIssues': aggregate_result.low_issues or 0,
+            'newIssues': aggregate_result.new_issues or 0,
+            'fixedIssues': aggregate_result.fixed_issues or 0,
+            'notFixedIssues': aggregate_result.not_fixed_issues or 0,
+            'reopenedIssues': aggregate_result.reopened_issues or 0,
+            'deferredIssues': aggregate_result.deferred_issues or 0,
+            'totalEnhancements': aggregate_result.total_enhancements or 0,
+            'avgEvaluationScore': round(aggregate_result.avg_evaluation_score or 0, 2),
+            'avgProjectEvaluationScore': round(aggregate_result.avg_project_evaluation_score or 0, 2)
         },
         'projects': list(projects.values())
     })
@@ -423,78 +469,95 @@ def get_dashboard_stats():
 @app.route('/api/reports', methods=['POST'])
 def create_report():
     """Creates a new report and saves it to the database."""
-    data = request.get_json()
-    
-    new_report = Report(
-        portfolioName=data.get('portfolioName'),
-        projectName=data.get('projectName'),
-        sprintNumber=int(data.get('sprintNumber') or 0),
-        reportVersion=data.get('reportVersion'),
-        cycleNumber=int(data.get('cycleNumber') or 0),
-        reportDate=data.get('reportDate'),
-        testSummary=data.get('testSummary'),
-        testingStatus=data.get('testingStatus'),
+    try:
+        data = request.get_json()
         
-        # Dynamic data
-        requestData=json.dumps(data.get('requestData', [])),
-        buildData=json.dumps(data.get('buildData', [])),
-        testerData=json.dumps(data.get('testerData', [])),
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
         
-        # User Stories
-        passedUserStories=int(data.get('passedUserStories') or 0),
-        passedWithIssuesUserStories=int(data.get('passedWithIssuesUserStories') or 0),
-        failedUserStories=int(data.get('failedUserStories') or 0),
-        blockedUserStories=int(data.get('blockedUserStories') or 0),
-        cancelledUserStories=int(data.get('cancelledUserStories') or 0),
-        deferredUserStories=int(data.get('deferredUserStories') or 0),
-        notTestableUserStories=int(data.get('notTestableUserStories') or 0),
+        # Validate required fields
+        required_fields = ['portfolioName', 'projectName', 'sprintNumber']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'error': f'Missing required field: {field}'}), 400
         
-        # Test Cases
-        passedTestCases=int(data.get('passedTestCases') or 0),
-        passedWithIssuesTestCases=int(data.get('passedWithIssuesTestCases') or 0),
-        failedTestCases=int(data.get('failedTestCases') or 0),
-        blockedTestCases=int(data.get('blockedTestCases') or 0),
-        cancelledTestCases=int(data.get('cancelledTestCases') or 0),
-        deferredTestCases=int(data.get('deferredTestCases') or 0),
-        notTestableTestCases=int(data.get('notTestableTestCases') or 0),
+        new_report = Report(
+            portfolioName=data.get('portfolioName'),
+            projectName=data.get('projectName'),
+            sprintNumber=int(data.get('sprintNumber') or 0),
+            reportVersion=data.get('reportVersion'),
+            reportName=data.get('reportName'), # New field
+            cycleNumber=int(data.get('cycleNumber') or 0),
+            releaseNumber=data.get('releaseNumber'), # Add releaseNumber field
+            reportDate=data.get('reportDate'),
+            testSummary=data.get('testSummary'),
+            testingStatus=data.get('testingStatus'),
+            
+            # Dynamic data
+            requestData=json.dumps(data.get('requestData', [])),
+            buildData=json.dumps(data.get('buildData', [])),
+            testerData=json.dumps(data.get('testerData', [])),
+            teamMemberData=json.dumps(data.get('teamMemberData', [])), # New field
+            
+            # User Stories
+            passedUserStories=int(data.get('passedUserStories') or 0),
+            passedWithIssuesUserStories=int(data.get('passedWithIssuesUserStories') or 0),
+            failedUserStories=int(data.get('failedUserStories') or 0),
+            blockedUserStories=int(data.get('blockedUserStories') or 0),
+            cancelledUserStories=int(data.get('cancelledUserStories') or 0),
+            deferredUserStories=int(data.get('deferredUserStories') or 0),
+            notTestableUserStories=int(data.get('notTestableUserStories') or 0),
+            
+            # Test Cases
+            passedTestCases=int(data.get('passedTestCases') or 0),
+            passedWithIssuesTestCases=int(data.get('passedWithIssuesTestCases') or 0),
+            failedTestCases=int(data.get('failedTestCases') or 0),
+            blockedTestCases=int(data.get('blockedTestCases') or 0),
+            cancelledTestCases=int(data.get('cancelledTestCases') or 0),
+            deferredTestCases=int(data.get('deferredTestCases') or 0),
+            notTestableTestCases=int(data.get('notTestableTestCases') or 0),
+            
+            # Issues
+            criticalIssues=int(data.get('criticalIssues') or 0),
+            highIssues=int(data.get('highIssues') or 0),
+            mediumIssues=int(data.get('mediumIssues') or 0),
+            lowIssues=int(data.get('lowIssues') or 0),
+            newIssues=int(data.get('newIssues') or 0),
+            fixedIssues=int(data.get('fixedIssues') or 0),
+            notFixedIssues=int(data.get('notFixedIssues') or 0),
+            reopenedIssues=int(data.get('reopenedIssues') or 0),
+            deferredIssues=int(data.get('deferredIssues') or 0),
+            
+            # Enhancements
+            newEnhancements=int(data.get('newEnhancements') or 0),
+            implementedEnhancements=int(data.get('implementedEnhancements') or 0),
+            existsEnhancements=int(data.get('existsEnhancements') or 0),
+            
+            # Evaluation - REMOVED
+            # evaluationData=json.dumps(data.get('evaluationData', {})),
+            # projectEvaluationData=json.dumps(data.get('projectEvaluationData', {})),
+            
+            # Other metrics
+            evaluationMetric=data.get('evaluationMetric'),
+            qaNotesText=data.get('qaNotesText'),
+            
+            # Custom Fields - REMOVED
+            # customFields=json.dumps(data.get('customFields', {}))
+        )
         
-        # Issues
-        criticalIssues=int(data.get('criticalIssues') or 0),
-        highIssues=int(data.get('highIssues') or 0),
-        mediumIssues=int(data.get('mediumIssues') or 0),
-        lowIssues=int(data.get('lowIssues') or 0),
-        newIssues=int(data.get('newIssues') or 0),
-        fixedIssues=int(data.get('fixedIssues') or 0),
-        notFixedIssues=int(data.get('notFixedIssues') or 0),
-        reopenedIssues=int(data.get('reopenedIssues') or 0),
-        deferredIssues=int(data.get('deferredIssues') or 0),
+        # Calculate totals and scores
+        new_report.calculate_totals()
+        new_report.calculate_evaluation_scores()
         
-        # Enhancements
-        newEnhancements=int(data.get('newEnhancements') or 0),
-        implementedEnhancements=int(data.get('implementedEnhancements') or 0),
-        existsEnhancements=int(data.get('existsEnhancements') or 0),
+        db.session.add(new_report)
+        db.session.commit()
         
-        # Evaluation
-        evaluationData=json.dumps(data.get('evaluationData', {})),
-        projectEvaluationData=json.dumps(data.get('projectEvaluationData', {})),
+        return jsonify(new_report.to_dict()), 201
         
-        # Other metrics
-        evaluationMetric=data.get('evaluationMetric'),
-        qaNotesMetric=int(data.get('qaNotesMetric') or 0),
-        qaNotesText=data.get('qaNotesText'),
-        
-        # Custom Fields
-        customFields=json.dumps(data.get('customFields', {}))
-    )
-    
-    # Calculate totals and scores
-    new_report.calculate_totals()
-    new_report.calculate_evaluation_scores()
-    
-    db.session.add(new_report)
-    db.session.commit()
-    
-    return jsonify(new_report.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating report: {str(e)}")
+        return jsonify({'error': f'Failed to create report: {str(e)}'}), 500
 
 class Portfolio(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -909,12 +972,7 @@ def get_latest_project_data(portfolio_name, project_name):
         tester_data = json.loads(latest_report.testerData or '[]')
         request_data = json.loads(latest_report.requestData or '[]') 
         build_data = json.loads(latest_report.buildData or '[]')
-        
-        # Get team members from request data if available
-        team_members = []
-        for req in request_data:
-            if 'assignedTo' in req:
-                team_members.append(req['assignedTo'])
+        team_member_data = json.loads(latest_report.teamMemberData or '[]')
         
         return jsonify({
             'hasData': True,
@@ -925,7 +983,7 @@ def get_latest_project_data(portfolio_name, project_name):
                 'reportVersion': latest_report.reportVersion or '1.0',
                 'reportDate': latest_report.reportDate,
                 'testerData': tester_data,
-                'teamMembers': team_members,
+                'teamMembers': team_member_data,
                 'requestData': request_data,
                 'buildData': build_data
             },
@@ -970,7 +1028,7 @@ def update_report(id):
 
     # Update fields
     for field in ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion', 
-                  'cycleNumber', 'reportDate', 'testSummary', 'testingStatus',
+                  'reportName', 'cycleNumber', 'releaseNumber', 'reportDate', 'testSummary', 'testingStatus',
                   'passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories',
                   'blockedUserStories', 'cancelledUserStories', 'deferredUserStories', 
                   'notTestableUserStories', 'passedTestCases', 'passedWithIssuesTestCases',
@@ -978,26 +1036,26 @@ def update_report(id):
                   'deferredTestCases', 'notTestableTestCases', 'criticalIssues',
                   'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues',
                   'notFixedIssues', 'reopenedIssues', 'deferredIssues', 'newEnhancements',
-                  'implementedEnhancements', 'existsEnhancements', 'evaluationMetric',
-                  'qaNotesMetric']:
+                  'implementedEnhancements', 'existsEnhancements', 'evaluationMetric', 'qaNotesText']:
         if field in data:
             setattr(report, field, data[field])
     
     # Update JSON fields
-    if 'qaNotes' in data:
-        report.qaNotes = json.dumps(data['qaNotes'])
     if 'requestData' in data:
         report.requestData = json.dumps(data['requestData'])
     if 'buildData' in data:
         report.buildData = json.dumps(data['buildData'])
     if 'testerData' in data:
         report.testerData = json.dumps(data['testerData'])
-    if 'evaluationData' in data:
-        report.evaluationData = json.dumps(data['evaluationData'])
-    if 'projectEvaluationData' in data:
-        report.projectEvaluationData = json.dumps(data['projectEvaluationData'])
-    if 'customFields' in data:
-        report.customFields = json.dumps(data['customFields'])
+    if 'teamMemberData' in data:
+        report.teamMemberData = json.dumps(data['teamMemberData'])
+    # Evaluation and Custom Fields - REMOVED
+    # if 'evaluationData' in data:
+    #     report.evaluationData = json.dumps(data['evaluationData'])
+    # if 'projectEvaluationData' in data:
+    #     report.projectEvaluationData = json.dumps(data['projectEvaluationData'])
+    # if 'customFields' in data:
+    #     report.customFields = json.dumps(data['customFields'])
 
     # Recalculate totals and scores
     report.calculate_totals()
@@ -1202,10 +1260,235 @@ def get_cached_dashboard_stats():
         print(f"Cache retrieval failed, falling back to original method: {e}")
         return get_dashboard_stats()
 
+@app.route('/project-statistics')
+def project_statistics_page():
+    """Serves the project statistics HTML page."""
+    return render_template('project_statistics.html')
+
+@app.route('/api/project-stats/<int:project_id>', methods=['GET'])
+def get_project_stats(project_id):
+    """Get all statistics for a specific project."""
+    print(f"Requesting stats for project ID: {project_id}")
+    project = Project.query.get_or_404(project_id)
+    print(f"Fetching stats for project: {project.name}")
+    
+    # Debug: check all reports and their project names
+    all_reports = Report.query.all()
+    print(f"Total reports in database: {len(all_reports)}")
+    for r in all_reports:
+        print(f"Report ID: {r.id}, Project Name: {r.projectName}")
+    
+    reports = Report.query.filter_by(projectName=project.name).all()
+    print(f"Found {len(reports)} reports for project name: {project.name}")
+
+    if not reports:
+        print(f"No reports found for project ID: {project_id}, project name: {project.name}")
+        # Instead of returning 404, return empty stats
+        return jsonify({
+            'overall': {
+                'totalReports': 0,
+                'totalUserStories': 0,
+                'totalTestCases': 0,
+                'totalIssues': 0,
+                'totalEnhancements': 0,
+                'lastRelease': 'N/A',
+                'latestReleaseNumber': 'N/A',
+                'userStorySuccessRate': 0,
+                'testCaseSuccessRate': 0,
+                'issueFixRate': 0,
+                'enhancementCompletionRate': 0,
+                'avgEvaluationScore': 0,
+                'avgProjectEvaluationScore': 0,
+                'passedUserStories': 0,
+                'passedTestCases': 0,
+                'fixedIssues': 0,
+                'implementedEnhancements': 0
+            },
+            'charts': {
+                'userStories': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]},
+                'testCases': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]},
+                'issuesPriority': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]},
+                'issuesStatus': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]}
+            },
+            'testers': [],
+            'reports': [],
+            'time_stats': {'monthly': {}, 'quarterly': {}}
+        })
+
+    # Calculate overall stats
+    total_reports = len(reports)
+    total_user_stories = sum(r.totalUserStories for r in reports)
+    total_test_cases = sum(r.totalTestCases for r in reports)
+    total_issues = sum(r.totalIssues for r in reports)
+    total_enhancements = sum(r.totalEnhancements for r in reports)
+    last_release = reports[-1].reportVersion if reports else 'N/A'
+    latest_release_number = reports[-1].releaseNumber if reports else 'N/A'
+    
+    # Calculate success rates
+    passed_user_stories = sum(r.passedUserStories for r in reports)
+    passed_test_cases = sum(r.passedTestCases for r in reports)
+    fixed_issues = sum(r.fixedIssues for r in reports)
+    implemented_enhancements = sum(r.implementedEnhancements for r in reports)
+    
+    user_story_success_rate = (passed_user_stories / total_user_stories * 100) if total_user_stories > 0 else 0
+    test_case_success_rate = (passed_test_cases / total_test_cases * 100) if total_test_cases > 0 else 0
+    issue_fix_rate = (fixed_issues / total_issues * 100) if total_issues > 0 else 0
+    enhancement_completion_rate = (implemented_enhancements / total_enhancements * 100) if total_enhancements > 0 else 0
+    
+    # Calculate average evaluation scores
+    avg_evaluation_score = sum(r.evaluationTotalScore for r in reports) / len(reports) if reports else 0
+    avg_project_evaluation_score = sum(r.projectEvaluationTotalScore for r in reports) / len(reports) if reports else 0
+
+    # Get unique testers
+    testers = []
+    tester_emails = set()
+    for r in reports:
+        for tester in json.loads(r.testerData):
+            if tester['email'] not in tester_emails:
+                testers.append(tester)
+                tester_emails.add(tester['email'])
+
+    # Time-based stats
+    monthly_stats = {}
+    quarterly_stats = {}
+    for r in reports:
+        try:
+            report_date = datetime.strptime(r.reportDate, '%d-%m-%Y')
+            month_key = report_date.strftime('%Y-%m')
+            quarter_key = f"{report_date.year}-Q{ (report_date.month - 1) // 3 + 1 }"
+            monthly_stats[month_key] = monthly_stats.get(month_key, 0) + 1
+            quarterly_stats[quarter_key] = quarterly_stats.get(quarter_key, 0) + 1
+        except (ValueError, TypeError):
+            continue
+
+    # Prepare data for charts
+    chart_data = {
+        'userStories': {
+            'labels': ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
+            'datasets': [{
+                'data': [
+                    sum(r.passedUserStories for r in reports),
+                    sum(r.passedWithIssuesUserStories for r in reports),
+                    sum(r.failedUserStories for r in reports),
+                    sum(r.blockedUserStories for r in reports),
+                    sum(r.cancelledUserStories for r in reports),
+                    sum(r.deferredUserStories for r in reports),
+                    sum(r.notTestableUserStories for r in reports)
+                ],
+                'backgroundColor': ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E', '#2196F3', '#673AB7', '#00BCD4'],
+                'borderWidth': 3,
+                'borderColor': 'var(--surface)'
+            }]
+        },
+        'testCases': {
+            'labels': ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
+            'datasets': [{
+                'data': [
+                    sum(r.passedTestCases for r in reports),
+                    sum(r.passedWithIssuesTestCases for r in reports),
+                    sum(r.failedTestCases for r in reports),
+                    sum(r.blockedTestCases for r in reports),
+                    sum(r.cancelledTestCases for r in reports),
+                    sum(r.deferredTestCases for r in reports),
+                    sum(r.notTestableTestCases for r in reports)
+                ],
+                'backgroundColor': ['#8BC34A', '#FFEB3B', '#E91E63', '#607D8B', '#9C27B0', '#FF5722', '#795548'],
+                'borderWidth': 3,
+                'borderColor': 'var(--surface)'
+            }]
+        },
+        'issuesPriority': {
+            'labels': ['Critical', 'High', 'Medium', 'Low'],
+            'datasets': [{
+                'data': [
+                    sum(r.criticalIssues for r in reports),
+                    sum(r.highIssues for r in reports),
+                    sum(r.mediumIssues for r in reports),
+                    sum(r.lowIssues for r in reports)
+                ],
+                'backgroundColor': ['#F44336', '#FF9800', '#FFC107', '#4CAF50'],
+                'borderWidth': 3,
+                'borderColor': 'var(--surface)'
+            }]
+        },
+        'issuesStatus': {
+            'labels': ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'],
+            'datasets': [{
+                'data': [
+                    sum(r.newIssues for r in reports),
+                    sum(r.fixedIssues for r in reports),
+                    sum(r.notFixedIssues for r in reports),
+                    sum(r.reopenedIssues for r in reports),
+                    sum(r.deferredIssues for r in reports)
+                ],
+                'backgroundColor': ['#2196F3', '#4CAF50', '#E91E63', '#FF5722', '#673AB7'],
+                'borderWidth': 3,
+                'borderColor': 'var(--surface)'
+            }]
+        }
+    }
+
+    return jsonify({
+        'overall': {
+            'totalReports': total_reports,
+            'totalUserStories': total_user_stories,
+            'totalTestCases': total_test_cases,
+            'totalIssues': total_issues,
+            'totalEnhancements': total_enhancements,
+            'lastRelease': last_release,
+            'latestReleaseNumber': latest_release_number,
+            'userStorySuccessRate': round(user_story_success_rate, 2),
+            'testCaseSuccessRate': round(test_case_success_rate, 2),
+            'issueFixRate': round(issue_fix_rate, 2),
+            'enhancementCompletionRate': round(enhancement_completion_rate, 2),
+            'avgEvaluationScore': round(avg_evaluation_score, 2),
+            'avgProjectEvaluationScore': round(avg_project_evaluation_score, 2),
+            'passedUserStories': passed_user_stories,
+            'passedTestCases': passed_test_cases,
+            'fixedIssues': fixed_issues,
+            'implementedEnhancements': implemented_enhancements
+        },
+        'charts': chart_data,
+        'testers': testers,
+        'reports': [r.to_dict() for r in reports],
+        'time_stats': {
+            'monthly': monthly_stats,
+            'quarterly': quarterly_stats
+        }
+    })
+
+
+
+def migrate_database():
+    """Handle database migration for new fields"""
+    import sqlite3
+    import os
+    
+    db_path = os.path.join(basedir, 'reports.db')
+    
+    if os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Check if releaseNumber column exists
+        cursor.execute("PRAGMA table_info(report)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'releaseNumber' not in columns:
+            try:
+                cursor.execute("ALTER TABLE report ADD COLUMN releaseNumber VARCHAR(50)")
+                conn.commit()
+                print("Added releaseNumber column to existing database")
+            except sqlite3.Error as e:
+                print(f"Error adding releaseNumber column: {e}")
+        
+        conn.close()
 
 if __name__ == '__main__':
     with app.app_context():
         # This will create the database file and the 'report' table if they don't exist.
         db.create_all()
-    app.run(debug=True)
+        # Handle migration for existing databases
+        migrate_database()
+    app.run(debug=True, port=5001)
 
