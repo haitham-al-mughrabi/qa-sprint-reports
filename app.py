@@ -323,59 +323,86 @@ def get_report(report_id):
 @app.route('/api/dashboard/stats', methods=['GET'])
 def get_dashboard_stats():
     """Get dashboard statistics for all projects and individual projects."""
-    reports = Report.query.all()
+    # Use optimized database queries instead of loading all data into memory
+    from sqlalchemy import func
     
-    # Overall stats
-    total_reports = len(reports)
-    completed_reports = len([r for r in reports if r.testingStatus == 'passed'])
-    in_progress_reports = len([r for r in reports if r.testingStatus == 'passed-with-issues'])
+    # Get overall stats with single queries
+    total_reports = db.session.query(func.count(Report.id)).scalar()
+    completed_reports = db.session.query(func.count(Report.id)).filter(Report.testingStatus == 'passed').scalar()
+    in_progress_reports = db.session.query(func.count(Report.id)).filter(Report.testingStatus == 'passed-with-issues').scalar()
     pending_reports = total_reports - completed_reports - in_progress_reports
     
-    # Aggregate metrics
-    total_user_stories = sum(r.totalUserStories or 0 for r in reports)
-    total_test_cases = sum(r.totalTestCases or 0 for r in reports)
-    total_issues = sum(r.totalIssues or 0 for r in reports)
-    total_enhancements = sum(r.totalEnhancements or 0 for r in reports)
-    avg_evaluation_score = sum(r.evaluationTotalScore or 0 for r in reports) / len(reports) if reports else 0
-    avg_project_evaluation_score = sum(r.projectEvaluationTotalScore or 0 for r in reports) / len(reports) if reports else 0
+    # Get aggregate metrics with database aggregation
+    aggregate_result = db.session.query(
+        func.sum(Report.totalUserStories).label('total_user_stories'),
+        func.sum(Report.totalTestCases).label('total_test_cases'),
+        func.sum(Report.totalIssues).label('total_issues'),
+        func.sum(Report.totalEnhancements).label('total_enhancements'),
+        func.avg(Report.evaluationTotalScore).label('avg_evaluation_score'),
+        func.avg(Report.projectEvaluationTotalScore).label('avg_project_evaluation_score')
+    ).first()
     
-    # Project-specific metrics
+    total_user_stories = aggregate_result.total_user_stories or 0
+    total_test_cases = aggregate_result.total_test_cases or 0
+    total_issues = aggregate_result.total_issues or 0
+    total_enhancements = aggregate_result.total_enhancements or 0
+    avg_evaluation_score = aggregate_result.avg_evaluation_score or 0
+    avg_project_evaluation_score = aggregate_result.avg_project_evaluation_score or 0
+    
+    # Project-specific metrics using optimized query
+    project_stats = db.session.query(
+        Report.portfolioName,
+        Report.projectName,
+        func.count(Report.id).label('totalReports'),
+        func.sum(Report.totalUserStories).label('totalUserStories'),
+        func.sum(Report.totalTestCases).label('totalTestCases'),
+        func.sum(Report.totalIssues).label('totalIssues'),
+        func.sum(Report.totalEnhancements).label('totalEnhancements'),
+        func.avg(Report.evaluationTotalScore).label('avgEvaluationScore'),
+        func.avg(Report.projectEvaluationTotalScore).label('avgProjectEvaluationScore'),
+        func.max(Report.reportDate).label('lastReportDate')
+    ).group_by(Report.portfolioName, Report.projectName).all()
+    
+    # Get latest testing status for each project
+    latest_reports_subquery = db.session.query(
+        Report.portfolioName,
+        Report.projectName,
+        Report.testingStatus,
+        func.row_number().over(
+            partition_by=[Report.portfolioName, Report.projectName],
+            order_by=Report.reportDate.desc()
+        ).label('rn')
+    ).subquery()
+    
+    latest_statuses = db.session.query(
+        latest_reports_subquery.c.portfolioName,
+        latest_reports_subquery.c.projectName,
+        latest_reports_subquery.c.testingStatus
+    ).filter(latest_reports_subquery.c.rn == 1).all()
+    
+    # Create projects dictionary with optimized data
     projects = {}
-    for report in reports:
-        project_key = f"{report.portfolioName}_{report.projectName}"
-        if project_key not in projects:
-            projects[project_key] = {
-                'portfolioName': report.portfolioName,
-                'projectName': report.projectName,
-                'totalReports': 0,
-                'totalUserStories': 0,
-                'totalTestCases': 0,
-                'totalIssues': 0,
-                'totalEnhancements': 0,
-                'avgEvaluationScore': 0,
-                'avgProjectEvaluationScore': 0,
-                'lastReportDate': None,
-                'testingStatus': 'pending'
-            }
-        
-        project = projects[project_key]
-        project['totalReports'] += 1
-        project['totalUserStories'] += report.totalUserStories or 0
-        project['totalTestCases'] += report.totalTestCases or 0
-        project['totalIssues'] += report.totalIssues or 0
-        project['totalEnhancements'] += report.totalEnhancements or 0
-        project['avgEvaluationScore'] += report.evaluationTotalScore or 0
-        project['avgProjectEvaluationScore'] += report.projectEvaluationTotalScore or 0
-        
-        if not project['lastReportDate'] or report.reportDate > project['lastReportDate']:
-            project['lastReportDate'] = report.reportDate
-            project['testingStatus'] = report.testingStatus
+    for stat in project_stats:
+        project_key = f"{stat.portfolioName}_{stat.projectName}"
+        projects[project_key] = {
+            'portfolioName': stat.portfolioName,
+            'projectName': stat.projectName,
+            'totalReports': stat.totalReports or 0,
+            'totalUserStories': stat.totalUserStories or 0,
+            'totalTestCases': stat.totalTestCases or 0,
+            'totalIssues': stat.totalIssues or 0,
+            'totalEnhancements': stat.totalEnhancements or 0,
+            'avgEvaluationScore': round(stat.avgEvaluationScore or 0, 2),
+            'avgProjectEvaluationScore': round(stat.avgProjectEvaluationScore or 0, 2),
+            'lastReportDate': stat.lastReportDate,
+            'testingStatus': 'pending'  # Will be updated below
+        }
     
-    # Calculate averages for projects
-    for project in projects.values():
-        if project['totalReports'] > 0:
-            project['avgEvaluationScore'] /= project['totalReports']
-            project['avgProjectEvaluationScore'] /= project['totalReports']
+    # Update with latest testing statuses
+    for status in latest_statuses:
+        project_key = f"{status.portfolioName}_{status.projectName}"
+        if project_key in projects:
+            projects[project_key]['testingStatus'] = status.testingStatus
     
     return jsonify({
         'overall': {
@@ -867,3 +894,4 @@ if __name__ == '__main__':
         # This will create the database file and the 'report' table if they don't exist.
         db.create_all()
     app.run(debug=True)
+

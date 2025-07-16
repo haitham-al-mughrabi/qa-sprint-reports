@@ -6,7 +6,7 @@ let editingReportId = null;
 let currentPage = 1;
 const reportsPerPage = 10;
 let allReportsCache = []; // Cache for all reports to avoid re-fetching
-let dashboardStatsCache = null; // Cache for dashboard statistics
+let dashboardStatsCache = null; // Cache for dashboard statistics with structure: {data: object, cacheTime: number}
 
 // Form-specific variables
 let requestData = [];
@@ -40,11 +40,25 @@ async function fetchReports() {
 
 async function fetchDashboardStats() {
     try {
+        // Use existing cache if available and still valid
+        if (dashboardStatsCache && dashboardStatsCache.cacheTime && 
+            (Date.now() - dashboardStatsCache.cacheTime) < CACHE_DURATION) {
+            return dashboardStatsCache.data;
+        }
+
         const response = await fetch(DASHBOARD_API_URL);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return await response.json();
+        const data = await response.json();
+        
+        // Cache the dashboard stats
+        dashboardStatsCache = {
+            data: data,
+            cacheTime: Date.now()
+        };
+        
+        return data;
     } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
         return null;
@@ -779,7 +793,30 @@ function backToDashboard() { window.location.href = '/dashboard'; }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
 // --- Reports Table Functions ---
+// Debounced search to reduce API calls
+let searchTimeout;
+
 async function searchReports() {
+    const searchQuery = document.getElementById('searchInput')?.value || '';
+    
+    // Clear existing timeout
+    if (searchTimeout) {
+        clearTimeout(searchTimeout);
+    }
+    
+    // Set new timeout for debounced search
+    searchTimeout = setTimeout(async () => {
+        showReportsLoading();
+        const result = await fetchReports(currentPage, searchQuery);
+        hideReportsLoading();
+
+        renderReportsTable(result.reports);
+        renderPagination(result);
+    }, 300); // 300ms delay
+}
+
+// Immediate search for pagination and buttons
+async function searchReportsImmediate() {
     const searchQuery = document.getElementById('searchInput')?.value || '';
     showReportsLoading();
     const result = await fetchReports(currentPage, searchQuery);
@@ -836,7 +873,7 @@ function renderPagination(result) {
 
 function goToPage(page) {
     currentPage = page;
-    searchReports();
+    searchReportsImmediate();
 }
 
 // --- Report Actions (CRUD) ---
@@ -892,7 +929,7 @@ async function deleteReport(id) {
                 dashboardStatsCache = await fetchDashboardStats();
                 updateDashboardStats(dashboardStatsCache);
             }
-            searchReports(); // Re-render the reports table
+            searchReportsImmediate(); // Re-render the reports table
             showToast('Report deleted successfully', 'success');
         } else {
             showToast('Failed to delete report', 'error');
@@ -1475,6 +1512,7 @@ async function addPortfolio() {
             });
             if (response.ok) {
                 showToast('Portfolio added successfully!', 'success');
+                invalidateAllCaches(); // Clear caches since data changed
                 loadFormDropdownData(); // Reload dropdowns to include new portfolio
                 closeModal('addPortfolioModal');
             } else {
@@ -1521,6 +1559,7 @@ async function addProject() {
             });
             if (response.ok) {
                 showToast('Project added successfully!', 'success');
+                invalidateAllCaches(); // Clear caches since data changed
                 loadFormDropdownData(); // Reload dropdowns to include new project
                 closeModal('addProjectModal');
             } else {
@@ -2052,10 +2091,10 @@ async function populatePortfolioDropdown(portfolios) {
 
     // Add static options first (if any, as per your original HTML)
     const staticOptions = [
-        { value: 'api-services', text: 'API Services' },
-        { value: 'web-platform', text: 'Web Platform' },
-        { value: 'mobile-app', text: 'Mobile App' },
-        { value: 'data-analytics', text: 'Data Analytics' }
+        // { value: 'api-services', text: 'API Services' },
+        // { value: 'web-platform', text: 'Web Platform' },
+        // { value: 'mobile-app', text: 'Mobile App' },
+        // { value: 'data-analytics', text: 'Data Analytics' }
     ];
 
     staticOptions.forEach(opt => {
@@ -2091,12 +2130,37 @@ async function populateProjectDropdown(projects) {
     });
 }
 
-// Missing form dropdown data loading function
+// Caching for form dropdown data
+let formDataCache = null;
+let formDataCacheTime = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+// Cache invalidation function
+function invalidateAllCaches() {
+    formDataCache = null;
+    formDataCacheTime = null;
+    dashboardStatsCache = null;
+    allReportsCache = [];
+}
+
+// Missing form dropdown data loading function with caching
 async function loadFormDropdownData() {
     try {
+        // Check if we have cached data that's still valid
+        if (formDataCache && formDataCacheTime && (Date.now() - formDataCacheTime) < CACHE_DURATION) {
+            populatePortfolioDropdown(formDataCache.portfolios);
+            populateProjectDropdown(formDataCache.projects);
+            return;
+        }
+
         const response = await fetch('/api/form-data');
         if (response.ok) {
             const data = await response.json();
+            
+            // Cache the data
+            formDataCache = data;
+            formDataCacheTime = Date.now();
+            
             populatePortfolioDropdown(data.portfolios);
             populateProjectDropdown(data.projects);
             // You can also load testers and team members here if needed for the form
@@ -2110,6 +2174,7 @@ async function loadFormDropdownData() {
 // Make functions globally accessible
 window.createNewReport = createNewReport;
 window.searchReports = searchReports;
+window.searchReportsImmediate = searchReportsImmediate;
 window.viewReport = viewReport;
 window.regenerateReport = regenerateReport;
 window.deleteReport = deleteReport;
@@ -2158,6 +2223,7 @@ window.removeToast = removeToast;
 window.loadFormDropdownData = loadFormDropdownData; // Make it globally accessible
 window.initializeCharts = initializeCharts; // Make it globally accessible
 window.resetFormData = resetFormData; // Make it globally accessible
+window.invalidateAllCaches = invalidateAllCaches; // Make cache invalidation globally accessible
 window.fetchReport = fetchReport; // Make it globally accessible for editing
 window.loadReportForEditing = loadReportForEditing; // Make it globally accessible for editing
 window.editingReportId = editingReportId; // Make global variable accessible

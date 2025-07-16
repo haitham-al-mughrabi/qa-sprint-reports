@@ -51,7 +51,7 @@
 
             <!-- Main Content -->
             <div class="main-content">
-                <div class="dashboard-header">
+                <div class="create-report-header">
                     <h1 id="formTitle">Create Sprint Report</h1>
                     <p>Complete all sections to generate your comprehensive QA testing report</p>
                 </div>
@@ -61,49 +61,87 @@
                         <!-- Section 1: General Details -->
                         <div class="section active" id="section-0">
                             <h2 class="section-title"><i class="fas fa-file-alt"></i> General Details</h2>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="portfolioName">Portfolio Name</label>
-                                    <div class="select-with-add">
-                                        <select id="portfolioName" name="portfolioName" required>
-                                        </select>
-                                        <button type="button" class="add-btn" onclick="showAddPortfolioModal()">+ Add</button>
+                            
+                            <!-- Two Column Layout -->
+                            <div class="general-details-columns">
+                                <!-- Left Column: Portfolio & Project Information -->
+                                <div class="general-details-column">
+                                    <div class="subsection subsection-equal-height">
+                                        <h3 class="subsection-title"><i class="fas fa-folder-open"></i> Portfolio & Project Information</h3>
+                                        
+                                        <!-- Portfolio Section -->
+                                        <div class="stacked-form-section">
+                                            <div class="form-field-vertical">
+                                                <label for="portfolioName" class="field-label">Portfolio Name</label>
+                                                <select id="portfolioName" name="portfolioName" class="field-input" required>
+                                                </select>
+                                                <button type="button" class="add-btn-vertical" onclick="showAddPortfolioModal()">
+                                                    <i class="fas fa-plus"></i> Add New Portfolio
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="field-divider"></div>
+                                            
+                                            <!-- Project Section -->
+                                            <div class="form-field-vertical">
+                                                <label for="projectName" class="field-label">Project Name</label>
+                                                <select id="projectName" name="projectName" class="field-input" required>
+                                                    <option value="">Select Project</option>
+                                                </select>
+                                                <button type="button" class="add-btn-vertical" onclick="showAddProjectModal()">
+                                                    <i class="fas fa-plus"></i> Add New Project
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label for="projectName">Project Name</label>
-                                    <div class="select-with-add">
-                                        <select id="projectName" name="projectName" required>
-                                            <option value="">Select Project</option>
-                                        </select>
-                                        <button type="button" class="add-btn" onclick="showAddProjectModal()">+ Add</button>
+                                <!-- Right Column: Sprint & Release + Report Information -->
+                                <div class="general-details-column">
+                                    <div class="subsection subsection-equal-height">
+                                        <!-- Sprint & Release Information -->
+                                        <div class="subsection-group">
+                                            <h3 class="subsection-title"><i class="fas fa-running"></i> Sprint & Release Information</h3>
+                                            <div class="form-grid">
+                                                <div class="form-group">
+                                                    <label for="sprintNumber">Sprint Number</label>
+                                                    <input type="number" id="sprintNumber" name="sprintNumber" min="1" placeholder="Enter sprint number" required>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label for="cycleNumber">Cycle Number</label>
+                                                    <input type="number" id="cycleNumber" name="cycleNumber" min="1" placeholder="Enter cycle number" required>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label for="releaseNumber">Release Number</label>
+                                                    <input type="text" id="releaseNumber" name="releaseNumber" placeholder="e.g., R1.0, R2.1" required>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Report Information -->
+                                        <div class="subsection-group">
+                                            <h3 class="subsection-title"><i class="fas fa-file-text"></i> Report Information</h3>
+                                            <div class="form-grid">
+                                                <div class="form-group full-width">
+                                                    <label for="reportName">Report Name</label>
+                                                    <input type="text" id="reportName" name="reportName" placeholder="Enter custom report name (e.g., Enhanced QA Report, Sprint Testing Report)" onInput="updateReportTitle()">
+                                                    <small class="field-hint">Leave blank to use default name</small>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label for="reportVersion">Report Version</label>
+                                                    <input type="text" id="reportVersion" name="reportVersion" placeholder="e.g., 1.0, 2.1" required>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label for="reportDate">Report Date (dd-mm-yyyy)</label>
+                                                    <input type="text" id="reportDate" name="reportDate" pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy" required>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="sprintNumber">Sprint Number</label>
-                                    <input type="number" id="sprintNumber" name="sprintNumber" min="1" placeholder="Enter sprint number" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="reportVersion">Report Version</label>
-                                    <input type="text" id="reportVersion" name="reportVersion" placeholder="e.g., 1.0, 2.1" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="cycleNumber">Cycle Number</label>
-                                    <input type="number" id="cycleNumber" name="cycleNumber" min="1" placeholder="Enter cycle number" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="releaseNumber">Release Number</label>
-                                    <input type="text" id="releaseNumber" name="releaseNumber" placeholder="e.g., R1.0, R2.1" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="reportDate">Report Date (dd-mm-yyyy)</label>
-                                    <input type="text" id="reportDate" name="reportDate" pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy" required>
                                 </div>
                             </div>
                         </div>
@@ -177,43 +215,72 @@
                         <div class="section" id="section-2">
                             <h2 class="section-title"><i class="fas fa-info-circle"></i> Additional Information</h2>
                             
-                            <div class="dynamic-section">
-                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
-                                    <i class="fas fa-clipboard-list"></i> Request Information
-                                    <button type="button" class="section-btn" onclick="showRequestModal()">+ Add Request</button>
-                                </h3>
-                                <div class="dynamic-list" id="requestList">
-                                    <div class="empty-state">No requests added yet. Click "Add Request" to get started.</div>
+                            <!-- 2x2 Grid Layout for Additional Information Cards -->
+                            <div class="additional-info-grid">
+                                <!-- Row 1 -->
+                                <div class="info-card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="fas fa-clipboard-list"></i> Request Information
+                                        </h3>
+                                        <button type="button" class="card-btn" onclick="showRequestModal()">
+                                            <i class="fas fa-plus"></i> Add Request
+                                        </button>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="dynamic-list" id="requestList">
+                                            <div class="empty-state">No requests added yet. Click "Add Request" to get started.</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="dynamic-section">
-                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
-                                    <i class="fas fa-hammer"></i> Build Information
-                                    <button type="button" class="section-btn" onclick="showBuildModal()">+ Add Build</button>
-                                </h3>
-                                <div class="dynamic-list" id="buildList">
-                                    <div class="empty-state">No builds added yet. Click "Add Build" to get started.</div>
+                                <div class="info-card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="fas fa-hammer"></i> Build Information
+                                        </h3>
+                                        <button type="button" class="card-btn" onclick="showBuildModal()">
+                                            <i class="fas fa-plus"></i> Add Build
+                                        </button>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="dynamic-list" id="buildList">
+                                            <div class="empty-state">No builds added yet. Click "Add Build" to get started.</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="dynamic-section">
-                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
-                                    <i class="fas fa-user-cog"></i> Tester(s) Information
-                                    <button type="button" class="section-btn" onclick="showTesterModal()">+ Add/Select Tester</button>
-                                </h3>
-                                <div class="dynamic-list" id="testerList">
-                                    <div class="empty-state">No testers added yet. Click "Add/Select Tester" to get started.</div>
+                                <!-- Row 2 -->
+                                <div class="info-card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="fas fa-user-cog"></i> Tester(s) Information
+                                        </h3>
+                                        <button type="button" class="card-btn" onclick="showTesterModal()">
+                                            <i class="fas fa-plus"></i> Add/Select Tester
+                                        </button>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="dynamic-list" id="testerList">
+                                            <div class="empty-state">No testers added yet. Click "Add/Select Tester" to get started.</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="dynamic-section">
-                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
-                                    <i class="fas fa-users"></i> Team Members
-                                    <button type="button" class="section-btn" onclick="showTeamMemberModal()">+ Add Team Member</button>
-                                </h3>
-                                <div class="dynamic-list" id="teamMemberList">
-                                    <div class="empty-state">No team members added yet.</div>
+                                <div class="info-card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="fas fa-users"></i> Team Members
+                                        </h3>
+                                        <button type="button" class="card-btn" onclick="showTeamMemberModal()">
+                                            <i class="fas fa-plus"></i> Add Team Member
+                                        </button>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="dynamic-list" id="teamMemberList">
+                                            <div class="empty-state">No team members added yet.</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -780,6 +847,24 @@
                 }
             });
         });
+
+        // Function to update the report title based on custom name input
+        function updateReportTitle() {
+            const reportNameInput = document.getElementById('reportName');
+            const formTitle = document.getElementById('formTitle');
+            const customName = reportNameInput.value.trim();
+            
+            if (customName) {
+                formTitle.textContent = customName;
+            } else {
+                // Use default based on editing state
+                if (editingReportId) {
+                    formTitle.textContent = 'Edit QA Report';
+                } else {
+                    formTitle.textContent = 'Create Enhanced QA Report';
+                }
+            }
+        }
     </script>
 
     <!-- Footer -->
