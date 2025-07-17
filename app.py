@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 
 # --- App & Database Configuration ---
-app = Flask(__name__, template_folder='.', static_folder='static')
+app = Flask(__name__, template_folder='templates', static_folder='static')
 # Define the absolute path for the database file
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'reports.db')
@@ -506,27 +506,87 @@ class Tester(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
+    role = db.Column(db.String(50), nullable=True)  # Legacy single role field
+    roles = db.Column(db.Text, nullable=True)  # JSON array of roles
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Add validation for tester roles (QA-focused roles)
+    VALID_TESTER_ROLES = [
+        'Manual Tester', 'Automation Tester', 'Performance Tester', 'Quality Manager', 'Quality Team Lead',
+        'Quality Assurance Lead', 'Security Analyst'
+    ]
+    
+    def get_roles(self):
+        """Get roles as a list, handling both new and legacy format"""
+        if self.roles:
+            try:
+                import json
+                return json.loads(self.roles)
+            except:
+                return []
+        elif self.role:
+            return [self.role]
+        return []
+    
+    def set_roles(self, roles_list):
+        """Set roles from a list"""
+        import json
+        self.roles = json.dumps(roles_list)
+        # Set the first role as the primary role for backward compatibility
+        if roles_list:
+            self.role = roles_list[0]
+    
+    def validate_roles(self, roles_list):
+        """Validate that all roles are valid"""
+        for role in roles_list:
+            if role not in self.VALID_TESTER_ROLES:
+                raise ValueError(f"Invalid tester role: {role}")
+        return True
 
 class TeamMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
-    role = db.Column(db.String(50), nullable=False)  # Updated to allow longer role names
+    role = db.Column(db.String(50), nullable=True)  # Legacy single role field
+    roles = db.Column(db.Text, nullable=True)  # JSON array of roles
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Add validation for roles
+    # Add validation for roles - Software development focused roles
     VALID_ROLES = [
-        'Project Owner', 'Project Analyst', 'Project Manager', 'Business Analyst',
-        'Technical Lead', 'Scrum Master', 'Product Owner', 'Quality Assurance Lead',
-        'DevOps Engineer', 'UI/UX Designer', 'Database Administrator', 'Security Analyst',
-        'System Administrator', 'Stakeholder', 'Client Representative'
+        'Project Owner', 'Project Manager', 'Business Analyst', 'Technical Lead',
+        'Senior Developer', 'Full Stack Developer', 'Frontend Developer', 'Backend Developer',
+        'Mobile Developer', 'DevOps Engineer', 'Database Administrator', 'System Administrator',
+        'UI/UX Designer', 'Product Owner', 'Scrum Master', 'Software Architect',
+        'Quality Assurance Lead', 'Security Analyst', 'Data Scientist', 'Data Engineer',
+        'Manual Tester', 'Automation Tester', 'Performance Tester', 'Quality Manager', 'Quality Team Lead'
     ]
     
-    def __init__(self, **kwargs):
-        super(TeamMember, self).__init__(**kwargs)
-        if self.role not in self.VALID_ROLES:
-            raise ValueError(f"Invalid role: {self.role}")
+    def get_roles(self):
+        """Get roles as a list, handling both new and legacy format"""
+        if self.roles:
+            try:
+                import json
+                return json.loads(self.roles)
+            except:
+                return []
+        elif self.role:
+            return [self.role]
+        return []
+    
+    def set_roles(self, roles_list):
+        """Set roles from a list"""
+        import json
+        self.roles = json.dumps(roles_list)
+        # Set the first role as the primary role for backward compatibility
+        if roles_list:
+            self.role = roles_list[0]
+    
+    def validate_roles(self, roles_list):
+        """Validate that all roles are valid"""
+        for role in roles_list:
+            if role not in self.VALID_ROLES:
+                raise ValueError(f"Invalid team member role: {role}")
+        return True
 
 # --- Statistical Cache Models ---
 class DashboardStats(db.Model):
@@ -659,6 +719,8 @@ def manage_testers():
             'id': t.id,
             'name': t.name,
             'email': t.email,
+            'role': t.role,  # Legacy field for backward compatibility
+            'roles': t.get_roles(),  # New multiple roles field
             'createdAt': t.createdAt.isoformat() if t.createdAt else None
         } for t in testers])
     
@@ -670,16 +732,35 @@ def manage_testers():
         if existing_tester:
             return jsonify({'error': 'Tester with this email already exists'}), 400
         
+        # Handle both single role and multiple roles
+        roles = data.get('roles', [])
+        if not roles and 'role' in data:
+            roles = [data['role']]
+        
+        if not roles:
+            return jsonify({'error': 'At least one role is required'}), 400
+        
+        # Create tester instance
         tester = Tester(
             name=data['name'],
             email=data['email']
         )
+        
+        # Validate and set roles
+        try:
+            tester.validate_roles(roles)
+            tester.set_roles(roles)
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 400
+        
         db.session.add(tester)
         db.session.commit()
         return jsonify({
             'id': tester.id,
             'name': tester.name,
-            'email': tester.email
+            'email': tester.email,
+            'role': tester.role,
+            'roles': tester.get_roles()
         }), 201
 
 @app.route('/api/testers/<int:tester_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -691,6 +772,8 @@ def manage_tester(tester_id):
             'id': tester.id,
             'name': tester.name,
             'email': tester.email,
+            'role': tester.role,
+            'roles': tester.get_roles(),
             'createdAt': tester.createdAt.isoformat() if tester.createdAt else None
         })
     
@@ -703,13 +786,28 @@ def manage_tester(tester_id):
             if existing_tester:
                 return jsonify({'error': 'Tester with this email already exists'}), 400
         
+        # Handle both single role and multiple roles
+        roles = data.get('roles', [])
+        if not roles and 'role' in data:
+            roles = [data['role']]
+        
+        if roles:
+            try:
+                tester.validate_roles(roles)
+                tester.set_roles(roles)
+            except ValueError as e:
+                return jsonify({'error': str(e)}), 400
+        
         tester.name = data.get('name', tester.name)
         tester.email = data.get('email', tester.email)
+        
         db.session.commit()
         return jsonify({
             'id': tester.id,
             'name': tester.name,
-            'email': tester.email
+            'email': tester.email,
+            'role': tester.role,
+            'roles': tester.get_roles()
         })
     
     elif request.method == 'DELETE':
@@ -726,34 +824,48 @@ def manage_team_members():
             'id': tm.id,
             'name': tm.name,
             'email': tm.email,
-            'role': tm.role,
+            'role': tm.role,  # Legacy field for backward compatibility
+            'roles': tm.get_roles(),  # New multiple roles field
             'createdAt': tm.createdAt.isoformat() if tm.createdAt else None
         } for tm in team_members])
     
     elif request.method == 'POST':
         data = request.get_json()
         
-        # Validate role
-        if data['role'] not in TeamMember.VALID_ROLES:
-            return jsonify({'error': f'Invalid role: {data["role"]}'}), 400
-        
         # Check if email already exists
         existing_member = TeamMember.query.filter_by(email=data['email']).first()
         if existing_member:
             return jsonify({'error': 'Team member with this email already exists'}), 400
         
+        # Handle both single role and multiple roles
+        roles = data.get('roles', [])
+        if not roles and 'role' in data:
+            roles = [data['role']]
+        
+        if not roles:
+            return jsonify({'error': 'At least one role is required'}), 400
+        
+        # Create team member instance
         team_member = TeamMember(
             name=data['name'],
-            email=data['email'],
-            role=data['role']
+            email=data['email']
         )
+        
+        # Validate and set roles
+        try:
+            team_member.validate_roles(roles)
+            team_member.set_roles(roles)
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 400
+        
         db.session.add(team_member)
         db.session.commit()
         return jsonify({
             'id': team_member.id,
             'name': team_member.name,
             'email': team_member.email,
-            'role': team_member.role
+            'role': team_member.role,
+            'roles': team_member.get_roles()
         }), 201
         
 @app.route('/api/team-members/<int:member_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -766,6 +878,7 @@ def manage_team_member(member_id):
             'name': team_member.name,
             'email': team_member.email,
             'role': team_member.role,
+            'roles': team_member.get_roles(),
             'createdAt': team_member.createdAt.isoformat() if team_member.createdAt else None
         })
     
@@ -778,15 +891,28 @@ def manage_team_member(member_id):
             if existing_member:
                 return jsonify({'error': 'Team member with this email already exists'}), 400
         
+        # Handle both single role and multiple roles
+        roles = data.get('roles', [])
+        if not roles and 'role' in data:
+            roles = [data['role']]
+        
+        if roles:
+            try:
+                team_member.validate_roles(roles)
+                team_member.set_roles(roles)
+            except ValueError as e:
+                return jsonify({'error': str(e)}), 400
+        
         team_member.name = data.get('name', team_member.name)
         team_member.email = data.get('email', team_member.email)
-        team_member.role = data.get('role', team_member.role)
+        
         db.session.commit()
         return jsonify({
             'id': team_member.id,
             'name': team_member.name,
             'email': team_member.email,
-            'role': team_member.role
+            'role': team_member.role,
+            'roles': team_member.get_roles()
         })
     
     elif request.method == 'DELETE':
@@ -934,10 +1060,17 @@ def get_latest_project_data(portfolio_name, project_name):
         })
 
 # Add route for manage data page
-@app.route('/manage')
-def manage_data_page():
-    """Serves the manage data page."""
-    return render_template('manage_data.html')
+
+
+@app.route('/manage-data')
+def manage_data_new_page():
+    """Serves the new manage data page."""
+    return render_template('manage_data_new.html')
+
+@app.route('/test-debug')
+def test_debug_page():
+    """Serves the debug test page."""
+    return render_template('test_debug.html')
 
 # Similar routes for projects, testers, team members
 

@@ -1,42 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sprint Report View</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="/static/view_report.css">
-    <link rel="stylesheet" href="/static/unified-nav.css">
-    <link rel="stylesheet" href="/static/rtl-support.css">
-</head>
-<body>
-    <nav class="main-nav">
-        <div class="nav-container">
-            <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
-            <div style="display: flex; align-items: center;">
-                <div class="nav-links">
-                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                    <a href="/reports" class="nav-link active"><i class="fas fa-chart-line"></i> Reports</a>
-                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
-                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
-                </div>
-                <div class="nav-controls">
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <i class="fas fa-sun" id="theme-icon"></i>
-                        <span id="theme-text" data-i18n="theme_light">Light</span>
-                    </button>
-                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
-                </div>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
+{% block title %}Sprint Report View{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="/static/view_report.css">
+{% endblock %}
+
+{% block body_content %}
     <div class="main-wrapper">
         <div class="dashboard-container">
             <div class="page-header">
@@ -44,7 +14,43 @@
                     <h1 id="reportTitle">Sprint Testing Report</h1>
                     <p id="reportSubtitle">Loading report details...</p>
                 </div>
-                <div class="header-actions">
+            </div>
+
+            <div class="dashboard-section report-actions-section">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fas fa-cogs"></i> Report Actions</h2>
+                </div>
+                <div class="action-buttons-grid">
+                    <div class="action-group">
+                        <button class="action-btn btn-back" onclick="window.location.href='/reports'">
+                            <i class="fas fa-arrow-left"></i> Back to Reports
+                        </button>
+                        <button class="action-btn btn-edit" onclick="editCurrentReport()" id="editReportBtn">
+                            <i class="fas fa-edit"></i> Edit Report
+                        </button>
+                        <button class="action-btn btn-delete" onclick="deleteCurrentReport()" id="deleteReportBtn">
+                            <i class="fas fa-trash-alt"></i> Delete Report
+                        </button>
+                    </div>
+                    <div class="export-group">
+                        <button class="action-btn btn-export-pdf" onclick="exportCurrentReportAsPdf()">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                        <button class="action-btn btn-export-excel" onclick="exportCurrentReportAsExcel()">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                        <button class="action-btn btn-export-styled-pdf" onclick="exportStyledReportAsPdf()">
+                            <i class="fas fa-file-pdf"></i> Styled PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-section report-actions-section">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fas fa-cogs"></i> Report Actions</h2>
+                </div>
+                <div class="action-buttons-grid">
                     <div class="action-group">
                         <button class="action-btn btn-back" onclick="window.location.href='/reports'">
                             <i class="fas fa-arrow-left"></i> Back to Reports
@@ -196,13 +202,9 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <script src="/static/theme-manager.js"></script>
-    <script src="/static/translations.js"></script>
-    <script src="/static/language-manager.js"></script>
+{% block scripts_extra %}
     <script src="/static/translations-helper.js"></script>
     <script>
         let currentReport = null;
@@ -262,10 +264,6 @@
 
         // Load report data when page loads
         document.addEventListener('DOMContentLoaded', async () => {
-            // Initialize theme first
-            if (window.themeManager) {
-                window.themeManager.init();
-            }
             await loadReportData(reportId);
         });
 
@@ -852,20 +850,6 @@
                 `;
             }
 
-            // Custom Fields - REMOVED
-            // if (report.customFields && Object.keys(report.customFields).length > 0) {
-            //     content += `
-            //         <h3 class="section-title" style="font-size: 1.25rem; margin-top: 1.5rem;">⚙️ Custom Fields</h3>
-            //         <div class="dynamic-list">
-            //             ${Object.entries(report.customFields).map(([key, value]) => `
-            //                 <div class="dynamic-item">
-            //                     <strong>${key}:</strong> ${value}
-            //                 </div>
-            //             `).join('')}
-            //         </div>
-            //     `;
-            // }
-
             if (!content) {
                 content = '<div class="empty-state"><h3>No Additional Information Provided</h3><p>This report does not contain any extra details.</p></div>';
             }
@@ -1235,29 +1219,6 @@
             const wsEnhancements = XLSX.utils.aoa_to_sheet(enhancementsData);
             XLSX.utils.book_append_sheet(workbook, wsEnhancements, "Enhancements");
 
-            // Add all the additional sheets like in the main function - REMOVED evaluation
-            // if (currentReport.evaluationData && Object.keys(currentReport.evaluationData).length > 0) {
-            //     const evaluationHeaders = ["Evaluation Criteria", "Score", "Weight", "Weighted Score"];
-            //     const evaluationSheetData = [];
-            //     
-            //     for (const [key, value] of Object.entries(currentReport.evaluationData)) {
-            //         if (key.includes('_score')) {
-            //             const criteriaName = key.replace('_score', '').replace(/_/g, ' ').toUpperCase();
-            //             const weightKey = key.replace('_score', '_weight');
-            //             const weight = currentReport.evaluationData[weightKey] || 1;
-            //             const weightedScore = (value || 0) * weight;
-            //             evaluationSheetData.push([criteriaName, value || 0, weight, weightedScore]);
-            //         }
-            //     }
-            //     
-            //     if (evaluationSheetData.length > 0) {
-            //         evaluationSheetData.unshift(["", "", "", ""]);
-            //         evaluationSheetData.unshift(["TOTAL EVALUATION SCORE", "", "", currentReport.evaluationTotalScore || 0]);
-            //         const wsEvaluation = XLSX.utils.aoa_to_sheet([evaluationHeaders, ...evaluationSheetData]);
-            //         XLSX.utils.book_append_sheet(workbook, wsEvaluation, "Evaluation");
-            //     }
-            // }
-
             // Dynamic Data Sheets
             if (currentReport.requestData && currentReport.requestData.length > 0) {
                 const requestHeaders = ["Request ID", "URL"];
@@ -1286,14 +1247,6 @@
                 const wsTeam = XLSX.utils.aoa_to_sheet([teamHeaders, ...teamSheetData]);
                 XLSX.utils.book_append_sheet(workbook, wsTeam, "Team Members");
             }
-
-            // Custom Fields - REMOVED
-            // if (currentReport.customFields && Object.keys(currentReport.customFields).length > 0) {
-            //     const customFieldsHeaders = ["Field Name", "Value"];
-            //     const customFieldsSheetData = Object.entries(currentReport.customFields).map(([key, value]) => [key, value]);
-            //     const wsCustomFields = XLSX.utils.aoa_to_sheet([customFieldsHeaders, ...customFieldsSheetData]);
-            //     XLSX.utils.book_append_sheet(workbook, wsCustomFields, "Custom Fields");
-            // }
 
             XLSX.writeFile(workbook, `QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_Complete.xlsx`);
             showSuccessToast('Excel export completed successfully!');
@@ -1848,16 +1801,6 @@
                         </div>
                         ` : ''}
                         
-                        <!-- Custom Fields - REMOVED -->
-                        ${/* currentReport.customFields && Object.keys(currentReport.customFields).length > 0 ? `
-                        <div class="qa-notes">
-                            <h3>Custom Fields</h3>
-                            ${Object.entries(currentReport.customFields).map(([key, value]) => `
-                                <p><strong>${key}:</strong> ${value}</p>
-                            `).join('')}
-                        </div>
-                        ` : '' */ ''}
-                        
                         <!-- Footer -->
                         <div class="footer">
                             <p>Generated on ${new Date().toLocaleDateString('en-GB')} | Sprint Reports System</p>
@@ -1913,7 +1856,4 @@
             document.body.appendChild(messageBox);
         }
     </script>
-    </div>
-
-</body>
-</html>
+{% endblock %}

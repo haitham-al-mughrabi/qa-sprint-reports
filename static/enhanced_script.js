@@ -1,5 +1,20 @@
 // static/enhanced_script.js
 
+// Set global Chart.js defaults to prevent chart expansion
+if (typeof Chart !== 'undefined') {
+    Chart.defaults.responsive = true;
+    Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.aspectRatio = 1;
+    Chart.defaults.layout = {
+        padding: {
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10
+        }
+    };
+}
+
 // --- Global variables ---
 let currentSection = 0;
 let editingReportId = null;
@@ -30,16 +45,26 @@ const DASHBOARD_API_URL = '/api/dashboard/stats';
 
 
 
-async function fetchReports() {
+async function fetchReports(page, searchQuery, portfolioFilter, projectFilter, statusFilter) {
     try {
-        const response = await fetch(API_URL);
+        let url = `${API_URL}?page=${page}&search=${searchQuery}`;
+        if (portfolioFilter) {
+            url += `&portfolio=${portfolioFilter}`;
+        }
+        if (projectFilter) {
+            url += `&project=${projectFilter}`;
+        }
+        if (statusFilter) {
+            url += `&status=${statusFilter}`;
+        }
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return await response.json();
     } catch (error) {
         console.error("Failed to fetch reports:", error);
-        return []; // Return empty array on error
+        return { reports: [], total: 0, page: page, totalPages: 0, hasNext: false, hasPrev: false };
     }
 }
 
@@ -388,10 +413,24 @@ function getChartOptions() {
     return {
         responsive: true,
         maintainAspectRatio: false,
+        aspectRatio: 1,
+        layout: {
+            padding: {
+                top: 10,
+                bottom: 10,
+                left: 10,
+                right: 10
+            }
+        },
         plugins: {
             legend: {
                 position: 'bottom',
-                labels: { padding: 15, usePointStyle: true, font: { size: 11 } }
+                labels: { 
+                    padding: 15, 
+                    usePointStyle: true, 
+                    font: { size: 11 },
+                    boxWidth: 12
+                }
             },
             tooltip: {
                 callbacks: {
@@ -806,13 +845,56 @@ function toggleSidebar() {
     sidebar.classList.toggle('show'); // Also toggle 'show' for compatibility
 }
 
+async function populateFilterDropdowns() {
+    try {
+        const [portfoliosResponse, projectsResponse] = await Promise.all([
+            fetch('/api/portfolios'),
+            fetch('/api/projects')
+        ]);
+
+        const portfolios = await portfoliosResponse.json();
+        const projects = await projectsResponse.json();
+
+        const portfolioFilter = document.getElementById('portfolioFilter');
+        const projectFilter = document.getElementById('projectFilter');
+
+        // Populate Portfolio Filter
+        if (portfolioFilter) {
+            portfolioFilter.innerHTML = '<option value="">All Portfolios</option>';
+            portfolios.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.name; // Use name for filtering
+                option.textContent = p.name;
+                portfolioFilter.appendChild(option);
+            });
+        }
+
+        // Populate Project Filter
+        if (projectFilter) {
+            projectFilter.innerHTML = '<option value="">All Projects</option>';
+            projects.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.name; // Use name for filtering
+                option.textContent = p.name;
+                projectFilter.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error populating filter dropdowns:', error);
+        showToast('Error loading filter options.', 'error');
+    }
+}
+
 // --- Reports Table Functions ---
 // Debounced search to reduce API calls
 let searchTimeout;
 
 async function searchReports() {
     const searchQuery = document.getElementById('searchInput')?.value || '';
-    
+    const portfolioFilter = document.getElementById('portfolioFilter')?.value || '';
+    const projectFilter = document.getElementById('projectFilter')?.value || '';
+    const statusFilter = document.getElementById('statusFilter')?.value || '';
+
     // Clear existing timeout
     if (searchTimeout) {
         clearTimeout(searchTimeout);
@@ -821,7 +903,7 @@ async function searchReports() {
     // Set new timeout for debounced search
     searchTimeout = setTimeout(async () => {
         showReportsLoading();
-        const result = await fetchReports(currentPage, searchQuery);
+        const result = await fetchReports(currentPage, searchQuery, portfolioFilter, projectFilter, statusFilter);
         hideReportsLoading();
 
         renderReportsTable(result.reports);
@@ -832,8 +914,11 @@ async function searchReports() {
 // Immediate search for pagination and buttons
 async function searchReportsImmediate() {
     const searchQuery = document.getElementById('searchInput')?.value || '';
+    const portfolioFilter = document.getElementById('portfolioFilter')?.value || '';
+    const projectFilter = document.getElementById('projectFilter')?.value || '';
+    const statusFilter = document.getElementById('statusFilter')?.value || '';
     showReportsLoading();
-    const result = await fetchReports(currentPage, searchQuery);
+    const result = await fetchReports(currentPage, searchQuery, portfolioFilter, projectFilter, statusFilter);
     hideReportsLoading();
 
     renderReportsTable(result.reports);
@@ -1097,7 +1182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const savedReport = await saveReport(reportData);
             if (savedReport) {
                 showToast('Report saved successfully!', 'success');
-                
+                clearFormDataOnSubmit();
                 // Redirect to reports list after saving
                 window.location.href = '/reports';
             } else {
@@ -1107,6 +1192,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function clearFormDataOnSubmit() {
+    const form = document.getElementById('qaReportForm');
+    if (form) {
+        form.reset();
+        document.getElementById('reportDate').value = getCurrentDate();
+        requestData = [];
+        buildData = [];
+        testerData = [];
+        teamMemberData = [];
+        qaNoteFieldsData = [];
+        qaNotesData = []; // Clear the QA notes array
+
+        renderRequestList();
+        renderBuildList();
+        renderTesterList();
+        renderTeamMemberList();
+        renderQANotesList(); // Re-render QA notes list
+
+        resetAllCharts();
+        currentSection = 0;
+        updateNavigationButtons();
+    }
+}
 
 // --- Enhanced Export Functions ---
 async function exportReportAsPdf(id) {
@@ -2832,3 +2940,116 @@ if (typeof originalAddSelectedTeamMember === 'function') {
 
 window.setupAutoSave = setupAutoSave;
 window.clearFormDataOnSubmit = clearFormDataOnSubmit;
+
+// Selection only functions for create report page
+async function showSelectTesterModal() {
+    try {
+        const response = await fetch('/api/testers');
+        const testers = await response.json();
+        
+        const dropdown = document.getElementById('selectTesterDropdown');
+        dropdown.innerHTML = '<option value="">-- Select a tester --</option>';
+        
+        testers.forEach(tester => {
+            dropdown.innerHTML += `<option value="${tester.id}">${tester.name} (${tester.email}) - ${tester.role}</option>`;
+        });
+        
+        showModal('selectTesterModal');
+    } catch (error) {
+        console.error('Error loading testers:', error);
+        showToast('Error loading testers', 'error');
+    }
+}
+
+async function showSelectTeamMemberModal() {
+    try {
+        const response = await fetch('/api/team-members');
+        const teamMembers = await response.json();
+        
+        const dropdown = document.getElementById('selectTeamMemberDropdown');
+        dropdown.innerHTML = '<option value="">-- Select a team member --</option>';
+        
+        teamMembers.forEach(member => {
+            dropdown.innerHTML += `<option value="${member.id}">${member.name} (${member.email}) - ${member.role}</option>`;
+        });
+        
+        showModal('selectTeamMemberModal');
+    } catch (error) {
+        console.error('Error loading team members:', error);
+        showToast('Error loading team members', 'error');
+    }
+}
+
+async function addSelectedTesterToReport() {
+    const selectedId = document.getElementById('selectTesterDropdown').value;
+    if (!selectedId) {
+        showToast('Please select a tester', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/testers/${selectedId}`);
+        const tester = await response.json();
+        
+        // Check if already added
+        const alreadyAdded = testerData.some(t => t.id === parseInt(selectedId));
+        if (alreadyAdded) {
+            showToast('This tester is already added to the report', 'warning');
+            return;
+        }
+        
+        testerData.push({
+            id: tester.id,
+            name: tester.name,
+            email: tester.email,
+            role: tester.role
+        });
+        
+        renderTesterList();
+        closeModal('selectTesterModal');
+        showToast('Tester added successfully!', 'success');
+    } catch (error) {
+        console.error('Error adding tester:', error);
+        showToast('Error adding tester', 'error');
+    }
+}
+
+async function addSelectedTeamMemberToReport() {
+    const selectedId = document.getElementById('selectTeamMemberDropdown').value;
+    if (!selectedId) {
+        showToast('Please select a team member', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/team-members/${selectedId}`);
+        const teamMember = await response.json();
+        
+        // Check if already added
+        const alreadyAdded = teamMemberData.some(tm => tm.id === parseInt(selectedId));
+        if (alreadyAdded) {
+            showToast('This team member is already added to the report', 'warning');
+            return;
+        }
+        
+        teamMemberData.push({
+            id: teamMember.id,
+            name: teamMember.name,
+            email: teamMember.email,
+            role: teamMember.role
+        });
+        
+        renderTeamMemberList();
+        closeModal('selectTeamMemberModal');
+        showToast('Team member added successfully!', 'success');
+    } catch (error) {
+        console.error('Error adding team member:', error);
+        showToast('Error adding team member', 'error');
+    }
+}
+
+// Make new functions globally accessible
+window.showSelectTesterModal = showSelectTesterModal;
+window.showSelectTeamMemberModal = showSelectTeamMemberModal;
+window.addSelectedTesterToReport = addSelectedTesterToReport;
+window.addSelectedTeamMemberToReport = addSelectedTeamMemberToReport;

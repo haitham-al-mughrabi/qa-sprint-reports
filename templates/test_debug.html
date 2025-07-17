@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Test Debug Page{% endblock %}
+
+{% block body_content %}
+    <div class="main-wrapper">
+        <div class="dashboard-container">
+            <h1>Test Debug Page</h1>
+            <p>This page is for testing and debugging purposes.</p>
+
+            <div class="dashboard-section">
+                <h2>Theme and Language Test</h2>
+                <button onclick="toggleTheme()">Toggle Theme</button>
+                <button onclick="toggleLanguage()">Toggle Language</button>
+                <p data-i18n="hello_world">Hello World!</p>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Toast Notifications Test</h2>
+                <button onclick="showToast('This is a success message!', 'success')">Show Success Toast</button>
+                <button onclick="showToast('This is an error message!', 'error')">Show Error Toast</button>
+                <button onclick="showToast('This is a warning message!', 'warning')">Show Warning Toast</button>
+                <button onclick="showToast('This is an info message!', 'info')">Show Info Toast</button>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>API Test</h2>
+                <button onclick="testApi()">Test API Endpoint</button>
+                <pre id="apiResponse"></pre>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts_extra %}
+    <script>
+        async function testApi() {
+            try {
+                const response = await fetch('/api/test');
+                const data = await response.json();
+                document.getElementById('apiResponse').textContent = JSON.stringify(data, null, 2);
+                showToast('API test successful!', 'success');
+            } catch (error) {
+                console.error('API test failed:', error);
+                document.getElementById('apiResponse').textContent = 'API test failed: ' + error.message;
+                showToast('API test failed!', 'error');
+            }
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Data - Sprint Reports System{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="/static/manage_data_new.css">
+{% endblock %}
+
+{% block body_content %}
+    <div class="main-wrapper">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1><i class="fas fa-cogs"></i> <span data-i18n="manage_data">Manage Data</span></h1>
+                <p data-i18n="manage_data_description">Create and manage portfolios, projects, testers, and team members</p>
+            </div>
+
+            <!-- Portfolios Section -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-folder-open"></i> <span data-i18n="portfolios">Portfolios</span>
+                    </h2>
+                    <button class="action-btn" onclick="showAddPortfolioModal()">
+                        <i class="fas fa-plus-circle"></i> <span data-i18n="add_portfolio">Add Portfolio</span>
+                    </button>
+                </div>
+                <div class="search-filter-container">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="portfolioSearch" placeholder="Search portfolios..." onkeyup="displayPortfolios()" data-i18n-placeholder="search_portfolios">
+                    </div>
+                </div>
+                <div class="data-list" id="portfolioList">
+                    <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading portfolios...</div>
+                </div>
+            </div>
+
+            <!-- Projects Section -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-rocket"></i> <span data-i18n="projects">Projects</span>
+                    </h2>
+                    <button class="action-btn" onclick="showAddProjectModal()">
+                        <i class="fas fa-plus-circle"></i> <span data-i18n="add_project">Add Project</span>
+                    </button>
+                </div>
+                <div class="search-filter-container">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="projectSearch" placeholder="Search projects..." onkeyup="displayProjects()" data-i18n-placeholder="search_projects">
+                    </div>
+                    <div class="filter-container">
+                        <select id="portfolioFilter" onchange="displayProjects()">
+                            <option value="" data-i18n="all_portfolios">All Portfolios</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="data-list" id="projectList">
+                    <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading projects...</div>
+                </div>
+            </div>
+
+            <!-- Testers Section -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-user-cog"></i> <span data-i18n="testers">Testers</span>
+                    </h2>
+                    <button class="action-btn" onclick="showAddTesterModal()">
+                        <i class="fas fa-plus-circle"></i> <span data-i18n="add_tester">Add Tester</span>
+                    </button>
+                </div>
+                <div class="search-filter-container">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="testerSearch" placeholder="Search testers..." onkeyup="displayTesters()" data-i18n-placeholder="search_testers">
+                    </div>
+                    <div class="filter-container">
+                        <select id="testerRoleFilter" onchange="displayTesters()">
+                            <option value="" data-i18n="all_roles">All Roles</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="data-list" id="testerList">
+                    <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading testers...</div>
+                </div>
+            </div>
+
+            <!-- Team Members Section -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-users"></i> <span data-i18n="team_members">Team Members</span>
+                    </h2>
+                    <button class="action-btn" onclick="showAddTeamMemberModal()">
+                        <i class="fas fa-plus-circle"></i> <span data-i18n="add_team_member">Add Team Member</span>
+                    </button>
+                </div>
+                <div class="search-filter-container">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="teamMemberSearch" placeholder="Search team members..." onkeyup="displayTeamMembers()" data-i18n-placeholder="search_team_members">
+                    </div>
+                    <div class="filter-container">
+                        <select id="teamMemberRoleFilter" onchange="displayTeamMembers()">
+                            <option value="" data-i18n="all_roles">All Roles</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="data-list" id="teamMemberList">
+                    <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading team members...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Portfolio Modal -->
+    <div id="portfolioModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="icon-bg">
+                    <i class="fas fa-folder-open"></i>
+                </div>
+                <h3 id="portfolioModalTitle" data-i18n="add_portfolio">Add Portfolio</h3>
+            </div>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="portfolioName" data-i18n="portfolio_name">Portfolio Name:</label>
+                    <input type="text" id="portfolioName" required data-i18n-placeholder="enter_portfolio_name">
+                </div>
+                <div class="form-group">
+                    <label for="portfolioDescription" data-i18n="description">Description:</label>
+                    <textarea id="portfolioDescription" rows="4" data-i18n-placeholder="enter_portfolio_description"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('portfolioModal')" data-i18n="cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="savePortfolio()" data-i18n="save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="icon-bg">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3 id="projectModalTitle" data-i18n="add_project">Add Project</h3>
+            </div>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="projectName" data-i18n="project_name">Project Name:</label>
+                    <input type="text" id="projectName" required data-i18n-placeholder="enter_project_name">
+                </div>
+                <div class="form-group">
+                    <label for="projectPortfolio" data-i18n="portfolio">Portfolio:</label>
+                    <select id="projectPortfolio" required>
+                        <option value="" data-i18n="select_portfolio">Select Portfolio</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="projectDescription" data-i18n="description">Description:</label>
+                    <textarea id="projectDescription" rows="4" data-i18n-placeholder="enter_project_description"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('projectModal')" data-i18n="cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveProject()" data-i18n="save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tester Modal -->
+    <div id="testerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="icon-bg">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <h3 id="testerModalTitle" data-i18n="add_tester">Add Tester</h3>
+            </div>
+            <div class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="testerName" data-i18n="name">Name:</label>
+                        <input type="text" id="testerName" required data-i18n-placeholder="enter_tester_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="testerEmail" data-i18n="email">Email:</label>
+                        <input type="email" id="testerEmail" required data-i18n-placeholder="enter_tester_email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="testerRoles" data-i18n="roles">Roles:</label>
+                    <div class="multi-select-container">
+                        <div class="selected-roles" id="selectedTesterRoles"></div>
+                        <select id="testerRoles" multiple>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('testerModal')" data-i18n="cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveTester()" data-i18n="save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Member Modal -->
+    <div id="teamMemberModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="icon-bg">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 id="teamMemberModalTitle" data-i18n="add_team_member">Add Team Member</h3>
+            </div>
+            <div class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="teamMemberName" data-i18n="name">Name:</label>
+                        <input type="text" id="teamMemberName" required data-i18n-placeholder="enter_team_member_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="teamMemberEmail" data-i18n="email">Email:</label>
+                        <input type="email" id="teamMemberEmail" required data-i18n-placeholder="enter_team_member_email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="teamMemberRoles" data-i18n="roles">Roles:</label>
+                    <div class="multi-select-container">
+                        <div class="selected-roles" id="selectedTeamMemberRoles"></div>
+                        <select id="teamMemberRoles" multiple>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('teamMemberModal')" data-i18n="cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveTeamMember()" data-i18n="save">Save</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts_extra %}
+    <script src="/static/manage_data_simple.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Set active class for navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === window.location.pathname) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        });
+    </script>
+{% endblock %}

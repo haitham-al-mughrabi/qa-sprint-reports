@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Reports Management - Sprint Reports System{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="/static/reports_filter_style.css">
+{% endblock %}
+
+{% block body_content %}
+    <div class="main-wrapper">
+        <!-- Reports List Page -->
+        <div id="reportsPage" class="page active">
+            <div class="reports-container">
+            <div class="page-header">
+                <h1><i class="fas fa-chart-line"></i> <span data-i18n="reports_management">Reports Management</span></h1>
+                <p data-i18n="reports_management_subtitle">Manage and view all your sprint reports</p>
+            </div>
+
+            <div class="dashboard-section reports-actions-section">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fas fa-filter"></i> <span data-i18n="filter_reports">Filter Reports</span></h2>
+                </div>
+                <div class="filter-search-create-wrapper">
+                    <div class="filter-controls">
+                        <select id="portfolioFilter" onchange="searchReports()">
+                            <option value="">All Portfolios</option>
+                        </select>
+                        <select id="projectFilter" onchange="searchReports()">
+                            <option value="">All Projects</option>
+                        </select>
+                        <select id="statusFilter" onchange="searchReports()">
+                            <option value="">All Statuses</option>
+                            <option value="passed">Passed</option>
+                            <option value="passed-with-issues">Passed with Issues</option>
+                            <option value="failed">Failed</option>
+                            <option value="blocked">Blocked</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="deferred">Deferred</option>
+                            <option value="not-testable">Not Testable</option>
+                        </select>
+                    </div>
+                    <div class="search-create-controls">
+                        <div class="search-container">
+                            <i class="fas fa-search"></i>
+                            <input type="text" class="search-box" data-i18n-placeholder="search_reports" placeholder="Search reports..." id="searchInput" onkeyup="searchReports()">
+                        </div>
+                        <button class="action-btn" onclick="window.location.href='/create-report'"><i class="fas fa-plus-circle"></i> <span data-i18n="nav_new_report">New Report</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reports-table-container">
+                <div id="reports-loading" class="loading-spinner-container" style="display: none;">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Loading reports...</p>
+                    </div>
+                </div>
+                <table class="reports-table" id="reportsTable">
+                    <thead>
+                        <tr>
+                            <th data-i18n="report_title">Report Title</th>
+                            <th data-i18n="project">Project</th>
+                            <th data-i18n="portfolio">Portfolio</th>
+                            <th data-i18n="sprint">Sprint</th>
+                            <th data-i18n="date">Date</th>
+                            <th data-i18n="status">Status</th>
+                            <th data-i18n="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        <!-- Reports will be rendered here by script.js -->
+                    </tbody>
+                </table>
+
+                <div class="pagination" id="pagination">
+                    <!-- Pagination will be rendered here by script.js -->
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+
+{% block scripts_extra %}
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initial data load
+            await populateFilterDropdowns();
+            searchReports();
+        });
+        
+        function showReportsLoading() {
+            document.getElementById('reports-loading').style.display = 'flex';
+            document.getElementById('reportsTable').style.display = 'none';
+        }
+        
+        function hideReportsLoading() {
+            document.getElementById('reports-loading').style.display = 'none';
+            document.getElementById('reportsTable').style.display = 'table';
+        }
+    </script>
+{% endblock %}

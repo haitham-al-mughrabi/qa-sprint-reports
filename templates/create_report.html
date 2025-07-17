@@ -1,45 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Report - Sprint Reports System</title>
-    <!-- External Chart.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="/static/new_report.css">
-    <link rel="stylesheet" href="/static/unified-nav.css">
-    <link rel="stylesheet" href="/static/rtl-support.css">
-</head>
-<body>
-    <!-- Navigation Header -->
-    <nav class="main-nav">
-        <div class="nav-container">
-            <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
-            <div style="display: flex; align-items: center;">
-                <div class="nav-links">
-                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
-                    <a href="/create-report" class="nav-link active"><i class="fas fa-plus-circle"></i> New Report</a>
-                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
-                </div>
-                <div class="nav-controls">
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <i class="fas fa-sun" id="theme-icon"></i>
-                        <span id="theme-text" data-i18n="theme_light">Light</span>
-                    </button>
-                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
-                </div>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
-    <div class="main-wrapper">
+{% block title %}Create Report - Sprint Reports System{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="/static/new_report.css">
+{% endblock %}
+
+{% block body_content %}
+    <div class="main-wrapper form-page-wrapper">
         <!-- Enhanced QA Form Page -->
         <div id="formPage" class="page active">
             <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
@@ -63,9 +31,11 @@
 
             <!-- Main Content -->
             <div class="main-content">
-                <div class="create-report-header">
-                    <h1 id="formTitle">Create Sprint Report</h1>
-                    <p>Complete all sections to generate your comprehensive QA testing report</p>
+                <div class="page-header">
+                    <div class="header-content">
+                        <h1 id="formTitle"><i class="fas fa-plus-circle"></i> Create Sprint Report</h1>
+                        <p>Complete all sections to generate your comprehensive QA testing report</p>
+                    </div>
                 </div>
 
                 <div class="content-area">
@@ -86,9 +56,6 @@
                                                 <label for="portfolioName" class="field-label">Portfolio Name</label>
                                                 <select id="portfolioName" name="portfolioName" class="field-input">
                                                 </select>
-                                                <button type="button" class="add-btn-vertical" onclick="showAddPortfolioModal()">
-                                                    <i class="fas fa-plus"></i> Add New Portfolio
-                                                </button>
                                             </div>
                                             
                                             <div class="field-divider"></div>
@@ -98,9 +65,6 @@
                                                 <select id="projectName" name="projectName" class="field-input" onchange="onProjectSelection()">
                                                     <option value="">Select Project</option>
                                                 </select>
-                                                <button type="button" class="add-btn-vertical" onclick="showAddProjectModal()">
-                                                    <i class="fas fa-plus"></i> Add New Project
-                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -265,13 +229,13 @@
                                         <h3 class="card-title">
                                             <i class="fas fa-user-cog"></i> Tester(s) Information
                                         </h3>
-                                        <button type="button" class="card-btn" onclick="showTesterModal()">
-                                            <i class="fas fa-plus"></i> Add/Select Tester
+                                        <button type="button" class="card-btn" onclick="showSelectTesterModal()">
+                                            <i class="fas fa-user-plus"></i> Select Tester
                                         </button>
                                     </div>
                                     <div class="card-content">
                                         <div class="dynamic-list" id="testerList">
-                                            <div class="empty-state">No testers added yet. Click "Add/Select Tester" to get started.</div>
+                                            <div class="empty-state">No testers added yet. Click "Select Tester" to get started.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -281,8 +245,8 @@
                                         <h3 class="card-title">
                                             <i class="fas fa-users"></i> Team Members
                                         </h3>
-                                        <button type="button" class="card-btn" onclick="showTeamMemberModal()">
-                                            <i class="fas fa-plus"></i> Add Team Member
+                                        <button type="button" class="card-btn" onclick="showSelectTeamMemberModal()">
+                                            <i class="fas fa-user-plus"></i> Select Team Member
                                         </button>
                                     </div>
                                     <div class="card-content">
@@ -385,37 +349,37 @@
                                                 <td class="percentage-cell">100%</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fas fa-check-circle text-success"></i> Passed</td>
+                                                <td>✅ Passed</td>
                                                 <td><input type="number" id="passedTestCases" name="passedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
                                                 <td class="percentage-cell" id="passedTestCasesPercentage">0%</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fas fa-exclamation-triangle text-warning"></i> Passed with Issue/s</td>
+                                                <td>⚠️ Passed with Issue/s</td>
                                                 <td><input type="number" id="passedWithIssuesTestCases" name="passedWithIssuesTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
                                                 <td class="percentage-cell" id="passedWithIssuesTestCasesPercentage">0%</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fas fa-times-circle text-danger"></i> Failed</td>
+                                                <td>❌ Failed</td>
                                                 <td><input type="number" id="failedTestCases" name="failedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
                                                 <td class="percentage-cell" id="failedTestCasesPercentage">0%</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fas fa-ban text-warning"></i> Blocked</td>
+                                                <td>🚫 Blocked</td>
                                                 <td><input type="number" id="blockedTestCases" name="blockedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
                                                 <td class="percentage-cell" id="blockedTestCasesPercentage">0%</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fas fa-trash-alt text-danger"></i> Cancelled</td>
+                                                <td>🚮 Cancelled</td>
                                                 <td><input type="number" id="cancelledTestCases" name="cancelledTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
                                                 <td class="percentage-cell" id="cancelledTestCasesPercentage">0%</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fas fa-pause"></i> Deferred</td>
+                                                <td>⏸️ Deferred</td>
                                                 <td><input type="number" id="deferredTestCases" name="deferredTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
                                                 <td class="percentage-cell" id="deferredTestCasesPercentage">0%</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fas fa-question-circle text-info"></i> Not Testable</td>
+                                                <td>❓ Not Testable</td>
                                                 <td><input type="number" id="notTestableTestCases" name="notTestableTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
                                                 <td class="percentage-cell" id="notTestableTestCasesPercentage">0%</td>
                                             </tr>
@@ -434,11 +398,11 @@
 
                         <!-- Section 6: Issues Analysis -->
                         <div class="section" id="section-5">
-                            <h2 class="section-title"><i class="fas fa-bug"></i> Issues Analysis</h2>
+                            <h2 class="section-title">🐛 Issues Analysis</h2>
                             
                             <div class="issues-container">
                                 <div class="issues-priority-section">
-                                    <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-exclamation-triangle"></i> Issues by Priority</h3>
+                                    <h3 style="margin-bottom: 20px; color: white;">🔥 Issues by Priority</h3>
                                     <div class="table-chart-layout">
                                         <div class="table-section">
                                             <table class="data-table" id="issuesPriorityTable">
@@ -561,17 +525,17 @@
                                                 <td class="percentage-cell">100%</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fas fa-plus-circle text-primary"></i> New</td>
+                                                <td>🆕 New</td>
                                                 <td><input type="number" id="newEnhancements" name="newEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
                                                 <td class="percentage-cell" id="newEnhancementsPercentage">0%</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fas fa-check-circle text-success"></i> Implemented</td>
+                                                <td>✅ Implemented</td>
                                                 <td><input type="number" id="implementedEnhancements" name="implementedEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
                                                 <td class="percentage-cell" id="implementedEnhancementsPercentage">0%</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fas fa-star text-warning"></i> Exists</td>
+                                                <td>✨ Exists</td>
                                                 <td><input type="number" id="existsEnhancements" name="existsEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
                                                 <td class="percentage-cell" id="existsEnhancementsPercentage">0%</td>
                                             </tr>
@@ -591,13 +555,11 @@
                         <!-- Section 8: QA Notes -->
                         <div class="section" id="section-7">
                             <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
-                            <div class="dynamic-section">
-                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
-                                    <i class="fas fa-clipboard-list"></i> QA Notes
-                                    <button type="button" class="section-btn" onclick="showAddQANoteModal()">+ Add Note</button>
-                                </h3>
-                                <div class="dynamic-list" id="qaNotesList">
-                                    <div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>
+                            
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="qaNotesText">General Notes</label>
+                                    <textarea id="qaNotesText" name="qaNotesText" placeholder="Add all your QA notes, observations, or comments here..." rows="12"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -617,39 +579,7 @@
     </div>
 
     <!-- Enhanced Modals -->
-    <!-- Portfolio Modal -->
-    <div id="addPortfolioModal" class="modal">
-        <div class="modal-content">
-            <h3>📁 Add New Portfolio</h3>
-            <div class="modal-form">
-                <div class="form-group">
-                    <label for="newPortfolioName">Portfolio Name:</label>
-                    <input type="text" id="newPortfolioName" placeholder="Enter portfolio name">
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('addPortfolioModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addPortfolio()">Add Portfolio</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Project Modal -->
-    <div id="addProjectModal" class="modal">
-        <div class="modal-content">
-            <h3><i class="fas fa-rocket"></i> Add New Project</h3>
-            <div class="modal-form">
-                <div class="form-group">
-                    <label for="newProjectName">Project Name:</label>
-                    <input type="text" id="newProjectName" placeholder="Enter project name">
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('addProjectModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addProject()">Add Project</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Request Modal -->
     <div id="requestModal" class="modal">
@@ -701,93 +631,7 @@
         </div>
     </div>
 
-    <!-- Tester Modal -->
-    <div id="testerModal" class="modal">
-        <div class="modal-content">
-            <h3>🧪 Add/Select Tester</h3>
-            <div class="modal-form">
-                <div class="form-group">
-                    <label for="existingTesterSelect">Select Existing Tester:</label>
-                    <select id="existingTesterSelect" onchange="handleTesterSelection()">
-                        <option value="">-- Select from existing testers --</option>
-                    </select>
-                </div>
-                
-                <div style="text-align: center; margin: 20px 0; color: rgba(255,255,255,0.6); font-weight: 600;">
-                    OR
-                </div>
-                
-                <div class="form-group">
-                    <label for="newTesterName">Add New Tester Name:</label>
-                    <input type="text" id="newTesterName" placeholder="Enter new tester name">
-                </div>
-                
-                <div class="form-group">
-                    <label for="newTesterEmail">New Tester Email:</label>
-                    <input type="email" id="newTesterEmail" placeholder="Enter new tester email">
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('testerModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addSelectedTester()">Add Tester</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Team Member Modal -->
-    <div id="teamMemberModal" class="modal">
-        <div class="modal-content">
-            <h3>👥 Add/Select Team Member</h3>
-            <div class="modal-form">
-                <div class="form-group">
-                    <label for="existingTeamMemberSelect">Select Existing Team Member:</label>
-                    <select id="existingTeamMemberSelect" onchange="handleTeamMemberSelection()">
-                        <option value="">-- Select from existing team members --</option>
-                    </select>
-                </div>
-                
-                <div style="text-align: center; margin: 20px 0; color: rgba(255,255,255,0.6); font-weight: 600;">
-                    OR
-                </div>
-                
-                <div class="form-group">
-                    <label for="newTeamMemberName">Add New Team Member Name:</label>
-                    <input type="text" id="newTeamMemberName" placeholder="Enter new team member name">
-                </div>
-                
-                <div class="form-group">
-                    <label for="newTeamMemberEmail">New Team Member Email:</label>
-                    <input type="email" id="newTeamMemberEmail" placeholder="Enter new team member email">
-                </div>
-                
-                <div class="form-group">
-                    <label for="newTeamMemberRole">Role:</label>
-                    <select id="newTeamMemberRole">
-                        <option value="">Select Role</option>
-                        <option value="Project Owner">👑 Project Owner</option>
-                        <option value="Project Analyst"><i class="fas fa-chart-bar"></i> Project Analyst</option>
-                        <option value="Project Manager"><i class="fas fa-bullseye"></i> Project Manager</option>
-                        <option value="Business Analyst"><i class="fas fa-briefcase"></i> Business Analyst</option>
-                        <option value="Technical Lead"><i class="fas fa-bolt"></i> Technical Lead</option>
-                        <option value="Scrum Master"><i class="fas fa-running"></i> Scrum Master</option>
-                        <option value="Product Owner"><i class="fas fa-rocket"></i> Product Owner</option>
-                        <option value="Quality Assurance Lead"><i class="fas fa-search"></i> Quality Assurance Lead</option>
-                        <option value="DevOps Engineer"><i class="fas fa-wrench"></i> DevOps Engineer</option>
-                        <option value="UI/UX Designer"><i class="fas fa-paint-brush"></i> UI/UX Designer</option>
-                        <option value="Database Administrator"><i class="fas fa-database"></i> Database Administrator</option>
-                        <option value="Security Analyst"><i class="fas fa-shield-alt"></i> Security Analyst</option>
-                        <option value="System Administrator"><i class="fas fa-cog"></i> System Administrator</option>
-                        <option value="Stakeholder"><i class="fas fa-user-suit"></i> Stakeholder</option>
-                        <option value="Client Representative"><i class="fas fa-handshake"></i> Client Representative</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('teamMemberModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addSelectedTeamMember()">Add Team Member</button>
-            </div>
-        </div>
-    </div>
 
     <!-- QA Note Modal -->
     <div id="addQANoteModal" class="modal">
@@ -858,31 +702,50 @@
             </div>
         </div>
     </div>
+
+    <!-- Selection Only Modals -->
+    <!-- Select Tester Modal -->
+    <div id="selectTesterModal" class="modal">
+        <div class="modal-content">
+            <h3>🧪 Select Tester</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="selectTesterDropdown">Select Tester:</label>
+                    <select id="selectTesterDropdown">
+                        <option value="">-- Select a tester --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('selectTesterModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addSelectedTesterToReport()">Add Tester</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toast-container" class="toast-container"></div>
+    <!-- Select Team Member Modal -->
+    <div id="selectTeamMemberModal" class="modal">
+        <div class="modal-content">
+            <h3>👥 Select Team Member</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="selectTeamMemberDropdown">Select Team Member:</label>
+                    <select id="selectTeamMemberDropdown">
+                        <option value="">-- Select a team member --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('selectTeamMemberModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addSelectedTeamMemberToReport()">Add Team Member</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
-    <!-- Link to the external JavaScript files -->
-    <script src="/static/theme-manager.js"></script>
-    <script src="/static/translations.js"></script>
-    <script src="/static/language-manager.js"></script>
-    <script src="/static/enhanced_script.js"></script>
-    <script src="/static/Charts.js"></script>
+{% block scripts_extra %}
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // Initialize theme first
-            if (window.themeManager) {
-                window.themeManager.init();
-            }
-            // Set active class for navigation
-            document.querySelectorAll('.nav-link').forEach(link => {
-                if (link.getAttribute('href') === window.location.pathname) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
-            });
             // Initialize form for new report
             resetFormData();
             loadFormDropdownData();
@@ -901,9 +764,6 @@
                     showToast('Report not found for editing.', 'error');
                     editingReportId = null; // Reset if not found
                 }
-            } else {
-                document.getElementById('formTitle').textContent = 'Create Enhanced QA Report';
-                
             }
             
             
@@ -936,6 +796,4 @@
             }
         }
     </script>
-
-</body>
-</html>
+{% endblock %}

@@ -1,47 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sprint Reports System</title>
-    <!-- External Chart.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="/static/theme-manager.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/unified-nav.css">
-</head>
-<body>
-    <!-- Navigation Header -->
-    <nav class="main-nav">
-        <div class="nav-container">
-            <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
-            <div style="display: flex; align-items: center;">
-                <div class="nav-links">
-                    <a href="/dashboard" class="nav-link active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
-                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
-                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
-                </div>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <i class="fas fa-sun" id="theme-icon"></i>
-                    <span id="theme-text">Light</span>
-                </button>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
+{% block title %}Sprint Reports System{% endblock %}
+
+{% block body_content %}
     <div class="main-wrapper">
         <!-- Enhanced Dashboard Page -->
         <div id="dashboardPage" class="page active">
             <div class="dashboard-container">
                 <div class="dashboard-header">
-                    <h1>Sprint Reports Dashboard</h1>
+                    <h1><i class="fas fa-tachometer-alt"></i> Sprint Reports Dashboard</h1>
                     <p>Comprehensive Quality Assurance Management System</p>
                 </div>
 
@@ -685,8 +652,7 @@
             <div class="modal-form">
                 <div class="form-group">
                     <label for="newProjectName">Project Name:</label>
-                    <input type="text" id="newProjectName" placeholder="Enter project name">
-                </div>
+                    <input type="text" id="newProjectName" placeholder="Enter project name">n                </div>
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('addProjectModal')">Cancel</button>
@@ -832,22 +798,4 @@
             </div>
         </div>
     </div>
-    </div>
-
-    <!-- Footer -->
-
-    <!-- Link to the external JavaScript files -->
-    <script src="/static/enhanced_script.js"></script>
-    <script src="/static/Charts.js"></script>
-    
-    <script>
-        // Initialize theme on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize theme first
-            if (window.themeManager) {
-                window.themeManager.init();
-            }
-        });
-    </script>
-</body>
-</html>
+{% endblock %}

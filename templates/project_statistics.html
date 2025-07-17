@@ -1,41 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Statistics - Sprint Reports System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/project_statistics.css">
-    <link rel="stylesheet" href="/static/unified-nav.css">
-    <link rel="stylesheet" href="/static/rtl-support.css">
-</head>
-<body>
-    <!-- Navigation Header -->
-    <nav class="main-nav">
-        <div class="nav-container">
-            <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
-            <div style="display: flex; align-items: center;">
-                <div class="nav-links">
-                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
-                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
-                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
-                    <a href="/project-statistics" class="nav-link active"><i class="fas fa-chart-pie"></i> Project Statistics</a>
-                </div>
-                <div class="nav-controls">
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <i class="fas fa-sun" id="theme-icon"></i>
-                        <span id="theme-text" data-i18n="theme_light">Light</span>
-                    </button>
-                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
-                </div>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
+{% block title %}Project Statistics - Sprint Reports System{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="/static/project_statistics.css">
+{% endblock %}
+
+{% block body_content %}
     <!-- Project Statistics Page -->
     <div id="projectStatisticsPage" class="page active">
         <div class="dashboard-container">
@@ -126,19 +97,8 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
-    <script src="/static/theme-manager.js"></script>
-    <script src="/static/translations.js"></script>
-    <script src="/static/language-manager.js"></script>
+{% block scripts_extra %}
     <script src="/static/project_statistics.js"></script>
-    <script>
-        // Initialize theme on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize theme first
-            if (window.themeManager) {
-                window.themeManager.init();
-            }
-        });
-    </script>
-</body>
-</html>
+{% endblock %}
