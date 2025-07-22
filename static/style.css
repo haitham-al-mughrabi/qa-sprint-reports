@@ -106,7 +106,7 @@ body {
     min-height: 100vh;
     color: var(--text-primary);
     overflow-x: hidden;
-    padding-top: 70px;
+    padding-top: var(--nav-height, 4rem); /* Use CSS variable for nav height */
     display: flex;
     flex-direction: column;
     transition: background 0.3s ease, color 0.3s ease;
@@ -178,108 +178,7 @@ body::before {
     50% { opacity: 0.8; }
 }
 
-.main-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    box-shadow: var(--shadow-light);
-    z-index: 1000;
-    padding: 0.75rem 0;
-}
 
-.nav-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.nav-brand {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-}
-
-.nav-brand i {
-    margin-right: 10px;
-    color: var(--accent);
-}
-
-.nav-links {
-    display: flex;
-    gap: 25px;
-}
-
-.nav-link {
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-weight: 500;
-    padding: 8px 15px;
-    border-radius: var(--border-radius);
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-}
-
-.nav-link i {
-    margin-right: 8px;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    background: rgba(var(--primary-rgb), 0.1);
-    color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.nav-link:hover i,
-.nav-link.active i {
-    color: var(--primary);
-    transform: scale(1.1);
-}
-
-/* Theme Toggle Button */
-.theme-toggle {
-    background: none;
-    border: 2px solid var(--border);
-    color: var(--text-secondary);
-    padding: 8px 12px;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-left: 15px;
-}
-
-.theme-toggle:hover {
-    background: rgba(var(--primary-rgb), 0.1);
-    border-color: var(--primary);
-    color: var(--primary);
-    transform: translateY(-2px);
-}
-
-.theme-toggle i {
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.theme-toggle:hover i {
-    transform: scale(1.1);
-}
 
 .page {
     display: none;

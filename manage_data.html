@@ -4,11 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Data - Sprint Reports System</title>
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload" as="style" onload="this.rel='stylesheet'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/manage_data.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
+    <link rel="stylesheet" href="/static/manage_data.css">
     <link rel="stylesheet" href="/static/rtl-support.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Theme manager (loads early) -->
+    <script src="/static/theme-manager.js" defer></script>
+
+    <!-- Load non-critical CSS asynchronously -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"></noscript>
 </head>
 <body>
     <nav class="main-nav">
@@ -189,9 +202,8 @@
         </div>
     </div>
 
-    <script src="/static/theme-manager.js"></script>
-    <script src="/static/translations.js"></script>
-    <script src="/static/language-manager.js"></script>
+    <script src="/static/translations.js" defer></script>
+    <script src="/static/language-manager.js" defer></script>
     <script>
         let portfolios = [];
         let projects = [];

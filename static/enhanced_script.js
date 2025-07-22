@@ -1098,6 +1098,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (savedReport) {
                 showToast('Report saved successfully!', 'success');
                 
+                // Clear form data from localStorage and reset form
+                clearFormDataOnSubmit();
+                
                 // Redirect to reports list after saving
                 window.location.href = '/reports';
             } else {
@@ -2787,8 +2790,37 @@ function setupAutoSave() {
     }
 }
 
-// Clear localStorage when form is submitted successfully
-
+// Clear localStorage when form is submitted
+function clearFormDataOnSubmit() {
+    try {
+        // Clear form data from localStorage
+        clearFormDataFromLocalStorage();
+        
+        // Reset form arrays
+        requestData = [];
+        buildData = [];
+        testerData = [];
+        teamMemberData = [];
+        qaNoteFieldsData = [];
+        
+        // Reset form fields
+        const form = document.getElementById('qaReportForm');
+        if (form) {
+            form.reset();
+        }
+        
+        // Reset charts if they exist
+        resetAllCharts();
+        
+        // Reset current section to the first one
+        currentSection = 0;
+        updateNavigationButtons();
+        
+        console.log('Form data cleared after successful submission');
+    } catch (error) {
+        console.error('Error clearing form data after submission:', error);
+    }
+}
 
 // Override the existing arrays when they're modified
 const originalAddRequest = window.addRequest;

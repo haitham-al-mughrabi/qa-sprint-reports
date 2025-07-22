@@ -172,9 +172,30 @@ window.toggleTheme = toggleTheme;
 window.initializeTheme = initializeTheme;
 window.updateThemeButton = updateThemeButton;
 
-// Auto-initialize when DOM is ready
+// Apply theme as early as possible to prevent FOUC
+function applyEarlyTheme() {
+    const savedTheme = localStorage.getItem('sprint-reports-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.body.classList.add(`theme-${savedTheme}`);
+}
+
+// Apply theme immediately
+applyEarlyTheme();
+
+// Full initialization when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => themeManager.init());
+    document.addEventListener('DOMContentLoaded', () => {
+        themeManager.init();
+        console.log('Theme manager initialized after DOM load');
+    });
 } else {
     themeManager.init();
+    console.log('Theme manager initialized (DOM already loaded)');
 }
+
+// Listen for theme changes from other tabs
+window.addEventListener('storage', (event) => {
+    if (event.key === 'sprint-reports-theme') {
+        themeManager.setTheme(event.newValue || 'light');
+    }
+});
