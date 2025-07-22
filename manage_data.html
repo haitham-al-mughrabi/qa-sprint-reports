@@ -46,19 +46,20 @@
         </div>
     </nav>
 
-    <div class="main-wrapper">
-        <div class="dashboard-container">
-            <div class="dashboard-header">
-                <h1><i class="fas fa-cogs"></i> <span data-i18n="manage_system_data">Manage System Data</span></h1>
+    <div class="container">
+        <div class="dashboard-header">
+            <div class="header-content">
+                <h1 data-i18n="manage_system_data">Manage System Data</h1>
                 <p data-i18n="administer_data">Administer portfolios, projects, testers, and team members</p>
             </div>
+        </div>
 
         <div class="tabs-container">
             <div class="tabs">
-                <button class="tab active" onclick="showTab('portfolios')"><i class="fas fa-briefcase"></i> <span data-i18n="portfolios">Portfolios</span></button>
-                <button class="tab" onclick="showTab('projects')"><i class="fas fa-project-diagram"></i> <span data-i18n="projects">Projects</span></button>
-                <button class="tab" onclick="showTab('testers')"><i class="fas fa-user-cog"></i> <span data-i18n="testers">Testers</span></button>
-                <button class="tab" onclick="showTab('team')"><i class="fas fa-users"></i> <span data-i18n="team">Team</span></button>
+                <button class="btn btn-secondary active" onclick="showTab('portfolios')"><i class="fas fa-briefcase"></i> <span data-i18n="portfolios">Portfolios</span></button>
+                <button class="btn btn-secondary" onclick="showTab('projects')"><i class="fas fa-project-diagram"></i> <span data-i18n="projects">Projects</span></button>
+                <button class="btn btn-secondary" onclick="showTab('testers')"><i class="fas fa-user-cog"></i> <span data-i18n="testers">Testers</span></button>
+                <button class="btn btn-secondary" onclick="showTab('team')"><i class="fas fa-users"></i> <span data-i18n="team">Team</span></button>
             </div>
         </div>
 
@@ -67,7 +68,7 @@
             <div class="dashboard-section">
                 <div class="section-header">
                     <h2 class="section-title"><i class="fas fa-briefcase"></i> <span data-i18n="portfolio_management">Portfolio Management</span></h2>
-                    <button class="action-btn" onclick="showAddPortfolioModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add_portfolio">Add Portfolio</span></button>
+                    <button class="btn btn-primary" onclick="showAddPortfolioModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add_portfolio">Add Portfolio</span></button>
                 </div>
             <div class="search-filter-container">
                  <input type="text" data-i18n-placeholder="search_portfolios" placeholder="Search portfolios..." id="portfolioSearch" onkeyup="displayPortfolios()">
@@ -87,7 +88,7 @@
             <div class="dashboard-section">
                 <div class="section-header">
                     <h2 class="section-title"><i class="fas fa-project-diagram"></i> <span data-i18n="projects">Project Management</span></h2>
-                    <button class="action-btn" onclick="showAddProjectModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add">Add Project</span></button>
+                    <button class="btn btn-primary" onclick="showAddProjectModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add">Add Project</span></button>
                 </div>
              <div class="search-filter-container">
                 <input type="text" data-i18n-placeholder="search_projects" placeholder="Search projects..." id="projectSearch" onkeyup="displayProjects()">
@@ -109,7 +110,7 @@
             <div class="dashboard-section">
                 <div class="section-header">
                     <h2 class="section-title"><i class="fas fa-user-cog"></i> <span data-i18n="testers">Tester Management</span></h2>
-                    <button class="action-btn" onclick="showAddTesterModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add">Add Tester</span></button>
+                    <button class="btn btn-primary" onclick="showAddTesterModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add">Add Tester</span></button>
                 </div>
              <div class="search-filter-container">
                 <input type="text" data-i18n-placeholder="search_testers" placeholder="Search testers..." id="testerSearch" onkeyup="displayTesters()">
@@ -130,7 +131,7 @@
             <div class="dashboard-section">
                 <div class="section-header">
                     <h2 class="section-title"><i class="fas fa-users"></i> <span data-i18n="team">Team Member Management</span></h2>
-                    <button class="action-btn" onclick="showAddTeamMemberModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add_team_member">Add Team Member</span></button>
+                    <button class="btn btn-primary" onclick="showAddTeamMemberModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add_team_member">Add Team Member</span></button>
                 </div>
             <div class="search-filter-container">
                 <input type="text" data-i18n-placeholder="search_team_members" placeholder="Search team members..." id="teamSearch" onkeyup="displayTeamMembers()">
