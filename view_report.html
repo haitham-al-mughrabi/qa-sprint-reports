@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sprint Report View</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -892,7 +893,7 @@
             }
         }
 
-        function getViewChartOptions() {
+                function getViewChartOptions() {
             return {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -902,11 +903,11 @@
                         labels: { 
                             padding: 15, 
                             usePointStyle: true, 
-                            font: { 
+                            font: {
                                 size: 10,
-                                family: 'Poppins' // Use Poppins font
+                                family: 'Poppins'
                             },
-                            color: '#f1f5f9' // Directly set to --text-primary hex value for Chart.js visibility
+                            color: '#f1f5f9'
                         }
                     },
                     tooltip: {
@@ -918,19 +919,23 @@
                                 return `${context.label}: ${value} (${percentage}%)`;
                             }
                         },
-                        titleColor: '#f1f5f9', // Directly set to --text-primary hex value
-                        bodyColor: '#f1f5f9',   // Directly set to --text-primary hex value
-                        backgroundColor: 'var(--surface)',   // Consistent tooltip background
-                        borderColor: 'var(--border)',        // Consistent tooltip border
+                        titleColor: '#f1f5f9',
+                        bodyColor: '#f1f5f9',
+                        backgroundColor: 'var(--surface)',
+                        borderColor: 'var(--border)',
                         borderWidth: 1,
-                        titleFont: { family: 'Poppins' }, // Use Poppins font
-                        bodyFont: { family: 'Poppins' } // Use Poppins font
+                        titleFont: {
+                            family: 'Poppins'
+                        },
+                        bodyFont: {
+                            family: 'Poppins'
+                        }
                     }
                 }
             };
         }
 
-        function getBarChartOptions(yAxisLabel) {
+                function getBarChartOptions(yAxisLabel) {
             return {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -949,15 +954,21 @@
                         backgroundColor: 'var(--surface)',
                         borderColor: 'var(--border)',
                         borderWidth: 1,
-                        titleFont: { family: 'Poppins' }, // Use Poppins font
-                        bodyFont: { family: 'Poppins' } // Use Poppins font
+                        titleFont: {
+                            family: 'Poppins'
+                        },
+                        bodyFont: {
+                            family: 'Poppins'
+                        }
                     }
                 },
                 scales: {
                     x: {
                         ticks: {
                             color: 'var(--text-secondary)',
-                            font: { family: 'Poppins' } // Use Poppins font
+                            font: {
+                                family: 'Poppins'
+                            }
                         },
                         grid: {
                             color: 'rgba(51, 65, 85, 0.5)'
@@ -967,7 +978,9 @@
                         beginAtZero: true,
                         ticks: {
                             color: 'var(--text-secondary)',
-                            font: { family: 'Poppins' } // Use Poppins font
+                            font: {
+                                family: 'Poppins'
+                            }
                         },
                         grid: {
                             color: 'rgba(51, 65, 85, 0.5)'
@@ -976,7 +989,9 @@
                             display: true,
                             text: yAxisLabel,
                             color: 'var(--text-primary)',
-                            font: { family: 'Poppins' } // Use Poppins font
+                            font: {
+                                family: 'Poppins'
+                            }
                         }
                     }
                 }
@@ -1304,580 +1319,72 @@
                 showErrorToast('Report data not loaded yet.');
                 return;
             }
-            
+
             showInfoToast('Generating styled PDF export...');
 
-            // Get the view report page content
-            const reportContent = document.querySelector('.container');
-            if (!reportContent) {
+            const { jsPDF } = window.jspdf;
+            const reportContent = document.querySelector('#reportContent');
+            const sections = Array.from(reportContent.querySelectorAll('.dashboard-section'));
+
+            if (!sections.length) {
                 showErrorToast('Report content not found.');
                 return;
             }
 
-            // Capture charts as images
-            const chartImages = {};
-            try {
-                const userStoriesChart = Chart.getChart('userStoriesViewChart');
-                const testCasesChart = Chart.getChart('testCasesViewChart');
-                const issuesPriorityChart = Chart.getChart('issuesPriorityViewChart');
-                const issuesStatusChart = Chart.getChart('issuesStatusViewChart');
-                const enhancementsChart = Chart.getChart('enhancementsViewChart');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            let yPosition = 15;
 
-                if (userStoriesChart) {
-                    chartImages.userStories = userStoriesChart.toBase64Image('image/png', 1.0);
+            // Correctly detect theme based on the 'data-theme' attribute
+            const isLightMode = document.body.getAttribute('data-theme') === 'light';
+            const themeBackgroundColor = isLightMode ? '#f8fafc' : '#1e293b'; // Use --surface colors
+            const textColor = isLightMode ? '#1e293b' : '#f1f5f9'; // Use --text-primary colors
+
+            const addPageBackground = () => {
+                pdf.setFillColor(themeBackgroundColor);
+                pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+            };
+
+            addPageBackground();
+
+            pdf.setTextColor(textColor);
+            pdf.setFontSize(18);
+            pdf.text(document.getElementById('reportTitle').innerText, pdfWidth / 2, yPosition, { align: 'center' });
+            yPosition += 8;
+            pdf.setFontSize(10);
+            pdf.text(document.getElementById('reportSubtitle').innerText, pdfWidth / 2, yPosition, { align: 'center' });
+            yPosition += 12;
+
+            for (const section of sections) {
+                try {
+                    const canvas = await html2canvas(section, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: null // Render sections with a transparent background
+                    });
+
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = pdfWidth - 20;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                    if (yPosition + imgHeight > pdfHeight - 15) {
+                        pdf.addPage();
+                        addPageBackground(); // Add background to new pages
+                        yPosition = 15;
+                    }
+
+                    pdf.addImage(imgData, 'PNG', 10, yPosition, imgWidth, imgHeight);
+                    yPosition += imgHeight + 5;
+
+                } catch (error) {
+                    console.error('Could not render section to PDF:', error, section);
                 }
-                if (testCasesChart) {
-                    chartImages.testCases = testCasesChart.toBase64Image('image/png', 1.0);
-                }
-                if (issuesPriorityChart) {
-                    chartImages.issuesPriority = issuesPriorityChart.toBase64Image('image/png', 1.0);
-                }
-                if (issuesStatusChart) {
-                    chartImages.issuesStatus = issuesStatusChart.toBase64Image('image/png', 1.0);
-                }
-                if (enhancementsChart) {
-                    chartImages.enhancements = enhancementsChart.toBase64Image('image/png', 1.0);
-                }
-            } catch (error) {
-                console.log('Some charts may not be available:', error);
             }
 
-            // Create a new window for the styled PDF export
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>QA Report - ${currentReport.portfolioName} Sprint ${currentReport.sprintNumber}</title>
-                    <style>
-                        * { box-sizing: border-box; margin: 0; padding: 0; }
-                        body { 
-                            font-family: 'Poppins', sans-serif; 
-                            line-height: 1.4; 
-                            color: #1e293b; 
-                            background: linear-gradient(to bottom, #ffffff, #f8fafc);
-                            padding: 0;
-                            font-size: 14px;
-                        }
-                        
-                        .page-container {
-                            max-width: 210mm;
-                            margin: 0 auto;
-                            padding: 20mm;
-                            min-height: 297mm;
-                            background: linear-gradient(to bottom, #ffffff, #f8fafc);
-                        }
-                        
-                        .header { 
-                            text-align: center; 
-                            margin-bottom: 40px; 
-                            padding: 30px 0;
-                            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-                            color: #ffffff;
-                            border-radius: 15px;
-                            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-                            border: 1px solid #e2e8f0;
-                        }
-                        
-                        .header h1 { 
-                            font-size: 2.8em; 
-                            margin-bottom: 10px;
-                            font-weight: 700;
-                            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-                        }
-                        
-                        .header .subtitle { 
-                            font-size: 1.3em; 
-                            font-weight: 400;
-                            margin-bottom: 5px;
-                            opacity: 0.9;
-                        }
-                        
-                        .header .project-info { 
-                            font-size: 1.1em; 
-                            font-weight: 300;
-                            opacity: 0.8;
-                        }
-                        
-                        .executive-summary {
-                            background: rgba(248, 250, 252, 0.8);
-                            border-radius: 12px;
-                            padding: 25px;
-                            margin: 30px 0;
-                            border-left: 5px solid #3b82f6;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                            border: 1px solid #e2e8f0;
-                        }
-                        
-                        .executive-summary h2 {
-                            color: #1e293b;
-                            font-size: 1.8em;
-                            margin-bottom: 20px;
-                            font-weight: 600;
-                        }
-                        
-                        .metrics-grid {
-                            display: grid;
-                            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-                            gap: 20px;
-                            margin: 20px 0;
-                        }
-                        
-                        .metric-card {
-                            background: rgba(255, 255, 255, 0.8);
-                            border-radius: 10px;
-                            padding: 20px;
-                            text-align: center;
-                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                            border: 1px solid #3b82f6;
-                        }
-                        
-                        .metric-card .metric-value {
-                            font-size: 2.2em;
-                            font-weight: 700;
-                            color: #3b82f6;
-                            margin-bottom: 8px;
-                        }
-                        
-                        .metric-card .metric-label {
-                            font-size: 0.9em;
-                            color: #64748b;
-                            font-weight: 500;
-                            text-transform: uppercase;
-                            letter-spacing: 0.5px;
-                        }
-                        
-                        .section {
-                            margin: 40px 0;
-                            page-break-inside: avoid;
-                        }
-                        
-                        .section-title {
-                            font-size: 1.6em;
-                            font-weight: 600;
-                            color: #1e293b;
-                            margin-bottom: 20px;
-                            padding-bottom: 10px;
-                            border-bottom: 3px solid #3b82f6;
-                        }
-                        
-                        .info-grid {
-                            display: grid;
-                            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                            gap: 15px;
-                            margin: 20px 0;
-                        }
-                        
-                        .info-item {
-                            background: rgba(255, 255, 255, 0.8);
-                            padding: 15px;
-                            border-radius: 8px;
-                            border-left: 4px solid #3b82f6;
-                            border: 1px solid #e2e8f0;
-                        }
-                        
-                        .info-label {
-                            font-weight: 600;
-                            color: #3b82f6;
-                            font-size: 0.9em;
-                            margin-bottom: 5px;
-                            text-transform: uppercase;
-                            letter-spacing: 0.5px;
-                        }
-                        
-                        .info-value {
-                            font-size: 1.1em;
-                            color: #1e293b;
-                            font-weight: 500;
-                        }
-                        
-                        .chart-section {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 20px;
-                            margin: 30px 0;
-                            page-break-inside: avoid;
-                        }
-                        
-                        .chart-container {
-                            width: 100%;
-                            text-align: center;
-                            background: rgba(255, 255, 255, 0.8);
-                            border-radius: 8px;
-                            padding: 20px;
-                            border: 1px solid #e2e8f0;
-                        }
-                        
-                        .chart-container h3 {
-                            color: #1e293b;
-                            margin-bottom: 15px;
-                            font-size: 1.2em;
-                        }
-                        
-                        .chart-container img {
-                            max-width: 100%;
-                            height: auto;
-                            border-radius: 8px;
-                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                        }
-                        
-                        .data-table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            font-size: 0.9em;
-                            border-radius: 8px;
-                            overflow: hidden;
-                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                            background: rgba(255, 255, 255, 0.8);
-                            border: 1px solid #e2e8f0;
-                        }
-                        
-                        .data-table th {
-                            background: #3b82f6;
-                            color: #ffffff;
-                            padding: 12px;
-                            text-align: left;
-                            font-weight: 600;
-                            font-size: 0.85em;
-                            text-transform: uppercase;
-                            letter-spacing: 0.5px;
-                        }
-                        
-                        .data-table td {
-                            padding: 10px 12px;
-                            border-bottom: 1px solid #e2e8f0;
-                            background: rgba(248, 250, 252, 0.8);
-                            color: #1e293b;
-                        }
-                        
-                        .data-table tr:nth-child(even) td {
-                            background: rgba(241, 245, 249, 0.8);
-                        }
-                        
-                        .percentage-cell {
-                            text-align: center;
-                            font-weight: 600;
-                            color: #3b82f6;
-                        }
-                        
-                        .test-summary {
-                            background: rgba(248, 250, 252, 0.8);
-                            border-radius: 12px;
-                            padding: 25px;
-                            margin: 30px 0;
-                            border-left: 5px solid #eab308;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                            border: 1px solid #e2e8f0;
-                        }
-                        
-                        .test-summary h3 {
-                            color: #eab308;
-                            font-size: 1.4em;
-                            margin-bottom: 15px;
-                            font-weight: 600;
-                        }
-                        
-                        .test-summary p {
-                            color: #1e293b;
-                            line-height: 1.6;
-                            font-size: 1em;
-                        }
-                        
-                        .qa-notes {
-                            background: rgba(248, 250, 252, 0.8);
-                            border-radius: 12px;
-                            padding: 25px;
-                            margin: 30px 0;
-                            border-left: 5px solid #22c55e;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                            border: 1px solid #e2e8f0;
-                        }
-                        
-                        .qa-notes h3 {
-                            color: #22c55e;
-                            font-size: 1.4em;
-                            margin-bottom: 15px;
-                            font-weight: 600;
-                        }
-                        
-                        .qa-notes p {
-                            color: #1e293b;
-                            line-height: 1.6;
-                            font-size: 1em;
-                        }
-                        
-                        .footer {
-                            margin-top: 50px;
-                            padding-top: 20px;
-                            border-top: 2px solid #e2e8f0;
-                            text-align: center;
-                            color: #64748b;
-                            font-size: 0.9em;
-                        }
-                        
-                        @media print {
-                            .page-container { 
-                                margin: 0; 
-                                padding: 15mm;
-                                max-width: none;
-                            }
-                            .section { 
-                                page-break-inside: avoid; 
-                            }
-                            .chart-section { 
-                                page-break-inside: avoid; 
-                            }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="page-container">
-                        <!-- Header -->
-                        <div class="header">
-                            <h1>QA Testing Report</h1>
-                            <div class="subtitle">${currentReport.portfolioName} - Sprint ${currentReport.sprintNumber}</div>
-                            <div class="project-info">${currentReport.projectName} | Version ${currentReport.reportVersion} | ${formatDate(currentReport.reportDate)}</div>
-                        </div>
-                        
-                        <!-- Executive Summary -->
-                        <div class="executive-summary">
-                            <h2>Executive Summary</h2>
-                            <div class="metrics-grid">
-                                <div class="metric-card">
-                                    <div class="metric-value">${currentReport.totalUserStories || 0}</div>
-                                    <div class="metric-label">User Stories</div>
-                                </div>
-                                <div class="metric-card">
-                                    <div class="metric-value">${currentReport.totalTestCases || 0}</div>
-                                    <div class="metric-label">Test Cases</div>
-                                </div>
-                                <div class="metric-card">
-                                    <div class="metric-value">${currentReport.totalIssues || 0}</div>
-                                    <div class="metric-label">Issues</div>
-                                </div>
-                                <div class="metric-card">
-                                    <div class="metric-value">${currentReport.totalEnhancements || 0}</div>
-                                    <div class="metric-label">Enhancements</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- General Information -->
-                        <div class="section">
-                            <h2 class="section-title">General Information</h2>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <div class="info-label">Portfolio</div>
-                                    <div class="info-value">${currentReport.portfolioName || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Project</div>
-                                    <div class="info-value">${currentReport.projectName || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Sprint Number</div>
-                                    <div class="info-value">#${currentReport.sprintNumber || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Report Version</div>
-                                    <div class="info-value">v${currentReport.reportVersion || '1.0'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Release Number</div>
-                                    <div class="info-value">${currentReport.releaseNumber || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Cycle Number</div>
-                                    <div class="info-value">${currentReport.cycleNumber || 'N/A'}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Report Date</div>
-                                    <div class="info-value">${formatDate(currentReport.reportDate)}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Testing Status</div>
-                                    <div class="info-value">${getStatusText(currentReport.testingStatus)}</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Analysis Section -->
-                        <div class="section">
-                            <h2 class="section-title">Analysis</h2>
-                            <div class="grid-container">
-                                <!-- User Stories Analysis -->
-                                <div class="grid-item">
-                                    <h3>User Stories Analysis</h3>
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Status</th>
-                                                <th>Count</th>
-                                                <th>Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><strong>Total</strong></td>
-                                                <td>${currentReport.totalUserStories || 0}</td>
-                                                <td class="percentage-cell">100%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Passed</td>
-                                                <td>${currentReport.passedUserStories || 0}</td>
-                                                <td class="percentage-cell">${currentReport.totalUserStories ? Math.round(((currentReport.passedUserStories || 0) / currentReport.totalUserStories) * 100) : 0}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Passed with Issues</td>
-                                                <td>${currentReport.passedWithIssuesUserStories || 0}</td>
-                                                <td class="percentage-cell">${currentReport.totalUserStories ? Math.round(((currentReport.passedWithIssuesUserStories || 0) / currentReport.totalUserStories) * 100) : 0}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Failed</td>
-                                                <td>${currentReport.failedUserStories || 0}</td>
-                                                <td class="percentage-cell">${currentReport.totalUserStories ? Math.round(((currentReport.failedUserStories || 0) / currentReport.totalUserStories) * 100) : 0}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Blocked</td>
-                                                <td>${currentReport.blockedUserStories || 0}</td>
-                                                <td class="percentage-cell">${currentReport.totalUserStories ? Math.round(((currentReport.blockedUserStories || 0) / currentReport.totalUserStories) * 100) : 0}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Other</td>
-                                                <td>${(currentReport.cancelledUserStories || 0) + (currentReport.deferredUserStories || 0) + (currentReport.notTestableUserStories || 0)}</td>
-                                                <td class="percentage-cell">${currentReport.totalUserStories ? Math.round((((currentReport.cancelledUserStories || 0) + (currentReport.deferredUserStories || 0) + (currentReport.notTestableUserStories || 0)) / currentReport.totalUserStories) * 100) : 0}%</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <!-- Test Cases Analysis -->
-                                <div class="grid-item">
-                                    <h3>Test Cases Analysis</h3>
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Status</th>
-                                                <th>Count</th>
-                                                <th>Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><strong>Total</strong></td>
-                                                <td>${currentReport.totalTestCases || 0}</td>
-                                                <td class="percentage-cell">100%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Passed</td>
-                                                <td>${currentReport.passedTestCases || 0}</td>
-                                                <td class="percentage-cell">${currentReport.totalTestCases ? Math.round(((currentReport.passedTestCases || 0) / currentReport.totalTestCases) * 100) : 0}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Passed with Issues</td>
-                                                <td>${currentReport.passedWithIssuesTestCases || 0}</td>
-                                                <td class="percentage-cell">${currentReport.totalTestCases ? Math.round(((currentReport.passedWithIssuesTestCases || 0) / currentReport.totalTestCases) * 100) : 0}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Failed</td>
-                                                <td>${currentReport.failedTestCases || 0}</td>
-                                                <td class="percentage-cell">${currentReport.totalTestCases ? Math.round(((currentReport.failedTestCases || 0) / currentReport.totalTestCases) * 100) : 0}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Blocked</td>
-                                                <td>${currentReport.blockedTestCases || 0}</td>
-                                                <td class="percentage-cell">${currentReport.totalTestCases ? Math.round(((currentReport.blockedTestCases || 0) / currentReport.totalTestCases) * 100) : 0}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Other</td>
-                                                <td>${(currentReport.cancelledTestCases || 0) + (currentReport.deferredTestCases || 0) + (currentReport.notTestableTestCases || 0)}</td>
-                                                <td class="percentage-cell">${currentReport.totalTestCases ? Math.round((((currentReport.cancelledTestCases || 0) + (currentReport.deferredTestCases || 0) + (currentReport.notTestableTestCases || 0)) / currentReport.totalTestCases) * 100) : 0}%</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Charts Section -->
-                        <div class="section">
-                            <h2 class="section-title">Visualizations</h2>
-                            <div class="grid-container">
-                                <div class="grid-item chart-container">
-                                    <h3>User Stories Distribution</h3>
-                                    ${chartImages.userStories ? `<img src="${chartImages.userStories}" alt="User Stories Chart">` : '<p>Chart not available</p>'}
-                                </div>
-                                <div class="grid-item chart-container">
-                                    <h3>Test Cases Distribution</h3>
-                                    ${chartImages.testCases ? `<img src="${chartImages.testCases}" alt="Test Cases Chart">` : '<p>Chart not available</p>'}
-                                </div>
-                                <div class="grid-item chart-container">
-                                    <h3>Issues by Priority</h3>
-                                    ${chartImages.issuesPriority ? `<img src="${chartImages.issuesPriority}" alt="Issues Priority Chart">` : '<p>Chart not available</p>'}
-                                </div>
-                                <div class="grid-item chart-container">
-                                    <h3>Issues by Status</h3>
-                                    ${chartImages.issuesStatus ? `<img src="${chartImages.issuesStatus}" alt="Issues Status Chart">` : '<p>Chart not available</p>'}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Test Summary -->
-                        ${currentReport.testSummary ? `
-                        <div class="test-summary">
-                            <h3>Test Summary</h3>
-                            <p>${currentReport.testSummary}</p>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- QA Notes -->
-                        ${currentReport.qaNotesText ? `
-                        <div class="qa-notes">
-                            <h3>QA Notes</h3>
-                            <p>${currentReport.qaNotesText}</p>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Team Members -->
-                        ${currentReport.teamMemberData && currentReport.teamMemberData.length > 0 ? `
-                        <div class="test-summary">
-                            <h3>Team Members</h3>
-                            ${currentReport.teamMemberData.map(member => `
-                                <p><strong>${member.name}</strong> - ${member.role || 'N/A'} (${member.email || 'N/A'})</p>
-                            `).join('')}
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Custom Fields - REMOVED -->
-                        ${/* currentReport.customFields && Object.keys(currentReport.customFields).length > 0 ? `
-                        <div class="qa-notes">
-                            <h3>Custom Fields</h3>
-                            ${Object.entries(currentReport.customFields).map(([key, value]) => `
-                                <p><strong>${key}:</strong> ${value}</p>
-                            `).join('')}
-                        </div>
-                        ` : '' */ ''}
-                        
-                        <!-- Footer -->
-                        <div class="footer">
-                            <p>Generated on ${new Date().toLocaleDateString('en-GB')} | Sprint Reports System</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `);
-
-            // Close the document and trigger print
-            printWindow.document.close();
-            
-            // Wait for the content to load, then print
-            printWindow.onload = function() {
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                    showSuccessToast('Styled PDF export completed successfully!');
-                }, 500);
-            };
+            pdf.save(`QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_Styled.pdf`);
+            showSuccessToast('Styled PDF export completed successfully!');
         }
 
         // Custom Message Box (instead of alert)
