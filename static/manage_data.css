@@ -1,4 +1,5 @@
-
+/* Hide scrollbar for Firefox */
+html { scrollbar-width: none; }
 
 .search-filter-container {
     display: flex;

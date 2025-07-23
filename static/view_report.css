@@ -41,6 +41,9 @@
     --accent-rgb: 139, 92, 246;
 }
 
+/* Hide scrollbar for Firefox */
+html { scrollbar-width: none; }
+
 body {
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(to bottom, var(--background), var(--surface));

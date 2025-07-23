@@ -1,3 +1,6 @@
+/* Hide scrollbar for Firefox */
+html { scrollbar-width: none; }
+
 .project-selection-container {
     display: flex;
     gap: 1rem;

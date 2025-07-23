@@ -1,3 +1,6 @@
+/* Hide scrollbar for Firefox */
+html { scrollbar-width: none; }
+
 :root {
     --primary: #3b82f6;
     --secondary: #60a5fa;
