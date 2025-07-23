@@ -75,6 +75,8 @@ body {
 
 .page-header.centered {
     text-align: center;
+    display: flex;
+    justify-content: center;
 }
 
 .action-buttons-card {
