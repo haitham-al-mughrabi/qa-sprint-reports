@@ -81,6 +81,7 @@
                 </div>
             </div>
             <div id="portfoliosList" class="data-list"></div>
+            </div>
         </div>
 
         <!-- Project Management -->
@@ -101,7 +102,9 @@
                         <p data-i18n="total_projects">Total Projects</p>
                     </div>
                 </div>
-                <div id="projectsList" class="data-list"></div>
+                <div id="projectsList" class="data-list">
+                    <div class="empty-state">Loading projects...</div>
+                </div>
             </div>
         </div>
 
@@ -122,7 +125,9 @@
                         <p data-i18n="total_testers">Total Testers</p>
                     </div>
                 </div>
-                <div id="testersList" class="data-list"></div>
+                <div id="testersList" class="data-list">
+                    <div class="empty-state">Loading testers...</div>
+                </div>
             </div>
         </div>
 
@@ -143,7 +148,9 @@
                     <div class="stat-card-small"><div class="icon-bg"><i class="fas fa-user-graduate"></i></div><h3 id="projectAnalysts">0</h3><p data-i18n="analysts">Analysts</p></div>
                     <div class="stat-card-small"><div class="icon-bg"><i class="fas fa-user-tie"></i></div><h3 id="projectManagers">0</h3><p data-i18n="managers">Managers</p></div>
                 </div>
-                <div id="teamMembersList" class="data-list"></div>
+                <div id="teamMembersList" class="data-list">
+                    <div class="empty-state">Loading team members...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -240,6 +247,12 @@
                     fetch('/api/testers').then(res => res.ok ? res.json() : []),
                     fetch('/api/team-members').then(res => res.ok ? res.json() : [])
                 ]);
+                console.log('Data loaded:', {
+                    portfolios: portfolios.length,
+                    projects: projects.length, 
+                    testers: testers.length,
+                    teamMembers: teamMembers.length
+                });
             } catch (error) {
                 console.error("Failed to load data:", error);
                 alert("Failed to load system data. Please check the console for errors.");
@@ -331,10 +344,45 @@
 
         // --- TABS & MODALS ---
         function showTab(tabName) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
-            document.getElementById(tabName).classList.add('active');
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tabs .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show target content
+            const targetContent = document.getElementById(tabName);
+            if (targetContent) {
+                targetContent.style.display = 'block';
+                targetContent.classList.add('active');
+            }
+            
+            // Add active class to clicked button
+            const activeButton = document.querySelector(`[onclick="showTab('${tabName}')"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+            
+            // Call the appropriate display function to populate the tab content
+            switch(tabName) {
+                case 'portfolios':
+                    displayPortfolios();
+                    break;
+                case 'projects':
+                    displayProjects();
+                    break;
+                case 'testers':
+                    displayTesters();
+                    break;
+                case 'team':
+                    displayTeamMembers();
+                    break;
+            }
         }
 
         function showModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }

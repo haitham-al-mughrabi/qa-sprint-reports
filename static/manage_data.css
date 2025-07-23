@@ -180,8 +180,15 @@ html { scrollbar-width: none; }
     color: var(--text-primary);
 }
 
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+.tab-content { 
+    display: none; 
+}
+.tab-content.active { 
+    display: block !important; 
+    min-height: 400px;
+    padding: 1rem 0;
+    visibility: visible;
+}
 .modal.manage-modal .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 
 @media (max-width: 768px) {
