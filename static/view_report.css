@@ -63,7 +63,7 @@ body {
 /* Ensure page-header has the same styling as dashboard-header */
 .page-header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     padding: 30px 0;
     background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(var(--accent-rgb), 0.1));
     border-radius: var(--border-radius-large);
@@ -71,6 +71,19 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
+}
+
+.page-header.centered {
+    text-align: center;
+}
+
+.action-buttons-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-large);
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-light);
 }
 
 .page-header::before {

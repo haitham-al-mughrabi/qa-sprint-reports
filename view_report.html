@@ -55,11 +55,15 @@
 
     <div class="main-wrapper">
         <div class="dashboard-container">
-            <div class="page-header">
+            <div class="page-header centered">
                 <div class="header-content">
                     <h1 id="reportTitle">Sprint Testing Report</h1>
                     <p id="reportSubtitle">Loading report details...</p>
                 </div>
+            </div>
+
+            <!-- Action Buttons Card -->
+            <div class="action-buttons-card">
                 <div class="header-actions">
                     <div class="action-group">
                         <button class="action-btn btn-back" onclick="window.location.href='/reports'">
@@ -812,6 +816,41 @@
             });
         }
 
+        // Function to update all charts when theme changes
+        function updateChartsForTheme() {
+            if (!currentReport) return;
+            
+            // Destroy existing charts
+            Object.values(viewCharts).forEach(chart => {
+                if (chart && chart.destroy) {
+                    chart.destroy();
+                }
+            });
+            
+            // Recreate charts with new theme colors
+            renderUserStoriesChart(currentReport);
+            renderTestCasesChart(currentReport);
+            renderIssuesCharts(currentReport);
+            renderEnhancementsChart(currentReport);
+        }
+
+        // Listen for theme changes
+        document.addEventListener('DOMContentLoaded', function() {
+            // Watch for theme attribute changes
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                        updateChartsForTheme();
+                    }
+                });
+            });
+            
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['data-theme']
+            });
+        });
+
         function renderAdditionalInfo(report) {
             const section = document.getElementById('additionalInfoSection');
             let content = '';
@@ -903,9 +942,29 @@
         function renderQANotes(report) {
             const qaNotesContent = document.getElementById('qaNotesContent');
             const qaNotesText = report.qaNotesText || '';
+            const qaNotesData = report.qaNotesData || [];
 
+            let hasNotes = false;
+            let notesHtml = '';
+
+            // Check for text-based notes
             if (qaNotesText.trim()) {
-                qaNotesContent.innerHTML = `<div class="dynamic-item">${qaNotesText}</div>`;
+                notesHtml += `<div class="dynamic-item">${qaNotesText}</div>`;
+                hasNotes = true;
+            }
+
+            // Check for array-based notes
+            if (qaNotesData.length > 0) {
+                qaNotesData.forEach(noteItem => {
+                    if (noteItem.note && noteItem.note.trim()) {
+                        notesHtml += `<div class="dynamic-item">${noteItem.note}</div>`;
+                        hasNotes = true;
+                    }
+                });
+            }
+
+            if (hasNotes) {
+                qaNotesContent.innerHTML = notesHtml;
             } else {
                 qaNotesContent.innerHTML = `<div class="empty-state" style="border: none; padding: 0; background: none;">
                     <h3 data-i18n="no_qa_notes">No QA Notes</h3>
@@ -920,6 +979,10 @@
         }
 
                 function getViewChartOptions() {
+            // Get current theme
+            const isLightTheme = document.documentElement.getAttribute('data-theme') === 'light';
+            const textColor = isLightTheme ? '#1e293b' : '#f1f5f9';
+            
             return {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -933,7 +996,7 @@
                                 size: 10,
                                 family: 'Poppins'
                             },
-                            color: '#f1f5f9'
+                            color: textColor
                         }
                     },
                     tooltip: {
@@ -945,8 +1008,8 @@
                                 return `${context.label}: ${value} (${percentage}%)`;
                             }
                         },
-                        titleColor: '#f1f5f9',
-                        bodyColor: '#f1f5f9',
+                        titleColor: textColor,
+                        bodyColor: textColor,
                         backgroundColor: 'var(--surface)',
                         borderColor: 'var(--border)',
                         borderWidth: 1,
