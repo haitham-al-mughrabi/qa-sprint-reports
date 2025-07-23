@@ -6,7 +6,7 @@
 class ThemeManager {
     constructor() {
         this.THEME_KEY = 'sprint-reports-theme';
-        this.DEFAULT_THEME = 'light'; // Changed default to light
+        this.DEFAULT_THEME = 'light'; // Default theme
         this.currentTheme = this.DEFAULT_THEME;
         
         // Initialize theme on creation

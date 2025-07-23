@@ -13,11 +13,11 @@
     <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
-    <link rel="stylesheet" href="/static/manage_data.css">
     <link rel="stylesheet" href="/static/rtl-support.css">
+    <link rel="stylesheet" href="/static/manage_data.css">
 
     <!-- Theme manager (loads early) -->
-    <script src="/static/theme-manager.js" defer></script>
+    <script src="/static/theme-manager.js"></script>
 
     <!-- Load non-critical CSS asynchronously -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
@@ -29,11 +29,11 @@
             <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div style="display: flex; align-items: center;">
                 <div class="nav-links">
-                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
-                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
-                    <a href="/manage" class="nav-link active"><i class="fas fa-cogs"></i> Manage Data</a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span data-i18n="nav_dashboard">Dashboard</span></a>
+                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> <span data-i18n="nav_reports">Reports</span></a>
+                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> <span data-i18n="nav_new_report">New Report</span></a>
+                    <a href="/manage" class="nav-link active"><i class="fas fa-cogs"></i> <span data-i18n="nav_manage_data">Manage Data</span></a>
+                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> <span data-i18n="nav_project_statistics">Project Statistics</span></a>
                 </div>
                 <div class="nav-controls">
                     <button class="theme-toggle" onclick="toggleTheme()">
@@ -203,8 +203,10 @@
         </div>
     </div>
 
+    <!-- Link to the external JavaScript files -->
     <script src="/static/translations.js" defer></script>
     <script src="/static/language-manager.js" defer></script>
+    <script src="/static/enhanced_script.js" defer></script>
     <script>
         let portfolios = [];
         let projects = [];
@@ -481,6 +483,15 @@
             if (window.themeManager) {
                 window.themeManager.init();
             }
+            
+            // Set active class for navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === window.location.pathname) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
         });
     </script>
     </div>
