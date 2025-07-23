@@ -102,9 +102,6 @@
                                                 <label for="portfolioName" class="field-label">Portfolio Name</label>
                                                 <select id="portfolioName" name="portfolioName" class="field-input">
                                                 </select>
-                                                <button type="button" class="add-btn-vertical" onclick="showAddPortfolioModal()">
-                                                    <i class="fas fa-plus"></i> Add New Portfolio
-                                                </button>
                                             </div>
                                             
                                             <div class="field-divider"></div>
@@ -114,9 +111,6 @@
                                                 <select id="projectName" name="projectName" class="field-input" onchange="onProjectSelection()">
                                                     <option value="">Select Project</option>
                                                 </select>
-                                                <button type="button" class="add-btn-vertical" onclick="showAddProjectModal()">
-                                                    <i class="fas fa-plus"></i> Add New Project
-                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -282,7 +276,7 @@
                                             <i class="fas fa-user-cog"></i> Tester(s) Information
                                         </h3>
                                         <button type="button" class="card-btn" onclick="showTesterModal()">
-                                            <i class="fas fa-plus"></i> Add/Select Tester
+                                            <i class="fas fa-user-plus"></i> Select Tester
                                         </button>
                                     </div>
                                     <div class="card-content">
@@ -298,7 +292,7 @@
                                             <i class="fas fa-users"></i> Team Members
                                         </h3>
                                         <button type="button" class="card-btn" onclick="showTeamMemberModal()">
-                                            <i class="fas fa-plus"></i> Add Team Member
+                                            <i class="fas fa-users"></i> Select Team Member
                                         </button>
                                     </div>
                                     <div class="card-content">
@@ -720,32 +714,22 @@
     <!-- Tester Modal -->
     <div id="testerModal" class="modal">
         <div class="modal-content">
-            <h3>🧪 Add/Select Tester</h3>
+            <h3>🧪 Select Tester</h3>
             <div class="modal-form">
                 <div class="form-group">
-                    <label for="existingTesterSelect">Select Existing Tester:</label>
+                    <label for="existingTesterSelect">Select Tester:</label>
                     <select id="existingTesterSelect" onchange="handleTesterSelection()">
-                        <option value="">-- Select from existing testers --</option>
+                        <option value="">-- Select a tester --</option>
                     </select>
                 </div>
-                
-                <div style="text-align: center; margin: 20px 0; color: rgba(255,255,255,0.6); font-weight: 600;">
-                    OR
-                </div>
-                
                 <div class="form-group">
-                    <label for="newTesterName">Add New Tester Name:</label>
-                    <input type="text" id="newTesterName" placeholder="Enter new tester name">
+                    <p class="help-text">To add new testers, please use the <strong>Manage Data</strong> page.</p>
                 </div>
                 
-                <div class="form-group">
-                    <label for="newTesterEmail">New Tester Email:</label>
-                    <input type="email" id="newTesterEmail" placeholder="Enter new tester email">
-                </div>
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('testerModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addSelectedTester()">Add Tester</button>
+                <button type="button" class="btn btn-primary" onclick="addSelectedTester()">Select Tester</button>
             </div>
         </div>
     </div>
@@ -753,54 +737,21 @@
     <!-- Team Member Modal -->
     <div id="teamMemberModal" class="modal">
         <div class="modal-content">
-            <h3>👥 Add/Select Team Member</h3>
+            <h3>👥 Select Team Member</h3>
             <div class="modal-form">
                 <div class="form-group">
-                    <label for="existingTeamMemberSelect">Select Existing Team Member:</label>
-                    <select id="existingTeamMemberSelect" onchange="handleTeamMemberSelection()">
-                        <option value="">-- Select from existing team members --</option>
+                    <label for="existingTeamMemberSelect">Select Team Member:</label>
+                    <select id="existingTeamMemberSelect">
+                        <option value="">-- Select a team member --</option>
                     </select>
                 </div>
-                
-                <div style="text-align: center; margin: 20px 0; color: rgba(255,255,255,0.6); font-weight: 600;">
-                    OR
-                </div>
-                
                 <div class="form-group">
-                    <label for="newTeamMemberName">Add New Team Member Name:</label>
-                    <input type="text" id="newTeamMemberName" placeholder="Enter new team member name">
-                </div>
-                
-                <div class="form-group">
-                    <label for="newTeamMemberEmail">New Team Member Email:</label>
-                    <input type="email" id="newTeamMemberEmail" placeholder="Enter new team member email">
-                </div>
-                
-                <div class="form-group">
-                    <label for="newTeamMemberRole">Role:</label>
-                    <select id="newTeamMemberRole">
-                        <option value="">Select Role</option>
-                        <option value="Project Owner">👑 Project Owner</option>
-                        <option value="Project Analyst"><i class="fas fa-chart-bar"></i> Project Analyst</option>
-                        <option value="Project Manager"><i class="fas fa-bullseye"></i> Project Manager</option>
-                        <option value="Business Analyst"><i class="fas fa-briefcase"></i> Business Analyst</option>
-                        <option value="Technical Lead"><i class="fas fa-bolt"></i> Technical Lead</option>
-                        <option value="Scrum Master"><i class="fas fa-running"></i> Scrum Master</option>
-                        <option value="Product Owner"><i class="fas fa-rocket"></i> Product Owner</option>
-                        <option value="Quality Assurance Lead"><i class="fas fa-search"></i> Quality Assurance Lead</option>
-                        <option value="DevOps Engineer"><i class="fas fa-wrench"></i> DevOps Engineer</option>
-                        <option value="UI/UX Designer"><i class="fas fa-paint-brush"></i> UI/UX Designer</option>
-                        <option value="Database Administrator"><i class="fas fa-database"></i> Database Administrator</option>
-                        <option value="Security Analyst"><i class="fas fa-shield-alt"></i> Security Analyst</option>
-                        <option value="System Administrator"><i class="fas fa-cog"></i> System Administrator</option>
-                        <option value="Stakeholder"><i class="fas fa-user-suit"></i> Stakeholder</option>
-                        <option value="Client Representative"><i class="fas fa-handshake"></i> Client Representative</option>
-                    </select>
+                    <p class="help-text">To add new team members, please use the <strong>Manage Data</strong> page.</p>
                 </div>
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('teamMemberModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addSelectedTeamMember()">Add Team Member</button>
+                <button type="button" class="btn btn-primary" onclick="addSelectedTeamMember()">Select Team Member</button>
             </div>
         </div>
     </div>

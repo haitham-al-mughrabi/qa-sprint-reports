@@ -10,6 +10,11 @@ let dashboardStatsCache = null; // Cache for dashboard statistics with structure
 // Auto-save functionality
 let autoSaveTimeout = null;
 
+// Constants for localStorage keys
+const FORM_DATA_KEY = 'qaReportFormData';
+const FORM_ARRAYS_KEY = 'qaReportArrayData';
+const CACHE_DURATION = 300000; // 5 minutes in milliseconds
+
 // Form-specific variables
 let requestData = [];
 let buildData = [];
@@ -1712,67 +1717,45 @@ async function loadExistingTeamMembers() {
 
 function handleTeamMemberSelection() {
     const select = document.getElementById('existingTeamMemberSelect');
-    const newNameField = document.getElementById('newTeamMemberName');
-    const newEmailField = document.getElementById('newTeamMemberEmail');
-    const newRoleField = document.getElementById('newTeamMemberRole');
 
-    if (select.value) {
-        newNameField.value = '';
-        newEmailField.value = '';
-        newRoleField.value = '';
-        newNameField.disabled = true;
-        newEmailField.disabled = true;
-        newRoleField.disabled = true;
-    } else {
-        newNameField.disabled = false;
-        newEmailField.disabled = false;
-        newRoleField.disabled = false;
+    // Since we simplified the modal to select-only, we don't need to handle role field
+    if (!select) {
+        console.error('Team member select element not found');
+        return;
     }
+    
+    // The function is called but doesn't need to do anything since we only have select functionality
 }
 
 function clearTeamMemberForm() {
-    document.getElementById('existingTeamMemberSelect').value = '';
-    document.getElementById('newTeamMemberName').value = '';
-    document.getElementById('newTeamMemberEmail').value = '';
-    document.getElementById('newTeamMemberRole').value = '';
-    document.getElementById('newTeamMemberName').disabled = false;
-    document.getElementById('newTeamMemberEmail').disabled = false;
-    document.getElementById('newTeamMemberRole').disabled = false;
+    const existingSelect = document.getElementById('existingTeamMemberSelect');
+
+    // Only clear the select dropdown since we simplified to select-only
+    if (existingSelect) {
+        existingSelect.value = '';
+    }
 }
 
 async function addSelectedTeamMember() {
     const existingSelect = document.getElementById('existingTeamMemberSelect');
-    const newName = document.getElementById('newTeamMemberName').value.trim();
-    const newEmail = document.getElementById('newTeamMemberEmail').value.trim();
-    const newRole = document.getElementById('newTeamMemberRole').value;
+
+    if (!existingSelect) {
+        console.error('Team member select element not found');
+        return;
+    }
+
+    if (!existingSelect.value) {
+        showToast('Please select a team member', 'warning');
+        return;
+    }
 
     let memberToAdd = null;
 
-    if (existingSelect.value) {
+    try {
         memberToAdd = JSON.parse(existingSelect.value);
-    } else if (newName && newEmail && newRole) {
-        try {
-            const response = await fetch('/api/team-members', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newName, email: newEmail, role: newRole })
-            });
-
-            if (response.ok) {
-                memberToAdd = await response.json();
-                showToast('New team member created and added!', 'success');
-            } else {
-                const error = await response.json();
-                showToast('Error creating team member: ' + (error.error || 'Unknown error'), 'error');
-                return;
-            }
-        } catch (error) {
-            console.error('Error creating team member:', error);
-            showToast('Error creating team member', 'error');
-            return;
-        }
-    } else {
-        showToast('Please either select an existing team member or provide all details for a new member', 'warning');
+    } catch (error) {
+        console.error('Error parsing team member data:', error);
+        showToast('Error parsing team member data', 'error');
         return;
     }
 
@@ -1849,60 +1832,45 @@ async function loadExistingTesters() {
 
 function handleTesterSelection() {
     const select = document.getElementById('existingTesterSelect');
-    const newNameField = document.getElementById('newTesterName');
-    const newEmailField = document.getElementById('newTesterEmail');
-
-    if (select.value) {
-        newNameField.value = '';
-        newEmailField.value = '';
-        newNameField.disabled = true;
-        newEmailField.disabled = true;
-    } else {
-        newNameField.disabled = false;
-        newEmailField.disabled = false;
+    
+    // Since we simplified the modal to select-only, we don't need to handle add fields
+    if (!select) {
+        console.error('Tester select element not found');
+        return;
     }
+    
+    // The function is called but doesn't need to do anything since we only have select functionality
 }
 
 function clearTesterForm() {
-    document.getElementById('existingTesterSelect').value = '';
-    document.getElementById('newTesterName').value = '';
-    document.getElementById('newTesterEmail').value = '';
-    document.getElementById('newTesterName').disabled = false;
-    document.getElementById('newTesterEmail').disabled = false;
+    const existingTesterSelect = document.getElementById('existingTesterSelect');
+    
+    // Only clear the select dropdown since we simplified to select-only
+    if (existingTesterSelect) {
+        existingTesterSelect.value = '';
+    }
 }
 
 async function addSelectedTester() {
     const existingTesterSelect = document.getElementById('existingTesterSelect');
-    const newTesterName = document.getElementById('newTesterName').value.trim();
-    const newTesterEmail = document.getElementById('newTesterEmail').value.trim();
+    
+    if (!existingTesterSelect) {
+        console.error('Tester select element not found');
+        return;
+    }
+
+    if (!existingTesterSelect.value) {
+        showToast('Please select a tester', 'warning');
+        return;
+    }
 
     let testerToAdd = null;
 
-    if (existingTesterSelect.value) {
+    try {
         testerToAdd = JSON.parse(existingTesterSelect.value);
-    } else if (newTesterName && newTesterEmail) {
-        try {
-            const response = await fetch('/api/testers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newTesterName, email: newTesterEmail })
-            });
-
-            if (response.ok) {
-                testerToAdd = await response.json();
-                showToast('New tester created and added!', 'success');
-            } else {
-                const error = await response.json();
-                showToast('Error creating tester: ' + (error.error || 'Unknown error'), 'error');
-                return;
-            }
-        } catch (error) {
-            console.error('Error creating tester:', error);
-            showToast('Error creating tester', 'error');
-            return;
-        }
-    } else {
-        showToast('Please either select an existing tester or provide name and email for a new tester', 'warning');
+    } catch (error) {
+        console.error('Error parsing tester data:', error);
+        showToast('Error parsing tester data', 'error');
         return;
     }
 
