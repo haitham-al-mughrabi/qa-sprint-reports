@@ -233,8 +233,8 @@ body::before {
 }
 
 .container {
-    width: 95%;
-    max-width: 1600px;
+    width: 98%;
+    max-width: 1800px;
     margin: 20px auto;
     padding: 20px;
     background: var(--surface);
