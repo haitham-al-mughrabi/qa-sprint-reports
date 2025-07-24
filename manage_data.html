@@ -269,7 +269,7 @@
                 </div>
                 <div class="form-group">
                     <label data-i18n="tester_roles">Tester Roles:</label>
-                    <div class="checkbox-list" style="max-height: 120px; padding: 1rem;">
+                    <div class="checkbox-list" style="max-height: 200px; padding: 1rem; overflow-y: auto;">
                         <label class="checkbox-item">
                             <input type="checkbox" id="isAutomationEngineer">
                             <span class="checkbox-text">
@@ -284,6 +284,68 @@
                                 <small>Handles manual testing tasks</small>
                             </span>
                         </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="isPerformanceTester">
+                            <span class="checkbox-text">
+                                <strong>Performance Tester</strong>
+                                <small>Specializes in performance and load testing</small>
+                            </span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="isSecurityTester">
+                            <span class="checkbox-text">
+                                <strong>Security Tester</strong>
+                                <small>Focuses on security and vulnerability testing</small>
+                            </span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="isApiTester">
+                            <span class="checkbox-text">
+                                <strong>API Tester</strong>
+                                <small>Specializes in API and backend testing</small>
+                            </span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="isMobileTester">
+                            <span class="checkbox-text">
+                                <strong>Mobile Tester</strong>
+                                <small>Focuses on mobile application testing</small>
+                            </span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="isWebTester">
+                            <span class="checkbox-text">
+                                <strong>Web Tester</strong>
+                                <small>Specializes in web application testing</small>
+                            </span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="isAccessibilityTester">
+                            <span class="checkbox-text">
+                                <strong>Accessibility Tester</strong>
+                                <small>Ensures accessibility compliance (WCAG, ADA)</small>
+                            </span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="isUsabilityTester">
+                            <span class="checkbox-text">
+                                <strong>Usability Tester</strong>
+                                <small>Focuses on user experience and usability</small>
+                            </span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="isTestLead">
+                            <span class="checkbox-text">
+                                <strong>Test Lead</strong>
+                                <small>Leads testing teams and coordinates testing activities</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="assign_projects">Assign to Projects (Optional):</label>
+                    <div id="projectAssignmentList" class="checkbox-list" style="max-height: 150px; padding: 1rem; overflow-y: auto;">
+                        <!-- Project checkboxes will be populated here -->
                     </div>
                 </div>
             </div>
@@ -459,7 +521,20 @@
             const roleBadges = [];
             if (t.is_automation_engineer) roleBadges.push('<span class="role-badge">Automation Engineer</span>');
             if (t.is_manual_engineer) roleBadges.push('<span class="role-badge">Manual Engineer</span>');
+            if (t.is_performance_tester) roleBadges.push('<span class="role-badge">Performance Tester</span>');
+            if (t.is_security_tester) roleBadges.push('<span class="role-badge">Security Tester</span>');
+            if (t.is_api_tester) roleBadges.push('<span class="role-badge">API Tester</span>');
+            if (t.is_mobile_tester) roleBadges.push('<span class="role-badge">Mobile Tester</span>');
+            if (t.is_web_tester) roleBadges.push('<span class="role-badge">Web Tester</span>');
+            if (t.is_accessibility_tester) roleBadges.push('<span class="role-badge">Accessibility Tester</span>');
+            if (t.is_usability_tester) roleBadges.push('<span class="role-badge">Usability Tester</span>');
+            if (t.is_test_lead) roleBadges.push('<span class="role-badge test-lead">Test Lead</span>');
+            
             const roleDisplay = roleBadges.length > 0 ? roleBadges.join(' ') : '<span style="color: var(--text-secondary); font-style: italic;">No roles assigned</span>';
+            
+            // Show assigned projects count
+            const projectCount = t.project_ids ? t.project_ids.length : 0;
+            const projectText = projectCount === 1 ? '1 project' : `${projectCount} projects`;
 
             return `<div class="data-item">
                 <div class="data-item-header">
@@ -473,6 +548,7 @@
                 <div class="data-item-content">
                     <p><strong>Email:</strong> ${t.email}</p>
                     <p><strong>Roles:</strong> ${roleDisplay}</p>
+                    <p><strong>Assigned to:</strong> ${projectText}</p>
                 </div>
             </div>`;
         };
@@ -603,6 +679,33 @@
 
             select.value = currentValue;
         }
+        
+        function populateProjectAssignmentList(selectedProjectIds = []) {
+            const container = document.getElementById('projectAssignmentList');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (projects && Array.isArray(projects) && projects.length > 0) {
+                projects.forEach(project => {
+                    const portfolioName = project.portfolio_name || 'No Portfolio';
+                    const isChecked = selectedProjectIds.includes(project.id);
+                    
+                    const checkboxItem = document.createElement('label');
+                    checkboxItem.className = 'checkbox-item';
+                    checkboxItem.innerHTML = `
+                        <input type="checkbox" id="project_${project.id}" value="${project.id}" ${isChecked ? 'checked' : ''}>
+                        <span class="checkbox-text">
+                            <strong>${project.name}</strong>
+                            <small>${portfolioName}</small>
+                        </span>
+                    `;
+                    container.appendChild(checkboxItem);
+                });
+            } else {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">No projects available</p>';
+            }
+        }
 
         // --- CRUD OPERATIONS ---
         // Show Modals for Adding
@@ -620,12 +723,29 @@
             populatePortfolioDropdown();
             showModal('addProjectModal');
         }
-        function showAddTesterModal() {
+        async function showAddTesterModal() {
             editingId = null;
             document.getElementById('testerName').value = '';
             document.getElementById('testerEmail').value = '';
+            
+            // Reset all role checkboxes
             document.getElementById('isAutomationEngineer').checked = false;
             document.getElementById('isManualEngineer').checked = false;
+            document.getElementById('isPerformanceTester').checked = false;
+            document.getElementById('isSecurityTester').checked = false;
+            document.getElementById('isApiTester').checked = false;
+            document.getElementById('isMobileTester').checked = false;
+            document.getElementById('isWebTester').checked = false;
+            document.getElementById('isAccessibilityTester').checked = false;
+            document.getElementById('isUsabilityTester').checked = false;
+            document.getElementById('isTestLead').checked = false;
+            
+            // Ensure projects are loaded before populating project list
+            if (!projects || projects.length === 0) {
+                await loadAllData();
+            }
+            
+            populateProjectAssignmentList();
             showModal('addTesterModal');
         }
         function showAddTeamMemberModal() { editingId = null; document.getElementById('teamMemberName').value = ''; document.getElementById('teamMemberEmail').value = ''; document.getElementById('teamMemberRole').value = ''; showModal('addTeamMemberModal'); }
@@ -633,14 +753,34 @@
         // Show Modals for Editing
         function editPortfolio(id) { const p = portfolios.find(i => i.id === id); if (!p) return; editingId = id; document.getElementById('portfolioName').value = p.name; document.getElementById('portfolioDescription').value = p.description; showModal('addPortfolioModal'); }
         function editProject(id) { const p = projects.find(i => i.id === id); if (!p) return; editingId = id; document.getElementById('projectName').value = p.name; document.getElementById('projectDescription').value = p.description; populatePortfolioDropdown(p.portfolio_id); showModal('addProjectModal'); }
-        function editTester(id) {
+        async function editTester(id) {
             const t = testers.find(i => i.id === id);
             if (!t) return;
+            
             editingId = id;
             document.getElementById('testerName').value = t.name;
             document.getElementById('testerEmail').value = t.email;
+            
+            // Set all role checkboxes
             document.getElementById('isAutomationEngineer').checked = t.is_automation_engineer || false;
             document.getElementById('isManualEngineer').checked = t.is_manual_engineer || false;
+            document.getElementById('isPerformanceTester').checked = t.is_performance_tester || false;
+            document.getElementById('isSecurityTester').checked = t.is_security_tester || false;
+            document.getElementById('isApiTester').checked = t.is_api_tester || false;
+            document.getElementById('isMobileTester').checked = t.is_mobile_tester || false;
+            document.getElementById('isWebTester').checked = t.is_web_tester || false;
+            document.getElementById('isAccessibilityTester').checked = t.is_accessibility_tester || false;
+            document.getElementById('isUsabilityTester').checked = t.is_usability_tester || false;
+            document.getElementById('isTestLead').checked = t.is_test_lead || false;
+            
+            // Ensure projects are loaded before populating project list
+            if (!projects || projects.length === 0) {
+                await loadAllData();
+            }
+            
+            // Populate project assignment list with current assignments
+            populateProjectAssignmentList(t.project_ids || []);
+            
             showModal('addTesterModal');
         }
         function editTeamMember(id) { const m = teamMembers.find(i => i.id === id); if (!m) return; editingId = id; document.getElementById('teamMemberName').value = m.name; document.getElementById('teamMemberEmail').value = m.email; document.getElementById('teamMemberRole').value = m.role; showModal('addTeamMemberModal'); }
@@ -705,14 +845,37 @@
 
             await saveData('projects', { name, portfolio_id, description }, 'addProjectModal');
         }
-        function saveTester() {
-            const name = document.getElementById('testerName').value;
-            const email = document.getElementById('testerEmail').value;
-            const is_automation_engineer = document.getElementById('isAutomationEngineer').checked;
-            const is_manual_engineer = document.getElementById('isManualEngineer').checked;
-            if (name && email) {
-                saveData('testers', { name, email, is_automation_engineer, is_manual_engineer }, 'addTesterModal');
+        async function saveTester() {
+            const name = document.getElementById('testerName').value.trim();
+            const email = document.getElementById('testerEmail').value.trim();
+            
+            if (!name || !email) {
+                alert('Name and email are required');
+                return;
             }
+            
+            // Get all role checkboxes
+            const testerData = {
+                name,
+                email,
+                is_automation_engineer: document.getElementById('isAutomationEngineer').checked,
+                is_manual_engineer: document.getElementById('isManualEngineer').checked,
+                is_performance_tester: document.getElementById('isPerformanceTester').checked,
+                is_security_tester: document.getElementById('isSecurityTester').checked,
+                is_api_tester: document.getElementById('isApiTester').checked,
+                is_mobile_tester: document.getElementById('isMobileTester').checked,
+                is_web_tester: document.getElementById('isWebTester').checked,
+                is_accessibility_tester: document.getElementById('isAccessibilityTester').checked,
+                is_usability_tester: document.getElementById('isUsabilityTester').checked,
+                is_test_lead: document.getElementById('isTestLead').checked
+            };
+            
+            // Get selected project IDs
+            const projectCheckboxes = document.querySelectorAll('#projectAssignmentList input[type="checkbox"]:checked');
+            const selectedProjectIds = Array.from(projectCheckboxes).map(cb => parseInt(cb.value));
+            testerData.project_ids = selectedProjectIds;
+            
+            await saveData('testers', testerData, 'addTesterModal');
         }
         function saveTeamMember() { const name = document.getElementById('teamMemberName').value, email = document.getElementById('teamMemberEmail').value, role = document.getElementById('teamMemberRole').value; if (name && email && role) saveData('team-members', { name, email, role }, 'addTeamMemberModal'); }
 

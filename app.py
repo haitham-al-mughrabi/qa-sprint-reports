@@ -518,8 +518,19 @@ class Tester(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
+    
+    # Expanded tester roles
     is_automation_engineer = db.Column(db.Boolean, default=False)
     is_manual_engineer = db.Column(db.Boolean, default=False)
+    is_performance_tester = db.Column(db.Boolean, default=False)
+    is_security_tester = db.Column(db.Boolean, default=False)
+    is_api_tester = db.Column(db.Boolean, default=False)
+    is_mobile_tester = db.Column(db.Boolean, default=False)
+    is_web_tester = db.Column(db.Boolean, default=False)
+    is_accessibility_tester = db.Column(db.Boolean, default=False)
+    is_usability_tester = db.Column(db.Boolean, default=False)
+    is_test_lead = db.Column(db.Boolean, default=False)
+    
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Many-to-many relationship with projects
@@ -533,6 +544,22 @@ class Tester(db.Model):
             roles.append('Automation Engineer')
         if self.is_manual_engineer:
             roles.append('Manual Engineer')
+        if self.is_performance_tester:
+            roles.append('Performance Tester')
+        if self.is_security_tester:
+            roles.append('Security Tester')
+        if self.is_api_tester:
+            roles.append('API Tester')
+        if self.is_mobile_tester:
+            roles.append('Mobile Tester')
+        if self.is_web_tester:
+            roles.append('Web Tester')
+        if self.is_accessibility_tester:
+            roles.append('Accessibility Tester')
+        if self.is_usability_tester:
+            roles.append('Usability Tester')
+        if self.is_test_lead:
+            roles.append('Test Lead')
         return roles
     
     @property
@@ -722,13 +749,25 @@ def manage_testers():
             'email': t.email,
             'is_automation_engineer': t.is_automation_engineer,
             'is_manual_engineer': t.is_manual_engineer,
+            'is_performance_tester': t.is_performance_tester,
+            'is_security_tester': t.is_security_tester,
+            'is_api_tester': t.is_api_tester,
+            'is_mobile_tester': t.is_mobile_tester,
+            'is_web_tester': t.is_web_tester,
+            'is_accessibility_tester': t.is_accessibility_tester,
+            'is_usability_tester': t.is_usability_tester,
+            'is_test_lead': t.is_test_lead,
             'role_types': t.role_types,
             'role_display': t.role_display,
+            'project_ids': [p.id for p in t.projects],
             'createdAt': t.createdAt.isoformat() if t.createdAt else None
         } for t in testers])
     
     elif request.method == 'POST':
         data = request.get_json()
+        
+        if not data or not data.get('name') or not data.get('email'):
+            return jsonify({'error': 'Name and email are required'}), 400
         
         # Check if email already exists
         existing_tester = Tester.query.filter_by(email=data['email']).first()
@@ -739,18 +778,43 @@ def manage_testers():
             name=data['name'],
             email=data['email'],
             is_automation_engineer=data.get('is_automation_engineer', False),
-            is_manual_engineer=data.get('is_manual_engineer', False)
+            is_manual_engineer=data.get('is_manual_engineer', False),
+            is_performance_tester=data.get('is_performance_tester', False),
+            is_security_tester=data.get('is_security_tester', False),
+            is_api_tester=data.get('is_api_tester', False),
+            is_mobile_tester=data.get('is_mobile_tester', False),
+            is_web_tester=data.get('is_web_tester', False),
+            is_accessibility_tester=data.get('is_accessibility_tester', False),
+            is_usability_tester=data.get('is_usability_tester', False),
+            is_test_lead=data.get('is_test_lead', False)
         )
+        
+        # Handle project assignments
+        project_ids = data.get('project_ids', [])
+        if project_ids:
+            projects = Project.query.filter(Project.id.in_(project_ids)).all()
+            tester.projects = projects
+        
         db.session.add(tester)
         db.session.commit()
+        
         return jsonify({
             'id': tester.id,
             'name': tester.name,
             'email': tester.email,
             'is_automation_engineer': tester.is_automation_engineer,
             'is_manual_engineer': tester.is_manual_engineer,
+            'is_performance_tester': tester.is_performance_tester,
+            'is_security_tester': tester.is_security_tester,
+            'is_api_tester': tester.is_api_tester,
+            'is_mobile_tester': tester.is_mobile_tester,
+            'is_web_tester': tester.is_web_tester,
+            'is_accessibility_tester': tester.is_accessibility_tester,
+            'is_usability_tester': tester.is_usability_tester,
+            'is_test_lead': tester.is_test_lead,
             'role_types': tester.role_types,
-            'role_display': tester.role_display
+            'role_display': tester.role_display,
+            'project_ids': [p.id for p in tester.projects]
         }), 201
 
 @app.route('/api/testers/<int:tester_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -764,34 +828,75 @@ def manage_tester(tester_id):
             'email': tester.email,
             'is_automation_engineer': tester.is_automation_engineer,
             'is_manual_engineer': tester.is_manual_engineer,
+            'is_performance_tester': tester.is_performance_tester,
+            'is_security_tester': tester.is_security_tester,
+            'is_api_tester': tester.is_api_tester,
+            'is_mobile_tester': tester.is_mobile_tester,
+            'is_web_tester': tester.is_web_tester,
+            'is_accessibility_tester': tester.is_accessibility_tester,
+            'is_usability_tester': tester.is_usability_tester,
+            'is_test_lead': tester.is_test_lead,
             'role_types': tester.role_types,
             'role_display': tester.role_display,
+            'project_ids': [p.id for p in tester.projects],
             'createdAt': tester.createdAt.isoformat() if tester.createdAt else None
         })
     
     elif request.method == 'PUT':
-        data = request.get_json()
-        
-        # Check if email is being changed and if new email already exists
-        if data.get('email') != tester.email:
-            existing_tester = Tester.query.filter_by(email=data['email']).first()
-            if existing_tester:
-                return jsonify({'error': 'Tester with this email already exists'}), 400
-        
-        tester.name = data.get('name', tester.name)
-        tester.email = data.get('email', tester.email)
-        tester.is_automation_engineer = data.get('is_automation_engineer', tester.is_automation_engineer)
-        tester.is_manual_engineer = data.get('is_manual_engineer', tester.is_manual_engineer)
-        db.session.commit()
-        return jsonify({
-            'id': tester.id,
-            'name': tester.name,
-            'email': tester.email,
-            'is_automation_engineer': tester.is_automation_engineer,
-            'is_manual_engineer': tester.is_manual_engineer,
-            'role_types': tester.role_types,
-            'role_display': tester.role_display
-        })
+        try:
+            data = request.get_json()
+            
+            # Check if email is being changed and if new email already exists
+            if data.get('email') != tester.email:
+                existing_tester = Tester.query.filter_by(email=data['email']).first()
+                if existing_tester:
+                    return jsonify({'error': 'Tester with this email already exists'}), 400
+            
+            # Update basic fields
+            tester.name = data.get('name', tester.name)
+            tester.email = data.get('email', tester.email)
+            
+            # Update all role fields
+            tester.is_automation_engineer = data.get('is_automation_engineer', tester.is_automation_engineer)
+            tester.is_manual_engineer = data.get('is_manual_engineer', tester.is_manual_engineer)
+            tester.is_performance_tester = data.get('is_performance_tester', tester.is_performance_tester)
+            tester.is_security_tester = data.get('is_security_tester', tester.is_security_tester)
+            tester.is_api_tester = data.get('is_api_tester', tester.is_api_tester)
+            tester.is_mobile_tester = data.get('is_mobile_tester', tester.is_mobile_tester)
+            tester.is_web_tester = data.get('is_web_tester', tester.is_web_tester)
+            tester.is_accessibility_tester = data.get('is_accessibility_tester', tester.is_accessibility_tester)
+            tester.is_usability_tester = data.get('is_usability_tester', tester.is_usability_tester)
+            tester.is_test_lead = data.get('is_test_lead', tester.is_test_lead)
+            
+            # Update project assignments
+            project_ids = data.get('project_ids', [])
+            if project_ids is not None:
+                projects = Project.query.filter(Project.id.in_(project_ids)).all()
+                tester.projects = projects
+            
+            db.session.commit()
+            
+            return jsonify({
+                'id': tester.id,
+                'name': tester.name,
+                'email': tester.email,
+                'is_automation_engineer': tester.is_automation_engineer,
+                'is_manual_engineer': tester.is_manual_engineer,
+                'is_performance_tester': tester.is_performance_tester,
+                'is_security_tester': tester.is_security_tester,
+                'is_api_tester': tester.is_api_tester,
+                'is_mobile_tester': tester.is_mobile_tester,
+                'is_web_tester': tester.is_web_tester,
+                'is_accessibility_tester': tester.is_accessibility_tester,
+                'is_usability_tester': tester.is_usability_tester,
+                'is_test_lead': tester.is_test_lead,
+                'role_types': tester.role_types,
+                'role_display': tester.role_display,
+                'project_ids': [p.id for p in tester.projects]
+            })
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
     
     elif request.method == 'DELETE':
         db.session.delete(tester)
@@ -1560,7 +1665,15 @@ def migrate_database():
         
         tester_migrations = [
             ('is_automation_engineer', 'BOOLEAN DEFAULT 0'),
-            ('is_manual_engineer', 'BOOLEAN DEFAULT 0')
+            ('is_manual_engineer', 'BOOLEAN DEFAULT 0'),
+            ('is_performance_tester', 'BOOLEAN DEFAULT 0'),
+            ('is_security_tester', 'BOOLEAN DEFAULT 0'),
+            ('is_api_tester', 'BOOLEAN DEFAULT 0'),
+            ('is_mobile_tester', 'BOOLEAN DEFAULT 0'),
+            ('is_web_tester', 'BOOLEAN DEFAULT 0'),
+            ('is_accessibility_tester', 'BOOLEAN DEFAULT 0'),
+            ('is_usability_tester', 'BOOLEAN DEFAULT 0'),
+            ('is_test_lead', 'BOOLEAN DEFAULT 0')
         ]
         
         for column_name, column_type in tester_migrations:
