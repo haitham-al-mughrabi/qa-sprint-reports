@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,11 @@
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload" as="style" onload="this.rel='stylesheet'">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload"
+        as="style" onload="this.rel='stylesheet'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
@@ -20,27 +24,38 @@
     <script src="/static/theme-manager.js"></script>
 
     <!-- Load non-critical CSS asynchronously -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"></noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+    </noscript>
 </head>
+
 <body>
     <nav class="main-nav">
         <div class="nav-container">
             <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div style="display: flex; align-items: center;">
                 <div class="nav-links">
-                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span data-i18n="nav_dashboard">Dashboard</span></a>
-                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> <span data-i18n="nav_reports">Reports</span></a>
-                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> <span data-i18n="nav_new_report">New Report</span></a>
-                    <a href="/manage" class="nav-link active"><i class="fas fa-cogs"></i> <span data-i18n="nav_manage_data">Manage Data</span></a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> <span data-i18n="nav_project_statistics">Project Statistics</span></a>
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span
+                            data-i18n="nav_dashboard">Dashboard</span></a>
+                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> <span
+                            data-i18n="nav_reports">Reports</span></a>
+                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> <span
+                            data-i18n="nav_new_report">New Report</span></a>
+                    <a href="/manage" class="nav-link active"><i class="fas fa-cogs"></i> <span
+                            data-i18n="nav_manage_data">Manage Data</span></a>
+                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> <span
+                            data-i18n="nav_project_statistics">Project Statistics</span></a>
                 </div>
                 <div class="nav-controls">
                     <button class="theme-toggle" onclick="toggleTheme()">
                         <i class="fas fa-sun" id="theme-icon"></i>
                         <span id="theme-text" data-i18n="theme_light">Light</span>
                     </button>
-                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
+                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()"
+                        data-i18n="language">العربية</button>
                 </div>
             </div>
         </div>
@@ -56,10 +71,14 @@
 
         <div class="tabs-container">
             <div class="tabs">
-                <button class="btn btn-secondary active" onclick="showTab('portfolios')"><i class="fas fa-briefcase"></i> <span data-i18n="portfolios">Portfolios</span></button>
-                <button class="btn btn-secondary" onclick="showTab('projects')"><i class="fas fa-project-diagram"></i> <span data-i18n="projects">Projects</span></button>
-                <button class="btn btn-secondary" onclick="showTab('testers')"><i class="fas fa-user-cog"></i> <span data-i18n="testers">Testers</span></button>
-                <button class="btn btn-secondary" onclick="showTab('team')"><i class="fas fa-users"></i> <span data-i18n="team">Team</span></button>
+                <button class="btn btn-secondary active" onclick="showTab('portfolios')"><i
+                        class="fas fa-briefcase"></i> <span data-i18n="portfolios">Portfolios</span></button>
+                <button class="btn btn-secondary" onclick="showTab('projects')"><i class="fas fa-project-diagram"></i>
+                    <span data-i18n="projects">Projects</span></button>
+                <button class="btn btn-secondary" onclick="showTab('testers')"><i class="fas fa-user-cog"></i> <span
+                        data-i18n="testers">Testers</span></button>
+                <button class="btn btn-secondary" onclick="showTab('team')"><i class="fas fa-users"></i> <span
+                        data-i18n="team">Team</span></button>
             </div>
         </div>
 
@@ -67,20 +86,23 @@
         <div id="portfolios" class="tab-content active">
             <div class="dashboard-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="fas fa-briefcase"></i> <span data-i18n="portfolio_management">Portfolio Management</span></h2>
-                    <button class="btn btn-primary" onclick="showAddPortfolioModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add_portfolio">Add Portfolio</span></button>
+                    <h2 class="section-title"><i class="fas fa-briefcase"></i> <span
+                            data-i18n="portfolio_management">Portfolio Management</span></h2>
+                    <button class="btn btn-primary" onclick="showAddPortfolioModal()"><i class="fas fa-plus-circle"></i>
+                        <span data-i18n="add_portfolio">Add Portfolio</span></button>
                 </div>
-            <div class="search-filter-container">
-                 <input type="text" data-i18n-placeholder="search_portfolios" placeholder="Search portfolios..." id="portfolioSearch" onkeyup="displayPortfolios()">
-            </div>
-            <div class="stats-grid">
-                <div class="stat-card-small">
-                    <div class="icon-bg"><i class="fas fa-briefcase"></i></div>
-                    <h3 id="totalPortfolios">0</h3>
-                    <p data-i18n="total_portfolios">Total Portfolios</p>
+                <div class="search-filter-container">
+                    <input type="text" data-i18n-placeholder="search_portfolios" placeholder="Search portfolios..."
+                        id="portfolioSearch" onkeyup="displayPortfolios()">
                 </div>
-            </div>
-            <div id="portfoliosList" class="data-list"></div>
+                <div class="stats-grid">
+                    <div class="stat-card-small">
+                        <div class="icon-bg"><i class="fas fa-briefcase"></i></div>
+                        <h3 id="totalPortfolios">0</h3>
+                        <p data-i18n="total_portfolios">Total Portfolios</p>
+                    </div>
+                </div>
+                <div id="portfoliosList" class="data-list"></div>
             </div>
         </div>
 
@@ -88,13 +110,18 @@
         <div id="projects" class="tab-content">
             <div class="dashboard-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="fas fa-project-diagram"></i> <span data-i18n="projects">Project Management</span></h2>
-                    <button class="btn btn-primary" onclick="showAddProjectModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add">Add Project</span></button>
+                    <h2 class="section-title"><i class="fas fa-project-diagram"></i> <span data-i18n="projects">Project
+                            Management</span></h2>
+                    <button class="btn btn-primary" onclick="showAddProjectModal()"><i class="fas fa-plus-circle"></i>
+                        <span data-i18n="add">Add Project</span></button>
                 </div>
-             <div class="search-filter-container">
-                <input type="text" data-i18n-placeholder="search_projects" placeholder="Search projects..." id="projectSearch" onkeyup="displayProjects()">
-                <select class="filter-select" id="portfolioFilter" onchange="displayProjects()"><option value="" data-i18n="all_portfolios">All Portfolios</option></select>
-            </div>
+                <div class="search-filter-container">
+                    <input type="text" data-i18n-placeholder="search_projects" placeholder="Search projects..."
+                        id="projectSearch" onkeyup="displayProjects()">
+                    <select class="filter-select" id="portfolioFilter" onchange="displayProjects()">
+                        <option value="" data-i18n="all_portfolios">All Portfolios</option>
+                    </select>
+                </div>
                 <div class="stats-grid">
                     <div class="stat-card-small">
                         <div class="icon-bg"><i class="fas fa-project-diagram"></i></div>
@@ -112,12 +139,15 @@
         <div id="testers" class="tab-content">
             <div class="dashboard-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="fas fa-user-cog"></i> <span data-i18n="testers">Tester Management</span></h2>
-                    <button class="btn btn-primary" onclick="showAddTesterModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add">Add Tester</span></button>
+                    <h2 class="section-title"><i class="fas fa-user-cog"></i> <span data-i18n="testers">Tester
+                            Management</span></h2>
+                    <button class="btn btn-primary" onclick="showAddTesterModal()"><i class="fas fa-plus-circle"></i>
+                        <span data-i18n="add">Add Tester</span></button>
                 </div>
-             <div class="search-filter-container">
-                <input type="text" data-i18n-placeholder="search_testers" placeholder="Search testers..." id="testerSearch" onkeyup="displayTesters()">
-            </div>
+                <div class="search-filter-container">
+                    <input type="text" data-i18n-placeholder="search_testers" placeholder="Search testers..."
+                        id="testerSearch" onkeyup="displayTesters()">
+                </div>
                 <div class="stats-grid">
                     <div class="stat-card-small">
                         <div class="icon-bg"><i class="fas fa-user-cog"></i></div>
@@ -135,18 +165,40 @@
         <div id="team" class="tab-content">
             <div class="dashboard-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="fas fa-users"></i> <span data-i18n="team">Team Member Management</span></h2>
-                    <button class="btn btn-primary" onclick="showAddTeamMemberModal()"><i class="fas fa-plus-circle"></i> <span data-i18n="add_team_member">Add Team Member</span></button>
+                    <h2 class="section-title"><i class="fas fa-users"></i> <span data-i18n="team">Team Member
+                            Management</span></h2>
+                    <button class="btn btn-primary" onclick="showAddTeamMemberModal()"><i
+                            class="fas fa-plus-circle"></i> <span data-i18n="add_team_member">Add Team
+                            Member</span></button>
                 </div>
-            <div class="search-filter-container">
-                <input type="text" data-i18n-placeholder="search_team_members" placeholder="Search team members..." id="teamSearch" onkeyup="displayTeamMembers()">
-                <select class="filter-select" id="roleFilter" onchange="displayTeamMembers()"><option value="" data-i18n="all_roles">All Roles</option></select>
-            </div>
+                <div class="search-filter-container">
+                    <input type="text" data-i18n-placeholder="search_team_members" placeholder="Search team members..."
+                        id="teamSearch" onkeyup="displayTeamMembers()">
+                    <select class="filter-select" id="roleFilter" onchange="displayTeamMembers()">
+                        <option value="" data-i18n="all_roles">All Roles</option>
+                    </select>
+                </div>
                 <div class="stats-grid">
-                    <div class="stat-card-small"><div class="icon-bg"><i class="fas fa-users"></i></div><h3 id="totalTeamMembers">0</h3><p data-i18n="total_team">Total Team</p></div>
-                    <div class="stat-card-small"><div class="icon-bg"><i class="fas fa-crown"></i></div><h3 id="projectOwners">0</h3><p data-i18n="project_owners">Project Owners</p></div>
-                    <div class="stat-card-small"><div class="icon-bg"><i class="fas fa-user-graduate"></i></div><h3 id="projectAnalysts">0</h3><p data-i18n="analysts">Analysts</p></div>
-                    <div class="stat-card-small"><div class="icon-bg"><i class="fas fa-user-tie"></i></div><h3 id="projectManagers">0</h3><p data-i18n="managers">Managers</p></div>
+                    <div class="stat-card-small">
+                        <div class="icon-bg"><i class="fas fa-users"></i></div>
+                        <h3 id="totalTeamMembers">0</h3>
+                        <p data-i18n="total_team">Total Team</p>
+                    </div>
+                    <div class="stat-card-small">
+                        <div class="icon-bg"><i class="fas fa-crown"></i></div>
+                        <h3 id="projectOwners">0</h3>
+                        <p data-i18n="project_owners">Project Owners</p>
+                    </div>
+                    <div class="stat-card-small">
+                        <div class="icon-bg"><i class="fas fa-user-graduate"></i></div>
+                        <h3 id="projectAnalysts">0</h3>
+                        <p data-i18n="analysts">Analysts</p>
+                    </div>
+                    <div class="stat-card-small">
+                        <div class="icon-bg"><i class="fas fa-user-tie"></i></div>
+                        <h3 id="projectManagers">0</h3>
+                        <p data-i18n="managers">Managers</p>
+                    </div>
                 </div>
                 <div id="teamMembersList" class="data-list">
                     <div class="empty-state">Loading team members...</div>
@@ -163,10 +215,15 @@
                 <h3 data-i18n="add_new_portfolio">Add New Portfolio</h3>
             </div>
             <div class="modal-form">
-                <div class="form-group"><label for="portfolioName" data-i18n="portfolio_name">Portfolio Name:</label><input type="text" id="portfolioName" required></div>
-                <div class="form-group"><label for="portfolioDescription" data-i18n="description">Description:</label><textarea id="portfolioDescription" rows="4"></textarea></div>
+                <div class="form-group"><label for="portfolioName" data-i18n="portfolio_name">Portfolio
+                        Name:</label><input type="text" id="portfolioName" required></div>
+                <div class="form-group"><label for="portfolioDescription"
+                        data-i18n="description">Description:</label><textarea id="portfolioDescription"
+                        rows="4"></textarea></div>
             </div>
-            <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addPortfolioModal')" data-i18n="cancel">Cancel</button><button type="button" class="btn btn-primary" onclick="savePortfolio()" data-i18n="save">Save</button></div>
+            <div class="modal-buttons"><button type="button" class="btn btn-secondary"
+                    onclick="closeModal('addPortfolioModal')" data-i18n="cancel">Cancel</button><button type="button"
+                    class="btn btn-primary" onclick="savePortfolio()" data-i18n="save">Save</button></div>
         </div>
     </div>
 
@@ -177,11 +234,19 @@
                 <h3 data-i18n="add_new_project">Add New Project</h3>
             </div>
             <div class="modal-form">
-                <div class="form-group"><label for="projectName" data-i18n="project_name">Project Name:</label><input type="text" id="projectName" required></div>
-                <div class="form-group"><label for="projectPortfolio" data-i18n="portfolio">Portfolio:</label><select id="projectPortfolio"><option value="" data-i18n="no_portfolio">No Portfolio (Standalone Project)</option></select></div>
-                <div class="form-group"><label for="projectDescription" data-i18n="description">Description:</label><textarea id="projectDescription" rows="4"></textarea></div>
+                <div class="form-group"><label for="projectName" data-i18n="project_name">Project Name:</label><input
+                        type="text" id="projectName" required></div>
+                <div class="form-group"><label for="projectPortfolio" data-i18n="portfolio">Portfolio:</label><select
+                        id="projectPortfolio">
+                        <option value="" data-i18n="no_portfolio">No Portfolio (Standalone Project)</option>
+                    </select></div>
+                <div class="form-group"><label for="projectDescription"
+                        data-i18n="description">Description:</label><textarea id="projectDescription"
+                        rows="4"></textarea></div>
             </div>
-            <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addProjectModal')" data-i18n="cancel">Cancel</button><button type="button" class="btn btn-primary" onclick="saveProject()" data-i18n="save">Save</button></div>
+            <div class="modal-buttons"><button type="button" class="btn btn-secondary"
+                    onclick="closeModal('addProjectModal')" data-i18n="cancel">Cancel</button><button type="button"
+                    class="btn btn-primary" onclick="saveProject()" data-i18n="save">Save</button></div>
         </div>
     </div>
 
@@ -222,7 +287,9 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addTesterModal')" data-i18n="cancel">Cancel</button><button type="button" class="btn btn-primary" onclick="saveTester()" data-i18n="save">Save</button></div>
+            <div class="modal-buttons"><button type="button" class="btn btn-secondary"
+                    onclick="closeModal('addTesterModal')" data-i18n="cancel">Cancel</button><button type="button"
+                    class="btn btn-primary" onclick="saveTester()" data-i18n="save">Save</button></div>
         </div>
     </div>
 
@@ -233,10 +300,20 @@
                 <h3 data-i18n="add_new_team_member">Add New Team Member</h3>
             </div>
             <div class="modal-form">
-                <div class="form-row"><div class="form-group"><label for="teamMemberName" data-i18n="name">Name:</label><input type="text" id="teamMemberName" required></div><div class="form-group"><label for="teamMemberEmail" data-i18n="email">Email:</label><input type="email" id="teamMemberEmail" required></div></div>
-                <div class="form-group"><label for="teamMemberRole" data-i18n="role">Role:</label><select id="teamMemberRole" required><option value="" data-i18n="select_role">Select Role</option></select></div>
+                <div class="form-row">
+                    <div class="form-group"><label for="teamMemberName" data-i18n="name">Name:</label><input type="text"
+                            id="teamMemberName" required></div>
+                    <div class="form-group"><label for="teamMemberEmail" data-i18n="email">Email:</label><input
+                            type="email" id="teamMemberEmail" required></div>
+                </div>
+                <div class="form-group"><label for="teamMemberRole" data-i18n="role">Role:</label><select
+                        id="teamMemberRole" required>
+                        <option value="" data-i18n="select_role">Select Role</option>
+                    </select></div>
             </div>
-            <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addTeamMemberModal')" data-i18n="cancel">Cancel</button><button type="button" class="btn btn-primary" onclick="saveTeamMember()" data-i18n="save">Save</button></div>
+            <div class="modal-buttons"><button type="button" class="btn btn-secondary"
+                    onclick="closeModal('addTeamMemberModal')" data-i18n="cancel">Cancel</button><button type="button"
+                    class="btn btn-primary" onclick="saveTeamMember()" data-i18n="save">Save</button></div>
         </div>
     </div>
 
@@ -260,8 +337,10 @@
                 </div>
             </div>
             <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('assignTesterProjectsModal')" data-i18n="cancel">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveTesterProjects()" data-i18n="save">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('assignTesterProjectsModal')"
+                    data-i18n="cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveTesterProjects()"
+                    data-i18n="save">Save</button>
             </div>
         </div>
     </div>
@@ -284,7 +363,7 @@
             setupRoleFilters();
             await loadAllData();
             updateAll();
-            
+
         });
 
         function setupRoleFilters() {
@@ -304,22 +383,16 @@
                     fetch('/api/testers').then(res => res.ok ? res.json() : []),
                     fetch('/api/team-members').then(res => res.ok ? res.json() : [])
                 ]);
-                console.log('Data loaded:', {
-                    portfolios: portfolios.length,
-                    projects: projects.length, 
-                    testers: testers.length,
-                    teamMembers: teamMembers.length
-                });
             } catch (error) {
                 console.error("Failed to load data:", error);
-                alert("Failed to load system data. Please check the console for errors.");
             }
         }
-        
+
         function updateAll() {
             updateStats();
             displayAllLists();
             populatePortfolioFilter();
+            populatePortfolioDropdown();
         }
 
         function updateStats() {
@@ -387,7 +460,7 @@
             if (t.is_automation_engineer) roleBadges.push('<span class="role-badge">Automation Engineer</span>');
             if (t.is_manual_engineer) roleBadges.push('<span class="role-badge">Manual Engineer</span>');
             const roleDisplay = roleBadges.length > 0 ? roleBadges.join(' ') : '<span style="color: var(--text-secondary); font-style: italic;">No roles assigned</span>';
-            
+
             return `<div class="data-item">
                 <div class="data-item-header">
                     <h3 class="data-item-title">${t.name}</h3>
@@ -426,27 +499,27 @@
                 content.style.display = 'none';
                 content.classList.remove('active');
             });
-            
+
             // Remove active class from all buttons
             document.querySelectorAll('.tabs .btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // Show target content
             const targetContent = document.getElementById(tabName);
             if (targetContent) {
                 targetContent.style.display = 'block';
                 targetContent.classList.add('active');
             }
-            
+
             // Add active class to clicked button
             const activeButton = document.querySelector(`[onclick="showTab('${tabName}')"]`);
             if (activeButton) {
                 activeButton.classList.add('active');
             }
-            
+
             // Call the appropriate display function to populate the tab content
-            switch(tabName) {
+            switch (tabName) {
                 case 'portfolios':
                     displayPortfolios();
                     break;
@@ -464,7 +537,7 @@
 
         function showModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-        
+
         // Simple toast notification function
         function showToast(message, type = 'info') {
             // Create toast element if it doesn't exist
@@ -479,20 +552,20 @@
                 `;
                 document.body.appendChild(toast);
             }
-            
+
             // Set background color based on type
             const colors = {
                 success: '#28a745',
-                error: '#dc3545', 
+                error: '#dc3545',
                 warning: '#ffc107',
                 info: '#17a2b8'
             };
             toast.style.backgroundColor = colors[type] || colors.info;
-            
+
             // Show toast
             toast.textContent = message;
             toast.style.opacity = '1';
-            
+
             // Hide after 3 seconds
             setTimeout(() => {
                 toast.style.opacity = '0';
@@ -501,71 +574,76 @@
 
         function populatePortfolioDropdown(selectedId = '') {
             const select = document.getElementById('projectPortfolio');
+            if (!select) return;
+
             select.innerHTML = '<option value="">No Portfolio (Standalone Project)</option>';
-            
-            portfolios.forEach(p => {
-                const option = document.createElement('option');
-                option.value = p.id;
-                option.textContent = p.name;
-                if (p.id == selectedId) {
-                    option.selected = true;
-                }
-                select.appendChild(option);
-            });
+
+            if (portfolios && Array.isArray(portfolios)) {
+                portfolios.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.id;
+                    option.textContent = p.name;
+                    if (p.id == selectedId) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            }
         }
         function populatePortfolioFilter() {
             const select = document.getElementById('portfolioFilter');
+            if (!select) return;
+
             const currentValue = select.value;
-            select.innerHTML = '<option value="">All Portfolios</option>' + portfolios.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            select.innerHTML = '<option value="">All Portfolios</option>';
+
+            if (portfolios && Array.isArray(portfolios)) {
+                select.innerHTML += portfolios.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            }
+
             select.value = currentValue;
         }
 
         // --- CRUD OPERATIONS ---
         // Show Modals for Adding
-        function showAddPortfolioModal() { editingId=null; document.getElementById('portfolioName').value=''; document.getElementById('portfolioDescription').value=''; showModal('addPortfolioModal'); }
-        function showAddProjectModal() { 
+        function showAddPortfolioModal() { editingId = null; document.getElementById('portfolioName').value = ''; document.getElementById('portfolioDescription').value = ''; showModal('addPortfolioModal'); }
+        async function showAddProjectModal() {
             editingId = null;
             document.getElementById('projectName').value = '';
             document.getElementById('projectDescription').value = '';
-            
-            // Populate the portfolio dropdown directly
-            const select = document.getElementById('projectPortfolio');
-            select.innerHTML = '<option value="">No Portfolio (Standalone Project)</option>';
-            
-            // Add each portfolio as an option
-            portfolios.forEach(portfolio => {
-                const option = document.createElement('option');
-                option.value = portfolio.id;
-                option.textContent = portfolio.name;
-                select.appendChild(option);
-            });
-            
+
+            // Ensure data is loaded before populating dropdown
+            if (!portfolios || portfolios.length === 0) {
+                await loadAllData();
+            }
+
+            populatePortfolioDropdown();
             showModal('addProjectModal');
         }
-        function showAddTesterModal() { 
-            editingId=null; 
-            document.getElementById('testerName').value=''; 
-            document.getElementById('testerEmail').value=''; 
-            document.getElementById('isAutomationEngineer').checked=false; 
-            document.getElementById('isManualEngineer').checked=false; 
-            showModal('addTesterModal'); 
+        function showAddTesterModal() {
+            editingId = null;
+            document.getElementById('testerName').value = '';
+            document.getElementById('testerEmail').value = '';
+            document.getElementById('isAutomationEngineer').checked = false;
+            document.getElementById('isManualEngineer').checked = false;
+            showModal('addTesterModal');
         }
-        function showAddTeamMemberModal() { editingId=null; document.getElementById('teamMemberName').value=''; document.getElementById('teamMemberEmail').value=''; document.getElementById('teamMemberRole').value=''; showModal('addTeamMemberModal'); }
+        function showAddTeamMemberModal() { editingId = null; document.getElementById('teamMemberName').value = ''; document.getElementById('teamMemberEmail').value = ''; document.getElementById('teamMemberRole').value = ''; showModal('addTeamMemberModal'); }
 
         // Show Modals for Editing
-        function editPortfolio(id) { const p = portfolios.find(i=>i.id===id); if(!p) return; editingId=id; document.getElementById('portfolioName').value=p.name; document.getElementById('portfolioDescription').value=p.description; showModal('addPortfolioModal'); }
-        function editProject(id) { const p = projects.find(i=>i.id===id); if(!p) return; editingId=id; document.getElementById('projectName').value=p.name; document.getElementById('projectDescription').value=p.description; populatePortfolioDropdown(p.portfolio_id); showModal('addProjectModal'); }
-        function editTester(id) { 
-            const t = testers.find(i=>i.id===id); 
-            if(!t) return; 
-            editingId=id; 
-            document.getElementById('testerName').value=t.name; 
-            document.getElementById('testerEmail').value=t.email; 
-            document.getElementById('isAutomationEngineer').checked=t.is_automation_engineer || false; 
-            document.getElementById('isManualEngineer').checked=t.is_manual_engineer || false; 
-            showModal('addTesterModal'); 
+        function editPortfolio(id) { const p = portfolios.find(i => i.id === id); if (!p) return; editingId = id; document.getElementById('portfolioName').value = p.name; document.getElementById('portfolioDescription').value = p.description; showModal('addPortfolioModal'); }
+        function editProject(id) { const p = projects.find(i => i.id === id); if (!p) return; editingId = id; document.getElementById('projectName').value = p.name; document.getElementById('projectDescription').value = p.description; populatePortfolioDropdown(p.portfolio_id); showModal('addProjectModal'); }
+        function editTester(id) {
+            const t = testers.find(i => i.id === id);
+            if (!t) return;
+            editingId = id;
+            document.getElementById('testerName').value = t.name;
+            document.getElementById('testerEmail').value = t.email;
+            document.getElementById('isAutomationEngineer').checked = t.is_automation_engineer || false;
+            document.getElementById('isManualEngineer').checked = t.is_manual_engineer || false;
+            showModal('addTesterModal');
         }
-        function editTeamMember(id) { const m = teamMembers.find(i=>i.id===id); if(!m) return; editingId=id; document.getElementById('teamMemberName').value=m.name; document.getElementById('teamMemberEmail').value=m.email; document.getElementById('teamMemberRole').value=m.role; showModal('addTeamMemberModal'); }
+        function editTeamMember(id) { const m = teamMembers.find(i => i.id === id); if (!m) return; editingId = id; document.getElementById('teamMemberName').value = m.name; document.getElementById('teamMemberEmail').value = m.email; document.getElementById('teamMemberRole').value = m.role; showModal('addTeamMemberModal'); }
 
         // Save Data (Create/Update)
         async function saveData(type, body, modalId) {
@@ -573,13 +651,15 @@
             const method = editingId ? 'PUT' : 'POST';
             try {
                 const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-                if(response.ok) {
+                if (response.ok) {
                     await loadAllData();
                     updateAll();
                     closeModal(modalId);
+                    showToast(`${type.slice(0, -1)} ${editingId ? 'updated' : 'created'} successfully!`, 'success');
                     return true; // Success
-                } else { 
-                    alert(`Failed to save ${type}.`); 
+                } else {
+                    const errorData = await response.json();
+                    alert(`Failed to save ${type}: ${errorData.error || 'Unknown error'}`);
                     return false; // Failure
                 }
             } catch (error) {
@@ -591,64 +671,71 @@
             }
         }
 
-        async function savePortfolio() { 
-            const name=document.getElementById('portfolioName').value;
-            const description=document.getElementById('portfolioDescription').value;
-            if(name) {
-                const result = await saveData('portfolios', {name, description}, 'addPortfolioModal');
-                if (result && !editingId) {
-                    // If it's a new portfolio (not editing), offer to add a project
-                    setTimeout(() => {
-                        showToast('Portfolio created! Would you like to add a project to this portfolio?', 'info');
-                        setTimeout(() => {
-                            if (confirm('Would you like to add a project to the new portfolio?')) {
-                                // Ensure data is loaded before opening modal
-                                loadAllData().then(() => {
-                                    showAddProjectModal();
-                                });
-                            }
-                        }, 1000);
-                    }, 500);
-                }
+        async function savePortfolio() {
+            const name = document.getElementById('portfolioName').value.trim();
+            const description = document.getElementById('portfolioDescription').value.trim();
+
+            if (!name) {
+                alert('Portfolio name is required');
+                return;
+            }
+
+            const result = await saveData('portfolios', { name, description }, 'addPortfolioModal');
+            if (result && !editingId) {
+                // If it's a new portfolio (not editing), offer to add a project
+                setTimeout(() => {
+                    if (confirm('Would you like to add a project to the new portfolio?')) {
+                        // Ensure data is loaded before opening modal
+                        loadAllData().then(() => {
+                            showAddProjectModal();
+                        });
+                    }
+                }, 500);
             }
         }
-        function saveProject() { 
-            const name=document.getElementById('projectName').value; 
-            const portfolio_id=document.getElementById('projectPortfolio').value || null; 
-            const description=document.getElementById('projectDescription').value; 
-            if(name) saveData('projects', {name, portfolio_id, description}, 'addProjectModal'); 
+        async function saveProject() {
+            const name = document.getElementById('projectName').value.trim();
+            const portfolio_id = document.getElementById('projectPortfolio').value || null;
+            const description = document.getElementById('projectDescription').value.trim();
+
+            if (!name) {
+                alert('Project name is required');
+                return;
+            }
+
+            await saveData('projects', { name, portfolio_id, description }, 'addProjectModal');
         }
-        function saveTester() { 
-            const name=document.getElementById('testerName').value; 
-            const email=document.getElementById('testerEmail').value; 
-            const is_automation_engineer=document.getElementById('isAutomationEngineer').checked; 
-            const is_manual_engineer=document.getElementById('isManualEngineer').checked; 
-            if(name && email) { 
-                saveData('testers', {name, email, is_automation_engineer, is_manual_engineer}, 'addTesterModal'); 
-            } 
+        function saveTester() {
+            const name = document.getElementById('testerName').value;
+            const email = document.getElementById('testerEmail').value;
+            const is_automation_engineer = document.getElementById('isAutomationEngineer').checked;
+            const is_manual_engineer = document.getElementById('isManualEngineer').checked;
+            if (name && email) {
+                saveData('testers', { name, email, is_automation_engineer, is_manual_engineer }, 'addTesterModal');
+            }
         }
-        function saveTeamMember() { const name=document.getElementById('teamMemberName').value, email=document.getElementById('teamMemberEmail').value, role=document.getElementById('teamMemberRole').value; if(name && email && role) saveData('team-members', {name, email, role}, 'addTeamMemberModal'); }
+        function saveTeamMember() { const name = document.getElementById('teamMemberName').value, email = document.getElementById('teamMemberEmail').value, role = document.getElementById('teamMemberRole').value; if (name && email && role) saveData('team-members', { name, email, role }, 'addTeamMemberModal'); }
 
         // Tester-Project Assignment Functions
         let currentTesterId = null;
-        
+
         function showAssignTesterProjectsModal(testerId) {
             currentTesterId = testerId;
             const tester = testers.find(t => t.id === testerId);
             if (!tester) return;
-            
+
             // Update tester info
             document.getElementById('selectedTesterInfo').textContent = `${tester.name} (${tester.email})`;
-            
+
             // Populate project checkboxes
             populateProjectCheckboxes(testerId);
-            
+
             showModal('assignTesterProjectsModal');
         }
-        
+
         async function populateProjectCheckboxes(testerId) {
             const container = document.getElementById('projectCheckboxList');
-            
+
             // Get tester's current projects
             let testerProjects = [];
             try {
@@ -659,9 +746,9 @@
             } catch (error) {
                 console.error('Error loading tester projects:', error);
             }
-            
+
             const testerProjectIds = testerProjects.map(p => p.id);
-            
+
             // Create checkboxes for all projects
             container.innerHTML = projects.map(project => {
                 const portfolioName = project.portfolio_name || 'No Portfolio';
@@ -677,20 +764,20 @@
                 `;
             }).join('');
         }
-        
+
         async function saveTesterProjects() {
             if (!currentTesterId) return;
-            
+
             const checkboxes = document.querySelectorAll('#projectCheckboxList input[type="checkbox"]:checked');
             const projectIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
-            
+
             try {
                 const response = await fetch(`/api/testers/${currentTesterId}/projects`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ project_ids: projectIds })
                 });
-                
+
                 if (response.ok) {
                     closeModal('assignTesterProjectsModal');
                     showToast('Tester projects updated successfully!', 'success');
@@ -709,10 +796,10 @@
             if (!confirm('Are you sure you want to delete this item?')) return;
             try {
                 const response = await fetch(`/api/${type}/${id}`, { method: 'DELETE' });
-                if(response.ok) { 
-                    await loadAllData(); 
-                    updateAll(); 
-                } 
+                if (response.ok) {
+                    await loadAllData();
+                    updateAll();
+                }
                 else { alert(`Failed to delete ${type}.`); }
             } catch (error) {
                 console.error(`Error deleting ${type}:`, error);
@@ -728,7 +815,7 @@
             if (window.themeManager) {
                 window.themeManager.init();
             }
-            
+
             // Set active class for navigation
             document.querySelectorAll('.nav-link').forEach(link => {
                 if (link.getAttribute('href') === window.location.pathname) {
@@ -742,4 +829,5 @@
     </div>
 
 </body>
+
 </html>

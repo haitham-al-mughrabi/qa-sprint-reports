@@ -615,11 +615,18 @@ def manage_portfolios():
         return jsonify([{'id': p.id, 'name': p.name, 'description': p.description} for p in portfolios])
     
     elif request.method == 'POST':
-        data = request.get_json()
-        portfolio = Portfolio(name=data['name'], description=data.get('description', ''))
-        db.session.add(portfolio)
-        db.session.commit()
-        return jsonify({'id': portfolio.id, 'name': portfolio.name})
+        try:
+            data = request.get_json()
+            if not data or not data.get('name'):
+                return jsonify({'error': 'Portfolio name is required'}), 400
+            
+            portfolio = Portfolio(name=data['name'], description=data.get('description', ''))
+            db.session.add(portfolio)
+            db.session.commit()
+            return jsonify({'id': portfolio.id, 'name': portfolio.name, 'description': portfolio.description}), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
 
 # Projects API Routes
 @app.route('/api/projects', methods=['GET', 'POST'])
@@ -635,19 +642,28 @@ def manage_projects():
         } for p in projects])
     
     elif request.method == 'POST':
-        data = request.get_json()
-        project = Project(
-            name=data['name'], 
-            description=data.get('description', ''),
-            portfolio_id=data.get('portfolio_id')  # Allow None for projects without portfolio
-        )
-        db.session.add(project)
-        db.session.commit()
-        return jsonify({
-            'id': project.id, 
-            'name': project.name,
-            'portfolio_id': project.portfolio_id
-        }), 201
+        try:
+            data = request.get_json()
+            if not data or not data.get('name'):
+                return jsonify({'error': 'Project name is required'}), 400
+            
+            project = Project(
+                name=data['name'], 
+                description=data.get('description', ''),
+                portfolio_id=data.get('portfolio_id') if data.get('portfolio_id') else None
+            )
+            db.session.add(project)
+            db.session.commit()
+            return jsonify({
+                'id': project.id, 
+                'name': project.name,
+                'description': project.description,
+                'portfolio_id': project.portfolio_id,
+                'portfolio_name': project.portfolio.name if project.portfolio else None
+            }), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
 
 @app.route('/api/projects/<int:project_id>', methods=['GET', 'PUT', 'DELETE'])
 def manage_project(project_id):

@@ -18,11 +18,11 @@ function showTab(tabName) {
     // Remove active class from all tabs and content
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    
+
     // Add active class to selected tab and content
     document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
     document.getElementById(tabName).classList.add('active');
-    
+
     // Load data for the selected tab if needed
     if (tabName === 'projects') {
         populatePortfolioFilter();
@@ -39,6 +39,15 @@ async function loadAllData() {
             projects = data.projects || [];
             testers = data.testers || [];
             teamMembers = data.team_members || [];
+
+            console.log('Data loaded successfully:', {
+                portfolios: portfolios.length,
+                projects: projects.length,
+                testers: testers.length,
+                teamMembers: teamMembers.length
+            });
+        } else {
+            console.error('Failed to load data:', response.status, response.statusText);
         }
     } catch (error) {
         console.error('Error loading data:', error);
@@ -51,7 +60,7 @@ function updateStats() {
     document.getElementById('totalProjects').textContent = projects.length;
     document.getElementById('totalTesters').textContent = testers.length;
     document.getElementById('totalTeamMembers').textContent = teamMembers.length;
-    
+
     // Team member role counts
     document.getElementById('projectOwners').textContent = teamMembers.filter(tm => tm.role === 'Project Owner').length;
     document.getElementById('projectAnalysts').textContent = teamMembers.filter(tm => tm.role === 'Project Analyst').length;
@@ -79,7 +88,7 @@ function renderPortfolios() {
         `;
         return;
     }
-    
+
     container.innerHTML = portfolios.map(portfolio => `
         <div class="data-item portfolio">
             <div class="data-item-header">
@@ -112,7 +121,7 @@ function renderProjects() {
         `;
         return;
     }
-    
+
     container.innerHTML = projects.map(project => {
         const portfolio = portfolios.find(p => p.id === project.portfolio_id);
         return `
@@ -146,7 +155,7 @@ function renderTesters() {
         `;
         return;
     }
-    
+
     container.innerHTML = testers.map(tester => `
         <div class="data-item tester">
             <div class="data-item-header">
@@ -176,7 +185,7 @@ function renderTeamMembers() {
         `;
         return;
     }
-    
+
     container.innerHTML = teamMembers.map(member => `
         <div class="data-item team-member">
             <div class="data-item-header">
@@ -210,7 +219,17 @@ function showAddProjectModal() {
     document.getElementById('projectName').value = '';
     document.getElementById('projectDescription').value = '';
     document.getElementById('projectPortfolio').value = '';
-    populatePortfolioDropdown();
+
+    // Ensure portfolios are loaded before populating dropdown
+    if (portfolios && portfolios.length > 0) {
+        populatePortfolioDropdown();
+    } else {
+        // If portfolios aren't loaded yet, load them first
+        loadAllData().then(() => {
+            populatePortfolioDropdown();
+        });
+    }
+
     document.querySelector('#addProjectModal .modal-title').textContent = 'Add New Project';
     showModal('addProjectModal');
 }
@@ -246,12 +265,19 @@ function closeModal(modalId) {
 function populatePortfolioDropdown() {
     const select = document.getElementById('projectPortfolio');
     if (!select) return;
-    
-    select.innerHTML = '<option value="">Select Portfolio</option>';
-    
-    portfolios.forEach(portfolio => {
-        select.innerHTML += `<option value="${portfolio.id}">${portfolio.name}</option>`;
-    });
+
+    select.innerHTML = '<option value="">No Portfolio (Standalone Project)</option>';
+
+    if (portfolios && portfolios.length > 0) {
+        portfolios.forEach(portfolio => {
+            const option = document.createElement('option');
+            option.value = portfolio.id;
+            option.textContent = portfolio.name;
+            select.appendChild(option);
+        });
+    } else {
+        console.log('No portfolios available to populate dropdown');
+    }
 }
 
 // QA Notes custom fields management
@@ -270,7 +296,7 @@ function showAddQANoteFieldModal() {
 function updateQAFieldOptions() {
     const type = document.getElementById('qaFieldType').value;
     const optionsDiv = document.getElementById('qaFieldOptions');
-    
+
     if (type === 'select' || type === 'radio' || type === 'checkbox') {
         optionsDiv.style.display = 'block';
     } else {
@@ -284,16 +310,16 @@ function addQANoteField() {
     const required = document.getElementById('qaFieldRequired').checked;
     const showInReport = document.getElementById('qaFieldShowInReport').checked;
     const optionsList = document.getElementById('qaFieldOptionsList').value.trim();
-    
+
     if (!name) {
         showToast('Please enter a field name', 'warning');
         return;
     }
-    
-    const options = (type === 'select' || type === 'radio' || type === 'checkbox') && optionsList 
+
+    const options = (type === 'select' || type === 'radio' || type === 'checkbox') && optionsList
         ? optionsList.split('\n').map(opt => opt.trim()).filter(opt => opt)
         : [];
-    
+
     const qaField = {
         id: `qa_note_${Date.now()}`,
         name,
@@ -303,7 +329,7 @@ function addQANoteField() {
         options,
         value: type === 'checkbox' ? [] : ''
     };
-    
+
     qaNotesFields.push(qaField);
     renderQANotesFields();
     closeModal('addQANoteFieldModal');
@@ -313,14 +339,14 @@ function addQANoteField() {
 function renderQANotesFields() {
     const container = document.getElementById('qaNotesFieldsList');
     if (!container) return;
-    
+
     // Find the default general notes field
     const defaultField = container.querySelector('.custom-field-item');
-    
+
     // Remove existing custom fields (keep default)
     const customFields = container.querySelectorAll('.qa-field-item');
     customFields.forEach(field => field.remove());
-    
+
     // Add new custom fields
     qaNotesFields.forEach(field => {
         const fieldHTML = renderQANoteFieldHTML(field);
@@ -334,7 +360,7 @@ function renderQANotesFields() {
 
 function renderQANoteFieldHTML(field) {
     let inputHTML = '';
-    
+
     switch (field.type) {
         case 'input':
             inputHTML = `<input type="text" id="${field.id}" name="${field.id}" placeholder="Enter ${field.name.toLowerCase()}" ${field.required ? 'required' : ''}>`;
@@ -373,7 +399,7 @@ function renderQANoteFieldHTML(field) {
             `).join('');
             break;
     }
-    
+
     return `
         <div class="qa-field-item">
             <div class="custom-field-header">
@@ -409,16 +435,16 @@ function populateProjectDropdown(projects) {
     const select = document.getElementById('projectName');
     // Keep existing static options
     const existingOptions = Array.from(select.options).map(opt => ({ value: opt.value, text: opt.text }));
-    
+
     select.innerHTML = '<option value="">Select Project</option>';
-    
+
     // Add existing static options
     existingOptions.slice(1).forEach(opt => {
         if (opt.value) {
             select.innerHTML += `<option value="${opt.value}">${opt.text}</option>`;
         }
     });
-    
+
     // Add dynamic projects
     projects.forEach(project => {
         select.innerHTML += `<option value="${project.name.toLowerCase().replace(/\s+/g, '-')}">${project.name}</option>`;
@@ -429,25 +455,25 @@ function populateProjectDropdown(projects) {
 async function savePortfolio() {
     const name = document.getElementById('portfolioName').value.trim();
     const description = document.getElementById('portfolioDescription').value.trim();
-    
+
     if (!name) {
         showToast('Please enter a portfolio name', 'warning');
         return;
     }
-    
+
     try {
         const method = editingId ? 'PUT' : 'POST';
         const url = editingId ? `/api/portfolios/${editingId}` : '/api/portfolios';
-        
+
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, description })
         });
-        
+
         if (response.ok) {
             const savedPortfolio = await response.json();
-            
+
             if (editingId) {
                 const index = portfolios.findIndex(p => p.id === editingId);
                 if (index !== -1) portfolios[index] = savedPortfolio;
@@ -456,7 +482,7 @@ async function savePortfolio() {
                 portfolios.push(savedPortfolio);
                 showToast('Portfolio created successfully!', 'success');
             }
-            
+
             await loadAllData();
             updateStats();
             renderPortfolios();
@@ -475,25 +501,25 @@ async function saveProject() {
     const name = document.getElementById('projectName').value.trim();
     const portfolioId = document.getElementById('projectPortfolio').value;
     const description = document.getElementById('projectDescription').value.trim();
-    
+
     if (!name || !portfolioId) {
         showToast('Please enter project name and select a portfolio', 'warning');
         return;
     }
-    
+
     try {
         const method = editingId ? 'PUT' : 'POST';
         const url = editingId ? `/api/projects/${editingId}` : '/api/projects';
-        
+
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, portfolio_id: portfolioId, description })
         });
-        
+
         if (response.ok) {
             const savedProject = await response.json();
-            
+
             if (editingId) {
                 const index = projects.findIndex(p => p.id === editingId);
                 if (index !== -1) projects[index] = savedProject;
@@ -502,7 +528,7 @@ async function saveProject() {
                 projects.push(savedProject);
                 showToast('Project created successfully!', 'success');
             }
-            
+
             await loadAllData();
             updateStats();
             renderProjects();
@@ -520,25 +546,25 @@ async function saveProject() {
 async function saveTester() {
     const name = document.getElementById('testerName').value.trim();
     const email = document.getElementById('testerEmail').value.trim();
-    
+
     if (!name || !email) {
         showToast('Please enter both name and email', 'warning');
         return;
     }
-    
+
     try {
         const method = editingId ? 'PUT' : 'POST';
         const url = editingId ? `/api/testers/${editingId}` : '/api/testers';
-        
+
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email })
         });
-        
+
         if (response.ok) {
             const savedTester = await response.json();
-            
+
             if (editingId) {
                 const index = testers.findIndex(t => t.id === editingId);
                 if (index !== -1) testers[index] = savedTester;
@@ -547,7 +573,7 @@ async function saveTester() {
                 testers.push(savedTester);
                 showToast('Tester created successfully!', 'success');
             }
-            
+
             await loadAllData();
             updateStats();
             renderTesters();
@@ -566,25 +592,25 @@ async function saveTeamMember() {
     const name = document.getElementById('teamMemberName').value.trim();
     const email = document.getElementById('teamMemberEmail').value.trim();
     const role = document.getElementById('teamMemberRole').value;
-    
+
     if (!name || !email || !role) {
         showToast('Please fill in all fields', 'warning');
         return;
     }
-    
+
     try {
         const method = editingId ? 'PUT' : 'POST';
         const url = editingId ? `/api/team-members/${editingId}` : '/api/team-members';
-        
+
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, role })
         });
-        
+
         if (response.ok) {
             const savedMember = await response.json();
-            
+
             if (editingId) {
                 const index = teamMembers.findIndex(tm => tm.id === editingId);
                 if (index !== -1) teamMembers[index] = savedMember;
@@ -593,7 +619,7 @@ async function saveTeamMember() {
                 teamMembers.push(savedMember);
                 showToast('Team member created successfully!', 'success');
             }
-            
+
             await loadAllData();
             updateStats();
             renderTeamMembers();
@@ -629,56 +655,56 @@ function searchTeamMembers() {
 function editPortfolio(id) {
     const portfolio = portfolios.find(p => p.id === id);
     if (!portfolio) return;
-    
+
     editingId = id;
     editingType = 'portfolio';
-    
+
     document.getElementById('portfolioName').value = portfolio.name || '';
     document.getElementById('portfolioDescription').value = portfolio.description || '';
-    
+
     showModal('addPortfolioModal');
 }
 
 function editProject(id) {
     const project = projects.find(p => p.id === id);
     if (!project) return;
-    
+
     editingId = id;
     editingType = 'project';
-    
+
     document.getElementById('projectName').value = project.name || '';
     document.getElementById('projectDescription').value = project.description || '';
-    
+
     populatePortfolioDropdown();
     document.getElementById('projectPortfolio').value = project.portfolio_id || '';
-    
+
     showModal('addProjectModal');
 }
 
 function editTester(id) {
     const tester = testers.find(t => t.id === id);
     if (!tester) return;
-    
+
     editingId = id;
     editingType = 'tester';
-    
+
     document.getElementById('testerName').value = tester.name || '';
     document.getElementById('testerEmail').value = tester.email || '';
-    
+
     showModal('addTesterModal');
 }
 
 function editTeamMember(id) {
     const member = teamMembers.find(tm => tm.id === id);
     if (!member) return;
-    
+
     editingId = id;
     editingType = 'teamMember';
-    
+
     document.getElementById('teamMemberName').value = member.name || '';
     document.getElementById('teamMemberEmail').value = member.email || '';
     document.getElementById('teamMemberRole').value = member.role || '';
-    
+
     showModal('addTeamMemberModal');
 }
 
@@ -687,10 +713,10 @@ async function deletePortfolio(id) {
     if (!confirm('Are you sure you want to delete this portfolio? This action cannot be undone.')) {
         return;
     }
-    
+
     try {
         const response = await fetch(`/api/portfolios/${id}`, { method: 'DELETE' });
-        
+
         if (response.ok) {
             portfolios = portfolios.filter(p => p.id !== id);
             showToast('Portfolio deleted successfully!', 'success');
@@ -710,10 +736,10 @@ async function deleteProject(id) {
     if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
         return;
     }
-    
+
     try {
         const response = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
-        
+
         if (response.ok) {
             projects = projects.filter(p => p.id !== id);
             showToast('Project deleted successfully!', 'success');
@@ -733,10 +759,10 @@ async function deleteTester(id) {
     if (!confirm('Are you sure you want to delete this tester? This action cannot be undone.')) {
         return;
     }
-    
+
     try {
         const response = await fetch(`/api/testers/${id}`, { method: 'DELETE' });
-        
+
         if (response.ok) {
             testers = testers.filter(t => t.id !== id);
             showToast('Tester deleted successfully!', 'success');
@@ -756,10 +782,10 @@ async function deleteTeamMember(id) {
     if (!confirm('Are you sure you want to delete this team member? This action cannot be undone.')) {
         return;
     }
-    
+
     try {
         const response = await fetch(`/api/team-members/${id}`, { method: 'DELETE' });
-        
+
         if (response.ok) {
             teamMembers = teamMembers.filter(tm => tm.id !== id);
             showToast('Team member deleted successfully!', 'success');
@@ -783,7 +809,7 @@ function showToast(message, type = 'info', duration = 5000) {
         container.className = 'toast-container';
         document.body.appendChild(container);
     }
-    
+
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerHTML = `
@@ -791,9 +817,9 @@ function showToast(message, type = 'info', duration = 5000) {
         <div class="toast-message">${message}</div>
         <button class="toast-close" onclick="removeToast(this.parentElement)">×</button>
     `;
-    
+
     container.appendChild(toast);
-    
+
     setTimeout(() => {
         removeToast(toast);
     }, duration);
@@ -811,7 +837,7 @@ function removeToast(toast) {
 }
 
 // Modal close on outside click
-window.onclick = function(event) {
+window.onclick = function (event) {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         if (event.target === modal) {

@@ -2126,25 +2126,25 @@ function removeQANoteField(fieldId) {
     showToast('QA note field removed', 'info');
 }
 
-async function populatePortfolioDropdown(portfolios) {
+async function populatePortfolioDropdownForCreateReport(portfolios) {
     const select = document.getElementById('portfolioName');
     if (!select) {
         console.error('Portfolio select element not found!');
         return;
     }
     
-
     // Clear loading state and add basic options
     select.innerHTML = '<option value="">Select Portfolio</option>';
     select.innerHTML += '<option value="no-portfolio">No Portfolio (Standalone Project)</option>';
 
     // Add dynamic portfolios from database
-    portfolios.forEach(portfolio => {
-        const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
-        // Store the actual ID in a data attribute
-        select.innerHTML += `<option value="${value}" data-id="${portfolio.id}">${portfolio.name}</option>`;
-    });
-    
+    if (portfolios && Array.isArray(portfolios) && portfolios.length > 0) {
+        portfolios.forEach(portfolio => {
+            const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
+            // Store the actual ID in a data attribute
+            select.innerHTML += `<option value="${value}" data-id="${portfolio.id}">${portfolio.name}</option>`;
+        });
+    }
 }
 
 // Function called when portfolio is selected
@@ -2422,10 +2422,10 @@ async function loadFormDropdownData() {
 // Load only portfolios for fast initial loading
 async function loadPortfoliosOnly() {
     try {
-        const response = await fetch('/api/portfolios/minimal');
+        const response = await fetch('/api/portfolios');
         if (response.ok) {
             const portfolios = await response.json();
-            populatePortfolioDropdown(portfolios);
+            populatePortfolioDropdownForCreateReport(portfolios);
         } else {
             throw new Error('Failed to load portfolios');
         }
