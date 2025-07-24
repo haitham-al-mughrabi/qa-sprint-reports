@@ -19,8 +19,8 @@
     <!-- Theme manager (loads early) -->
     <script src="/static/theme-manager.js"></script>
 
-    <!-- External libraries (defer non-critical) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
+    <!-- External libraries (load synchronously for charts) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
     <!-- Load non-critical CSS asynchronously -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
@@ -147,7 +147,24 @@
     <script src="/static/enhanced_script.js" defer></script>
     <script src="/static/project_statistics.js" defer></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        function waitForChart() {
+            return new Promise((resolve) => {
+                if (window.Chart) {
+                    resolve();
+                } else {
+                    const checkChart = () => {
+                        if (window.Chart) {
+                            resolve();
+                        } else {
+                            setTimeout(checkChart, 100);
+                        }
+                    };
+                    checkChart();
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
             // Initialize theme first
             if (window.themeManager) {
                 window.themeManager.init();
@@ -161,6 +178,10 @@
                     link.classList.remove('active');
                 }
             });
+
+            // Wait for Chart.js to load
+            await waitForChart();
+            console.log('Chart.js loaded successfully');
         });
     </script>
 </body>
