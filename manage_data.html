@@ -178,7 +178,7 @@
             </div>
             <div class="modal-form">
                 <div class="form-group"><label for="projectName" data-i18n="project_name">Project Name:</label><input type="text" id="projectName" required></div>
-                <div class="form-group"><label for="projectPortfolio" data-i18n="portfolio">Portfolio:</label><select id="projectPortfolio" required><option value="" data-i18n="select_portfolio">Select Portfolio</option></select></div>
+                <div class="form-group"><label for="projectPortfolio" data-i18n="portfolio">Portfolio:</label><select id="projectPortfolio"><option value="" data-i18n="no_portfolio">No Portfolio (Standalone Project)</option></select></div>
                 <div class="form-group"><label for="projectDescription" data-i18n="description">Description:</label><textarea id="projectDescription" rows="4"></textarea></div>
             </div>
             <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addProjectModal')" data-i18n="cancel">Cancel</button><button type="button" class="btn btn-primary" onclick="saveProject()" data-i18n="save">Save</button></div>
@@ -191,7 +191,37 @@
                 <div class="icon-bg"><i class="fas fa-user-cog"></i></div>
                 <h3 data-i18n="add_new_tester">Add New Tester</h3>
             </div>
-            <div class="modal-form"><div class="form-row"><div class="form-group"><label for="testerName" data-i18n="name">Name:</label><input type="text" id="testerName" required></div><div class="form-group"><label for="testerEmail" data-i18n="email">Email:</label><input type="email" id="testerEmail" required></div></div></div>
+            <div class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="testerName" data-i18n="name">Name:</label>
+                        <input type="text" id="testerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="testerEmail" data-i18n="email">Email:</label>
+                        <input type="email" id="testerEmail" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="tester_roles">Tester Roles:</label>
+                    <div class="checkbox-list" style="max-height: 120px; padding: 1rem;">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="isAutomationEngineer">
+                            <span class="checkbox-text">
+                                <strong>Automation Engineer</strong>
+                                <small>Handles automated testing tasks</small>
+                            </span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="isManualEngineer">
+                            <span class="checkbox-text">
+                                <strong>Manual Engineer</strong>
+                                <small>Handles manual testing tasks</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
             <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addTesterModal')" data-i18n="cancel">Cancel</button><button type="button" class="btn btn-primary" onclick="saveTester()" data-i18n="save">Save</button></div>
         </div>
     </div>
@@ -207,6 +237,32 @@
                 <div class="form-group"><label for="teamMemberRole" data-i18n="role">Role:</label><select id="teamMemberRole" required><option value="" data-i18n="select_role">Select Role</option></select></div>
             </div>
             <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('addTeamMemberModal')" data-i18n="cancel">Cancel</button><button type="button" class="btn btn-primary" onclick="saveTeamMember()" data-i18n="save">Save</button></div>
+        </div>
+    </div>
+
+    <!-- Assign Tester to Projects Modal -->
+    <div id="assignTesterProjectsModal" class="modal manage-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="icon-bg"><i class="fas fa-link"></i></div>
+                <h3 data-i18n="assign_tester_projects">Assign Tester to Projects</h3>
+            </div>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label id="selectedTesterName">Selected Tester:</label>
+                    <p id="selectedTesterInfo" style="margin: 0; font-weight: bold; color: var(--primary);"></p>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="select_projects">Select Projects:</label>
+                    <div id="projectCheckboxList" class="checkbox-list">
+                        <!-- Project checkboxes will be populated here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('assignTesterProjectsModal')" data-i18n="cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveTesterProjects()" data-i18n="save">Save</button>
+            </div>
         </div>
     </div>
 
@@ -228,6 +284,7 @@
             setupRoleFilters();
             await loadAllData();
             updateAll();
+            
         });
 
         function setupRoleFilters() {
@@ -317,7 +374,7 @@
             }
             renderList('projects', filtered, renderProject, 'fa-rocket', 'No Projects Found', 'Add a project to get started.');
         }
-        const renderProject = p => `<div class="data-item"><div class="data-item-header"><h3 class="data-item-title">${p.name}</h3><div class="data-item-actions"><button class="btn-edit" onclick="editProject(${p.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteItem('projects', ${p.id})"><i class="fas fa-trash"></i></button></div></div><div class="data-item-content"><p><strong>Portfolio:</strong> ${portfolios.find(pf => pf.id === p.portfolio_id)?.name || 'N/A'}</p><p>${p.description || 'No description'}</p></div></div>`;
+        const renderProject = p => `<div class="data-item"><div class="data-item-header"><h3 class="data-item-title">${p.name}</h3><div class="data-item-actions"><button class="btn-edit" onclick="editProject(${p.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteItem('projects', ${p.id})"><i class="fas fa-trash"></i></button></div></div><div class="data-item-content"><p><strong>Portfolio:</strong> ${portfolios.find(pf => pf.id === p.portfolio_id)?.name || 'No Portfolio'}</p><p>${p.description || 'No description'}</p></div></div>`;
 
         // Testers
         function displayTesters() {
@@ -325,7 +382,27 @@
             const filtered = testers.filter(t => t.name.toLowerCase().includes(searchTerm) || t.email.toLowerCase().includes(searchTerm));
             renderList('testers', filtered, renderTester, 'fa-vial', 'No Testers Found', 'Add a tester to the system.');
         }
-        const renderTester = t => `<div class="data-item"><div class="data-item-header"><h3 class="data-item-title">${t.name}</h3><div class="data-item-actions"><button class="btn-edit" onclick="editTester(${t.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteItem('testers', ${t.id})"><i class="fas fa-trash"></i></button></div></div><div class="data-item-content"><p><strong>Email:</strong> ${t.email}</p></div></div>`;
+        const renderTester = t => {
+            const roleBadges = [];
+            if (t.is_automation_engineer) roleBadges.push('<span class="role-badge">Automation Engineer</span>');
+            if (t.is_manual_engineer) roleBadges.push('<span class="role-badge">Manual Engineer</span>');
+            const roleDisplay = roleBadges.length > 0 ? roleBadges.join(' ') : '<span style="color: var(--text-secondary); font-style: italic;">No roles assigned</span>';
+            
+            return `<div class="data-item">
+                <div class="data-item-header">
+                    <h3 class="data-item-title">${t.name}</h3>
+                    <div class="data-item-actions">
+                        <button class="btn-secondary" onclick="showAssignTesterProjectsModal(${t.id})" title="Assign Projects"><i class="fas fa-link"></i></button>
+                        <button class="btn-edit" onclick="editTester(${t.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-delete" onclick="deleteItem('testers', ${t.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="data-item-content">
+                    <p><strong>Email:</strong> ${t.email}</p>
+                    <p><strong>Roles:</strong> ${roleDisplay}</p>
+                </div>
+            </div>`;
+        };
 
         // Team Members
         function displayTeamMembers() {
@@ -424,7 +501,17 @@
 
         function populatePortfolioDropdown(selectedId = '') {
             const select = document.getElementById('projectPortfolio');
-            select.innerHTML = '<option value="">Select Portfolio</option>' + portfolios.map(p => `<option value="${p.id}" ${p.id == selectedId ? 'selected' : ''}>${p.name}</option>`).join('');
+            select.innerHTML = '<option value="">No Portfolio (Standalone Project)</option>';
+            
+            portfolios.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = p.name;
+                if (p.id == selectedId) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
         }
         function populatePortfolioFilter() {
             const select = document.getElementById('portfolioFilter');
@@ -437,28 +524,47 @@
         // Show Modals for Adding
         function showAddPortfolioModal() { editingId=null; document.getElementById('portfolioName').value=''; document.getElementById('portfolioDescription').value=''; showModal('addPortfolioModal'); }
         function showAddProjectModal() { 
-            editingId=null; 
-            document.getElementById('projectName').value=''; 
-            document.getElementById('projectDescription').value=''; 
-            populatePortfolioDropdown(); 
+            editingId = null;
+            document.getElementById('projectName').value = '';
+            document.getElementById('projectDescription').value = '';
             
-            // If no portfolios exist, prompt user to create one first
-            if (portfolios.length === 0) {
-                closeModal('addProjectModal');
-                showToast('Please create a portfolio first before adding projects.', 'warning');
-                showAddPortfolioModal();
-                return;
-            }
+            // Populate the portfolio dropdown directly
+            const select = document.getElementById('projectPortfolio');
+            select.innerHTML = '<option value="">No Portfolio (Standalone Project)</option>';
             
-            showModal('addProjectModal'); 
+            // Add each portfolio as an option
+            portfolios.forEach(portfolio => {
+                const option = document.createElement('option');
+                option.value = portfolio.id;
+                option.textContent = portfolio.name;
+                select.appendChild(option);
+            });
+            
+            showModal('addProjectModal');
         }
-        function showAddTesterModal() { editingId=null; document.getElementById('testerName').value=''; document.getElementById('testerEmail').value=''; showModal('addTesterModal'); }
+        function showAddTesterModal() { 
+            editingId=null; 
+            document.getElementById('testerName').value=''; 
+            document.getElementById('testerEmail').value=''; 
+            document.getElementById('isAutomationEngineer').checked=false; 
+            document.getElementById('isManualEngineer').checked=false; 
+            showModal('addTesterModal'); 
+        }
         function showAddTeamMemberModal() { editingId=null; document.getElementById('teamMemberName').value=''; document.getElementById('teamMemberEmail').value=''; document.getElementById('teamMemberRole').value=''; showModal('addTeamMemberModal'); }
 
         // Show Modals for Editing
         function editPortfolio(id) { const p = portfolios.find(i=>i.id===id); if(!p) return; editingId=id; document.getElementById('portfolioName').value=p.name; document.getElementById('portfolioDescription').value=p.description; showModal('addPortfolioModal'); }
         function editProject(id) { const p = projects.find(i=>i.id===id); if(!p) return; editingId=id; document.getElementById('projectName').value=p.name; document.getElementById('projectDescription').value=p.description; populatePortfolioDropdown(p.portfolio_id); showModal('addProjectModal'); }
-        function editTester(id) { const t = testers.find(i=>i.id===id); if(!t) return; editingId=id; document.getElementById('testerName').value=t.name; document.getElementById('testerEmail').value=t.email; showModal('addTesterModal'); }
+        function editTester(id) { 
+            const t = testers.find(i=>i.id===id); 
+            if(!t) return; 
+            editingId=id; 
+            document.getElementById('testerName').value=t.name; 
+            document.getElementById('testerEmail').value=t.email; 
+            document.getElementById('isAutomationEngineer').checked=t.is_automation_engineer || false; 
+            document.getElementById('isManualEngineer').checked=t.is_manual_engineer || false; 
+            showModal('addTesterModal'); 
+        }
         function editTeamMember(id) { const m = teamMembers.find(i=>i.id===id); if(!m) return; editingId=id; document.getElementById('teamMemberName').value=m.name; document.getElementById('teamMemberEmail').value=m.email; document.getElementById('teamMemberRole').value=m.role; showModal('addTeamMemberModal'); }
 
         // Save Data (Create/Update)
@@ -496,16 +602,107 @@
                         showToast('Portfolio created! Would you like to add a project to this portfolio?', 'info');
                         setTimeout(() => {
                             if (confirm('Would you like to add a project to the new portfolio?')) {
-                                showAddProjectModal();
+                                // Ensure data is loaded before opening modal
+                                loadAllData().then(() => {
+                                    showAddProjectModal();
+                                });
                             }
                         }, 1000);
                     }, 500);
                 }
             }
         }
-        function saveProject() { const name=document.getElementById('projectName').value, portfolio_id=document.getElementById('projectPortfolio').value, description=document.getElementById('projectDescription').value; if(name && portfolio_id) saveData('projects', {name, portfolio_id, description}, 'addProjectModal'); }
-        function saveTester() { const name=document.getElementById('testerName').value, email=document.getElementById('testerEmail').value; if(name && email) saveData('testers', {name, email}, 'addTesterModal'); }
+        function saveProject() { 
+            const name=document.getElementById('projectName').value; 
+            const portfolio_id=document.getElementById('projectPortfolio').value || null; 
+            const description=document.getElementById('projectDescription').value; 
+            if(name) saveData('projects', {name, portfolio_id, description}, 'addProjectModal'); 
+        }
+        function saveTester() { 
+            const name=document.getElementById('testerName').value; 
+            const email=document.getElementById('testerEmail').value; 
+            const is_automation_engineer=document.getElementById('isAutomationEngineer').checked; 
+            const is_manual_engineer=document.getElementById('isManualEngineer').checked; 
+            if(name && email) { 
+                saveData('testers', {name, email, is_automation_engineer, is_manual_engineer}, 'addTesterModal'); 
+            } 
+        }
         function saveTeamMember() { const name=document.getElementById('teamMemberName').value, email=document.getElementById('teamMemberEmail').value, role=document.getElementById('teamMemberRole').value; if(name && email && role) saveData('team-members', {name, email, role}, 'addTeamMemberModal'); }
+
+        // Tester-Project Assignment Functions
+        let currentTesterId = null;
+        
+        function showAssignTesterProjectsModal(testerId) {
+            currentTesterId = testerId;
+            const tester = testers.find(t => t.id === testerId);
+            if (!tester) return;
+            
+            // Update tester info
+            document.getElementById('selectedTesterInfo').textContent = `${tester.name} (${tester.email})`;
+            
+            // Populate project checkboxes
+            populateProjectCheckboxes(testerId);
+            
+            showModal('assignTesterProjectsModal');
+        }
+        
+        async function populateProjectCheckboxes(testerId) {
+            const container = document.getElementById('projectCheckboxList');
+            
+            // Get tester's current projects
+            let testerProjects = [];
+            try {
+                const response = await fetch(`/api/testers/${testerId}/projects`);
+                if (response.ok) {
+                    testerProjects = await response.json();
+                }
+            } catch (error) {
+                console.error('Error loading tester projects:', error);
+            }
+            
+            const testerProjectIds = testerProjects.map(p => p.id);
+            
+            // Create checkboxes for all projects
+            container.innerHTML = projects.map(project => {
+                const portfolioName = project.portfolio_name || 'No Portfolio';
+                const isChecked = testerProjectIds.includes(project.id) ? 'checked' : '';
+                return `
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="${project.id}" ${isChecked}>
+                        <span class="checkbox-text">
+                            <strong>${project.name}</strong>
+                            <small>(${portfolioName})</small>
+                        </span>
+                    </label>
+                `;
+            }).join('');
+        }
+        
+        async function saveTesterProjects() {
+            if (!currentTesterId) return;
+            
+            const checkboxes = document.querySelectorAll('#projectCheckboxList input[type="checkbox"]:checked');
+            const projectIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            
+            try {
+                const response = await fetch(`/api/testers/${currentTesterId}/projects`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project_ids: projectIds })
+                });
+                
+                if (response.ok) {
+                    closeModal('assignTesterProjectsModal');
+                    showToast('Tester projects updated successfully!', 'success');
+                    updateAll(); // Refresh the displays
+                } else {
+                    showToast('Failed to update tester projects.', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving tester projects:', error);
+                showToast('An error occurred while updating tester projects.', 'error');
+            }
+        }
 
         // Delete Data
         async function deleteItem(type, id) {

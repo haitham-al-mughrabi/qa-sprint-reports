@@ -690,11 +690,18 @@ function addBuild() {
 
 function renderDynamicList(containerId, data, renderItemFn, removeFn) {
     const container = document.getElementById(containerId);
-    if (!container) return;
+    if (!container) {
+        console.error(`Container with id '${containerId}' not found`);
+        return;
+    }
+    
+    
     if (data.length === 0) {
         // Check if the container is for team members, as it has a slightly different empty state message
         if (containerId === 'teamMemberList') {
             container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No team members added yet.</div>`;
+        } else if (containerId === 'testerList') {
+            container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No testers added yet. Click "Add/Select Tester" to get started.</div>`;
         } else {
             container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No items added yet. Click "Add Request" to get started.</div>`;
         }
@@ -720,11 +727,18 @@ function renderBuildList() {
 }
 
 function renderTesterList() {
-    renderDynamicList('testerList', testerData, (item, index) => `
+    renderDynamicList('testerList', testerData, (item, index, removeFn) => {
+        const roles = [];
+        if (item.is_automation_engineer) roles.push('Automation Engineer');
+        if (item.is_manual_engineer) roles.push('Manual Engineer');
+        const roleText = roles.length > 0 ? `<br><strong>Roles:</strong> ${roles.join(', ')}` : '<br><em style="color: #6c757d;">No roles assigned</em>';
+        
+        return `
         <div class="dynamic-item">
-            <div><strong>Name:</strong> ${item.name}<br><strong>Email:</strong> ${item.email}</div>
+            <div><strong>Name:</strong> ${item.name}<br><strong>Email:</strong> ${item.email}${roleText}</div>
             <button type="button" class="btn-sm btn-delete" onclick="removeTester(${index})">Remove</button>
-        </div>`, removeTester);
+        </div>`;
+    }, removeTester);
 }
 
 function removeRequest(index) { requestData.splice(index, 1); renderRequestList(); showToast('Request removed', 'info'); }
@@ -1226,8 +1240,14 @@ async function exportReportAsPdf(id) {
 
     // Testers
     if (report.testerData && report.testerData.length > 0) {
-        const testersData = report.testerData.map(tester => [tester.name]);
-        addDataTable("Testers", testersData, ['Tester Name']);
+        const testersData = report.testerData.map(tester => {
+            const roles = [];
+            if (tester.is_automation_engineer) roles.push('Automation Engineer');
+            if (tester.is_manual_engineer) roles.push('Manual Engineer');
+            const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
+            return [tester.name, tester.email, roleText];
+        });
+        addDataTable("Testers", testersData, ['Tester Name', 'Email', 'Roles']);
     }
 
     // Team Members
@@ -1438,8 +1458,14 @@ async function exportReportAsExcel(id) {
     }
 
     if (report.testerData && report.testerData.length > 0) {
-        const testerHeaders = ["Tester Name"];
-        const testersSheetData = report.testerData.map(tester => [tester.name]);
+        const testerHeaders = ["Tester Name", "Email", "Roles"];
+        const testersSheetData = report.testerData.map(tester => {
+            const roles = [];
+            if (tester.is_automation_engineer) roles.push('Automation Engineer');
+            if (tester.is_manual_engineer) roles.push('Manual Engineer');
+            const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
+            return [tester.name, tester.email, roleText];
+        });
         const wsTesters = XLSX.utils.aoa_to_sheet([testerHeaders, ...testersSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsTesters, "Testers");
     }
@@ -1820,7 +1846,11 @@ async function loadExistingTesters() {
             testers.forEach(tester => {
                 const option = document.createElement('option');
                 option.value = JSON.stringify(tester); // Store full object for easy retrieval
-                option.textContent = `${tester.name} (${tester.email})`;
+                const roles = [];
+                if (tester.is_automation_engineer) roles.push('Automation');
+                if (tester.is_manual_engineer) roles.push('Manual');
+                const roleText = roles.length > 0 ? ` - ${roles.join(', ')}` : '';
+                option.textContent = `${tester.name} (${tester.email})${roleText}`;
                 select.appendChild(option);
             });
         }
@@ -1884,7 +1914,9 @@ async function addSelectedTester() {
         testerData.push({
             id: testerToAdd.id,
             name: testerToAdd.name,
-            email: testerToAdd.email
+            email: testerToAdd.email,
+            is_automation_engineer: testerToAdd.is_automation_engineer || false,
+            is_manual_engineer: testerToAdd.is_manual_engineer || false
         });
 
         renderTesterList();
@@ -2096,33 +2128,76 @@ function removeQANoteField(fieldId) {
 
 async function populatePortfolioDropdown(portfolios) {
     const select = document.getElementById('portfolioName');
-    if (!select) return;
+    if (!select) {
+        console.error('Portfolio select element not found!');
+        return;
+    }
+    
 
-    // Clear loading state
+    // Clear loading state and add basic options
     select.innerHTML = '<option value="">Select Portfolio</option>';
-
-    // Add static options first (if any, as per your original HTML)
-    const staticOptions = [
-        // { value: 'api-services', text: 'API Services' },
-        // { value: 'web-platform', text: 'Web Platform' },
-        // { value: 'mobile-app', text: 'Mobile App' },
-        // { value: 'data-analytics', text: 'Data Analytics' }
-    ];
-
-    staticOptions.forEach(opt => {
-        select.innerHTML += `<option value="${opt.value}">${opt.text}</option>`;
-    });
+    select.innerHTML += '<option value="no-portfolio">No Portfolio (Standalone Project)</option>';
 
     // Add dynamic portfolios from database
     portfolios.forEach(portfolio => {
         const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
-        // Check if this portfolio already exists in static options
-        const exists = staticOptions.some(opt => opt.value === value);
-        if (!exists) {
-            // Store the actual ID in a data attribute
-            select.innerHTML += `<option value="${value}" data-id="${portfolio.id}">${portfolio.name}</option>`;
-        }
+        // Store the actual ID in a data attribute
+        select.innerHTML += `<option value="${value}" data-id="${portfolio.id}">${portfolio.name}</option>`;
     });
+    
+}
+
+// Function called when portfolio is selected
+async function onPortfolioSelection() {
+    const portfolioSelect = document.getElementById('portfolioName');
+    const projectSelect = document.getElementById('projectName');
+    
+    if (!portfolioSelect.value) {
+        // Clear projects and disable
+        projectSelect.innerHTML = '<option value="">Select Project</option>';
+        projectSelect.disabled = true;
+        return;
+    }
+    
+    projectSelect.disabled = false;
+    projectSelect.innerHTML = '<option value="">Loading projects...</option>';
+    
+    try {
+        let projects = [];
+        
+        if (portfolioSelect.value === 'no-portfolio') {
+            // Load projects without portfolio
+            const response = await fetch('/api/projects/without-portfolio');
+            if (response.ok) {
+                projects = await response.json();
+            }
+        } else {
+            // Get portfolio ID from data attribute
+            const selectedOption = portfolioSelect.options[portfolioSelect.selectedIndex];
+            const portfolioId = selectedOption.getAttribute('data-id');
+            
+            if (portfolioId) {
+                const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
+                if (response.ok) {
+                    projects = await response.json();
+                }
+            }
+        }
+        
+        // Populate project dropdown
+        projectSelect.innerHTML = '<option value="">Select Project</option>';
+        projects.forEach(project => {
+            projectSelect.innerHTML += `<option value="${project.name.toLowerCase().replace(/\s+/g, '-')}" data-id="${project.id}">${project.name}</option>`;
+        });
+        
+        if (projects.length === 0) {
+            projectSelect.innerHTML = '<option value="">No projects available</option>';
+        }
+        
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        projectSelect.innerHTML = '<option value="">Error loading projects</option>';
+    }
 }
 
 async function populateProjectDropdown(projects) {
@@ -2166,8 +2241,16 @@ async function onProjectSelection() {
         return;
     }
     
-    const portfolioName = portfolioSelect.options[portfolioSelect.selectedIndex].text;
-    const projectName = projectSelect.options[projectSelect.selectedIndex].text;
+    let portfolioName, projectName;
+    
+    // Handle "no-portfolio" case
+    if (portfolioSelect.value === 'no-portfolio') {
+        portfolioName = 'No Portfolio';
+    } else {
+        portfolioName = portfolioSelect.options[portfolioSelect.selectedIndex].text;
+    }
+    
+    projectName = projectSelect.options[projectSelect.selectedIndex].text;
     
     try {
         const response = await fetch(`/api/projects/${encodeURIComponent(portfolioName)}/${encodeURIComponent(projectName)}/latest-data`);
@@ -2176,6 +2259,15 @@ async function onProjectSelection() {
             
             if (data.hasData) {
                 latestProjectData = data;
+                
+                // Automatically load testers when project is selected
+                const latestData = data.latestData;
+                if (latestData.testerData && latestData.testerData.length > 0) {
+                    console.log('Auto-loading testers for selected project:', latestData.testerData);
+                    testerData = [...latestData.testerData];
+                    renderTesterList();
+                }
+                
                 showAutoLoadModal(data);
             } else {
                 // No previous data, set defaults
@@ -2267,7 +2359,7 @@ function loadSelectedData() {
         latestData.testerData.forEach(tester => {
             testerData.push(tester);
         });
-        updateTesterList();
+        renderTesterList();
     }
     
     // Load Team Members  
@@ -2596,6 +2688,7 @@ window.invalidateAllCaches = invalidateAllCaches; // Make cache invalidation glo
 window.fetchReport = fetchReport; // Make it globally accessible for editing
 window.loadReportForEditing = loadReportForEditing; // Make it globally accessible for editing
 window.onProjectSelection = onProjectSelection; // Make project selection handler globally accessible
+window.onPortfolioSelection = onPortfolioSelection; // Make portfolio selection handler globally accessible
 window.loadSelectedData = loadSelectedData; // Make data loading function globally accessible
 window.editingReportId = editingReportId; // Make global variable accessible
 window.allReportsCache = allReportsCache; // Make global variable accessible

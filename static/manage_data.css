@@ -246,3 +246,50 @@ ight theme background adjustment */
     background: var(--primary);
     color: white;
 }
+
+/* Checkbox list styles */
+.checkbox-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    background: var(--surface);
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.checkbox-item:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-right: 0.75rem;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+}
+
+.checkbox-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.checkbox-text strong {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.checkbox-text small {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}

@@ -892,12 +892,18 @@
                 content += `
                     <h3 class="section-title" style="font-size: 1.25rem; margin-top: 1.5rem;">🧪 Tester Information</h3>
                     <div class="dynamic-list">
-                        ${report.testerData.map(tester => `
+                        ${report.testerData.map(tester => {
+                            const roles = [];
+                            if (tester.is_automation_engineer) roles.push('Automation Engineer');
+                            if (tester.is_manual_engineer) roles.push('Manual Engineer');
+                            const roleText = roles.length > 0 ? `<br><strong>Roles:</strong> ${roles.join(', ')}` : '<br><em style="color: #6c757d;">No roles assigned</em>';
+                            
+                            return `
                             <div class="dynamic-item">
                                 <strong>Tester:</strong> ${tester.name}
-                                ${tester.email ? `<br><strong>Email:</strong> ${tester.email}` : ''}
-                            </div>
-                        `).join('')}
+                                ${tester.email ? `<br><strong>Email:</strong> ${tester.email}` : ''}${roleText}
+                            </div>`;
+                        }).join('')}
                     </div>
                 `;
             }
@@ -1378,8 +1384,14 @@
             }
 
             if (currentReport.testerData && currentReport.testerData.length > 0) {
-                const testerHeaders = ["Tester Name", "Email"];
-                const testersSheetData = currentReport.testerData.map(tester => [tester.name, tester.email || '']);
+                const testerHeaders = ["Tester Name", "Email", "Roles"];
+                const testersSheetData = currentReport.testerData.map(tester => {
+                    const roles = [];
+                    if (tester.is_automation_engineer) roles.push('Automation Engineer');
+                    if (tester.is_manual_engineer) roles.push('Manual Engineer');
+                    const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
+                    return [tester.name, tester.email || '', roleText];
+                });
                 const wsTesters = XLSX.utils.aoa_to_sheet([testerHeaders, ...testersSheetData]);
                 XLSX.utils.book_append_sheet(workbook, wsTesters, "Testers");
             }

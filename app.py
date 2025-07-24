@@ -86,6 +86,7 @@ class Report(db.Model):
     
     # QA Notes
     qaNotesText = db.Column(db.Text)
+    qaNotesData = db.Column(db.Text, default='[]')  # Store multiple QA notes as JSON array
     
     # Metadata
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
@@ -199,6 +200,7 @@ class Report(db.Model):
             'issuesMetric': self.issuesMetric,
             'enhancementsMetric': self.enhancementsMetric,
             'qaNotesText': self.qaNotesText,
+            'qaNotesData': json.loads(self.qaNotesData or '[]'),
             
             # Metadata
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
@@ -470,6 +472,7 @@ def create_report():
             
             # Other metrics
             qaNotesText=data.get('qaNotesText'),
+            qaNotesData=json.dumps(data.get('qaNotesData', [])),
             
         )
         
@@ -495,18 +498,50 @@ class Portfolio(db.Model):
     # Relationship
     projects = db.relationship('Project', backref='portfolio', lazy=True)
 
+# Association table for many-to-many relationship between testers and projects
+tester_project_association = db.Table('tester_project',
+    db.Column('tester_id', db.Integer, db.ForeignKey('tester.id'), primary_key=True),
+    db.Column('project_id', db.Integer, db.ForeignKey('project.id'), primary_key=True)
+)
+
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
-    portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'), nullable=False)
+    portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'), nullable=True)  # Allow projects without portfolio
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Many-to-many relationship with testers
+    testers = db.relationship('Tester', secondary=tester_project_association, back_populates='projects')
 
 class Tester(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
+    is_automation_engineer = db.Column(db.Boolean, default=False)
+    is_manual_engineer = db.Column(db.Boolean, default=False)
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Many-to-many relationship with projects
+    projects = db.relationship('Project', secondary=tester_project_association, back_populates='testers')
+    
+    @property
+    def role_types(self):
+        """Return list of role types for this tester"""
+        roles = []
+        if self.is_automation_engineer:
+            roles.append('Automation Engineer')
+        if self.is_manual_engineer:
+            roles.append('Manual Engineer')
+        return roles
+    
+    @property
+    def role_display(self):
+        """Return formatted role display string"""
+        roles = self.role_types
+        if not roles:
+            return 'Unspecified'
+        return ', '.join(roles)
 
 class TeamMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -604,7 +639,7 @@ def manage_projects():
         project = Project(
             name=data['name'], 
             description=data.get('description', ''),
-            portfolio_id=data['portfolio_id']
+            portfolio_id=data.get('portfolio_id')  # Allow None for projects without portfolio
         )
         db.session.add(project)
         db.session.commit()
@@ -650,6 +685,16 @@ def get_portfolio_projects(portfolio_id):
         'description': p.description
     } for p in projects])
 
+@app.route('/api/projects/without-portfolio', methods=['GET'])
+def get_projects_without_portfolio():
+    """Get all projects that are not linked to any portfolio"""
+    projects = Project.query.filter_by(portfolio_id=None).all()
+    return jsonify([{
+        'id': p.id,
+        'name': p.name,
+        'description': p.description
+    } for p in projects])
+
 # Testers API Routes
 @app.route('/api/testers', methods=['GET', 'POST'])
 def manage_testers():
@@ -659,6 +704,10 @@ def manage_testers():
             'id': t.id,
             'name': t.name,
             'email': t.email,
+            'is_automation_engineer': t.is_automation_engineer,
+            'is_manual_engineer': t.is_manual_engineer,
+            'role_types': t.role_types,
+            'role_display': t.role_display,
             'createdAt': t.createdAt.isoformat() if t.createdAt else None
         } for t in testers])
     
@@ -672,14 +721,20 @@ def manage_testers():
         
         tester = Tester(
             name=data['name'],
-            email=data['email']
+            email=data['email'],
+            is_automation_engineer=data.get('is_automation_engineer', False),
+            is_manual_engineer=data.get('is_manual_engineer', False)
         )
         db.session.add(tester)
         db.session.commit()
         return jsonify({
             'id': tester.id,
             'name': tester.name,
-            'email': tester.email
+            'email': tester.email,
+            'is_automation_engineer': tester.is_automation_engineer,
+            'is_manual_engineer': tester.is_manual_engineer,
+            'role_types': tester.role_types,
+            'role_display': tester.role_display
         }), 201
 
 @app.route('/api/testers/<int:tester_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -691,6 +746,10 @@ def manage_tester(tester_id):
             'id': tester.id,
             'name': tester.name,
             'email': tester.email,
+            'is_automation_engineer': tester.is_automation_engineer,
+            'is_manual_engineer': tester.is_manual_engineer,
+            'role_types': tester.role_types,
+            'role_display': tester.role_display,
             'createdAt': tester.createdAt.isoformat() if tester.createdAt else None
         })
     
@@ -705,17 +764,66 @@ def manage_tester(tester_id):
         
         tester.name = data.get('name', tester.name)
         tester.email = data.get('email', tester.email)
+        tester.is_automation_engineer = data.get('is_automation_engineer', tester.is_automation_engineer)
+        tester.is_manual_engineer = data.get('is_manual_engineer', tester.is_manual_engineer)
         db.session.commit()
         return jsonify({
             'id': tester.id,
             'name': tester.name,
-            'email': tester.email
+            'email': tester.email,
+            'is_automation_engineer': tester.is_automation_engineer,
+            'is_manual_engineer': tester.is_manual_engineer,
+            'role_types': tester.role_types,
+            'role_display': tester.role_display
         })
     
     elif request.method == 'DELETE':
         db.session.delete(tester)
         db.session.commit()
         return jsonify({'message': 'Tester deleted successfully'}), 200
+
+# Tester-Project relationship endpoints
+@app.route('/api/testers/<int:tester_id>/projects', methods=['GET', 'POST'])
+def manage_tester_projects(tester_id):
+    tester = Tester.query.get_or_404(tester_id)
+    
+    if request.method == 'GET':
+        return jsonify([{
+            'id': p.id,
+            'name': p.name,
+            'portfolio_id': p.portfolio_id,
+            'portfolio_name': p.portfolio.name if p.portfolio else None
+        } for p in tester.projects])
+    
+    elif request.method == 'POST':
+        data = request.get_json()
+        project_ids = data.get('project_ids', [])
+        
+        # Clear existing relationships
+        tester.projects.clear()
+        
+        # Add new relationships
+        for project_id in project_ids:
+            project = Project.query.get(project_id)
+            if project:
+                tester.projects.append(project)
+        
+        db.session.commit()
+        return jsonify({'message': 'Tester projects updated successfully'}), 200
+
+@app.route('/api/projects/<int:project_id>/testers', methods=['GET'])
+def get_project_testers(project_id):
+    """Get all testers assigned to a specific project"""
+    project = Project.query.get_or_404(project_id)
+    return jsonify([{
+        'id': t.id,
+        'name': t.name,
+        'email': t.email,
+        'is_automation_engineer': t.is_automation_engineer,
+        'is_manual_engineer': t.is_manual_engineer,
+        'role_types': t.role_types,
+        'role_display': t.role_display
+    } for t in project.testers])
 
 # Team Members API Routes
 @app.route('/api/team-members', methods=['GET', 'POST'])
@@ -858,7 +966,7 @@ def get_form_data():
     return jsonify({
         'portfolios': [{'id': p.id, 'name': p.name} for p in portfolios],
         'projects': [{'id': p.id, 'name': p.name, 'portfolio_id': p.portfolio_id} for p in projects],
-        'testers': [{'id': t.id, 'name': t.name, 'email': t.email} for t in testers],
+        'testers': [{'id': t.id, 'name': t.name, 'email': t.email, 'is_automation_engineer': t.is_automation_engineer, 'is_manual_engineer': t.is_manual_engineer, 'role_types': t.role_types, 'role_display': t.role_display} for t in testers],
         'team_members': [{'id': tm.id, 'name': tm.name, 'email': tm.email, 'role': tm.role} for tm in team_members]
     })
 
@@ -866,16 +974,23 @@ def get_form_data():
 def get_latest_project_data(portfolio_name, project_name):
     """Get latest report data for a specific project to auto-populate new reports"""
     try:
-        # Get the latest report for this project
-        latest_report = Report.query.filter_by(
+        # Get all reports for this project to find the highest values
+        all_reports = Report.query.filter_by(
             portfolioName=portfolio_name,
             projectName=project_name
-        ).order_by(Report.id.desc()).first()
+        ).all()
         
-        if not latest_report:
+        if not all_reports:
             # No previous reports - return default values
             from datetime import datetime
             today = datetime.now().strftime('%d-%m-%Y')
+            
+            # Get project to find assigned testers
+            project = Project.query.filter_by(name=project_name).first()
+            project_testers = []
+            if project:
+                project_testers = [{'id': t.id, 'name': t.name, 'email': t.email, 'is_automation_engineer': t.is_automation_engineer, 'is_manual_engineer': t.is_manual_engineer, 'role_types': t.role_types, 'role_display': t.role_display} for t in project.testers]
+            
             return jsonify({
                 'hasData': False,
                 'defaultValues': {
@@ -884,10 +999,27 @@ def get_latest_project_data(portfolio_name, project_name):
                     'releaseNumber': '1.0',
                     'reportVersion': '1.0', 
                     'reportDate': today,
-                    'testerData': [],
+                    'testerData': project_testers,
                     'teamMembers': []
                 }
             })
+        
+        # Find the highest sprint, cycle, and release numbers
+        max_sprint = max((r.sprintNumber or 0) for r in all_reports)
+        max_cycle = max((r.cycleNumber or 0) for r in all_reports)
+        
+        # For release number, we need to parse and find the highest version
+        release_numbers = [r.releaseNumber for r in all_reports if r.releaseNumber]
+        latest_release = '1.0'
+        if release_numbers:
+            # Simple version comparison - assumes format like "1.0", "1.1", "2.0"
+            try:
+                latest_release = max(release_numbers, key=lambda v: tuple(map(int, v.split('.'))))
+            except:
+                latest_release = release_numbers[-1]  # fallback to last one
+        
+        # Get the latest report for other data
+        latest_report = max(all_reports, key=lambda r: r.id)
         
         # Parse existing data
         tester_data = json.loads(latest_report.testerData or '[]')
@@ -895,12 +1027,24 @@ def get_latest_project_data(portfolio_name, project_name):
         build_data = json.loads(latest_report.buildData or '[]')
         team_member_data = json.loads(latest_report.teamMemberData or '[]')
         
+        # Get project to find assigned testers (merge with existing tester data)
+        project = Project.query.filter_by(name=project_name).first()
+        if project:
+            # Get assigned testers that might not be in the latest report
+            assigned_testers = [{'id': t.id, 'name': t.name, 'email': t.email, 'is_automation_engineer': t.is_automation_engineer, 'is_manual_engineer': t.is_manual_engineer} for t in project.testers]
+            
+            # Merge with existing tester data (avoid duplicates)
+            existing_emails = {t.get('email') for t in tester_data}
+            for assigned_tester in assigned_testers:
+                if assigned_tester['email'] not in existing_emails:
+                    tester_data.append(assigned_tester)
+        
         return jsonify({
             'hasData': True,
             'latestData': {
-                'sprintNumber': latest_report.sprintNumber or 1,
-                'cycleNumber': latest_report.cycleNumber or 1,
-                'releaseNumber': latest_report.releaseNumber or '1.0',
+                'sprintNumber': max_sprint,
+                'cycleNumber': max_cycle,
+                'releaseNumber': latest_release,
                 'reportVersion': latest_report.reportVersion or '1.0',
                 'reportDate': latest_report.reportDate,
                 'testerData': tester_data,
@@ -909,9 +1053,9 @@ def get_latest_project_data(portfolio_name, project_name):
                 'buildData': build_data
             },
             'suggestedValues': {
-                'sprintNumber': (latest_report.sprintNumber or 1) + 1,
-                'cycleNumber': (latest_report.cycleNumber or 1) + 1,
-                'releaseNumber': latest_report.releaseNumber or '1.0',
+                'sprintNumber': max_sprint + 1,
+                'cycleNumber': 1,  # Default cycle number is always 1 as per requirement
+                'releaseNumber': latest_release,
                 'reportVersion': latest_report.reportVersion or '1.0'
             }
         })
@@ -970,6 +1114,8 @@ def update_report(id):
         report.testerData = json.dumps(data['testerData'])
     if 'teamMemberData' in data:
         report.teamMemberData = json.dumps(data['teamMemberData'])
+    if 'qaNotesData' in data:
+        report.qaNotesData = json.dumps(data['qaNotesData'])
 
 
     # Recalculate totals and scores
@@ -1105,9 +1251,23 @@ def get_portfolios_minimal():
 
 @app.route('/api/projects/by-portfolio/<int:portfolio_id>', methods=['GET'])
 def get_projects_by_portfolio(portfolio_id):
-    """Get projects for a specific portfolio"""
+    """Get projects for a specific portfolio - optimized for dropdowns"""
     projects = Project.query.filter_by(portfolio_id=portfolio_id).with_entities(Project.id, Project.name).all()
     return jsonify([{'id': p.id, 'name': p.name} for p in projects])
+
+@app.route('/api/portfolios/<int:portfolio_id>/projects/detailed', methods=['GET'])
+def get_portfolio_projects_detailed(portfolio_id):
+    """Get detailed projects for a specific portfolio including testers"""
+    projects = Project.query.filter_by(portfolio_id=portfolio_id).all()
+    result = []
+    for p in projects:
+        result.append({
+            'id': p.id,
+            'name': p.name,
+            'description': p.description,
+            'testers': [{'id': t.id, 'name': t.name, 'email': t.email, 'is_automation_engineer': t.is_automation_engineer, 'is_manual_engineer': t.is_manual_engineer, 'role_types': t.role_types, 'role_display': t.role_display} for t in p.testers]
+        })
+    return jsonify(result)
 
 @app.route('/api/dashboard/stats/cached', methods=['GET'])
 def get_cached_dashboard_stats():
@@ -1359,17 +1519,42 @@ def migrate_database():
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         
-        # Check if releaseNumber column exists
+        # Check existing columns in report table
         cursor.execute("PRAGMA table_info(report)")
         columns = [column[1] for column in cursor.fetchall()]
         
-        if 'releaseNumber' not in columns:
-            try:
-                cursor.execute("ALTER TABLE report ADD COLUMN releaseNumber VARCHAR(50)")
-                conn.commit()
-                print("Added releaseNumber column to existing database")
-            except sqlite3.Error as e:
-                print(f"Error adding releaseNumber column: {e}")
+        # Add missing columns to report table
+        migrations = [
+            ('releaseNumber', 'VARCHAR(50)'),
+            ('qaNotesData', 'TEXT DEFAULT "[]"')
+        ]
+        
+        for column_name, column_type in migrations:
+            if column_name not in columns:
+                try:
+                    cursor.execute(f"ALTER TABLE report ADD COLUMN {column_name} {column_type}")
+                    conn.commit()
+                    print(f"Added {column_name} column to existing database")
+                except sqlite3.Error as e:
+                    print(f"Error adding {column_name} column: {e}")
+        
+        # Check existing columns in tester table and add role fields
+        cursor.execute("PRAGMA table_info(tester)")
+        tester_columns = [column[1] for column in cursor.fetchall()]
+        
+        tester_migrations = [
+            ('is_automation_engineer', 'BOOLEAN DEFAULT 0'),
+            ('is_manual_engineer', 'BOOLEAN DEFAULT 0')
+        ]
+        
+        for column_name, column_type in tester_migrations:
+            if column_name not in tester_columns:
+                try:
+                    cursor.execute(f"ALTER TABLE tester ADD COLUMN {column_name} {column_type}")
+                    conn.commit()
+                    print(f"Added {column_name} column to tester table")
+                except sqlite3.Error as e:
+                    print(f"Error adding {column_name} column to tester table: {e}")
         
         conn.close()
 
