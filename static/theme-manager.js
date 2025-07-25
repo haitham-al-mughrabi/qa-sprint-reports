@@ -36,9 +36,13 @@ class ThemeManager {
         document.body.classList.add(`theme-${theme}`);
         
         // Trigger custom event for components that need to react to theme changes
-        window.dispatchEvent(new CustomEvent('themeChanged', { 
-            detail: { theme: theme } 
-        }));
+        // Add a longer delay to ensure CSS variables have fully updated
+        setTimeout(() => {
+            console.log('Firing themeChanged event for theme:', theme);
+            window.dispatchEvent(new CustomEvent('themeChanged', { 
+                detail: { theme: theme } 
+            }));
+        }, 200);
     }
 
     toggleTheme() {
@@ -90,17 +94,68 @@ class ThemeManager {
         if (typeof Chart !== 'undefined') {
             const isDark = theme === 'dark';
             
-            Chart.defaults.color = isDark ? '#94a3b8' : '#64748b';
+            // Set Chart.js global defaults
+            Chart.defaults.color = isDark ? '#f1f5f9' : '#1e293b';
             Chart.defaults.borderColor = isDark ? '#334155' : '#e2e8f0';
-            Chart.defaults.backgroundColor = isDark ? '#1e293b' : '#f8fafc';
+            Chart.defaults.backgroundColor = isDark ? '#1e293b' : '#ffffff';
             
-            // Update existing charts
-            Object.values(Chart.instances).forEach(chart => {
-                if (chart && chart.update) {
-                    chart.update('none');
+            // Set plugin defaults
+            if (Chart.defaults.plugins) {
+                if (Chart.defaults.plugins.legend) {
+                    Chart.defaults.plugins.legend.labels = Chart.defaults.plugins.legend.labels || {};
+                    Chart.defaults.plugins.legend.labels.color = isDark ? '#f1f5f9' : '#1e293b';
                 }
-            });
+                if (Chart.defaults.plugins.tooltip) {
+                    Chart.defaults.plugins.tooltip.titleColor = isDark ? '#f1f5f9' : '#1e293b';
+                    Chart.defaults.plugins.tooltip.bodyColor = isDark ? '#f1f5f9' : '#1e293b';
+                    Chart.defaults.plugins.tooltip.backgroundColor = isDark ? '#334155' : '#ffffff';
+                    Chart.defaults.plugins.tooltip.borderColor = isDark ? '#334155' : '#e2e8f0';
+                }
+            }
+            
+            // Set scale defaults
+            if (Chart.defaults.scales) {
+                ['x', 'y', 'r'].forEach(scaleType => {
+                    if (Chart.defaults.scales[scaleType]) {
+                        Chart.defaults.scales[scaleType].ticks = Chart.defaults.scales[scaleType].ticks || {};
+                        Chart.defaults.scales[scaleType].ticks.color = isDark ? '#f1f5f9' : '#1e293b';
+                        Chart.defaults.scales[scaleType].grid = Chart.defaults.scales[scaleType].grid || {};
+                        Chart.defaults.scales[scaleType].grid.color = isDark ? '#334155' : '#e2e8f0';
+                    }
+                });
+            }
+            
+            console.log('Chart.js defaults updated for theme:', theme);
+            
+            // Force update all existing charts with new theme
+            this.forceUpdateAllCharts(isDark);
         }
+    }
+
+    forceUpdateAllCharts(isDark) {
+        // Update existing charts with aggressive refresh
+        Object.values(Chart.instances).forEach(chart => {
+            if (chart && chart.update) {
+                // Update chart border colors for doughnut charts
+                if (chart.data && chart.data.datasets) {
+                    chart.data.datasets.forEach(dataset => {
+                        if (dataset.borderColor === '#fff' || dataset.borderColor === '#ffffff' || dataset.borderColor === '#1e293b') {
+                            dataset.borderColor = isDark ? '#1e293b' : '#ffffff';
+                        }
+                    });
+                }
+                
+                // Force a complete chart redraw
+                chart.update('active');
+                
+                // Additional force refresh after a short delay
+                setTimeout(() => {
+                    if (chart && chart.update) {
+                        chart.update('resize');
+                    }
+                }, 100);
+            }
+        });
     }
 
     observeNewElements() {
@@ -166,17 +221,86 @@ function updateThemeButton(theme) {
     themeManager.updateThemeButton(theme);
 }
 
+// Utility function for robust theme detection
+function getCurrentTheme() {
+    // Try multiple ways to detect current theme
+    if (window.themeManager && typeof window.themeManager.getCurrentTheme === 'function') {
+        return window.themeManager.getCurrentTheme();
+    } else if (document.documentElement.getAttribute('data-theme')) {
+        return document.documentElement.getAttribute('data-theme');
+    } else if (document.body.classList.contains('theme-dark')) {
+        return 'dark';
+    } else if (document.body.classList.contains('theme-light')) {
+        return 'light';
+    } else {
+        return localStorage.getItem('sprint-reports-theme') || 'light';
+    }
+}
+
+// Utility function to check if current theme is light
+function isCurrentThemeLight() {
+    return getCurrentTheme() === 'light';
+}
+
+// Force refresh all charts with current theme colors
+function forceRefreshAllCharts() {
+    console.log('Force refreshing all charts with current theme...');
+    
+    // Update Chart.js defaults first
+    if (window.themeManager) {
+        window.themeManager.updateChartsTheme(getCurrentTheme());
+    }
+    
+    // Trigger theme change event to recreate all charts
+    window.dispatchEvent(new CustomEvent('themeChanged', { 
+        detail: { theme: getCurrentTheme() } 
+    }));
+}
+
+// Force recreate all charts (more aggressive)
+function forceRecreateAllCharts() {
+    console.log('Force recreating all charts...');
+    
+    // Destroy all Chart.js instances
+    if (typeof Chart !== 'undefined' && Chart.instances) {
+        Object.values(Chart.instances).forEach(chart => {
+            if (chart && chart.destroy) {
+                chart.destroy();
+            }
+        });
+    }
+    
+    // Wait a bit then trigger theme change to recreate
+    setTimeout(() => {
+        forceRefreshAllCharts();
+    }, 200);
+}
+
 // Make functions globally accessible
 window.themeManager = themeManager;
 window.toggleTheme = toggleTheme;
 window.initializeTheme = initializeTheme;
 window.updateThemeButton = updateThemeButton;
+window.getCurrentTheme = getCurrentTheme;
+window.isCurrentThemeLight = isCurrentThemeLight;
+window.forceRefreshAllCharts = forceRefreshAllCharts;
+window.forceRecreateAllCharts = forceRecreateAllCharts;
 
 // Apply theme as early as possible to prevent FOUC
 function applyEarlyTheme() {
     const savedTheme = localStorage.getItem('sprint-reports-theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     document.body.classList.add(`theme-${savedTheme}`);
+    
+    // Set Chart.js defaults early if available
+    if (typeof Chart !== 'undefined') {
+        const isDark = savedTheme === 'dark';
+        Chart.defaults.color = isDark ? '#f1f5f9' : '#1e293b';
+        Chart.defaults.borderColor = isDark ? '#334155' : '#e2e8f0';
+        Chart.defaults.backgroundColor = isDark ? '#1e293b' : '#ffffff';
+    }
+    
+    console.log('Early theme applied:', savedTheme);
 }
 
 // Apply theme immediately

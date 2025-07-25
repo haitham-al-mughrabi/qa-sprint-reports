@@ -390,15 +390,34 @@ function initializeCharts() {
 }
 
 function getChartOptions() {
+    // Get theme-appropriate colors using robust detection
+    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
+    
+    const textColor = isLightTheme ? '#1e293b' : '#f1f5f9';
+    const tooltipBg = isLightTheme ? '#ffffff' : '#334155';
+    const gridColor = isLightTheme ? '#e2e8f0' : '#334155';
+    
+    console.log('Enhanced script chart options - isLightTheme:', isLightTheme, 'textColor:', textColor);
+    
     return {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'bottom',
-                labels: { padding: 15, usePointStyle: true, font: { size: 11 } }
+                labels: { 
+                    padding: 15, 
+                    usePointStyle: true, 
+                    font: { size: 11 },
+                    color: textColor
+                }
             },
             tooltip: {
+                titleColor: textColor,
+                bodyColor: textColor,
+                backgroundColor: tooltipBg,
+                borderColor: gridColor,
+                borderWidth: 1,
                 callbacks: {
                     label: function(context) {
                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
@@ -416,6 +435,9 @@ function initializeDoughnutChart(canvasId, labels, backgroundColors) {
     const ctx = document.getElementById(canvasId)?.getContext('2d');
     if (!ctx) return null;
 
+    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
+    const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
+
     return new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -424,7 +446,7 @@ function initializeDoughnutChart(canvasId, labels, backgroundColors) {
                 data: new Array(labels.length).fill(0),
                 backgroundColor: backgroundColors,
                 borderWidth: 3,
-                borderColor: '#fff'
+                borderColor: borderColor
             }]
         },
         options: getChartOptions()
@@ -2672,6 +2694,85 @@ function initializeTheme() {
 
 // Initialize theme on page load
 document.addEventListener('DOMContentLoaded', initializeTheme);
+
+// Listen for theme changes and update chart colors
+window.addEventListener('themeChanged', (event) => {
+    console.log('Theme changed, recreating form charts...');
+    
+    // Store current chart data before destroying charts
+    const chartConfigs = [
+        { chart: userStoriesChart, id: 'userStoriesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
+        { chart: testCasesChart, id: 'testCasesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
+        { chart: issuesPriorityChart, id: 'issuesPriorityChart', labels: ['Critical', 'High', 'Medium', 'Low'], colors: ['#dc3545', '#fd7e14', '#ffc107', '#28a745'] },
+        { chart: issuesStatusChart, id: 'issuesStatusChart', labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'], colors: ['#17a2b8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1'] },
+        { chart: enhancementsChart, id: 'enhancementsChart', labels: ['New', 'Implemented', 'Exists'], colors: ['#17a2b8', '#28a745', '#6c757d'] }
+    ];
+    
+    // Store data and destroy existing charts
+    const chartData = {};
+    chartConfigs.forEach(config => {
+        if (config.chart && config.chart.data) {
+            chartData[config.id] = config.chart.data.datasets[0].data;
+        }
+        if (config.chart && config.chart.destroy) {
+            config.chart.destroy();
+        }
+    });
+    
+    // Recreate charts with new theme colors
+    setTimeout(() => {
+        recreateFormCharts(chartConfigs, chartData);
+    }, 100);
+});
+
+// Function to recreate form charts with stored data
+function recreateFormCharts(chartConfigs, chartData) {
+    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
+    const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
+
+    chartConfigs.forEach(config => {
+        const canvas = document.getElementById(config.id);
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            const data = chartData[config.id] || new Array(config.labels.length).fill(0);
+            
+            const newChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: config.labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: config.colors,
+                        borderWidth: 3,
+                        borderColor: borderColor
+                    }]
+                },
+                options: getChartOptions()
+            });
+            
+            // Reassign to global variables
+            switch (config.id) {
+                case 'userStoriesChart':
+                    userStoriesChart = newChart;
+                    break;
+                case 'testCasesChart':
+                    testCasesChart = newChart;
+                    break;
+                case 'issuesPriorityChart':
+                    issuesPriorityChart = newChart;
+                    break;
+                case 'issuesStatusChart':
+                    issuesStatusChart = newChart;
+                    break;
+                case 'enhancementsChart':
+                    enhancementsChart = newChart;
+                    break;
+            }
+        }
+    });
+
+    console.log('Form charts recreated with new theme colors');
+}
 
 // Make theme functions globally accessible
 window.toggleTheme = toggleTheme;

@@ -17,64 +17,159 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Listen for theme changes and update chart colors
+// Listen for theme changes and recreate charts with new colors
 window.addEventListener('themeChanged', (event) => {
-    console.log('Theme changed, updating dashboard charts...');
-    
-    // Update all dashboard charts with new theme colors
-    Object.values(dashboardCharts).forEach(chart => {
-        if (chart && chart.update) {
-            const options = chart.config.type === 'doughnut' || chart.config.type === 'pie' ? 
-                           getDashboardChartOptions() : getTrendChartOptions();
-            
-            // Update legend and tooltip colors
-            if (chart.options.plugins) {
-                if (chart.options.plugins.legend) {
-                    chart.options.plugins.legend.labels.color = options.plugins.legend.labels.color;
-                }
-                if (chart.options.plugins.tooltip) {
-                    chart.options.plugins.tooltip.titleColor = options.plugins.tooltip.titleColor;
-                    chart.options.plugins.tooltip.bodyColor = options.plugins.tooltip.bodyColor;
-                    chart.options.plugins.tooltip.backgroundColor = options.plugins.tooltip.backgroundColor;
-                    chart.options.plugins.tooltip.borderColor = options.plugins.tooltip.borderColor;
-                }
-            }
-            
-            // Update scale colors for charts with scales
-            if (chart.options.scales) {
-                // Handle regular x/y scales
-                if (chart.options.scales.x) {
-                    chart.options.scales.x.ticks.color = options.scales.x.ticks.color;
-                    chart.options.scales.x.grid.color = options.scales.x.grid.color;
-                    if (chart.options.scales.x.title) {
-                        chart.options.scales.x.title.color = options.scales.x.ticks.color;
-                    }
-                }
-                if (chart.options.scales.y) {
-                    chart.options.scales.y.ticks.color = options.scales.y.ticks.color;
-                    chart.options.scales.y.grid.color = options.scales.y.grid.color;
-                    if (chart.options.scales.y.title) {
-                        chart.options.scales.y.title.color = options.scales.y.ticks.color;
-                    }
-                }
-                
-                // Handle radar chart scale
-                if (chart.options.scales.r) {
-                    chart.options.scales.r.angleLines.color = options.scales.x.grid.color;
-                    chart.options.scales.r.grid.color = options.scales.x.grid.color;
-                    chart.options.scales.r.pointLabels.color = options.scales.x.ticks.color;
-                    chart.options.scales.r.ticks.color = options.scales.x.ticks.color;
-                }
-            }
-            
-            chart.update('none');
+    console.log('Dashboard charts: Theme changed event received, theme:', event.detail?.theme);
+    console.log('Dashboard charts: Recreating charts...');
+
+    // Store current chart data before destroying charts
+    const chartData = {};
+    Object.keys(dashboardCharts).forEach(key => {
+        const chart = dashboardCharts[key];
+        if (chart && chart.data) {
+            chartData[key] = {
+                data: chart.data.datasets[0].data,
+                labels: chart.data.labels,
+                type: chart.config.type
+            };
         }
     });
+
+    // Destroy all existing charts
+    Object.values(dashboardCharts).forEach(chart => {
+        if (chart && chart.destroy) {
+            chart.destroy();
+        }
+    });
+
+    // Clear the charts object
+    dashboardCharts = {};
+
+    // Recreate charts with new theme colors
+    setTimeout(() => {
+        recreateDashboardCharts(chartData);
+    }, 100);
 });
+
+// Function to recreate dashboard charts with stored data
+function recreateDashboardCharts(chartData) {
+    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
+    const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
+
+    // Recreate user stories chart
+    if (chartData.userStories) {
+        const canvas = document.getElementById('dashboardUserStoriesChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            dashboardCharts.userStories = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.userStories.labels,
+                    datasets: [{
+                        data: chartData.userStories.data,
+                        backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E', '#2196F3', '#673AB7', '#00BCD4'],
+                        borderWidth: 3,
+                        borderColor: borderColor
+                    }]
+                },
+                options: getDashboardChartOptions()
+            });
+        }
+    }
+
+    // Recreate test cases chart
+    if (chartData.testCases) {
+        const canvas = document.getElementById('dashboardTestCasesChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            dashboardCharts.testCases = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.testCases.labels,
+                    datasets: [{
+                        data: chartData.testCases.data,
+                        backgroundColor: ['#8BC34A', '#FFEB3B', '#E91E63', '#607D8B', '#9C27B0', '#FF5722', '#795548'],
+                        borderWidth: 3,
+                        borderColor: borderColor
+                    }]
+                },
+                options: getDashboardChartOptions()
+            });
+        }
+    }
+
+    // Recreate issues priority chart
+    if (chartData.issuesPriority) {
+        const canvas = document.getElementById('dashboardIssuesPriorityChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            dashboardCharts.issuesPriority = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.issuesPriority.labels,
+                    datasets: [{
+                        data: chartData.issuesPriority.data,
+                        backgroundColor: ['#F44336', '#FF9800', '#FFC107', '#4CAF50'],
+                        borderWidth: 3,
+                        borderColor: borderColor
+                    }]
+                },
+                options: getDashboardChartOptions()
+            });
+        }
+    }
+
+    // Recreate issues status chart
+    if (chartData.issuesStatus) {
+        const canvas = document.getElementById('dashboardIssuesStatusChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            dashboardCharts.issuesStatus = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.issuesStatus.labels,
+                    datasets: [{
+                        data: chartData.issuesStatus.data,
+                        backgroundColor: ['#2196F3', '#4CAF50', '#E91E63', '#FF5722', '#673AB7'],
+                        borderWidth: 3,
+                        borderColor: borderColor
+                    }]
+                },
+                options: getDashboardChartOptions()
+            });
+        }
+    }
+
+    // Recreate any trend charts if they exist
+    Object.keys(chartData).forEach(key => {
+        if (key.includes('Trend') || key.includes('trend')) {
+            const canvas = document.getElementById(key + 'Chart');
+            if (canvas && chartData[key].type === 'line') {
+                const ctx = canvas.getContext('2d');
+                dashboardCharts[key] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData[key].labels,
+                        datasets: chartData[key].datasets || [{
+                            data: chartData[key].data,
+                            borderColor: 'var(--primary)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: getTrendChartOptions()
+                });
+            }
+        }
+    });
+
+    console.log('Dashboard charts recreated with new theme colors');
+}
 
 function createDashboardCharts(overallStats) {
     console.log('Creating dashboard charts with data:', overallStats);
-    
+
     if (!window.Chart) {
         console.error('Chart.js is not loaded');
         return;
@@ -82,7 +177,7 @@ function createDashboardCharts(overallStats) {
 
     // Use actual database data, provide minimal fallbacks only when data is completely unavailable
     overallStats = overallStats || {};
-    
+
     // Only provide fallbacks for essential fields if they're completely missing
     if (!overallStats.totalUserStories && !overallStats.totalTestCases && !overallStats.totalIssues) {
         console.warn('No real data available from database, using minimal fallbacks');
@@ -95,7 +190,7 @@ function createDashboardCharts(overallStats) {
             cancelledUserStories: 0,
             deferredUserStories: 0,
             notTestableUserStories: 0,
-            
+
             totalTestCases: 0,
             passedTestCases: 0,
             passedWithIssuesTestCases: 0,
@@ -104,19 +199,19 @@ function createDashboardCharts(overallStats) {
             cancelledTestCases: 0,
             deferredTestCases: 0,
             notTestableTestCases: 0,
-            
+
             totalIssues: 0,
             criticalIssues: 0,
             highIssues: 0,
             mediumIssues: 0,
             lowIssues: 0,
-            
+
             newIssues: 0,
             fixedIssues: 0,
             notFixedIssues: 0,
             reopenedIssues: 0,
             deferredIssues: 0,
-            
+
             ...overallStats // Keep any real data that exists
         };
     }
@@ -131,30 +226,30 @@ function createDashboardCharts(overallStats) {
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
-        const surfaceColor = isLightTheme ? '#f8fafc' : '#1e293b';
+        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const userStoriesCtx = userStoriesCanvas.getContext('2d');
         dashboardCharts.userStories = new Chart(userStoriesCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
-            datasets: [{
-                data: [
-                    overallStats.passedUserStories || 0,
-                    overallStats.passedWithIssuesUserStories || 0,
-                    overallStats.failedUserStories || 0,
-                    overallStats.blockedUserStories || 0,
-                    overallStats.cancelledUserStories || 0,
-                    overallStats.deferredUserStories || 0,
-                    overallStats.notTestableUserStories || 0
-                ],
-                backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E', '#2196F3', '#673AB7', '#00BCD4'],
-                borderWidth: 3,
-                borderColor: surfaceColor
-            }]
-        },
-        options: getDashboardChartOptions()
-    });
+            type: 'doughnut',
+            data: {
+                labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
+                datasets: [{
+                    data: [
+                        overallStats.passedUserStories || 0,
+                        overallStats.passedWithIssuesUserStories || 0,
+                        overallStats.failedUserStories || 0,
+                        overallStats.blockedUserStories || 0,
+                        overallStats.cancelledUserStories || 0,
+                        overallStats.deferredUserStories || 0,
+                        overallStats.notTestableUserStories || 0
+                    ],
+                    backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E', '#2196F3', '#673AB7', '#00BCD4'],
+                    borderWidth: 3,
+                    borderColor: borderColor
+                }]
+            },
+            options: getDashboardChartOptions()
+        });
     } catch (error) {
         console.error('Error creating user stories chart:', error);
     }
@@ -168,30 +263,30 @@ function createDashboardCharts(overallStats) {
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
-        const surfaceColor = isLightTheme ? '#f8fafc' : '#1e293b';
+        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const testCasesCtx = testCasesCanvas.getContext('2d');
         dashboardCharts.testCases = new Chart(testCasesCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
-            datasets: [{
-                data: [
-                    overallStats.passedTestCases || 0,
-                    overallStats.passedWithIssuesTestCases || 0,
-                    overallStats.failedTestCases || 0,
-                    overallStats.blockedTestCases || 0,
-                    overallStats.cancelledTestCases || 0,
-                    overallStats.deferredTestCases || 0,
-                    overallStats.notTestableTestCases || 0
-                ],
-                backgroundColor: ['#8BC34A', '#FFEB3B', '#E91E63', '#607D8B', '#9C27B0', '#FF5722', '#795548'],
-                borderWidth: 3,
-                borderColor: surfaceColor
-            }]
-        },
-        options: getDashboardChartOptions()
-    });
+            type: 'doughnut',
+            data: {
+                labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
+                datasets: [{
+                    data: [
+                        overallStats.passedTestCases || 0,
+                        overallStats.passedWithIssuesTestCases || 0,
+                        overallStats.failedTestCases || 0,
+                        overallStats.blockedTestCases || 0,
+                        overallStats.cancelledTestCases || 0,
+                        overallStats.deferredTestCases || 0,
+                        overallStats.notTestableTestCases || 0
+                    ],
+                    backgroundColor: ['#8BC34A', '#FFEB3B', '#E91E63', '#607D8B', '#9C27B0', '#FF5722', '#795548'],
+                    borderWidth: 3,
+                    borderColor: borderColor
+                }]
+            },
+            options: getDashboardChartOptions()
+        });
     } catch (error) {
         console.error('Error creating test cases chart:', error);
     }
@@ -205,27 +300,27 @@ function createDashboardCharts(overallStats) {
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
-        const surfaceColor = isLightTheme ? '#f8fafc' : '#1e293b';
+        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const issuesPriorityCtx = issuesPriorityCanvas.getContext('2d');
         dashboardCharts.issuesPriority = new Chart(issuesPriorityCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Critical', 'High', 'Medium', 'Low'],
-            datasets: [{
-                data: [
-                    overallStats.criticalIssues || 0,
-                    overallStats.highIssues || 0,
-                    overallStats.mediumIssues || 0,
-                    overallStats.lowIssues || 0
-                ],
-                backgroundColor: ['#F44336', '#FF9800', '#FFC107', '#4CAF50'],
-                borderWidth: 3,
-                borderColor: surfaceColor
-            }]
-        },
-        options: getDashboardChartOptions()
-    });
+            type: 'doughnut',
+            data: {
+                labels: ['Critical', 'High', 'Medium', 'Low'],
+                datasets: [{
+                    data: [
+                        overallStats.criticalIssues || 0,
+                        overallStats.highIssues || 0,
+                        overallStats.mediumIssues || 0,
+                        overallStats.lowIssues || 0
+                    ],
+                    backgroundColor: ['#F44336', '#FF9800', '#FFC107', '#4CAF50'],
+                    borderWidth: 3,
+                    borderColor: borderColor
+                }]
+            },
+            options: getDashboardChartOptions()
+        });
     } catch (error) {
         console.error('Error creating issues priority chart:', error);
     }
@@ -239,28 +334,28 @@ function createDashboardCharts(overallStats) {
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
-        const surfaceColor = isLightTheme ? '#f8fafc' : '#1e293b';
+        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const issuesStatusCtx = issuesStatusCanvas.getContext('2d');
         dashboardCharts.issuesStatus = new Chart(issuesStatusCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'],
-            datasets: [{
-                data: [
-                    overallStats.newIssues || 0,
-                    overallStats.fixedIssues || 0,
-                    overallStats.notFixedIssues || 0,
-                    overallStats.reopenedIssues || 0,
-                    overallStats.deferredIssues || 0
-                ],
-                backgroundColor: ['#2196F3', '#4CAF50', '#E91E63', '#FF5722', '#673AB7'],
-                borderWidth: 3,
-                borderColor: surfaceColor
-            }]
-        },
-        options: getDashboardChartOptions()
-    });
+            type: 'doughnut',
+            data: {
+                labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'],
+                datasets: [{
+                    data: [
+                        overallStats.newIssues || 0,
+                        overallStats.fixedIssues || 0,
+                        overallStats.notFixedIssues || 0,
+                        overallStats.reopenedIssues || 0,
+                        overallStats.deferredIssues || 0
+                    ],
+                    backgroundColor: ['#2196F3', '#4CAF50', '#E91E63', '#FF5722', '#673AB7'],
+                    borderWidth: 3,
+                    borderColor: borderColor
+                }]
+            },
+            options: getDashboardChartOptions()
+        });
     } catch (error) {
         console.error('Error creating issues status chart:', error);
     }
@@ -269,19 +364,23 @@ function createDashboardCharts(overallStats) {
     createProgressCircles(overallStats);
     createTrendCharts(overallStats);
     createPerformanceMatrix(overallStats);
-    
+
     // Create additional meaningful charts with real data
     createAdditionalCharts(overallStats);
     updateRealTimeMetrics(overallStats);
 }
 
 function getDashboardChartOptions() {
-    // Get theme-appropriate colors - fix dark theme detection
-    const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
+    // Get theme-appropriate colors using robust detection
+    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
+    
+    // Explicit color definitions
     const textColor = isLightTheme ? '#1e293b' : '#f1f5f9';
     const gridColor = isLightTheme ? '#e2e8f0' : '#334155';
-    const surfaceColor = isLightTheme ? '#f8fafc' : '#1e293b';
+    const tooltipBg = isLightTheme ? '#ffffff' : '#334155';
     
+    console.log('Dashboard chart options - isLightTheme:', isLightTheme, 'textColor:', textColor);
+
     return {
         responsive: true,
         maintainAspectRatio: false,
@@ -301,7 +400,7 @@ function getDashboardChartOptions() {
             tooltip: {
                 titleColor: textColor,
                 bodyColor: textColor,
-                backgroundColor: surfaceColor,
+                backgroundColor: tooltipBg,
                 borderColor: gridColor,
                 borderWidth: 1,
                 titleFont: { family: 'Poppins' },
@@ -318,32 +417,32 @@ function createProgressCircles(overallStats) {
     const userStoriesTotal = overallStats.totalUserStories || 0;
     const userStoriesPassed = (overallStats.passedUserStories || 0) + (overallStats.passedWithIssuesUserStories || 0);
     const userStoriesProgress = userStoriesTotal > 0 ? Math.round((userStoriesPassed / userStoriesTotal) * 100) : 0;
-    
+
     updateProgressCircle('userStoriesProgressBar', 'userStoriesPercentage', userStoriesProgress);
 
     // Test Cases Progress
     const testCasesTotal = overallStats.totalTestCases || 0;
     const testCasesPassed = (overallStats.passedTestCases || 0) + (overallStats.passedWithIssuesTestCases || 0);
     const testCasesProgress = testCasesTotal > 0 ? Math.round((testCasesPassed / testCasesTotal) * 100) : 0;
-    
+
     updateProgressCircle('testCasesProgressBar', 'testCasesPercentage', testCasesProgress);
 
     // Issues Resolution
     const issuesTotal = overallStats.totalIssues || 0;
     const issuesFixed = overallStats.fixedIssues || 0;
     const issuesProgress = issuesTotal > 0 ? Math.round((issuesFixed / issuesTotal) * 100) : 0;
-    
+
     updateProgressCircle('issuesProgressBar', 'issuesPercentage', issuesProgress);
 }
 
 function updateProgressCircle(barId, textId, percentage) {
     const circumference = 2 * Math.PI * 45; // radius = 45
     const offset = circumference - (percentage / 100) * circumference;
-    
+
     setTimeout(() => {
         const progressBar = document.getElementById(barId);
         const progressText = document.getElementById(textId);
-        
+
         if (progressBar && progressText) {
             progressBar.style.strokeDasharray = `${circumference} ${circumference}`;
             progressBar.style.strokeDashoffset = offset;
@@ -355,7 +454,7 @@ function updateProgressCircle(barId, textId, percentage) {
 function createTrendCharts(overallStats) {
     // Use real trend data from database or generate based on current metrics
     const trendData = generateRealTrendData(overallStats);
-    
+
     // Quality Metrics Over Time
     try {
         const qualityTrendCanvas = document.getElementById('qualityTrendChart');
@@ -434,22 +533,22 @@ function generateRealTrendData(overallStats) {
         date.setDate(date.getDate() - (i * 7));
         dates.push(date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
     }
-    
+
     // Calculate real completion rates
     const userStoriesTotal = overallStats.totalUserStories || 0;
     const testCasesTotal = overallStats.totalTestCases || 0;
     const currentUserStoriesRate = userStoriesTotal > 0 ? ((overallStats.passedUserStories || 0) / userStoriesTotal) * 100 : 0;
     const currentTestCasesRate = testCasesTotal > 0 ? ((overallStats.passedTestCases || 0) / testCasesTotal) * 100 : 0;
-    
+
     // Generate realistic progression leading to current state (assuming gradual improvement)
     const userStoriesProgression = generateProgressionArray(currentUserStoriesRate);
     const testCasesProgression = generateProgressionArray(currentTestCasesRate);
-    
+
     // Use real issue data for trend
     const totalIssues = overallStats.totalIssues || 0;
     const fixedIssues = overallStats.fixedIssues || 0;
     const issuesProgression = generateIssuesProgression(totalIssues, fixedIssues);
-    
+
     return {
         dates: dates,
         userStoriesCompletion: userStoriesProgression,
@@ -461,7 +560,7 @@ function generateRealTrendData(overallStats) {
 
 function generateProgressionArray(currentValue) {
     if (currentValue === 0) return [0, 0, 0, 0, 0];
-    
+
     // Generate realistic progression that leads to current value
     const progression = [];
     const step = currentValue / 5;
@@ -474,11 +573,11 @@ function generateProgressionArray(currentValue) {
 
 function generateIssuesProgression(totalIssues, fixedIssues) {
     if (totalIssues === 0) return { found: [0, 0, 0, 0, 0], fixed: [0, 0, 0, 0, 0] };
-    
+
     // Generate realistic issue discovery and fixing pattern
     const foundProgression = generateProgressionArray(totalIssues);
     const fixedProgression = generateProgressionArray(fixedIssues);
-    
+
     return {
         found: foundProgression,
         fixed: fixedProgression
@@ -486,11 +585,15 @@ function generateIssuesProgression(totalIssues, fixedIssues) {
 }
 
 function getTrendChartOptions() {
-    const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
+    // Get theme-appropriate colors using robust detection
+    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
+    
     const textColor = isLightTheme ? '#1e293b' : '#f1f5f9';
     const gridColor = isLightTheme ? '#e2e8f0' : '#334155';
-    const surfaceColor = isLightTheme ? '#f8fafc' : '#1e293b';
+    const tooltipBg = isLightTheme ? '#ffffff' : '#334155';
     
+    console.log('Trend chart options - isLightTheme:', isLightTheme, 'textColor:', textColor);
+
     return {
         responsive: true,
         maintainAspectRatio: false,
@@ -510,7 +613,7 @@ function getTrendChartOptions() {
             tooltip: {
                 titleColor: textColor,
                 bodyColor: textColor,
-                backgroundColor: surfaceColor,
+                backgroundColor: tooltipBg,
                 borderColor: gridColor,
                 borderWidth: 1,
                 titleFont: { family: 'Poppins' },
@@ -525,6 +628,10 @@ function getTrendChartOptions() {
                 ticks: {
                     color: textColor,
                     font: { family: 'Poppins' }
+                },
+                title: {
+                    color: textColor,
+                    font: { family: 'Poppins' }
                 }
             },
             y: {
@@ -532,6 +639,10 @@ function getTrendChartOptions() {
                     color: gridColor
                 },
                 ticks: {
+                    color: textColor,
+                    font: { family: 'Poppins' }
+                },
+                title: {
                     color: textColor,
                     font: { family: 'Poppins' }
                 }
@@ -546,7 +657,7 @@ function createPerformanceMatrix(overallStats) {
     const bugFixRate = calculateBugFixRate(overallStats);
     const sprintVelocity = calculateSprintVelocity(overallStats);
     const qualityScore = calculateQualityScore(overallStats);
-    
+
     // Animate the performance bars
     setTimeout(() => {
         updatePerformanceBar('testCoverageBar', 'testCoverageText', testCoverage);
@@ -558,8 +669,8 @@ function createPerformanceMatrix(overallStats) {
 
 function calculateTestCoverage(stats) {
     const total = (stats.totalUserStories || 0) + (stats.totalTestCases || 0);
-    const covered = (stats.passedUserStories || 0) + (stats.passedTestCases || 0) + 
-                   (stats.passedWithIssuesUserStories || 0) + (stats.passedWithIssuesTestCases || 0);
+    const covered = (stats.passedUserStories || 0) + (stats.passedTestCases || 0) +
+        (stats.passedWithIssuesUserStories || 0) + (stats.passedWithIssuesTestCases || 0);
     return total > 0 ? Math.round((covered / total) * 100) : 0;
 }
 
@@ -580,7 +691,7 @@ function calculateQualityScore(stats) {
     const testCoverage = calculateTestCoverage(stats);
     const bugFixRate = calculateBugFixRate(stats);
     const sprintVelocity = calculateSprintVelocity(stats);
-    
+
     // Weighted quality score
     const qualityScore = (testCoverage * 0.3) + (bugFixRate * 0.4) + (sprintVelocity * 0.3);
     return Math.round(qualityScore);
@@ -589,11 +700,11 @@ function calculateQualityScore(stats) {
 function updatePerformanceBar(barId, textId, percentage) {
     const bar = document.getElementById(barId);
     const text = document.getElementById(textId);
-    
+
     if (bar && text) {
         bar.style.width = `${percentage}%`;
         text.textContent = `${percentage}%`;
-        
+
         // Update color based on performance
         if (percentage >= 80) {
             bar.style.background = 'linear-gradient(90deg, var(--success), #4ade80)';
@@ -621,11 +732,11 @@ function createPortfolioDistributionChart(overallStats) {
 
         // Extract real portfolio data from stats
         const portfolioData = extractPortfolioData(overallStats);
-        
+
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
         const surfaceColor = isLightTheme ? '#f8fafc' : '#1e293b';
-        
+
         const ctx = canvas.getContext('2d');
         dashboardCharts.portfolioDistribution = new Chart(ctx, {
             type: 'pie',
@@ -634,7 +745,7 @@ function createPortfolioDistributionChart(overallStats) {
                 datasets: [{
                     data: portfolioData.values,
                     backgroundColor: [
-                        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', 
+                        '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
                         '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'
                     ],
                     borderWidth: 2,
@@ -648,7 +759,7 @@ function createPortfolioDistributionChart(overallStats) {
                     tooltip: {
                         ...getDashboardChartOptions().plugins.tooltip,
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((context.raw / total) * 100).toFixed(1);
                                 return `${context.label}: ${context.raw} reports (${percentage}%)`;
@@ -670,7 +781,7 @@ function createTeamPerformanceChart(overallStats) {
 
         // Extract real team performance data
         const teamData = extractTeamPerformanceData(overallStats);
-        
+
         const ctx = canvas.getContext('2d');
         dashboardCharts.teamPerformance = new Chart(ctx, {
             type: 'radar',
@@ -723,7 +834,7 @@ function createSprintTimelineChart(overallStats) {
 
         // Extract real sprint timeline data
         const timelineData = extractSprintTimelineData(overallStats);
-        
+
         const ctx = canvas.getContext('2d');
         dashboardCharts.sprintTimeline = new Chart(ctx, {
             type: 'line',
@@ -768,7 +879,7 @@ function createQualityScoreChart(overallStats) {
 
         // Extract real quality score distribution
         const qualityData = extractQualityScoreDistribution(overallStats);
-        
+
         const ctx = canvas.getContext('2d');
         dashboardCharts.qualityScore = new Chart(ctx, {
             type: 'bar',
@@ -833,7 +944,7 @@ function createQualityScoreChart(overallStats) {
 function extractPortfolioData(overallStats) {
     // Extract portfolio data from real stats (this would come from dashboardStatsCache.projects)
     const portfolios = {};
-    
+
     // Use real project data if available
     if (window.dashboardStatsCache && window.dashboardStatsCache.data && window.dashboardStatsCache.data.projects) {
         window.dashboardStatsCache.data.projects.forEach(project => {
@@ -841,7 +952,7 @@ function extractPortfolioData(overallStats) {
             portfolios[portfolioName] = (portfolios[portfolioName] || 0) + 1;
         });
     }
-    
+
     // If no real data, create meaningful fallback based on overall stats
     if (Object.keys(portfolios).length === 0) {
         const totalReports = overallStats.totalReports || 0;
@@ -850,7 +961,7 @@ function extractPortfolioData(overallStats) {
             portfolios['Secondary Portfolio'] = Math.floor(totalReports * 0.4);
         }
     }
-    
+
     return {
         labels: Object.keys(portfolios),
         values: Object.values(portfolios)
@@ -864,7 +975,7 @@ function extractTeamPerformanceData(overallStats) {
     const resolutionSpeed = calculateResolutionSpeed(overallStats);
     const qualityScore = calculateQualityScore(overallStats);
     const sprintCompletion = calculateSprintCompletion(overallStats);
-    
+
     return {
         values: [testCoverage, bugDetection, resolutionSpeed, qualityScore, sprintCompletion]
     };
@@ -874,32 +985,32 @@ function extractSprintTimelineData(overallStats) {
     // Generate timeline based on real sprint data
     const dates = [];
     const today = new Date();
-    
+
     // Generate last 10 days
     for (let i = 9; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
         dates.push(date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
     }
-    
+
     // Calculate realistic progress based on current completion rates
     const totalWork = (overallStats.totalUserStories || 0) + (overallStats.totalTestCases || 0);
     const completedWork = (overallStats.passedUserStories || 0) + (overallStats.passedTestCases || 0);
     const currentProgress = totalWork > 0 ? (completedWork / totalWork) * 100 : 0;
-    
+
     // Generate planned vs actual progress
     const planned = [];
     const actual = [];
-    
+
     for (let i = 0; i < 10; i++) {
         planned.push((i + 1) * 10); // Linear planned progress
-        
+
         // Actual progress with realistic variation
         let actualValue = (i + 1) * (currentProgress / 10);
         if (i === 9) actualValue = currentProgress; // Ensure last value is current
         actual.push(Math.max(0, actualValue));
     }
-    
+
     return { dates, planned, actual };
 }
 
@@ -911,7 +1022,7 @@ function extractQualityScoreDistribution(overallStats) {
         'Average (50-69)': 0,
         'Poor (0-49)': 0
     };
-    
+
     // Use real project data if available
     if (window.dashboardStatsCache && window.dashboardStatsCache.data && window.dashboardStatsCache.data.projects) {
         window.dashboardStatsCache.data.projects.forEach(project => {
@@ -925,13 +1036,13 @@ function extractQualityScoreDistribution(overallStats) {
         // Fallback distribution based on overall stats
         const totalProjects = Math.max(1, Math.ceil((overallStats.totalReports || 1) / 3));
         const qualityScore = calculateQualityScore(overallStats);
-        
+
         if (qualityScore >= 90) scores['Excellent (90-100)'] = totalProjects;
         else if (qualityScore >= 70) scores['Good (70-89)'] = totalProjects;
         else if (qualityScore >= 50) scores['Average (50-69)'] = totalProjects;
         else scores['Poor (0-49)'] = totalProjects;
     }
-    
+
     return {
         labels: Object.keys(scores),
         values: Object.values(scores),
@@ -950,9 +1061,9 @@ function calculateBugDetectionRate(stats) {
     const totalIssues = stats.totalIssues || 0;
     const criticalIssues = stats.criticalIssues || 0;
     const highIssues = stats.highIssues || 0;
-    
+
     if (totalIssues === 0) return 85; // Default good rate
-    
+
     // Rate based on finding critical/high priority issues
     const importantIssues = criticalIssues + highIssues;
     return Math.min(100, 60 + (importantIssues / totalIssues) * 40);
@@ -961,9 +1072,9 @@ function calculateBugDetectionRate(stats) {
 function calculateResolutionSpeed(stats) {
     const totalIssues = stats.totalIssues || 0;
     const fixedIssues = stats.fixedIssues || 0;
-    
+
     if (totalIssues === 0) return 80; // Default good rate
-    
+
     // Speed based on fix rate
     const fixRate = fixedIssues / totalIssues;
     return Math.round(fixRate * 100);
@@ -972,21 +1083,21 @@ function calculateResolutionSpeed(stats) {
 function calculateSprintCompletion(stats) {
     const totalUserStories = stats.totalUserStories || 0;
     const completedUserStories = (stats.passedUserStories || 0) + (stats.passedWithIssuesUserStories || 0);
-    
+
     if (totalUserStories === 0) return 75; // Default completion rate
-    
+
     return Math.round((completedUserStories / totalUserStories) * 100);
 }
 
 function calculateProjectQualityScore(project) {
     // Calculate quality score for individual project
-    const userStoriesRate = project.totalUserStories > 0 ? 
+    const userStoriesRate = project.totalUserStories > 0 ?
         ((project.passedUserStories || 0) / project.totalUserStories) * 100 : 0;
-    const testCasesRate = project.totalTestCases > 0 ? 
+    const testCasesRate = project.totalTestCases > 0 ?
         ((project.passedTestCases || 0) / project.totalTestCases) * 100 : 0;
-    const issueFixRate = project.totalIssues > 0 ? 
+    const issueFixRate = project.totalIssues > 0 ?
         ((project.fixedIssues || 0) / project.totalIssues) * 100 : 100;
-    
+
     return Math.round((userStoriesRate * 0.4) + (testCasesRate * 0.4) + (issueFixRate * 0.2));
 }
 
@@ -996,16 +1107,16 @@ function updateRealTimeMetrics(overallStats) {
     // Active Testers
     const activeTesters = extractActiveTestersCount(overallStats);
     updateMetricWidget('activeTestersCount', 'activeTestersChange', activeTesters, 12);
-    
+
     // Active Sprints
     const activeSprints = extractActiveSprintsCount(overallStats);
     updateMetricWidget('activeSprintsCount', 'activeSprintsChange', activeSprints, 8);
-    
+
     // Average Resolution Time
     const avgResolutionTime = calculateAvgResolutionTime(overallStats);
     document.getElementById('avgResolutionTime').textContent = `${avgResolutionTime}h`;
     updateMetricChange('resolutionTimeChange', -15); // Improvement
-    
+
     // Quality Rating
     const qualityRating = (calculateQualityScore(overallStats) / 10).toFixed(1);
     document.getElementById('qualityRating').textContent = qualityRating;
@@ -1017,7 +1128,7 @@ function extractActiveTestersCount(overallStats) {
     if (window.dashboardStatsCache && window.dashboardStatsCache.data && window.dashboardStatsCache.data.testers) {
         return window.dashboardStatsCache.data.testers.length;
     }
-    
+
     // Fallback calculation based on project activity
     return Math.max(1, Math.ceil((overallStats.totalReports || 0) / 3));
 }
@@ -1032,9 +1143,9 @@ function calculateAvgResolutionTime(overallStats) {
     // Calculate based on issue resolution patterns
     const totalIssues = overallStats.totalIssues || 0;
     const fixedIssues = overallStats.fixedIssues || 0;
-    
+
     if (fixedIssues === 0) return 24; // Default 24 hours
-    
+
     // Simulate realistic resolution time based on fix rate
     const fixRate = fixedIssues / Math.max(1, totalIssues);
     return Math.round(48 - (fixRate * 24)); // Better fix rate = faster resolution
@@ -1042,7 +1153,7 @@ function calculateAvgResolutionTime(overallStats) {
 
 function updateMetricWidget(valueId, changeId, currentValue, previousValue) {
     document.getElementById(valueId).textContent = currentValue;
-    
+
     const change = previousValue > 0 ? ((currentValue - previousValue) / previousValue) * 100 : 0;
     updateMetricChange(changeId, change);
 }
@@ -1050,9 +1161,9 @@ function updateMetricWidget(valueId, changeId, currentValue, previousValue) {
 function updateMetricChange(elementId, changePercent) {
     const element = document.getElementById(elementId);
     const roundedChange = Math.round(changePercent);
-    
+
     element.textContent = `${roundedChange >= 0 ? '+' : ''}${roundedChange}%`;
-    
+
     // Update classes based on change
     element.classList.remove('positive', 'negative', 'neutral');
     if (roundedChange > 0) {

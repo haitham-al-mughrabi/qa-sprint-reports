@@ -1,6 +1,8 @@
 let projects = [];
 let selectedProjectId = null;
 
+let projectCharts = {};
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded - initializing project statistics page');
     
@@ -63,6 +65,147 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// Listen for theme changes and recreate charts with new colors
+window.addEventListener('themeChanged', () => {
+    console.log('Theme changed, recreating project statistics charts...');
+    
+    // Store current chart data before destroying charts
+    const chartData = {};
+    Object.keys(projectCharts).forEach(key => {
+        const chart = projectCharts[key];
+        if (chart && chart.data) {
+            chartData[key] = {
+                data: chart.data.datasets[0].data,
+                labels: chart.data.labels,
+                type: chart.config.type,
+                datasets: chart.data.datasets
+            };
+        }
+    });
+
+    // Destroy all existing charts
+    Object.values(projectCharts).forEach(chart => {
+        if (chart && chart.destroy) {
+            chart.destroy();
+        }
+    });
+
+    // Clear the charts object
+    projectCharts = {};
+
+    // Recreate charts with new theme colors
+    setTimeout(() => {
+        recreateProjectCharts(chartData);
+    }, 100);
+});
+
+// Function to recreate project charts with stored data
+function recreateProjectCharts(chartData) {
+    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
+    const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
+
+    Object.keys(chartData).forEach(key => {
+        const data = chartData[key];
+        const canvas = document.getElementById(key.replace('Charts', 'Chart'));
+        
+        if (canvas && data) {
+            const ctx = canvas.getContext('2d');
+            
+            if (data.type === 'doughnut') {
+                projectCharts[key] = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: data.datasets[0].backgroundColor,
+                            borderWidth: 3,
+                            borderColor: borderColor
+                        }]
+                    },
+                    options: getDashboardChartOptions()
+                });
+            } else if (data.type === 'bar') {
+                projectCharts[key] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: data.datasets.map(dataset => ({
+                            ...dataset,
+                            borderColor: dataset.backgroundColor
+                        }))
+                    },
+                    options: {
+                        ...getDashboardChartOptions(),
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    color: isLightTheme ? '#1e293b' : '#f1f5f9',
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                },
+                                grid: {
+                                    color: isLightTheme ? '#e2e8f0' : '#334155'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: isLightTheme ? '#1e293b' : '#f1f5f9'
+                                },
+                                grid: {
+                                    color: isLightTheme ? '#e2e8f0' : '#334155'
+                                }
+                            }
+                        }
+                    }
+                });
+            } else if (data.type === 'radar') {
+                projectCharts[key] = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: data.labels,
+                        datasets: data.datasets.map(dataset => ({
+                            ...dataset,
+                            pointBorderColor: isLightTheme ? '#1e293b' : '#fff',
+                            pointHoverBackgroundColor: isLightTheme ? '#1e293b' : '#fff'
+                        }))
+                    },
+                    options: {
+                        ...getDashboardChartOptions(),
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    color: isLightTheme ? '#1e293b' : '#f1f5f9',
+                                    stepSize: 20
+                                },
+                                grid: {
+                                    color: isLightTheme ? '#e2e8f0' : '#334155'
+                                },
+                                pointLabels: {
+                                    color: isLightTheme ? '#1e293b' : '#f1f5f9',
+                                    font: {
+                                        size: 10
+                                    }
+                                },
+                                angleLines: {
+                                    color: isLightTheme ? '#e2e8f0' : '#334155'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    console.log('Project statistics charts recreated with new theme colors');
+}
 
 function renderProjectDropdown(projectsToRender) {
     const dropdownContent = document.getElementById('projectDropdownContent');
@@ -400,7 +543,7 @@ function renderProjectCharts(chartData) {
                 return;
             }
 
-            new Chart(canvas.getContext('2d'), {
+            projectCharts[config.id] = new Chart(canvas.getContext('2d'), {
                 type: 'doughnut',
                 data: config.data,
                 options: getDashboardChartOptions()
@@ -430,7 +573,12 @@ function renderAdditionalCharts(overallStats) {
             return;
         }
 
-        new Chart(successRatesCanvas.getContext('2d'), {
+        const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
+        const textColor = isLightTheme ? '#1e293b' : '#f1f5f9';
+        const gridColor = isLightTheme ? '#e2e8f0' : '#334155';
+        const tooltipBg = isLightTheme ? '#ffffff' : '#334155';
+        
+        projectCharts['successRates'] = new Chart(successRatesCanvas.getContext('2d'), {
         type: 'bar',
         data: {
             labels: ['User Stories', 'Test Cases', 'Issues Fixed', 'Enhancements'],
@@ -465,21 +613,27 @@ function renderAdditionalCharts(overallStats) {
                     beginAtZero: true,
                     max: 100,
                     ticks: {
-                        color: '#f1f5f9',
+                        color: textColor,
                         callback: function(value) {
                             return value + '%';
                         }
                     },
                     grid: {
-                        color: 'rgba(241, 245, 249, 0.1)'
+                        color: gridColor
+                    },
+                    title: {
+                        color: textColor
                     }
                 },
                 x: {
                     ticks: {
-                        color: '#f1f5f9'
+                        color: textColor
                     },
                     grid: {
-                        color: 'rgba(241, 245, 249, 0.1)'
+                        color: gridColor
+                    },
+                    title: {
+                        color: textColor
                     }
                 }
             },
@@ -488,10 +642,10 @@ function renderAdditionalCharts(overallStats) {
                     display: false
                 },
                 tooltip: {
-                    titleColor: '#f1f5f9',
-                    bodyColor: '#f1f5f9',
-                    backgroundColor: 'var(--surface)',
-                    borderColor: 'var(--border)',
+                    titleColor: textColor,
+                    bodyColor: textColor,
+                    backgroundColor: tooltipBg,
+                    borderColor: gridColor,
                     borderWidth: 1,
                     callbacks: {
                         label: function(context) {
@@ -514,7 +668,13 @@ function renderAdditionalCharts(overallStats) {
             return;
         }
 
-        new Chart(qualityTrendsCanvas.getContext('2d'), {
+        const isLightTheme2 = window.themeManager ? window.themeManager.isLightTheme() : true;
+        const textColor2 = isLightTheme2 ? '#1e293b' : '#f1f5f9';
+        const gridColor2 = isLightTheme2 ? '#e2e8f0' : '#334155';
+        const tooltipBg2 = isLightTheme2 ? '#ffffff' : '#334155';
+        const pointBorderColor = isLightTheme2 ? '#1e293b' : '#fff';
+        
+        projectCharts['qualityTrends'] = new Chart(qualityTrendsCanvas.getContext('2d'), {
         type: 'radar',
         data: {
             labels: ['Evaluation Score', 'Project Score', 'Success Rate', 'Completion Rate'],
@@ -530,8 +690,8 @@ function renderAdditionalCharts(overallStats) {
                 borderColor: '#8b5cf6',
                 borderWidth: 2,
                 pointBackgroundColor: '#8b5cf6',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
+                pointBorderColor: pointBorderColor,
+                pointHoverBackgroundColor: pointBorderColor,
                 pointHoverBorderColor: '#8b5cf6'
             }]
         },
@@ -543,17 +703,20 @@ function renderAdditionalCharts(overallStats) {
                     beginAtZero: true,
                     max: 100,
                     ticks: {
-                        color: '#f1f5f9',
+                        color: textColor2,
                         stepSize: 20
                     },
                     grid: {
-                        color: 'rgba(241, 245, 249, 0.1)'
+                        color: gridColor2
                     },
                     pointLabels: {
-                        color: '#f1f5f9',
+                        color: textColor2,
                         font: {
                             size: 10
                         }
+                    },
+                    angleLines: {
+                        color: gridColor2
                     }
                 }
             },
@@ -562,10 +725,10 @@ function renderAdditionalCharts(overallStats) {
                     display: false
                 },
                 tooltip: {
-                    titleColor: '#f1f5f9',
-                    bodyColor: '#f1f5f9',
-                    backgroundColor: 'var(--surface)',
-                    borderColor: 'var(--border)',
+                    titleColor: textColor2,
+                    bodyColor: textColor2,
+                    backgroundColor: tooltipBg2,
+                    borderColor: gridColor2,
                     borderWidth: 1
                 }
             }
@@ -668,6 +831,15 @@ function renderProjectTimeStats(timeStats) {
 }
 
 function getDashboardChartOptions() {
+    // Get theme-appropriate colors using robust detection
+    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
+    
+    const textColor = isLightTheme ? '#1e293b' : '#f1f5f9';
+    const tooltipBg = isLightTheme ? '#ffffff' : '#334155';
+    const gridColor = isLightTheme ? '#e2e8f0' : '#334155';
+    
+    console.log('Project stats chart options - isLightTheme:', isLightTheme, 'textColor:', textColor);
+    
     return {
         responsive: true,
         maintainAspectRatio: false,
@@ -681,14 +853,14 @@ function getDashboardChartOptions() {
                         size: 10,
                         family: 'Poppins'
                     },
-                    color: '#f1f5f9'
+                    color: textColor
                 }
             },
             tooltip: {
-                titleColor: '#f1f5f9',
-                bodyColor: '#f1f5f9',
-                backgroundColor: 'var(--surface)',
-                borderColor: 'var(--border)',
+                titleColor: textColor,
+                bodyColor: textColor,
+                backgroundColor: tooltipBg,
+                borderColor: gridColor,
                 borderWidth: 1,
                 titleFont: { family: 'Poppins' },
                 bodyFont: { family: 'Poppins' }

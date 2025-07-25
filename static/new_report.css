@@ -523,24 +523,27 @@
 
 /* Light theme specific adjustments */
 [data-theme="light"] .subsection {
-    background: rgba(248, 250, 252, 0.6);
+    background: rgba(248, 250, 252, 0.8);
+    border: 1px solid var(--border);
 }
 
 [data-theme="light"] .info-card {
-    background: rgba(248, 250, 252, 0.8);
+    background: rgba(248, 250, 252, 0.9);
+    border: 1px solid var(--border);
 }
 
 [data-theme="light"] .data-table th {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
 }
 
 [data-theme="light"] .data-table td {
-    background: rgba(248, 250, 252, 0.5);
+    background: var(--surface);
+    color: var(--text-primary);
 }
 
 [data-theme="light"] .data-table tr:nth-child(even) td {
-    background: rgba(248, 250, 252, 0.8);
+    background: rgba(59, 130, 246, 0.05);
 }
 
 [data-theme="light"] .data-table tr:hover td {
@@ -548,15 +551,39 @@
 }
 
 [data-theme="light"] .dynamic-item {
-    background: rgba(248, 250, 252, 0.8);
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
 }
 
 [data-theme="light"] .chart-section {
     background: var(--surface);
+    border: 1px solid var(--border);
 }
 
 [data-theme="light"] .modal-content {
     background: var(--background);
+    border: 1px solid var(--border);
+}
+
+[data-theme="light"] .table-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+[data-theme="light"] .stories-table-section,
+[data-theme="light"] .enhancements-table-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+[data-theme="light"] .form-container .sidebar {
+    background: rgba(248, 250, 252, 0.9);
+    border: 1px solid var(--border);
+}
+
+[data-theme="light"] .content-area {
+    background: var(--surface);
     border: 1px solid var(--border);
 }
 
