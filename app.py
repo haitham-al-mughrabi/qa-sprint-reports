@@ -87,6 +87,7 @@ class Report(db.Model):
     # QA Notes
     qaNotesText = db.Column(db.Text)
     qaNotesData = db.Column(db.Text, default='[]')  # Store multiple QA notes as JSON array
+    qaNoteFieldsData = db.Column(db.Text, default='[]')  # Store custom QA note fields as JSON array
     
     # Metadata
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
@@ -201,6 +202,7 @@ class Report(db.Model):
             'enhancementsMetric': self.enhancementsMetric,
             'qaNotesText': self.qaNotesText,
             'qaNotesData': json.loads(self.qaNotesData or '[]'),
+            'qaNoteFieldsData': json.loads(self.qaNoteFieldsData or '[]'),
             
             # Metadata
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
@@ -473,6 +475,7 @@ def create_report():
             # Other metrics
             qaNotesText=data.get('qaNotesText'),
             qaNotesData=json.dumps(data.get('qaNotesData', [])),
+            qaNoteFieldsData=json.dumps(data.get('qaNoteFieldsData', [])),
             
         )
         
@@ -1147,6 +1150,8 @@ def get_latest_project_data(portfolio_name, project_name):
         request_data = json.loads(latest_report.requestData or '[]') 
         build_data = json.loads(latest_report.buildData or '[]')
         team_member_data = json.loads(latest_report.teamMemberData or '[]')
+        qa_notes_data = json.loads(latest_report.qaNotesData or '[]')
+        qa_note_fields_data = json.loads(latest_report.qaNoteFieldsData or '[]')
         
         # Get project to find assigned testers (merge with existing tester data)
         project = Project.query.filter_by(name=project_name).first()
@@ -1171,7 +1176,9 @@ def get_latest_project_data(portfolio_name, project_name):
                 'testerData': tester_data,
                 'teamMembers': team_member_data,
                 'requestData': request_data,
-                'buildData': build_data
+                'buildData': build_data,
+                'qaNotesData': qa_notes_data,
+                'qaNoteFieldsData': qa_note_fields_data
             },
             'suggestedValues': {
                 'sprintNumber': max_sprint + 1,
@@ -1237,6 +1244,8 @@ def update_report(id):
         report.teamMemberData = json.dumps(data['teamMemberData'])
     if 'qaNotesData' in data:
         report.qaNotesData = json.dumps(data['qaNotesData'])
+    if 'qaNoteFieldsData' in data:
+        report.qaNoteFieldsData = json.dumps(data['qaNoteFieldsData'])
 
 
     # Recalculate totals and scores
@@ -1647,7 +1656,8 @@ def migrate_database():
         # Add missing columns to report table
         migrations = [
             ('releaseNumber', 'VARCHAR(50)'),
-            ('qaNotesData', 'TEXT DEFAULT "[]"')
+            ('qaNotesData', 'TEXT DEFAULT "[]"'),
+            ('qaNoteFieldsData', 'TEXT DEFAULT "[]"')
         ]
         
         for column_name, column_type in migrations:

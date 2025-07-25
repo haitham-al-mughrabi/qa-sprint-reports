@@ -983,13 +983,16 @@ function resetFormData() {
         testerData = [];
         teamMemberData = []; // Reset team member data
         qaNoteFieldsData = []; // Reset custom QA note fields
+        qaNotesData = []; // Reset QA notes array data
         // customFieldsData = []; // Reset custom fields data - REMOVED
 
         renderRequestList();
         renderBuildList();
         renderTesterList();
-        renderTeamMemberList(); // Render empty team member list
-        renderQANoteFieldsList(); // Render empty QA note fields list
+        renderTeamMemberList();
+        renderQANotesList();
+        renderQANoteFieldsList();
+        updateQANotesCount();
 
         resetAllCharts();
         currentSection = 0; // Reset to first section
@@ -1063,12 +1066,14 @@ function loadReportForEditing(report) {
     // Assuming teamMemberData are part of the report object
     teamMemberData = report.teamMemberData || []; // Assuming this field exists in your report model
     qaNoteFieldsData = report.qaNoteFieldsData || []; // Load custom QA note fields
+    qaNotesData = report.qaNotesData || []; // Load QA notes array data
     // customFieldsData = report.customFields || {}; // Assuming this is an object in your report model - REMOVED
 
     renderRequestList();
     renderBuildList();
     renderTesterList();
-    renderTeamMemberList(); // Render team members
+    renderTeamMemberList();
+    renderQANotesList();
     renderQANoteFieldsList(); // Render custom QA note fields
     // renderCustomFields(); // If you have a render function for custom fields
 
@@ -1110,6 +1115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.testerData = testerData;
             reportData.teamMemberData = teamMemberData; // Add team member data
             reportData.qaNoteFieldsData = qaNoteFieldsData; // Add custom QA note fields
+            reportData.qaNotesData = qaNotesData; // Add QA notes array data
             // reportData.customFields = customFieldsData; // Add custom fields data - REMOVED
             reportData.qaNotesText = document.getElementById('newQANoteText').value;
 
@@ -2863,6 +2869,7 @@ function clearFormDataOnSubmit() {
         testerData = [];
         teamMemberData = [];
         qaNoteFieldsData = [];
+        qaNotesData = [];
         
         // Reset form fields
         const form = document.getElementById('qaReportForm');
