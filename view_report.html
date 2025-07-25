@@ -1438,9 +1438,23 @@
             let yPosition = 15;
 
             // Correctly detect theme based on the 'data-theme' attribute
-            const isLightMode = document.body.getAttribute('data-theme') === 'light';
-            const themeBackgroundColor = isLightMode ? '#f8fafc' : '#1e293b'; // Use --surface colors
-            const textColor = isLightMode ? '#1e293b' : '#f1f5f9'; // Use --text-primary colors
+            const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
+            
+            // Use EXACT colors from the CSS light theme variables to match view report
+            const themeColors = {
+                background: isLightMode ? '#ffffff' : '#0f172a',
+                surface: isLightMode ? '#f8fafc' : '#1e293b',
+                textPrimary: isLightMode ? '#1e293b' : '#f1f5f9',
+                textSecondary: isLightMode ? '#64748b' : '#94a3b8',
+                border: isLightMode ? '#e2e8f0' : '#334155',
+                primary: '#3b82f6'
+            };
+            
+            const themeBackgroundColor = themeColors.background;
+            const textColor = themeColors.textPrimary;
+            
+            console.log('Light mode detected:', isLightMode);
+            console.log('Using background color:', themeBackgroundColor);
 
             const addPageBackground = () => {
                 pdf.setFillColor(themeBackgroundColor);
@@ -1463,7 +1477,7 @@
                         scale: 2,
                         useCORS: true,
                         logging: false,
-                        backgroundColor: null // Render sections with a transparent background
+                        backgroundColor: themeBackgroundColor
                     });
 
                     const imgData = canvas.toDataURL('image/png');
@@ -1472,7 +1486,7 @@
 
                     if (yPosition + imgHeight > pdfHeight - 15) {
                         pdf.addPage();
-                        addPageBackground(); // Add background to new pages
+                        addPageBackground();
                         yPosition = 15;
                     }
 
