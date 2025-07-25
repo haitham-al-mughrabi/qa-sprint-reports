@@ -1095,17 +1095,10 @@
 
         function renderQANotes(report) {
             const qaNotesContent = document.getElementById('qaNotesContent');
-            const qaNotesText = report.qaNotesText || '';
             const qaNotesData = report.qaNotesData || [];
 
             let hasNotes = false;
             let notesHtml = '';
-
-            // Check for text-based notes
-            if (qaNotesText.trim()) {
-                notesHtml += `<div class="dynamic-item">${qaNotesText}</div>`;
-                hasNotes = true;
-            }
 
             // Check for array-based notes
             if (qaNotesData.length > 0) {
@@ -1430,7 +1423,7 @@
                 ["Total Test Cases", currentReport.totalTestCases || 0],
                 ["Total Issues", currentReport.totalIssues || 0],
                 ["Total Enhancements", currentReport.totalEnhancements || 0],
-                ["QA Notes", currentReport.qaNotesText || 'N/A']
+                ["QA Notes", currentReport.qaNotesData && currentReport.qaNotesData.length > 0 ? `${currentReport.qaNotesData.length} notes` : 'N/A']
             ];
             const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
             XLSX.utils.book_append_sheet(workbook, wsSummary, "Summary");

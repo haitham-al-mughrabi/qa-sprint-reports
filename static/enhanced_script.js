@@ -1015,7 +1015,7 @@ function loadReportForEditing(report) {
     resetFormData(); // Reset first to clear any previous data
 
     // Basic fields
-    const basicFields = ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'qaNotesText', 'releaseNumber'];
+    const basicFields = ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber'];
     basicFields.forEach(field => {
         const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
@@ -1117,7 +1117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.qaNoteFieldsData = qaNoteFieldsData; // Add custom QA note fields
             reportData.qaNotesData = qaNotesData; // Add QA notes array data
             // reportData.customFields = customFieldsData; // Add custom fields data - REMOVED
-            reportData.qaNotesText = document.getElementById('newQANoteText').value;
 
             const savedReport = await saveReport(reportData);
             if (savedReport) {
@@ -1204,7 +1203,7 @@ async function exportReportAsPdf(id) {
             ['Total Test Cases', report.totalTestCases || 0],
             ['Total Issues', report.totalIssues || 0],
             ['Total Enhancements', report.totalEnhancements || 0],
-            ['QA Notes', report.qaNotesText ? 'Available' : 'N/A']
+            ['QA Notes', report.qaNotesData && report.qaNotesData.length > 0 ? `${report.qaNotesData.length} notes` : 'N/A']
         ],
         styles: { fontSize: 9, cellPadding: 3 },
         headStyles: { fillColor: [66, 133, 244], textColor: 255 }
@@ -1288,13 +1287,15 @@ async function exportReportAsPdf(id) {
     }
 
     // QA Notes
-    if (report.qaNotesText) {
+    if (report.qaNotesData && report.qaNotesData.length > 0) {
         if (yPos > 200) {
             doc.addPage();
             yPos = 20;
         }
         addSection("QA Notes");
-        addText(report.qaNotesText);
+        report.qaNotesData.forEach((note, index) => {
+            addText(`Note ${index + 1}: ${note.note}`);
+        });
     }
 
     doc.save(`QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.pdf`);
@@ -1329,7 +1330,7 @@ async function exportReportAsExcel(id) {
         ["Total Test Cases", report.totalTestCases || 0],
         ["Total Issues", report.totalIssues || 0],
         ["Total Enhancements", report.totalEnhancements || 0],
-        ["QA Notes", report.qaNotesText || 'N/A']
+        ["QA Notes", report.qaNotesData && report.qaNotesData.length > 0 ? `${report.qaNotesData.length} notes` : 'N/A']
     ];
     const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
     XLSX.utils.book_append_sheet(workbook, wsSummary, "Summary");
@@ -2307,7 +2308,7 @@ function showAutoLoadModal(data) {
         </div>
         <div class="data-preview-item">
             <span class="data-preview-label">Release Number:</span>
-            <span class="data-preview-value">${latestData.releaseNumber}</span>
+            <span class="data-preview-value">${latestData.releaseNumber} → Suggested: ${suggestedValues.releaseNumber}</span>
         </div>
         <div class="data-preview-item">
             <span class="data-preview-label">Report Version:</span>
@@ -2339,14 +2340,12 @@ function loadSelectedData() {
     const loadReportData = document.getElementById('loadReportData').checked;
     const loadTesters = document.getElementById('loadTesters').checked;
     const loadTeamMembers = document.getElementById('loadTeamMembers').checked;
-    const loadRequestData = document.getElementById('loadRequestData').checked;
-    const loadBuildData = document.getElementById('loadBuildData').checked;
     
     // Load Sprint & Release Information
     if (loadSprintData) {
         document.getElementById('sprintNumber').value = suggestedValues.sprintNumber;
         document.getElementById('cycleNumber').value = suggestedValues.cycleNumber;
-        document.getElementById('releaseNumber').value = latestData.releaseNumber;
+        document.getElementById('releaseNumber').value = suggestedValues.releaseNumber;
     }
     
     // Load Report Information
@@ -2370,20 +2369,8 @@ function loadSelectedData() {
     
     // Load Team Members  
     if (loadTeamMembers && latestData.teamMembers.length > 0) {
-        // This would need to be implemented based on how team members are stored
-        console.log('Loading team members:', latestData.teamMembers);
-    }
-    
-    // Load Request Data
-    if (loadRequestData && latestData.requestData.length > 0) {
-        requestData = [...latestData.requestData];
-        updateRequestList();
-    }
-    
-    // Load Build Data
-    if (loadBuildData && latestData.buildData.length > 0) {
-        buildData = [...latestData.buildData];
-        updateBuildList();
+        teamMemberData = [...latestData.teamMembers];
+        renderTeamMemberList();
     }
     
     closeModal('autoLoadDataModal');
@@ -2719,7 +2706,7 @@ function saveFormDataToLocalStorage() {
         const additionalFields = [
             'reportDate', 'portfolioName', 'projectName', 'sprintNumber',
             'reportVersion', 'cycleNumber', 'releaseNumber', 'testSummary',
-            'testingStatus', 'qaNotesText'
+            'testingStatus'
         ];
 
         additionalFields.forEach(fieldId => {

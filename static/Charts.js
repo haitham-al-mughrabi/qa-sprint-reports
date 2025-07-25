@@ -422,7 +422,7 @@ async function exportCurrentReportAsPdf() {
     }
 
     // QA Notes
-    if (currentReport.qaNotesText) {
+    if (currentReport.qaNotesData && currentReport.qaNotesData.length > 0) {
         yPos = checkPageBreak(yPos, 40);
         doc.setFontSize(16);
         doc.setFont(undefined, 'bold');
@@ -431,8 +431,11 @@ async function exportCurrentReportAsPdf() {
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
-        const notesText = doc.splitTextToSize(currentReport.qaNotesText, 190);
-        doc.text(notesText, 10, yPos);
+        currentReport.qaNotesData.forEach((note, index) => {
+            const noteText = doc.splitTextToSize(`Note ${index + 1}: ${note.note}`, 190);
+            doc.text(noteText, 10, yPos);
+            yPos += noteText.length * 6 + 5;
+        });
     }
 
     // Save the PDF

@@ -85,7 +85,6 @@ class Report(db.Model):
     enhancementsMetric = db.Column(db.Integer, default=0) # Auto-calculated from enhancements
     
     # QA Notes
-    qaNotesText = db.Column(db.Text)
     qaNotesData = db.Column(db.Text, default='[]')  # Store multiple QA notes as JSON array
     qaNoteFieldsData = db.Column(db.Text, default='[]')  # Store custom QA note fields as JSON array
     
@@ -200,7 +199,6 @@ class Report(db.Model):
             'testCasesMetric': self.testCasesMetric,
             'issuesMetric': self.issuesMetric,
             'enhancementsMetric': self.enhancementsMetric,
-            'qaNotesText': self.qaNotesText,
             'qaNotesData': json.loads(self.qaNotesData or '[]'),
             'qaNoteFieldsData': json.loads(self.qaNoteFieldsData or '[]'),
             
@@ -473,7 +471,6 @@ def create_report():
             existsEnhancements=int(data.get('existsEnhancements') or 0),
             
             # Other metrics
-            qaNotesText=data.get('qaNotesText'),
             qaNotesData=json.dumps(data.get('qaNotesData', [])),
             qaNoteFieldsData=json.dumps(data.get('qaNoteFieldsData', [])),
             
@@ -1128,30 +1125,19 @@ def get_latest_project_data(portfolio_name, project_name):
                 }
             })
         
-        # Find the highest sprint, cycle, and release numbers
-        max_sprint = max((r.sprintNumber or 0) for r in all_reports)
-        max_cycle = max((r.cycleNumber or 0) for r in all_reports)
-        
-        # For release number, we need to parse and find the highest version
-        release_numbers = [r.releaseNumber for r in all_reports if r.releaseNumber]
-        latest_release = '1.0'
-        if release_numbers:
-            # Simple version comparison - assumes format like "1.0", "1.1", "2.0"
-            try:
-                latest_release = max(release_numbers, key=lambda v: tuple(map(int, v.split('.'))))
-            except:
-                latest_release = release_numbers[-1]  # fallback to last one
-        
-        # Get the latest report for other data
+        # Get the latest report first (most recent by ID)
         latest_report = max(all_reports, key=lambda r: r.id)
+        
+        # Find the highest sprint number across all reports
+        max_sprint = max((r.sprintNumber or 0) for r in all_reports)
+        
+        # Get the last cycle number and release number from the most recent report
+        last_cycle = latest_report.cycleNumber or 1
+        last_release = latest_report.releaseNumber or '1.0'
         
         # Parse existing data
         tester_data = json.loads(latest_report.testerData or '[]')
-        request_data = json.loads(latest_report.requestData or '[]') 
-        build_data = json.loads(latest_report.buildData or '[]')
         team_member_data = json.loads(latest_report.teamMemberData or '[]')
-        qa_notes_data = json.loads(latest_report.qaNotesData or '[]')
-        qa_note_fields_data = json.loads(latest_report.qaNoteFieldsData or '[]')
         
         # Get project to find assigned testers (merge with existing tester data)
         project = Project.query.filter_by(name=project_name).first()
@@ -1169,21 +1155,17 @@ def get_latest_project_data(portfolio_name, project_name):
             'hasData': True,
             'latestData': {
                 'sprintNumber': max_sprint,
-                'cycleNumber': max_cycle,
-                'releaseNumber': latest_release,
+                'cycleNumber': last_cycle,
+                'releaseNumber': last_release,
                 'reportVersion': latest_report.reportVersion or '1.0',
                 'reportDate': latest_report.reportDate,
                 'testerData': tester_data,
-                'teamMembers': team_member_data,
-                'requestData': request_data,
-                'buildData': build_data,
-                'qaNotesData': qa_notes_data,
-                'qaNoteFieldsData': qa_note_fields_data
+                'teamMembers': team_member_data
             },
             'suggestedValues': {
                 'sprintNumber': max_sprint + 1,
-                'cycleNumber': 1,  # Default cycle number is always 1 as per requirement
-                'releaseNumber': latest_release,
+                'cycleNumber': last_cycle,  # Use last cycle number from most recent report
+                'releaseNumber': last_release,  # Use last release number from most recent report
                 'reportVersion': latest_report.reportVersion or '1.0'
             }
         })
@@ -1229,7 +1211,7 @@ def update_report(id):
                   'deferredTestCases', 'notTestableTestCases', 'criticalIssues',
                   'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues',
                   'notFixedIssues', 'reopenedIssues', 'deferredIssues', 'newEnhancements',
-                  'implementedEnhancements', 'existsEnhancements', 'qaNotesText']:
+                  'implementedEnhancements', 'existsEnhancements']:
         if field in data:
             setattr(report, field, data[field])
     

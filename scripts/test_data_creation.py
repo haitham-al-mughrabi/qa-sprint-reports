@@ -222,7 +222,11 @@ def generate_sample_report():
         # Other metrics
         "evaluationMetric": "Sprint evaluation completed successfully",
         "qaNotesMetric": random.randint(1, 10),
-        "qaNotesText": f"Additional notes for {portfolio} - {project} Sprint {sprint}. All testing activities completed according to plan with stakeholder satisfaction.",
+        "qaNotesData": [
+            {"note": f"Sprint {sprint} testing activities completed successfully for {project}."},
+            {"note": f"All stakeholders satisfied with the testing coverage and results."},
+            {"note": f"Test environment was stable throughout the testing cycle."}
+        ],
         
         # Custom Fields
         "customFields": generate_custom_fields()
