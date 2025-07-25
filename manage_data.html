@@ -17,7 +17,6 @@
     <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
-    <link rel="stylesheet" href="/static/rtl-support.css">
     <link rel="stylesheet" href="/static/manage_data.css">
 
     <!-- Theme manager (loads early) -->
@@ -38,25 +37,16 @@
             <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div style="display: flex; align-items: center;">
                 <div class="nav-links">
-                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span
-                            data-i18n="nav_dashboard">Dashboard</span></a>
-                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> <span
-                            data-i18n="nav_reports">Reports</span></a>
-                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> <span
-                            data-i18n="nav_new_report">New Report</span></a>
-                    <a href="/manage" class="nav-link active"><i class="fas fa-cogs"></i> <span
-                            data-i18n="nav_manage_data">Manage Data</span></a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> <span
-                            data-i18n="nav_project_statistics">Project Statistics</span></a>
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
+                    <a href="/manage" class="nav-link active"><i class="fas fa-cogs"></i> Manage Data</a>
+                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
                 </div>
-                <div class="nav-controls">
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <i class="fas fa-sun" id="theme-icon"></i>
-                        <span id="theme-text" data-i18n="theme_light">Light</span>
-                    </button>
-                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()"
-                        data-i18n="language">العربية</button>
-                </div>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -64,21 +54,19 @@
     <div class="container">
         <div class="dashboard-header">
             <div class="header-content">
-                <h1 data-i18n="manage_system_data">Manage System Data</h1>
-                <p data-i18n="administer_data">Administer portfolios, projects, testers, and team members</p>
+                <h1>Manage System Data</h1>
+                <p>Administer portfolios, projects, testers, and team members</p>
             </div>
         </div>
 
         <div class="tabs-container">
             <div class="tabs">
                 <button class="btn btn-secondary active" onclick="showTab('portfolios')"><i
-                        class="fas fa-briefcase"></i> <span data-i18n="portfolios">Portfolios</span></button>
+                        class="fas fa-briefcase"></i> Portfolios</button>
                 <button class="btn btn-secondary" onclick="showTab('projects')"><i class="fas fa-project-diagram"></i>
-                    <span data-i18n="projects">Projects</span></button>
-                <button class="btn btn-secondary" onclick="showTab('testers')"><i class="fas fa-user-cog"></i> <span
-                        data-i18n="testers">Testers</span></button>
-                <button class="btn btn-secondary" onclick="showTab('team')"><i class="fas fa-users"></i> <span
-                        data-i18n="team">Team</span></button>
+                    Projects</button>
+                <button class="btn btn-secondary" onclick="showTab('testers')"><i class="fas fa-user-cog"></i> Testers</button>
+                <button class="btn btn-secondary" onclick="showTab('team')"><i class="fas fa-users"></i> Team</button>
             </div>
         </div>
 
@@ -86,20 +74,19 @@
         <div id="portfolios" class="tab-content active">
             <div class="dashboard-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="fas fa-briefcase"></i> <span
-                            data-i18n="portfolio_management">Portfolio Management</span></h2>
+                    <h2 class="section-title"><i class="fas fa-briefcase"></i> Portfolio Management</h2>
                     <button class="btn btn-primary" onclick="showAddPortfolioModal()"><i class="fas fa-plus-circle"></i>
-                        <span data-i18n="add_portfolio">Add Portfolio</span></button>
+                        Add Portfolio</button>
                 </div>
                 <div class="search-filter-container">
-                    <input type="text" data-i18n-placeholder="search_portfolios" placeholder="Search portfolios..."
+                    <input type="text" placeholder="Search portfolios..."
                         id="portfolioSearch" onkeyup="displayPortfolios()">
                 </div>
                 <div class="stats-grid">
                     <div class="stat-card-small">
                         <div class="icon-bg"><i class="fas fa-briefcase"></i></div>
                         <h3 id="totalPortfolios">0</h3>
-                        <p data-i18n="total_portfolios">Total Portfolios</p>
+                        <p>Total Portfolios</p>
                     </div>
                 </div>
                 <div id="portfoliosList" class="data-list"></div>
@@ -110,23 +97,23 @@
         <div id="projects" class="tab-content">
             <div class="dashboard-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="fas fa-project-diagram"></i> <span data-i18n="projects">Project
-                            Management</span></h2>
+                    <h2 class="section-title"><i class="fas fa-project-diagram"></i> Project
+                            Management</h2>
                     <button class="btn btn-primary" onclick="showAddProjectModal()"><i class="fas fa-plus-circle"></i>
-                        <span data-i18n="add">Add Project</span></button>
+                        Add Project</button>
                 </div>
                 <div class="search-filter-container">
-                    <input type="text" data-i18n-placeholder="search_projects" placeholder="Search projects..."
+                    <input type="text" placeholder="Search projects..."
                         id="projectSearch" onkeyup="displayProjects()">
                     <select class="filter-select" id="portfolioFilter" onchange="displayProjects()">
-                        <option value="" data-i18n="all_portfolios">All Portfolios</option>
+                        <option value="">All Portfolios</option>
                     </select>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-card-small">
                         <div class="icon-bg"><i class="fas fa-project-diagram"></i></div>
                         <h3 id="totalProjects">0</h3>
-                        <p data-i18n="total_projects">Total Projects</p>
+                        <p>Total Projects</p>
                     </div>
                 </div>
                 <div id="projectsList" class="data-list">
@@ -139,20 +126,20 @@
         <div id="testers" class="tab-content">
             <div class="dashboard-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="fas fa-user-cog"></i> <span data-i18n="testers">Tester
-                            Management</span></h2>
+                    <h2 class="section-title"><i class="fas fa-user-cog"></i> Tester
+                            Management</h2>
                     <button class="btn btn-primary" onclick="showAddTesterModal()"><i class="fas fa-plus-circle"></i>
-                        <span data-i18n="add">Add Tester</span></button>
+                        Add Tester</button>
                 </div>
                 <div class="search-filter-container">
-                    <input type="text" data-i18n-placeholder="search_testers" placeholder="Search testers..."
+                    <input type="text" placeholder="Search testers..."
                         id="testerSearch" onkeyup="displayTesters()">
                 </div>
                 <div class="stats-grid">
                     <div class="stat-card-small">
                         <div class="icon-bg"><i class="fas fa-user-cog"></i></div>
                         <h3 id="totalTesters">0</h3>
-                        <p data-i18n="total_testers">Total Testers</p>
+                        <p>Total Testers</p>
                     </div>
                 </div>
                 <div id="testersList" class="data-list">
@@ -165,39 +152,39 @@
         <div id="team" class="tab-content">
             <div class="dashboard-section">
                 <div class="section-header">
-                    <h2 class="section-title"><i class="fas fa-users"></i> <span data-i18n="team">Team Member
-                            Management</span></h2>
+                    <h2 class="section-title"><i class="fas fa-users"></i> Team Member
+                            Management</h2>
                     <button class="btn btn-primary" onclick="showAddTeamMemberModal()"><i
-                            class="fas fa-plus-circle"></i> <span data-i18n="add_team_member">Add Team
-                            Member</span></button>
+                            class="fas fa-plus-circle"></i> Add Team
+                            Member</button>
                 </div>
                 <div class="search-filter-container">
-                    <input type="text" data-i18n-placeholder="search_team_members" placeholder="Search team members..."
+                    <input type="text" placeholder="Search team members..."
                         id="teamSearch" onkeyup="displayTeamMembers()">
                     <select class="filter-select" id="roleFilter" onchange="displayTeamMembers()">
-                        <option value="" data-i18n="all_roles">All Roles</option>
+                        <option value="">All Roles</option>
                     </select>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-card-small">
                         <div class="icon-bg"><i class="fas fa-users"></i></div>
                         <h3 id="totalTeamMembers">0</h3>
-                        <p data-i18n="total_team">Total Team</p>
+                        <p>Total Team</p>
                     </div>
                     <div class="stat-card-small">
                         <div class="icon-bg"><i class="fas fa-crown"></i></div>
                         <h3 id="projectOwners">0</h3>
-                        <p data-i18n="project_owners">Project Owners</p>
+                        <p>Project Owners</p>
                     </div>
                     <div class="stat-card-small">
                         <div class="icon-bg"><i class="fas fa-user-graduate"></i></div>
                         <h3 id="projectAnalysts">0</h3>
-                        <p data-i18n="analysts">Analysts</p>
+                        <p>Analysts</p>
                     </div>
                     <div class="stat-card-small">
                         <div class="icon-bg"><i class="fas fa-user-tie"></i></div>
                         <h3 id="projectManagers">0</h3>
-                        <p data-i18n="managers">Managers</p>
+                        <p>Managers</p>
                     </div>
                 </div>
                 <div id="teamMembersList" class="data-list">
@@ -212,18 +199,17 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="icon-bg"><i class="fas fa-briefcase"></i></div>
-                <h3 data-i18n="add_new_portfolio">Add New Portfolio</h3>
+                <h3>Add New Portfolio</h3>
             </div>
             <div class="modal-form">
-                <div class="form-group"><label for="portfolioName" data-i18n="portfolio_name">Portfolio
+                <div class="form-group"><label for="portfolioName">Portfolio
                         Name:</label><input type="text" id="portfolioName" required></div>
-                <div class="form-group"><label for="portfolioDescription"
-                        data-i18n="description">Description:</label><textarea id="portfolioDescription"
+                <div class="form-group"><label for="portfolioDescription">Description:</label><textarea id="portfolioDescription"
                         rows="4"></textarea></div>
             </div>
             <div class="modal-buttons"><button type="button" class="btn btn-secondary"
-                    onclick="closeModal('addPortfolioModal')" data-i18n="cancel">Cancel</button><button type="button"
-                    class="btn btn-primary" onclick="savePortfolio()" data-i18n="save">Save</button></div>
+                    onclick="closeModal('addPortfolioModal')">Cancel</button><button type="button"
+                    class="btn btn-primary" onclick="savePortfolio()">Save</button></div>
         </div>
     </div>
 
@@ -231,22 +217,21 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="icon-bg"><i class="fas fa-project-diagram"></i></div>
-                <h3 data-i18n="add_new_project">Add New Project</h3>
+                <h3>Add New Project</h3>
             </div>
             <div class="modal-form">
-                <div class="form-group"><label for="projectName" data-i18n="project_name">Project Name:</label><input
+                <div class="form-group"><label for="projectName">Project Name:</label><input
                         type="text" id="projectName" required></div>
-                <div class="form-group"><label for="projectPortfolio" data-i18n="portfolio">Portfolio:</label><select
+                <div class="form-group"><label for="projectPortfolio">Portfolio:</label><select
                         id="projectPortfolio">
-                        <option value="" data-i18n="no_portfolio">No Portfolio (Standalone Project)</option>
+                        <option value="">No Portfolio (Standalone Project)</option>
                     </select></div>
-                <div class="form-group"><label for="projectDescription"
-                        data-i18n="description">Description:</label><textarea id="projectDescription"
+                <div class="form-group"><label for="projectDescription">Description:</label><textarea id="projectDescription"
                         rows="4"></textarea></div>
             </div>
             <div class="modal-buttons"><button type="button" class="btn btn-secondary"
-                    onclick="closeModal('addProjectModal')" data-i18n="cancel">Cancel</button><button type="button"
-                    class="btn btn-primary" onclick="saveProject()" data-i18n="save">Save</button></div>
+                    onclick="closeModal('addProjectModal')">Cancel</button><button type="button"
+                    class="btn btn-primary" onclick="saveProject()">Save</button></div>
         </div>
     </div>
 
@@ -254,21 +239,21 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="icon-bg"><i class="fas fa-user-cog"></i></div>
-                <h3 data-i18n="add_new_tester">Add New Tester</h3>
+                <h3>Add New Tester</h3>
             </div>
             <div class="modal-form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="testerName" data-i18n="name">Name:</label>
+                        <label for="testerName">Name:</label>
                         <input type="text" id="testerName" required>
                     </div>
                     <div class="form-group">
-                        <label for="testerEmail" data-i18n="email">Email:</label>
+                        <label for="testerEmail">Email:</label>
                         <input type="email" id="testerEmail" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label data-i18n="tester_roles">Tester Roles:</label>
+                    <label>Tester Roles:</label>
                     <div class="checkbox-list" style="max-height: 200px; padding: 1rem; overflow-y: auto;">
                         <label class="checkbox-item">
                             <input type="checkbox" id="isAutomationEngineer">
@@ -343,15 +328,15 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label data-i18n="assign_projects">Assign to Projects (Optional):</label>
+                    <label>Assign to Projects (Optional):</label>
                     <div id="projectAssignmentList" class="checkbox-list" style="max-height: 150px; padding: 1rem; overflow-y: auto;">
                         <!-- Project checkboxes will be populated here -->
                     </div>
                 </div>
             </div>
             <div class="modal-buttons"><button type="button" class="btn btn-secondary"
-                    onclick="closeModal('addTesterModal')" data-i18n="cancel">Cancel</button><button type="button"
-                    class="btn btn-primary" onclick="saveTester()" data-i18n="save">Save</button></div>
+                    onclick="closeModal('addTesterModal')">Cancel</button><button type="button"
+                    class="btn btn-primary" onclick="saveTester()">Save</button></div>
         </div>
     </div>
 
@@ -359,23 +344,23 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="icon-bg"><i class="fas fa-users"></i></div>
-                <h3 data-i18n="add_new_team_member">Add New Team Member</h3>
+                <h3>Add New Team Member</h3>
             </div>
             <div class="modal-form">
                 <div class="form-row">
-                    <div class="form-group"><label for="teamMemberName" data-i18n="name">Name:</label><input type="text"
+                    <div class="form-group"><label for="teamMemberName">Name:</label><input type="text"
                             id="teamMemberName" required></div>
-                    <div class="form-group"><label for="teamMemberEmail" data-i18n="email">Email:</label><input
+                    <div class="form-group"><label for="teamMemberEmail">Email:</label><input
                             type="email" id="teamMemberEmail" required></div>
                 </div>
-                <div class="form-group"><label for="teamMemberRole" data-i18n="role">Role:</label><select
+                <div class="form-group"><label for="teamMemberRole">Role:</label><select
                         id="teamMemberRole" required>
-                        <option value="" data-i18n="select_role">Select Role</option>
+                        <option value="">Select Role</option>
                     </select></div>
             </div>
             <div class="modal-buttons"><button type="button" class="btn btn-secondary"
-                    onclick="closeModal('addTeamMemberModal')" data-i18n="cancel">Cancel</button><button type="button"
-                    class="btn btn-primary" onclick="saveTeamMember()" data-i18n="save">Save</button></div>
+                    onclick="closeModal('addTeamMemberModal')">Cancel</button><button type="button"
+                    class="btn btn-primary" onclick="saveTeamMember()">Save</button></div>
         </div>
     </div>
 
@@ -384,7 +369,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="icon-bg"><i class="fas fa-link"></i></div>
-                <h3 data-i18n="assign_tester_projects">Assign Tester to Projects</h3>
+                <h3>Assign Tester to Projects</h3>
             </div>
             <div class="modal-form">
                 <div class="form-group">
@@ -392,24 +377,20 @@
                     <p id="selectedTesterInfo" style="margin: 0; font-weight: bold; color: var(--primary);"></p>
                 </div>
                 <div class="form-group">
-                    <label data-i18n="select_projects">Select Projects:</label>
+                    <label>Select Projects:</label>
                     <div id="projectCheckboxList" class="checkbox-list">
                         <!-- Project checkboxes will be populated here -->
                     </div>
                 </div>
             </div>
             <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('assignTesterProjectsModal')"
-                    data-i18n="cancel">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveTesterProjects()"
-                    data-i18n="save">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('assignTesterProjectsModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveTesterProjects()">Save</button>
             </div>
         </div>
     </div>
 
     <!-- Link to the external JavaScript files -->
-    <script src="/static/translations.js" defer></script>
-    <script src="/static/language-manager.js" defer></script>
     <script src="/static/enhanced_script.js" defer></script>
     <script>
         let portfolios = [];

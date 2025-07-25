@@ -13,7 +13,6 @@
     <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
-    <link rel="stylesheet" href="/static/rtl-support.css">
     <link rel="stylesheet" href="/static/new_report.css">
 
     <!-- Theme manager (loads early) -->
@@ -36,19 +35,16 @@
             <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div style="display: flex; align-items: center;">
                 <div class="nav-links">
-                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span data-i18n="nav_dashboard">Dashboard</span></a>
-                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> <span data-i18n="nav_reports">Reports</span></a>
-                    <a href="/create-report" class="nav-link active"><i class="fas fa-plus-circle"></i> <span data-i18n="nav_new_report">New Report</span></a>
-                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> <span data-i18n="nav_manage_data">Manage Data</span></a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> <span data-i18n="nav_project_statistics">Project Statistics</span></a>
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="/create-report" class="nav-link active"><i class="fas fa-plus-circle"></i> New Report</a>
+                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
+                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
                 </div>
-                <div class="nav-controls">
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <i class="fas fa-sun" id="theme-icon"></i>
-                        <span id="theme-text" data-i18n="theme_light">Light</span>
-                    </button>
-                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
-                </div>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -78,8 +74,8 @@
             <div class="main-content">
                 <div class="dashboard-header">
                     <div class="header-content">
-                        <h1 id="formTitle" data-i18n="create_sprint_report">Create Sprint Report</h1>
-                        <p data-i18n="create_sprint_report_subtitle">Complete all sections to generate your comprehensive QA testing report</p>
+                        <h1 id="formTitle">Create Sprint Report</h1>
+                        <p>Complete all sections to generate your comprehensive QA testing report</p>
                     </div>
                 </div>
 
@@ -820,8 +816,6 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Link to the external JavaScript files -->
-    <script src="/static/translations.js"></script>
-    <script src="/static/language-manager.js"></script>
     <script src="/static/enhanced_script.js"></script>
     <script src="/static/Charts.js"></script>
     <script>

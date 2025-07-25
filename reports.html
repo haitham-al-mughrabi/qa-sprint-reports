@@ -13,7 +13,6 @@
     <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
-    <link rel="stylesheet" href="/static/rtl-support.css">
 
     <!-- Theme manager (loads early) -->
     <script src="/static/theme-manager.js"></script>
@@ -35,19 +34,16 @@
             <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div style="display: flex; align-items: center;">
                 <div class="nav-links">
-                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span data-i18n="nav_dashboard">Dashboard</span></a>
-                    <a href="/reports" class="nav-link active"><i class="fas fa-chart-line"></i> <span data-i18n="nav_reports">Reports</span></a>
-                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> <span data-i18n="nav_new_report">New Report</span></a>
-                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> <span data-i18n="nav_manage_data">Manage Data</span></a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> <span data-i18n="nav_project_statistics">Project Statistics</span></a>
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="/reports" class="nav-link active"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
+                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
+                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
                 </div>
-                <div class="nav-controls">
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <i class="fas fa-sun" id="theme-icon"></i>
-                        <span id="theme-text" data-i18n="theme_light">Light</span>
-                    </button>
-                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
-                </div>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -57,13 +53,13 @@
         <div id="reportsPage" class="page active">
             <div class="reports-container">
             <div class="page-header">
-                <h1><i class="fas fa-chart-line"></i> <span data-i18n="reports_management">Reports Management</span></h1>
+                <h1><i class="fas fa-chart-line"></i> Reports Management</h1>
                 <div class="header-actions">
                     <div class="search-container">
                         <i class="fas fa-search"></i>
-                        <input type="text" class="search-box" data-i18n-placeholder="search_reports" placeholder="Search reports..." id="searchInput" onkeyup="searchReports()">
+                        <input type="text" class="search-box" placeholder="Search reports..." id="searchInput" onkeyup="searchReports()">
                     </div>
-                    <button class="action-btn" onclick="window.location.href='/create-report'"><i class="fas fa-plus-circle"></i> <span data-i18n="nav_new_report">New Report</span></button>
+                    <button class="action-btn" onclick="window.location.href='/create-report'"><i class="fas fa-plus-circle"></i> New Report</button>
                 </div>
             </div>
 
@@ -77,13 +73,13 @@
                 <table class="reports-table" id="reportsTable">
                     <thead>
                         <tr>
-                            <th data-i18n="report_title">Report Title</th>
-                            <th data-i18n="project">Project</th>
-                            <th data-i18n="portfolio">Portfolio</th>
-                            <th data-i18n="sprint">Sprint</th>
-                            <th data-i18n="date">Date</th>
-                            <th data-i18n="status">Status</th>
-                            <th data-i18n="actions">Actions</th>
+                            <th>Report Title</th>
+                            <th>Project</th>
+                            <th>Portfolio</th>
+                            <th>Sprint</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="reportsTableBody">
@@ -104,8 +100,6 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Link to the external JavaScript files -->
-    <script src="/static/translations.js" defer></script>
-    <script src="/static/language-manager.js" defer></script>
     <script src="/static/enhanced_script.js" defer></script>
     <script src="/static/Charts.js" defer></script>
     <script>

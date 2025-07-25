@@ -13,7 +13,6 @@
     <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
-    <link rel="stylesheet" href="/static/rtl-support.css">
     <link rel="stylesheet" href="/static/project_statistics.css">
 
     <!-- Theme manager (loads early) -->
@@ -33,19 +32,16 @@
             <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div style="display: flex; align-items: center;">
                 <div class="nav-links">
-                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span data-i18n="nav_dashboard">Dashboard</span></a>
-                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> <span data-i18n="nav_reports">Reports</span></a>
-                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> <span data-i18n="nav_new_report">New Report</span></a>
-                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> <span data-i18n="nav_manage_data">Manage Data</span></a>
-                    <a href="/project-statistics" class="nav-link active"><i class="fas fa-chart-pie"></i> <span data-i18n="nav_project_statistics">Project Statistics</span></a>
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
+                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
+                    <a href="/project-statistics" class="nav-link active"><i class="fas fa-chart-pie"></i> Project Statistics</a>
                 </div>
-                <div class="nav-controls">
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <i class="fas fa-sun" id="theme-icon"></i>
-                        <span id="theme-text" data-i18n="theme_light">Light</span>
-                    </button>
-                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
-                </div>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -54,68 +50,68 @@
     <div class="container">
         <div class="dashboard-header">
             <div class="header-content">
-                <h1 data-i18n="project_statistics">Project Statistics</h1>
-                <p data-i18n="project_statistics_subtitle">Detailed insights and analytics for your projects</p>
+                <h1>Project Statistics</h1>
+                <p>Detailed insights and analytics for your projects</p>
             </div>
         </div>
 
             <!-- Project Selection -->
             <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-filter"></i> <span data-i18n="select_project">Select Project</span></h2>
+                <h2 class="section-title"><i class="fas fa-filter"></i> Select Project</h2>
                 <div class="project-selection-container">
                     <div class="searchable-dropdown">
-                        <input type="text" id="projectSearchInput" data-i18n-placeholder="search_for_project" placeholder="Search for a project..." onkeyup="filterProjects()">
+                        <input type="text" id="projectSearchInput" placeholder="Search for a project..." onkeyup="filterProjects()">
                         <div class="dropdown-content" id="projectDropdownContent"></div>
                     </div>
-                    <button id="loadProjectStatsBtn" class="btn btn-primary" data-i18n="load_stats">Load Stats</button>
+                    <button id="loadProjectStatsBtn" class="btn btn-primary">Load Stats</button>
                 </div>
             </div>
 
             <div id="projectStatsContent" style="display: none;">
                 <!-- Overall Statistics -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-chart-line"></i> <span data-i18n="overall_statistics">Overall Statistics</span></h2>
+                    <h2 class="section-title"><i class="fas fa-chart-line"></i> Overall Statistics</h2>
                     <div class="dashboard-stats" id="projectStatsOverall"></div>
                 </div>
 
                 <!-- Success Rates -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-percentage"></i> <span data-i18n="success_rates">Success Rates</span></h2>
+                    <h2 class="section-title"><i class="fas fa-percentage"></i> Success Rates</h2>
                     <div class="success-rates-grid" id="successRates"></div>
                 </div>
 
                 <!-- Quality Metrics -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-award"></i> <span data-i18n="quality_metrics">Quality Metrics</span></h2>
+                    <h2 class="section-title"><i class="fas fa-award"></i> Quality Metrics</h2>
                     <div class="quality-metrics-grid" id="qualityMetrics"></div>
                 </div>
 
                 <!-- Charts Section -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-chart-pie"></i> <span data-i18n="visual_insights">Visual Insights</span></h2>
+                    <h2 class="section-title"><i class="fas fa-chart-pie"></i> Visual Insights</h2>
                     <div class="charts-grid">
                         <div class="chart-card">
-                            <h3 data-i18n="user_stories_distribution">User Stories Distribution</h3>
+                            <h3>User Stories Distribution</h3>
                             <canvas id="projectUserStoriesChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3 data-i18n="test_cases_distribution">Test Cases Distribution</h3>
+                            <h3>Test Cases Distribution</h3>
                             <canvas id="projectTestCasesChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3 data-i18n="issues_by_priority">Issues by Priority</h3>
+                            <h3>Issues by Priority</h3>
                             <canvas id="projectIssuesPriorityChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3 data-i18n="issues_by_status">Issues by Status</h3>
+                            <h3>Issues by Status</h3>
                             <canvas id="projectIssuesStatusChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3 data-i18n="success_rates_overview">Success Rates Overview</h3>
+                            <h3>Success Rates Overview</h3>
                             <canvas id="projectSuccessRatesChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3 data-i18n="quality_trends">Quality Trends</h3>
+                            <h3>Quality Trends</h3>
                             <canvas id="projectQualityTrendsChart"></canvas>
                         </div>
                     </div>
@@ -123,27 +119,25 @@
 
                 <!-- Testers Section -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-users"></i> <span data-i18n="testers">Testers</span></h2>
+                    <h2 class="section-title"><i class="fas fa-users"></i> Testers</h2>
                     <div id="projectTesters" class="testers-grid"></div>
                 </div>
 
                 <!-- Reports Section -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-file-alt"></i> <span data-i18n="reports">Reports</span></h2>
+                    <h2 class="section-title"><i class="fas fa-file-alt"></i> Reports</h2>
                     <div id="projectReports" class="reports-grid"></div>
                 </div>
 
                 <!-- Monthly/Quarterly Stats -->
                 <div class="dashboard-section">
-                    <h2 class="section-title"><i class="fas fa-calendar-alt"></i> <span data-i18n="monthly_quarterly_stats">Monthly & Quarterly Stats</span></h2>
+                    <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Monthly & Quarterly Stats</h2>
                     <div id="projectTimeStats" class="time-stats-grid"></div>
                 </div>
         </div>
     </div>
 
     <!-- Link to the external JavaScript files -->
-    <script src="/static/translations.js" defer></script>
-    <script src="/static/language-manager.js" defer></script>
     <script src="/static/enhanced_script.js" defer></script>
     <script src="/static/project_statistics.js" defer></script>
     <script>

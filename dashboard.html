@@ -13,7 +13,6 @@
     <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
-    <link rel="stylesheet" href="/static/rtl-support.css">
 
     <!-- Theme manager (loads early) -->
     <script src="/static/theme-manager.js"></script>
@@ -35,18 +34,17 @@
             <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports System</div>
             <div style="display: flex; align-items: center;">
                 <div class="nav-links">
-                    <a href="/dashboard" class="nav-link active"><i class="fas fa-tachometer-alt"></i> <span data-i18n="nav_dashboard">Dashboard</span></a>
-                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> <span data-i18n="nav_reports">Reports</span></a>
-                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> <span data-i18n="nav_new_report">New Report</span></a>
-                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> <span data-i18n="nav_manage_data">Manage Data</span></a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> <span data-i18n="nav_project_statistics">Project Statistics</span></a>
+                    <a href="/dashboard" class="nav-link active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
+                    <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
+                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
                 </div>
                 <div class="nav-controls">
                     <button class="theme-toggle" onclick="toggleTheme()">
                         <i class="fas fa-sun" id="theme-icon"></i>
-                        <span id="theme-text" data-i18n="theme_light">Light</span>
+                        <span id="theme-text">Light</span>
                     </button>
-                    <button class="lang-toggle" id="language-toggle" onclick="toggleLanguage()" data-i18n="language">العربية</button>
                 </div>
             </div>
         </div>
@@ -56,13 +54,13 @@
     <div id="dashboardPage" class="page active">
         <div class="dashboard-container">
             <div class="dashboard-header">
-                <h1 data-i18n="dashboard_title">Sprint Reports Dashboard</h1>
-                <p data-i18n="dashboard_subtitle">Comprehensive Quality Assurance Management System</p>
+                <h1>Sprint Reports Dashboard</h1>
+                <p>Comprehensive Quality Assurance Management System</p>
             </div>
 
             <!-- Overall Statistics -->
             <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-chart-line"></i> <span data-i18n="overall_statistics">Overall Statistics</span></h2>
+                <h2 class="section-title"><i class="fas fa-chart-line"></i> Overall Statistics</h2>
                 <div class="dashboard-stats">
                     <div class="stat-card">
                         <div class="icon"><i class="fas fa-file-alt"></i></div>
@@ -192,129 +190,9 @@
                     </div>
                 </div>
 
-                <!-- Trend Analysis -->
-                <div class="trend-section">
-                    <h3 class="subsection-title"><i class="fas fa-chart-line"></i> Trend Analysis</h3>
-                    <div class="trend-grid">
-                        <div class="trend-card">
-                            <h4>Quality Metrics Over Time</h4>
-                            <canvas id="qualityTrendChart"></canvas>
-                        </div>
-                        <div class="trend-card">
-                            <h4>Issue Discovery Rate</h4>
-                            <canvas id="issueDiscoveryChart"></canvas>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Performance Matrix -->
-                <div class="matrix-section">
-                    <h3 class="subsection-title"><i class="fas fa-th"></i> Performance Matrix</h3>
-                    <div class="performance-matrix">
-                        <div class="matrix-item">
-                            <div class="matrix-header">
-                                <i class="fas fa-bullseye"></i>
-                                <span>Test Coverage</span>
-                            </div>
-                            <div class="matrix-bar">
-                                <div id="testCoverageBar" class="bar-fill" data-percentage="0"></div>
-                                <span id="testCoverageText" class="bar-text">0%</span>
-                            </div>
-                        </div>
-                        <div class="matrix-item">
-                            <div class="matrix-header">
-                                <i class="fas fa-bug"></i>
-                                <span>Bug Fix Rate</span>
-                            </div>
-                            <div class="matrix-bar">
-                                <div id="bugFixRateBar" class="bar-fill" data-percentage="0"></div>
-                                <span id="bugFixRateText" class="bar-text">0%</span>
-                            </div>
-                        </div>
-                        <div class="matrix-item">
-                            <div class="matrix-header">
-                                <i class="fas fa-rocket"></i>
-                                <span>Sprint Velocity</span>
-                            </div>
-                            <div class="matrix-bar">
-                                <div id="sprintVelocityBar" class="bar-fill" data-percentage="0"></div>
-                                <span id="sprintVelocityText" class="bar-text">0%</span>
-                            </div>
-                        </div>
-                        <div class="matrix-item">
-                            <div class="matrix-header">
-                                <i class="fas fa-star"></i>
-                                <span>Quality Score</span>
-                            </div>
-                            <div class="matrix-bar">
-                                <div id="qualityScoreBar" class="bar-fill" data-percentage="0"></div>
-                                <span id="qualityScoreText" class="bar-text">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Additional Meaningful Charts -->
-                <div class="additional-charts-section">
-                    <h3 class="subsection-title"><i class="fas fa-chart-area"></i> Detailed Insights</h3>
-                    <div class="charts-grid">
-                        <div class="chart-card">
-                            <h4>Portfolio Distribution</h4>
-                            <canvas id="portfolioDistributionChart"></canvas>
-                        </div>
-                        <div class="chart-card">
-                            <h4>Testing Team Performance</h4>
-                            <canvas id="teamPerformanceChart"></canvas>
-                        </div>
-                        <div class="chart-card">
-                            <h4>Sprint Progress Timeline</h4>
-                            <canvas id="sprintTimelineChart"></canvas>
-                        </div>
-                        <div class="chart-card">
-                            <h4>Quality Score Distribution</h4>
-                            <canvas id="qualityScoreChart"></canvas>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Real-time Metrics -->
-                <div class="realtime-section">
-                    <h3 class="subsection-title"><i class="fas fa-broadcast-tower"></i> Real-time Metrics</h3>
-                    <div class="metrics-grid">
-                        <div class="metric-widget">
-                            <div class="metric-header">
-                                <i class="fas fa-users"></i>
-                                <span>Active Testers</span>
-                            </div>
-                            <div class="metric-value" id="activeTestersCount">0</div>
-                            <div class="metric-change" id="activeTestersChange">+0%</div>
-                        </div>
-                        <div class="metric-widget">
-                            <div class="metric-header">
-                                <i class="fas fa-calendar-week"></i>
-                                <span>Active Sprints</span>
-                            </div>
-                            <div class="metric-value" id="activeSprintsCount">0</div>
-                            <div class="metric-change" id="activeSprintsChange">+0%</div>
-                        </div>
-                        <div class="metric-widget">
-                            <div class="metric-header">
-                                <i class="fas fa-clock"></i>
-                                <span>Avg Resolution Time</span>
-                            </div>
-                            <div class="metric-value" id="avgResolutionTime">0h</div>
-                            <div class="metric-change" id="resolutionTimeChange">-0%</div>
-                        </div>
-                        <div class="metric-widget">
-                            <div class="metric-header">
-                                <i class="fas fa-award"></i>
-                                <span>Quality Rating</span>
-                            </div>
-                            <div class="metric-value" id="qualityRating">0.0</div>
-                            <div class="metric-change" id="qualityRatingChange">+0%</div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Project-Specific Metrics -->
@@ -346,8 +224,6 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Link to the external JavaScript files -->
-    <script src="/static/translations.js" defer></script>
-    <script src="/static/language-manager.js" defer></script>
     <script src="/static/enhanced_script.js" defer></script>
     <script src="/static/Charts.js" defer></script>
     <script src="/static/dashboard_charts.js" defer></script>
