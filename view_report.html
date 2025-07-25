@@ -827,16 +827,159 @@
                 }
             });
             
-            // Recreate charts with new theme colors
+            // Clear the viewCharts object
+            viewCharts = {};
+            
+            // Recreate only the charts (not tables) with new theme colors
             renderUserStoriesChart(currentReport);
             renderTestCasesChart(currentReport);
-            renderIssuesCharts(currentReport);
+            renderIssuesPriorityChart(currentReport);
+            renderIssuesStatusChart(currentReport);
             renderEnhancementsChart(currentReport);
         }
 
-        // Listen for theme changes
+        // Individual chart rendering functions for theme updates
+        function renderUserStoriesChart(report) {
+            const ctx = document.getElementById('userStoriesViewChart').getContext('2d');
+            if (viewCharts.userStories) viewCharts.userStories.destroy();
+            
+            viewCharts.userStories = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
+                    datasets: [{
+                        data: [
+                            report.passedUserStories || 0,
+                            report.passedWithIssuesUserStories || 0,
+                            report.failedUserStories || 0,
+                            report.blockedUserStories || 0,
+                            report.cancelledUserStories || 0,
+                            report.deferredUserStories || 0,
+                            report.notTestableUserStories || 0
+                        ],
+                        backgroundColor: [
+                            '#4CAF50', '#FFC107', '#F44336', '#9E9E9E', 
+                            '#2196F3', '#673AB7', '#00BCD4'
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getViewChartOptions()
+            });
+        }
+
+        function renderTestCasesChart(report) {
+            const ctx = document.getElementById('testCasesViewChart').getContext('2d');
+            if (viewCharts.testCases) viewCharts.testCases.destroy();
+            
+            viewCharts.testCases = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
+                    datasets: [{
+                        data: [
+                            report.passedTestCases || 0,
+                            report.passedWithIssuesTestCases || 0,
+                            report.failedTestCases || 0,
+                            report.blockedTestCases || 0,
+                            report.cancelledTestCases || 0,
+                            report.deferredTestCases || 0,
+                            report.notTestableTestCases || 0
+                        ],
+                        backgroundColor: [
+                            '#8BC34A', '#FFEB3B', '#E91E63', '#607D8B', 
+                            '#9C27B0', '#FF5722', '#795548'
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getViewChartOptions()
+            });
+        }
+
+        function renderIssuesPriorityChart(report) {
+            const priorityCtx = document.getElementById('issuesPriorityViewChart').getContext('2d');
+            if (viewCharts.issuesPriority) viewCharts.issuesPriority.destroy();
+            
+            viewCharts.issuesPriority = new Chart(priorityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Critical', 'High', 'Medium', 'Low'],
+                    datasets: [{
+                        data: [
+                            report.criticalIssues || 0,
+                            report.highIssues || 0,
+                            report.mediumIssues || 0,
+                            report.lowIssues || 0
+                        ],
+                        backgroundColor: [
+                            '#F44336', '#FF9800', '#FFC107', '#4CAF50'
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getViewChartOptions()
+            });
+        }
+
+        function renderIssuesStatusChart(report) {
+            const statusCtx = document.getElementById('issuesStatusViewChart').getContext('2d');
+            if (viewCharts.issuesStatus) viewCharts.issuesStatus.destroy();
+            
+            viewCharts.issuesStatus = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'],
+                    datasets: [{
+                        data: [
+                            report.newIssues || 0,
+                            report.fixedIssues || 0,
+                            report.notFixedIssues || 0,
+                            report.reopenedIssues || 0,
+                            report.deferredIssues || 0
+                        ],
+                        backgroundColor: [
+                            '#2196F3', '#4CAF50', '#E91E63', '#FF5722', '#673AB7'
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getViewChartOptions()
+            });
+        }
+
+        function renderEnhancementsChart(report) {
+            const ctx = document.getElementById('enhancementsViewChart').getContext('2d');
+            if (viewCharts.enhancements) viewCharts.enhancements.destroy();
+            
+            viewCharts.enhancements = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['New', 'Implemented', 'Exists'],
+                    datasets: [{
+                        data: [
+                            report.newEnhancements || 0,
+                            report.implementedEnhancements || 0,
+                            report.existsEnhancements || 0
+                        ],
+                        backgroundColor: [
+                            '#00BCD4', '#4CAF50', '#9E9E9E'
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getViewChartOptions()
+            });
+        }
+
+        // Listen for theme changes - both mutation observer and custom event
         document.addEventListener('DOMContentLoaded', function() {
-            // Watch for theme attribute changes
+            // Watch for theme attribute changes (fallback)
             const observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
                     if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
@@ -849,6 +992,11 @@
                 attributes: true,
                 attributeFilter: ['data-theme']
             });
+        });
+
+        // Listen for custom theme change event (primary method)
+        window.addEventListener('themeChanged', function(event) {
+            updateChartsForTheme();
         });
 
         function renderAdditionalInfo(report) {
