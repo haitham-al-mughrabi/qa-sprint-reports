@@ -1498,7 +1498,7 @@
                 return;
             }
             
-            showInfoToast('Generating PDF export...');
+            showInfoToast('Generating comprehensive PDF export...');
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'pt', 'a4');
@@ -1506,6 +1506,16 @@
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
             let yPos = margin;
+
+            // Helper function to check if we need a new page
+            const checkNewPage = (requiredSpace = 80) => {
+                if (yPos + requiredSpace > pageHeight - margin) {
+                    doc.addPage();
+                    yPos = margin;
+                    return true;
+                }
+                return false;
+            };
 
             // Header
             doc.setFontSize(20);
@@ -1520,7 +1530,8 @@
             doc.text(`${currentReport.projectName} | Version ${currentReport.reportVersion} | ${formatDate(currentReport.reportDate)}`, pageWidth / 2, yPos, { align: 'center' });
             yPos += 30;
 
-            // General Information
+            // 1. General Information
+            checkNewPage(150);
             doc.setFontSize(16);
             doc.setFont(undefined, 'bold');
             doc.text('General Information', margin, yPos);
@@ -1547,31 +1558,537 @@
             });
             yPos = doc.lastAutoTable.finalY + 30;
 
-            // Charts
-            const chartIds = ['userStoriesViewChart', 'testCasesViewChart', 'issuesPriorityViewChart', 'issuesStatusViewChart', 'enhancementsViewChart', 'automationTestCasesViewChart', 'automationStabilityViewChart'];
-            const chartTitles = ['User Stories Distribution', 'Test Cases Distribution', 'Issues by Priority', 'Issues by Status', 'Enhancements Distribution', 'Automation Test Cases', 'Automation Test Stability'];
+            // 2. Test Summary & Status
+            checkNewPage(100);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Test Summary & Status', margin, yPos);
+            yPos += 20;
 
-            for (let i = 0; i < chartIds.length; i++) {
-                const chartId = chartIds[i];
-                const chartTitle = chartTitles[i];
-                const canvas = document.getElementById(chartId);
+            const testSummaryData = [
+                ['Testing Status', getStatusText(currentReport.testingStatus)],
+                ['Test Summary', currentReport.testSummary || 'No summary provided']
+            ];
 
-                if (canvas) {
-                    if (yPos + 250 > pageHeight) {
-                        doc.addPage();
-                        yPos = margin;
+            doc.autoTable({
+                startY: yPos,
+                head: [['Field', 'Value']],
+                body: testSummaryData,
+                theme: 'grid',
+                headStyles: { fillColor: [59, 130, 246] },
+                margin: { left: margin, right: margin },
+                columnStyles: {
+                    1: { cellWidth: 350 }
+                }
+            });
+            yPos = doc.lastAutoTable.finalY + 30;
+
+            // 3. Testing Metrics Overview
+            checkNewPage(150);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Testing Metrics Overview', margin, yPos);
+            yPos += 20;
+
+            const metricsData = [
+                ['Total User Stories', currentReport.totalUserStories || 0],
+                ['Total Test Cases', currentReport.totalTestCases || 0],
+                ['Total Issues', currentReport.totalIssues || 0],
+                ['Total Enhancements', currentReport.totalEnhancements || 0]
+            ];
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['Metric', 'Count']],
+                body: metricsData,
+                theme: 'grid',
+                headStyles: { fillColor: [168, 85, 247] },
+                margin: { left: margin, right: margin }
+            });
+            yPos = doc.lastAutoTable.finalY + 30;
+
+            // 4. User Stories Analysis
+            checkNewPage(250);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('User Stories Analysis', margin, yPos);
+            yPos += 20;
+
+            const total = currentReport.totalUserStories || 0;
+            const userStoriesData = [
+                ['Status', 'Count', 'Percentage'],
+                ['Total User Stories', total, '100%'],
+                ['Passed', currentReport.passedUserStories || 0, total ? Math.round(((currentReport.passedUserStories || 0) / total) * 100) + '%' : '0%'],
+                ['Passed with Issues', currentReport.passedWithIssuesUserStories || 0, total ? Math.round(((currentReport.passedWithIssuesUserStories || 0) / total) * 100) + '%' : '0%'],
+                ['Failed', currentReport.failedUserStories || 0, total ? Math.round(((currentReport.failedUserStories || 0) / total) * 100) + '%' : '0%'],
+                ['Blocked', currentReport.blockedUserStories || 0, total ? Math.round(((currentReport.blockedUserStories || 0) / total) * 100) + '%' : '0%'],
+                ['Cancelled', currentReport.cancelledUserStories || 0, total ? Math.round(((currentReport.cancelledUserStories || 0) / total) * 100) + '%' : '0%'],
+                ['Deferred', currentReport.deferredUserStories || 0, total ? Math.round(((currentReport.deferredUserStories || 0) / total) * 100) + '%' : '0%'],
+                ['Not Testable', currentReport.notTestableUserStories || 0, total ? Math.round(((currentReport.notTestableUserStories || 0) / total) * 100) + '%' : '0%']
+            ];
+
+            // Create table and chart side by side - using web dimensions
+            const tableStartY = yPos;
+            const tableWidth = 260;
+            const chartStartX = margin + tableWidth + 20;
+            const webChartRatio = 400/300; // Original web chart ratio
+            const chartHeight = 160;
+            const chartWidth = chartHeight * webChartRatio; // Maintain aspect ratio
+
+            doc.autoTable({
+                startY: tableStartY,
+                head: [userStoriesData[0]],
+                body: userStoriesData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [34, 197, 94] },
+                margin: { left: margin, right: chartStartX },
+                tableWidth: tableWidth,
+                styles: { fontSize: 9, cellPadding: 3 }
+            });
+
+            // Add chart beside the table with high quality capture
+            const userStoriesCanvas = document.getElementById('userStoriesViewChart');
+            if (userStoriesCanvas) {
+                // Create a temporary canvas with higher resolution
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                const scale = 2; // Higher resolution
+                tempCanvas.width = userStoriesCanvas.width * scale;
+                tempCanvas.height = userStoriesCanvas.height * scale;
+                tempCtx.scale(scale, scale);
+                tempCtx.drawImage(userStoriesCanvas, 0, 0);
+                
+                const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                doc.addImage(imgData, 'PNG', chartStartX, tableStartY + 5, chartWidth, chartHeight);
+            }
+
+            yPos = Math.max(doc.lastAutoTable.finalY, tableStartY + chartHeight) + 30;
+
+            // 5. Test Cases Analysis
+            checkNewPage(250);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Test Cases Analysis', margin, yPos);
+            yPos += 20;
+
+            const totalTestCases = currentReport.totalTestCases || 0;
+            const testCasesData = [
+                ['Status', 'Count', 'Percentage'],
+                ['Total Test Cases', totalTestCases, '100%'],
+                ['Passed', currentReport.passedTestCases || 0, totalTestCases ? Math.round(((currentReport.passedTestCases || 0) / totalTestCases) * 100) + '%' : '0%'],
+                ['Passed with Issues', currentReport.passedWithIssuesTestCases || 0, totalTestCases ? Math.round(((currentReport.passedWithIssuesTestCases || 0) / totalTestCases) * 100) + '%' : '0%'],
+                ['Failed', currentReport.failedTestCases || 0, totalTestCases ? Math.round(((currentReport.failedTestCases || 0) / totalTestCases) * 100) + '%' : '0%'],
+                ['Blocked', currentReport.blockedTestCases || 0, totalTestCases ? Math.round(((currentReport.blockedTestCases || 0) / totalTestCases) * 100) + '%' : '0%'],
+                ['Cancelled', currentReport.cancelledTestCases || 0, totalTestCases ? Math.round(((currentReport.cancelledTestCases || 0) / totalTestCases) * 100) + '%' : '0%'],
+                ['Deferred', currentReport.deferredTestCases || 0, totalTestCases ? Math.round(((currentReport.deferredTestCases || 0) / totalTestCases) * 100) + '%' : '0%'],
+                ['Not Testable', currentReport.notTestableTestCases || 0, totalTestCases ? Math.round(((currentReport.notTestableTestCases || 0) / totalTestCases) * 100) + '%' : '0%']
+            ];
+
+            // Create table and chart side by side
+            const testCasesTableStartY = yPos;
+
+            doc.autoTable({
+                startY: testCasesTableStartY,
+                head: [testCasesData[0]],
+                body: testCasesData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [236, 72, 153] },
+                margin: { left: margin, right: chartStartX },
+                tableWidth: tableWidth,
+                styles: { fontSize: 9, cellPadding: 3 }
+            });
+
+            // Add chart beside the table with high quality capture
+            const testCasesCanvas = document.getElementById('testCasesViewChart');
+            if (testCasesCanvas) {
+                // Create a temporary canvas with higher resolution
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                const scale = 2;
+                tempCanvas.width = testCasesCanvas.width * scale;
+                tempCanvas.height = testCasesCanvas.height * scale;
+                tempCtx.scale(scale, scale);
+                tempCtx.drawImage(testCasesCanvas, 0, 0);
+                
+                const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                doc.addImage(imgData, 'PNG', chartStartX, testCasesTableStartY + 5, chartWidth, chartHeight);
+            }
+
+            yPos = Math.max(doc.lastAutoTable.finalY, testCasesTableStartY + chartHeight) + 30;
+
+            // 6. Issues by Priority
+            checkNewPage(220);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Issues by Priority', margin, yPos);
+            yPos += 20;
+
+            const totalIssues = currentReport.totalIssues || 0;
+            const issuesPriorityData = [
+                ['Priority', 'Count', 'Percentage'],
+                ['Total Issues', totalIssues, '100%'],
+                ['Critical', currentReport.criticalIssues || 0, totalIssues ? Math.round(((currentReport.criticalIssues || 0) / totalIssues) * 100) + '%' : '0%'],
+                ['High', currentReport.highIssues || 0, totalIssues ? Math.round(((currentReport.highIssues || 0) / totalIssues) * 100) + '%' : '0%'],
+                ['Medium', currentReport.mediumIssues || 0, totalIssues ? Math.round(((currentReport.mediumIssues || 0) / totalIssues) * 100) + '%' : '0%'],
+                ['Low', currentReport.lowIssues || 0, totalIssues ? Math.round(((currentReport.lowIssues || 0) / totalIssues) * 100) + '%' : '0%']
+            ];
+
+            // Create table and chart side by side - Issues by Priority (high quality)
+            const issuesPriorityTableStartY = yPos;
+
+            doc.autoTable({
+                startY: issuesPriorityTableStartY,
+                head: [issuesPriorityData[0]],
+                body: issuesPriorityData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [239, 68, 68] },
+                margin: { left: margin, right: chartStartX },
+                tableWidth: tableWidth,
+                styles: { fontSize: 9, cellPadding: 3 }
+            });
+
+            // Add chart beside the table with high quality capture
+            const issuesPriorityCanvas = document.getElementById('issuesPriorityViewChart');
+            if (issuesPriorityCanvas) {
+                // Create a temporary canvas with higher resolution
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                const scale = 2;
+                tempCanvas.width = issuesPriorityCanvas.width * scale;
+                tempCanvas.height = issuesPriorityCanvas.height * scale;
+                tempCtx.scale(scale, scale);
+                tempCtx.drawImage(issuesPriorityCanvas, 0, 0);
+                
+                const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                doc.addImage(imgData, 'PNG', chartStartX, issuesPriorityTableStartY + 5, chartWidth, chartHeight);
+            }
+
+            yPos = Math.max(doc.lastAutoTable.finalY, issuesPriorityTableStartY + chartHeight) + 30;
+
+            // 7. Issues by Status
+            checkNewPage(220);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Issues by Status', margin, yPos);
+            yPos += 20;
+
+            const issuesStatusData = [
+                ['Status', 'Count', 'Percentage'],
+                ['New', currentReport.newIssues || 0, totalIssues ? Math.round(((currentReport.newIssues || 0) / totalIssues) * 100) + '%' : '0%'],
+                ['Fixed', currentReport.fixedIssues || 0, totalIssues ? Math.round(((currentReport.fixedIssues || 0) / totalIssues) * 100) + '%' : '0%'],
+                ['Not Fixed', currentReport.notFixedIssues || 0, totalIssues ? Math.round(((currentReport.notFixedIssues || 0) / totalIssues) * 100) + '%' : '0%'],
+                ['Re-opened', currentReport.reopenedIssues || 0, totalIssues ? Math.round(((currentReport.reopenedIssues || 0) / totalIssues) * 100) + '%' : '0%'],
+                ['Deferred', currentReport.deferredIssues || 0, totalIssues ? Math.round(((currentReport.deferredIssues || 0) / totalIssues) * 100) + '%' : '0%']
+            ];
+
+            // Create table and chart side by side - Issues by Status (high quality)
+            const issuesStatusTableStartY = yPos;
+
+            doc.autoTable({
+                startY: issuesStatusTableStartY,
+                head: [issuesStatusData[0]],
+                body: issuesStatusData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [245, 158, 11] },
+                margin: { left: margin, right: chartStartX },
+                tableWidth: tableWidth,
+                styles: { fontSize: 9, cellPadding: 3 }
+            });
+
+            // Add chart beside the table with high quality capture
+            const issuesStatusCanvas = document.getElementById('issuesStatusViewChart');
+            if (issuesStatusCanvas) {
+                // Create a temporary canvas with higher resolution
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                const scale = 2;
+                tempCanvas.width = issuesStatusCanvas.width * scale;
+                tempCanvas.height = issuesStatusCanvas.height * scale;
+                tempCtx.scale(scale, scale);
+                tempCtx.drawImage(issuesStatusCanvas, 0, 0);
+                
+                const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                doc.addImage(imgData, 'PNG', chartStartX, issuesStatusTableStartY + 5, chartWidth, chartHeight);
+            }
+
+            yPos = Math.max(doc.lastAutoTable.finalY, issuesStatusTableStartY + chartHeight) + 30;
+
+            // 8. Enhancements Analysis
+            checkNewPage(220);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Enhancements Analysis', margin, yPos);
+            yPos += 20;
+
+            const totalEnhancements = currentReport.totalEnhancements || 0;
+            const enhancementsData = [
+                ['Status', 'Count', 'Percentage'],
+                ['Total Enhancements', totalEnhancements, '100%'],
+                ['New', currentReport.newEnhancements || 0, totalEnhancements ? Math.round(((currentReport.newEnhancements || 0) / totalEnhancements) * 100) + '%' : '0%'],
+                ['Implemented', currentReport.implementedEnhancements || 0, totalEnhancements ? Math.round(((currentReport.implementedEnhancements || 0) / totalEnhancements) * 100) + '%' : '0%'],
+                ['Exists', currentReport.existsEnhancements || 0, totalEnhancements ? Math.round(((currentReport.existsEnhancements || 0) / totalEnhancements) * 100) + '%' : '0%']
+            ];
+
+            // Create table and chart side by side - Enhancements Analysis (high quality)
+            const enhancementsTableStartY = yPos;
+
+            doc.autoTable({
+                startY: enhancementsTableStartY,
+                head: [enhancementsData[0]],
+                body: enhancementsData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [14, 165, 233] },
+                margin: { left: margin, right: chartStartX },
+                tableWidth: tableWidth,
+                styles: { fontSize: 9, cellPadding: 3 }
+            });
+
+            // Add chart beside the table with high quality capture
+            const enhancementsCanvas = document.getElementById('enhancementsViewChart');
+            if (enhancementsCanvas) {
+                // Create a temporary canvas with higher resolution
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                const scale = 2;
+                tempCanvas.width = enhancementsCanvas.width * scale;
+                tempCanvas.height = enhancementsCanvas.height * scale;
+                tempCtx.scale(scale, scale);
+                tempCtx.drawImage(enhancementsCanvas, 0, 0);
+                
+                const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                doc.addImage(imgData, 'PNG', chartStartX, enhancementsTableStartY + 5, chartWidth, chartHeight);
+            }
+
+            yPos = Math.max(doc.lastAutoTable.finalY, enhancementsTableStartY + chartHeight) + 30;
+
+            // 9. Automation Regression - Test Cases
+            checkNewPage(220);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Automation Regression - Test Cases', margin, yPos);
+            yPos += 20;
+
+            const automationTotal = currentReport.automationTotalTestCases || 0;
+            const automationTestCasesData = [
+                ['Status', 'Count', 'Percentage'],
+                ['Total Test Cases', automationTotal, '100%'],
+                ['Passed', currentReport.automationPassedTestCases || 0, currentReport.automationPassedPercentage + '%' || '0%'],
+                ['Failed', currentReport.automationFailedTestCases || 0, currentReport.automationFailedPercentage + '%' || '0%'],
+                ['Skipped', currentReport.automationSkippedTestCases || 0, currentReport.automationSkippedPercentage + '%' || '0%']
+            ];
+
+            // Create table and chart side by side
+            const automationTestCasesTableStartY = yPos;
+
+            doc.autoTable({
+                startY: automationTestCasesTableStartY,
+                head: [automationTestCasesData[0]],
+                body: automationTestCasesData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [139, 69, 19] },
+                margin: { left: margin, right: chartStartX },
+                tableWidth: tableWidth,
+                styles: { fontSize: 9, cellPadding: 3 }
+            });
+
+            // Add chart beside the table with high quality capture
+            const automationTestCasesCanvas = document.getElementById('automationTestCasesViewChart');
+            if (automationTestCasesCanvas) {
+                // Create a temporary canvas with higher resolution
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                const scale = 2;
+                tempCanvas.width = automationTestCasesCanvas.width * scale;
+                tempCanvas.height = automationTestCasesCanvas.height * scale;
+                tempCtx.scale(scale, scale);
+                tempCtx.drawImage(automationTestCasesCanvas, 0, 0);
+                
+                const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                doc.addImage(imgData, 'PNG', chartStartX, automationTestCasesTableStartY + 5, chartWidth, chartHeight);
+            }
+
+            yPos = Math.max(doc.lastAutoTable.finalY, automationTestCasesTableStartY + chartHeight) + 30;
+
+            // 10. Automation Regression - Test Stability
+            checkNewPage(220);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Automation Regression - Test Stability', margin, yPos);
+            yPos += 20;
+
+            const stabilityTotal = currentReport.automationStabilityTotal || 0;
+            const automationStabilityData = [
+                ['Stability', 'Count', 'Percentage'],
+                ['Total Tests', stabilityTotal, '100%'],
+                ['Stable', currentReport.automationStableTests || 0, currentReport.automationStablePercentage + '%' || '0%'],
+                ['Flaky', currentReport.automationFlakyTests || 0, currentReport.automationFlakyPercentage + '%' || '0%']
+            ];
+
+            // Create table and chart side by side
+            const automationStabilityTableStartY = yPos;
+
+            doc.autoTable({
+                startY: automationStabilityTableStartY,
+                head: [automationStabilityData[0]],
+                body: automationStabilityData.slice(1),
+                theme: 'grid',
+                headStyles: { fillColor: [107, 114, 128] },
+                margin: { left: margin, right: chartStartX },
+                tableWidth: tableWidth,
+                styles: { fontSize: 9, cellPadding: 3 }
+            });
+
+            // Add chart beside the table with high quality capture
+            const automationStabilityCanvas = document.getElementById('automationStabilityViewChart');
+            if (automationStabilityCanvas) {
+                // Create a temporary canvas with higher resolution
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                const scale = 2;
+                tempCanvas.width = automationStabilityCanvas.width * scale;
+                tempCanvas.height = automationStabilityCanvas.height * scale;
+                tempCtx.scale(scale, scale);
+                tempCtx.drawImage(automationStabilityCanvas, 0, 0);
+                
+                const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                doc.addImage(imgData, 'PNG', chartStartX, automationStabilityTableStartY + 5, chartWidth, chartHeight);
+            }
+
+            yPos = Math.max(doc.lastAutoTable.finalY, automationStabilityTableStartY + chartHeight) + 30;
+
+            // 11. Additional Information Sections
+            if (currentReport.requestData && currentReport.requestData.length > 0) {
+                checkNewPage(150);
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('Request Information', margin, yPos);
+                yPos += 20;
+
+                const requestHeaders = ['Request ID', 'URL'];
+                const requestData = currentReport.requestData.map(req => [req.id, req.url]);
+
+                doc.autoTable({
+                    startY: yPos,
+                    head: [requestHeaders],
+                    body: requestData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [79, 70, 229] },
+                    margin: { left: margin, right: margin },
+                    columnStyles: {
+                        1: { cellWidth: 300 }
                     }
+                });
+                yPos = doc.lastAutoTable.finalY + 30;
+            }
 
-                    doc.setFontSize(14);
-                    doc.setFont(undefined, 'bold');
-                    doc.text(chartTitle, margin, yPos);
-                    yPos += 20;
+            if (currentReport.buildData && currentReport.buildData.length > 0) {
+                checkNewPage(150);
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('Build Information', margin, yPos);
+                yPos += 20;
 
-                    const imgData = canvas.toDataURL('image/png');
-                    doc.addImage(imgData, 'PNG', margin, yPos, 500, 250);
-                    yPos += 280;
+                const buildHeaders = ['Request ID', 'URL', 'Environment', 'Cycles'];
+                const buildData = currentReport.buildData.map(build => [
+                    build.requestId,
+                    build.requestUrl.length > 40 ? build.requestUrl.substring(0, 40) + '...' : build.requestUrl,
+                    build.environment,
+                    build.cycles
+                ]);
+
+                doc.autoTable({
+                    startY: yPos,
+                    head: [buildHeaders],
+                    body: buildData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [16, 185, 129] },
+                    margin: { left: margin, right: margin }
+                });
+                yPos = doc.lastAutoTable.finalY + 30;
+            }
+
+            if (currentReport.testerData && currentReport.testerData.length > 0) {
+                checkNewPage(150);
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('Tester Information', margin, yPos);
+                yPos += 20;
+
+                const testerHeaders = ['Tester Name', 'Email', 'Roles'];
+                const testerData = currentReport.testerData.map(tester => {
+                    const roles = [];
+                    if (tester.is_automation_engineer) roles.push('Automation Engineer');
+                    if (tester.is_manual_engineer) roles.push('Manual Engineer');
+                    const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
+                    return [tester.name, tester.email || '', roleText];
+                });
+
+                doc.autoTable({
+                    startY: yPos,
+                    head: [testerHeaders],
+                    body: testerData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [217, 119, 6] },
+                    margin: { left: margin, right: margin }
+                });
+                yPos = doc.lastAutoTable.finalY + 30;
+            }
+
+            if (currentReport.teamMemberData && currentReport.teamMemberData.length > 0) {
+                checkNewPage(150);
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('Team Members', margin, yPos);
+                yPos += 20;
+
+                const teamHeaders = ['Team Member Name', 'Email', 'Role'];
+                const teamData = currentReport.teamMemberData.map(member => [
+                    member.name,
+                    member.email || '',
+                    member.role || ''
+                ]);
+
+                doc.autoTable({
+                    startY: yPos,
+                    head: [teamHeaders],
+                    body: teamData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [147, 51, 234] },
+                    margin: { left: margin, right: margin }
+                });
+                yPos = doc.lastAutoTable.finalY + 30;
+            }
+
+            // 12. QA Notes
+            if (currentReport.qaNotesData && currentReport.qaNotesData.length > 0) {
+                checkNewPage(150);
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('QA Notes', margin, yPos);
+                yPos += 20;
+
+                const qaNotesHeaders = ['Note'];
+                const qaNotesDataForTable = currentReport.qaNotesData
+                    .filter(noteItem => noteItem.note && noteItem.note.trim())
+                    .map(noteItem => [noteItem.note]);
+
+                if (qaNotesDataForTable.length > 0) {
+                    doc.autoTable({
+                        startY: yPos,
+                        head: [qaNotesHeaders],
+                        body: qaNotesDataForTable,
+                        theme: 'grid',
+                        headStyles: { fillColor: [185, 28, 28] },
+                        margin: { left: margin, right: margin },
+                        columnStyles: {
+                            0: { cellWidth: 450 }
+                        }
+                    });
+                    yPos = doc.lastAutoTable.finalY + 30;
                 }
             }
+
+            // Charts are now placed beside their respective tables above
 
             // Footer
             const pageCount = doc.internal.getNumberOfPages();
@@ -1581,8 +2098,8 @@
                 doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 20, { align: 'center' });
             }
 
-            doc.save(`QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}.pdf`);
-            showSuccessToast('PDF export completed successfully!');
+            doc.save(`QA_Report_Complete_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}.pdf`);
+            showSuccessToast('Comprehensive PDF export completed successfully!');
         }
 
         function exportCurrentReportAsExcel() {
