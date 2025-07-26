@@ -84,73 +84,67 @@
                         <!-- Section 1: General Details -->
                         <div class="section active" id="section-0">
                             <h2 class="section-title"><i class="fas fa-file-alt"></i> General Details</h2>
-                            
-                            <!-- Three Section Layout -->
-                            <div class="general-details-grid">
-                                <!-- Section 1: Project Details -->
-                                <div class="detail-section">
-                                    <div class="subsection">
-                                        <h3 class="subsection-title"><i class="fas fa-folder-open"></i> Project Details</h3>
-                                        
-                                        <div class="stacked-form-section">
-                                            <div class="form-field-vertical">
-                                                <label for="portfolioName" class="field-label">Portfolio Name</label>
-                                                <select id="portfolioName" name="portfolioName" class="field-input" onchange="onPortfolioSelection()">
-                                                    <option value="">Select Portfolio</option>
-                                                </select>
-                                            </div>
-                                            
-                                            <div class="field-divider"></div>
-                                            
-                                            <div class="form-field-vertical">
-                                                <label for="projectName" class="field-label">Project Name</label>
-                                                <select id="projectName" name="projectName" class="field-input" onchange="onProjectSelection()">
-                                                    <option value="">Select Project</option>
-                                                </select>
-                                            </div>
+                            <div class="general-details-layout">
+                                <!-- Project Details Card (Top, Full Width) -->
+                                <div class="info-card-v2 project-details-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-folder-open"></i>
+                                        <h3>Project Details</h3>
+                                    </div>
+                                    <div class="info-card-v2-content form-row-fields">
+                                        <div class="form-group">
+                                            <label for="portfolioName">Portfolio Name</label>
+                                            <select id="portfolioName" name="portfolioName" onchange="onPortfolioSelection()">
+                                                <option value="">Select Portfolio</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="projectName">Project Name</label>
+                                            <select id="projectName" name="projectName" onchange="onProjectSelection()">
+                                                <option value="">Select Project</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Section 2: Sprint & Release Information -->
-                                <div class="detail-section">
-                                    <div class="subsection">
-                                        <h3 class="subsection-title"><i class="fas fa-running"></i> Sprint & Release Information</h3>
-                                        <div class="form-grid">
+                                <!-- Sprint & Release and Report Info Cards (Second Row, Side-by-Side) -->
+                                <div class="bottom-cards-row">
+                                    <div class="info-card-v2">
+                                        <div class="info-card-v2-header">
+                                            <i class="fas fa-running"></i>
+                                            <h3>Sprint & Release Information</h3>
+                                        </div>
+                                        <div class="info-card-v2-content">
                                             <div class="form-group">
                                                 <label for="sprintNumber">Sprint Number</label>
                                                 <input type="number" id="sprintNumber" name="sprintNumber" min="1" placeholder="Enter sprint number">
                                             </div>
-
                                             <div class="form-group">
                                                 <label for="cycleNumber">Cycle Number</label>
                                                 <input type="number" id="cycleNumber" name="cycleNumber" min="1" placeholder="Enter cycle number">
                                             </div>
-
                                             <div class="form-group">
                                                 <label for="releaseNumber">Release Number</label>
                                                 <input type="text" id="releaseNumber" name="releaseNumber" placeholder="e.g., R1.0, R2.1">
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Section 3: Report Information -->
-                                <div class="detail-section">
-                                    <div class="subsection">
-                                        <h3 class="subsection-title"><i class="fas fa-file-text"></i> Report Information</h3>
-                                        <div class="form-grid">
-                                            <div class="form-group full-width">
+                                    <div class="info-card-v2">
+                                        <div class="info-card-v2-header">
+                                            <i class="fas fa-file-text"></i>
+                                            <h3>Report Information</h3>
+                                        </div>
+                                        <div class="info-card-v2-content">
+                                            <div class="form-group">
                                                 <label for="reportName">Report Name</label>
-                                                <input type="text" id="reportName" name="reportName" placeholder="Enter custom report name" onInput="updateReportTitle()">
+                                                <input type="text" id="reportName" name="reportName" placeholder="Enter custom report name" oninput="updateReportTitle()">
                                                 <small class="field-hint">Leave blank to use default name</small>
                                             </div>
-
                                             <div class="form-group">
                                                 <label for="reportVersion">Report Version</label>
                                                 <input type="text" id="reportVersion" name="reportVersion" placeholder="e.g., 1.0, 2.1">
                                             </div>
-
                                             <div class="form-group">
                                                 <label for="reportDate">Report Date (dd-mm-yyyy)</label>
                                                 <input type="text" id="reportDate" name="reportDate" pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy">

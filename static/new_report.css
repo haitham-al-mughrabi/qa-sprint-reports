@@ -521,6 +521,95 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* General Details Section V2 */
+.general-details-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+.form-row-fields {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.form-row-fields .form-group {
+    flex: 1;
+    min-width: 250px; /* Adjust as needed */
+}
+
+.bottom-cards-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.info-card-v2 {
+    background: var(--surface);
+    border-radius: var(--border-radius-large);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+}
+
+.info-card-v2:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.info-card-v2-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-card-v2-header i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.info-card-v2-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.info-card-v2-content {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem; /* Default vertical spacing for form groups */
+}
+
+.form-row-fields {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.form-row-fields .form-group {
+    flex: 1;
+    min-width: 250px;
+    margin-bottom: 0; /* Remove vertical margin when in a row */
+}
+
+@media (max-width: 768px) {
+    .form-row-fields {
+        flex-direction: column;
+    }
+    .form-row-fields .form-group {
+        margin-bottom: 1rem; /* Re-add vertical spacing when stacked */
+    }
+    .form-row-fields .form-group:last-child {
+        margin-bottom: 0; /* No margin after the last item when stacked */
+    }
+}
+
 /* Light theme specific adjustments */
 [data-theme="light"] .btn,
 [data-theme="light"] .nav-btn,
@@ -807,7 +896,7 @@
 
 .field-input {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.75rem 1rem; /* Adjusted padding for visual balance */
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--border-radius);
