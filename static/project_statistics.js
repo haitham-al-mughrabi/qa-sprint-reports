@@ -1,5 +1,6 @@
 let projects = [];
 let selectedProjectId = null;
+let projectStatsCache = null; // Cache project statistics data
 
 let projectCharts = {};
 
@@ -64,26 +65,50 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Please select a project first');
         }
     });
+    
+    // Setup MutationObserver to watch for theme attribute changes (fallback)
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                console.log('Project statistics: Theme attribute changed, recreating charts...');
+                // Trigger chart recreation with same logic as themeChanged event
+                setTimeout(() => {
+                    if (selectedProjectId && projectStatsCache) {
+                        console.log('Recreating project statistics from cache for theme attribute update');
+                        // Destroy existing charts first
+                        Object.values(projectCharts).forEach(chart => {
+                            if (chart && chart.destroy) {
+                                chart.destroy();
+                            }
+                        });
+                        projectCharts = {};
+                        renderAllProjectStatistics(projectStatsCache);
+                    } else if (selectedProjectId) {
+                        console.log('No cached data, reloading project statistics for theme attribute update:', selectedProjectId);
+                        // Destroy existing charts first
+                        Object.values(projectCharts).forEach(chart => {
+                            if (chart && chart.destroy) {
+                                chart.destroy();
+                            }
+                        });
+                        projectCharts = {};
+                        loadProjectStatistics(selectedProjectId);
+                    }
+                }, 100);
+            }
+        });
+    });
+    
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+    });
 });
 
-// Listen for theme changes and recreate charts with new colors
+// Listen for theme changes and recreate charts and statistics with cached data
 window.addEventListener('themeChanged', () => {
-    console.log('Theme changed, recreating project statistics charts...');
+    console.log('Theme changed, recreating project statistics with cached data...');
     
-    // Store current chart data before destroying charts
-    const chartData = {};
-    Object.keys(projectCharts).forEach(key => {
-        const chart = projectCharts[key];
-        if (chart && chart.data) {
-            chartData[key] = {
-                data: chart.data.datasets[0].data,
-                labels: chart.data.labels,
-                type: chart.config.type,
-                datasets: chart.data.datasets
-            };
-        }
-    });
-
     // Destroy all existing charts
     Object.values(projectCharts).forEach(chart => {
         if (chart && chart.destroy) {
@@ -94,118 +119,18 @@ window.addEventListener('themeChanged', () => {
     // Clear the charts object
     projectCharts = {};
 
-    // Recreate charts with new theme colors
+    // Recreate all statistics and charts using cached data
     setTimeout(() => {
-        recreateProjectCharts(chartData);
+        if (selectedProjectId && projectStatsCache) {
+            console.log('Recreating project statistics from cache for theme update');
+            renderAllProjectStatistics(projectStatsCache);
+        } else if (selectedProjectId) {
+            console.log('No cached data, reloading project statistics for theme update:', selectedProjectId);
+            loadProjectStatistics(selectedProjectId);
+        }
     }, 100);
 });
 
-// Function to recreate project charts with stored data
-function recreateProjectCharts(chartData) {
-    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
-    const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
-
-    Object.keys(chartData).forEach(key => {
-        const data = chartData[key];
-        const canvas = document.getElementById(key.replace('Charts', 'Chart'));
-        
-        if (canvas && data) {
-            const ctx = canvas.getContext('2d');
-            
-            if (data.type === 'doughnut') {
-                projectCharts[key] = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            data: data.data,
-                            backgroundColor: data.datasets[0].backgroundColor,
-                            borderWidth: 3,
-                            borderColor: borderColor
-                        }]
-                    },
-                    options: getDashboardChartOptions()
-                });
-            } else if (data.type === 'bar') {
-                projectCharts[key] = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.labels,
-                        datasets: data.datasets.map(dataset => ({
-                            ...dataset,
-                            borderColor: dataset.backgroundColor
-                        }))
-                    },
-                    options: {
-                        ...getDashboardChartOptions(),
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 100,
-                                ticks: {
-                                    color: isLightTheme ? '#1e293b' : '#f1f5f9',
-                                    callback: function(value) {
-                                        return value + '%';
-                                    }
-                                },
-                                grid: {
-                                    color: isLightTheme ? '#e2e8f0' : '#334155'
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    color: isLightTheme ? '#1e293b' : '#f1f5f9'
-                                },
-                                grid: {
-                                    color: isLightTheme ? '#e2e8f0' : '#334155'
-                                }
-                            }
-                        }
-                    }
-                });
-            } else if (data.type === 'radar') {
-                projectCharts[key] = new Chart(ctx, {
-                    type: 'radar',
-                    data: {
-                        labels: data.labels,
-                        datasets: data.datasets.map(dataset => ({
-                            ...dataset,
-                            pointBorderColor: isLightTheme ? '#1e293b' : '#fff',
-                            pointHoverBackgroundColor: isLightTheme ? '#1e293b' : '#fff'
-                        }))
-                    },
-                    options: {
-                        ...getDashboardChartOptions(),
-                        scales: {
-                            r: {
-                                beginAtZero: true,
-                                max: 100,
-                                ticks: {
-                                    color: isLightTheme ? '#1e293b' : '#f1f5f9',
-                                    stepSize: 20
-                                },
-                                grid: {
-                                    color: isLightTheme ? '#e2e8f0' : '#334155'
-                                },
-                                pointLabels: {
-                                    color: isLightTheme ? '#1e293b' : '#f1f5f9',
-                                    font: {
-                                        size: 10
-                                    }
-                                },
-                                angleLines: {
-                                    color: isLightTheme ? '#e2e8f0' : '#334155'
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    console.log('Project statistics charts recreated with new theme colors');
-}
 
 function renderProjectDropdown(projectsToRender) {
     const dropdownContent = document.getElementById('projectDropdownContent');
@@ -268,6 +193,9 @@ function loadProjectStatistics(projectId) {
         .then(stats => {
             console.log('Statistics loaded:', stats);
             
+            // Cache the stats data for theme changes
+            projectStatsCache = stats;
+            
             // Reset the button state
             const loadBtn = document.getElementById('loadProjectStatsBtn');
             if (loadBtn) {
@@ -277,62 +205,8 @@ function loadProjectStatistics(projectId) {
             
             document.getElementById('projectStatsContent').style.display = 'block';
             
-            // Render each section with error handling
-            try {
-                renderProjectOverallStats(stats.overall);
-                console.log('Overall stats rendered');
-            } catch (error) {
-                console.error('Error rendering overall stats:', error);
-            }
-            
-            try {
-                renderSuccessRates(stats.overall);
-                console.log('Success rates rendered');
-            } catch (error) {
-                console.error('Error rendering success rates:', error);
-            }
-            
-            try {
-                renderQualityMetrics(stats.overall);
-                console.log('Quality metrics rendered');
-            } catch (error) {
-                console.error('Error rendering quality metrics:', error);
-            }
-            
-            try {
-                renderProjectCharts(stats.charts);
-                console.log('Project charts rendered');
-            } catch (error) {
-                console.error('Error rendering project charts:', error);
-            }
-            
-            try {
-                renderAdditionalCharts(stats.overall);
-                console.log('Additional charts rendered');
-            } catch (error) {
-                console.error('Error rendering additional charts:', error);
-            }
-            
-            try {
-                renderProjectTesters(stats.testers);
-                console.log('Project testers rendered');
-            } catch (error) {
-                console.error('Error rendering project testers:', error);
-            }
-            
-            try {
-                renderProjectReports(stats.reports);
-                console.log('Project reports rendered');
-            } catch (error) {
-                console.error('Error rendering project reports:', error);
-            }
-            
-            try {
-                renderProjectTimeStats(stats.time_stats);
-                console.log('Time stats rendered');
-            } catch (error) {
-                console.error('Error rendering time stats:', error);
-            }
+            // Render all project statistics
+            renderAllProjectStatistics(stats);
         })
         .catch(error => {
             console.error('Error loading project statistics:', error);
@@ -357,6 +231,66 @@ function loadProjectStatistics(projectId) {
                 `;
             }
         });
+}
+
+// Function to render all project statistics sections
+function renderAllProjectStatistics(stats) {
+    // Render each section with error handling
+    try {
+        renderProjectOverallStats(stats.overall);
+        console.log('Overall stats rendered');
+    } catch (error) {
+        console.error('Error rendering overall stats:', error);
+    }
+    
+    try {
+        renderSuccessRates(stats.overall);
+        console.log('Success rates rendered');
+    } catch (error) {
+        console.error('Error rendering success rates:', error);
+    }
+    
+    try {
+        renderQualityMetrics(stats.overall);
+        console.log('Quality metrics rendered');
+    } catch (error) {
+        console.error('Error rendering quality metrics:', error);
+    }
+    
+    try {
+        renderProjectCharts(stats.charts);
+        console.log('Project charts rendered');
+    } catch (error) {
+        console.error('Error rendering project charts:', error);
+    }
+    
+    try {
+        renderAdditionalCharts(stats.overall);
+        console.log('Additional charts rendered');
+    } catch (error) {
+        console.error('Error rendering additional charts:', error);
+    }
+    
+    try {
+        renderProjectTesters(stats.testers);
+        console.log('Project testers rendered');
+    } catch (error) {
+        console.error('Error rendering project testers:', error);
+    }
+    
+    try {
+        renderProjectReports(stats.reports);
+        console.log('Project reports rendered');
+    } catch (error) {
+        console.error('Error rendering project reports:', error);
+    }
+    
+    try {
+        renderProjectTimeStats(stats.time_stats);
+        console.log('Time stats rendered');
+    } catch (error) {
+        console.error('Error rendering time stats:', error);
+    }
 }
 
 function renderProjectOverallStats(overallStats) {

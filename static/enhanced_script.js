@@ -3037,7 +3037,48 @@ function initializeTheme() {
 }
 
 // Initialize theme on page load
-document.addEventListener('DOMContentLoaded', initializeTheme);
+document.addEventListener('DOMContentLoaded', () => {
+    initializeTheme();
+    
+    // Setup MutationObserver to watch for theme attribute changes (fallback)
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                console.log('Create report: Theme attribute changed, recreating charts...');
+                // Trigger chart recreation with same logic as themeChanged event
+                setTimeout(() => {
+                    // Store current chart data before destroying charts
+                    const chartConfigs = [
+                        { chart: userStoriesChart, id: 'userStoriesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
+                        { chart: testCasesChart, id: 'testCasesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
+                        { chart: issuesPriorityChart, id: 'issuesPriorityChart', labels: ['Critical', 'High', 'Medium', 'Low'], colors: ['#dc3545', '#fd7e14', '#ffc107', '#28a745'] },
+                        { chart: issuesStatusChart, id: 'issuesStatusChart', labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'], colors: ['#17a2b8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1'] },
+                        { chart: enhancementsChart, id: 'enhancementsChart', labels: ['New', 'Implemented', 'Exists'], colors: ['#17a2b8', '#28a745', '#6c757d'] }
+                    ];
+                    
+                    // Store data and destroy existing charts
+                    const chartData = {};
+                    chartConfigs.forEach(config => {
+                        if (config.chart && config.chart.data) {
+                            chartData[config.id] = config.chart.data.datasets[0].data;
+                        }
+                        if (config.chart && config.chart.destroy) {
+                            config.chart.destroy();
+                        }
+                    });
+                    
+                    // Recreate charts with new theme colors
+                    recreateFormCharts(chartConfigs, chartData);
+                }, 100);
+            }
+        });
+    });
+    
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+    });
+});
 
 // Listen for theme changes and update chart colors
 window.addEventListener('themeChanged', (event) => {
