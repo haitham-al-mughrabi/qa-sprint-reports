@@ -34,7 +34,7 @@ let weightReasonVisible = false; // Not directly used in this version but kept f
 
 // --- API Communication ---
 const API_URL = '/api/reports';
-const DASHBOARD_API_URL = '/api/dashboard/stats';
+const DASHBOARD_API_URL = '/api/dashboard/stats/cached';
 
 
 
@@ -240,22 +240,24 @@ function renderProjectMetrics(projects) {
                         <p class="portfolio-name">${project.portfolioName}</p>
                     </div>
                 </div>
-                <span class="status-badge status-${getStatusClass(project.testingStatus)}">${getStatusText(project.testingStatus)}</span>
+                <div class="status-badges">
+                    <span class="status-badge status-${getStatusClass(project.testingStatus)}">${getStatusText(project.testingStatus)}</span>
+                    <span class="risk-badge risk-${project.riskLevel?.toLowerCase() || 'low'}">${project.riskLevel || 'Low'} Risk</span>
+                </div>
             </div>
 
+            <!-- Project Summary Stats -->
             <div class="project-summary">
-                <div class="summary-card">
+                <div class="summary-grid">
                     <div class="summary-item">
                         <div class="summary-icon">
                             <i class="fas fa-file-alt"></i>
                         </div>
                         <div class="summary-content">
-                            <span class="summary-value">${project.totalReports}</span>
+                            <span class="summary-value">${project.totalReports || 0}</span>
                             <span class="summary-label">Reports</span>
                         </div>
                     </div>
-                </div>
-                <div class="summary-card">
                     <div class="summary-item">
                         <div class="summary-icon">
                             <i class="fas fa-calendar-alt"></i>
@@ -268,62 +270,276 @@ function renderProjectMetrics(projects) {
                 </div>
             </div>
 
+            <!-- Complete Project Metrics - ALL DATA -->
             <div class="project-metrics">
+                <!-- User Stories - COMPLETE -->
                 <div class="metrics-section">
                     <h4 class="metrics-title">
-                        <i class="fas fa-chart-bar"></i> Testing Metrics
+                        <i class="fas fa-user-check"></i> User Stories (${project.totalUserStories || 0} Total)
                     </h4>
-                    <div class="metrics-grid">
-                        <div class="metric-item">
-                            <div class="metric-icon">
-                                <i class="fas fa-user-check"></i>
+                    <div class="metrics-content">
+                        <div class="complete-breakdown">
+                            <div class="breakdown-grid">
+                                <div class="breakdown-item success">
+                                    <span class="breakdown-label">Passed</span>
+                                    <span class="breakdown-value">${project.passedUserStories || 0}</span>
+                                </div>
+                                <div class="breakdown-item warning">
+                                    <span class="breakdown-label">Passed w/ Issues</span>
+                                    <span class="breakdown-value">${project.passedWithIssuesUserStories || 0}</span>
+                                </div>
+                                <div class="breakdown-item error">
+                                    <span class="breakdown-label">Failed</span>
+                                    <span class="breakdown-value">${project.failedUserStories || 0}</span>
+                                </div>
+                                <div class="breakdown-item blocked">
+                                    <span class="breakdown-label">Blocked</span>
+                                    <span class="breakdown-value">${project.blockedUserStories || 0}</span>
+                                </div>
+                                <div class="breakdown-item cancelled">
+                                    <span class="breakdown-label">Cancelled</span>
+                                    <span class="breakdown-value">${project.cancelledUserStories || 0}</span>
+                                </div>
+                                <div class="breakdown-item deferred">
+                                    <span class="breakdown-label">Deferred</span>
+                                    <span class="breakdown-value">${project.deferredUserStories || 0}</span>
+                                </div>
+                                <div class="breakdown-item not-testable">
+                                    <span class="breakdown-label">Not Testable</span>
+                                    <span class="breakdown-value">${project.notTestableUserStories || 0}</span>
+                                </div>
                             </div>
-                            <div class="metric-content">
-                                <span class="metric-value">${project.totalUserStories}</span>
-                                <span class="metric-label">User Stories</span>
-                            </div>
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-icon">
-                                <i class="fas fa-flask"></i>
-                            </div>
-                            <div class="metric-content">
-                                <span class="metric-value">${project.totalTestCases}</span>
-                                <span class="metric-label">Test Cases</span>
+                            <div class="success-rate">
+                                <span class="rate-label">Success Rate:</span>
+                                <span class="rate-value rate-${getRateClass(project.userStoriesSuccessRate || 0)}">${project.userStoriesSuccessRate || 0}%</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Test Cases - COMPLETE -->
                 <div class="metrics-section">
                     <h4 class="metrics-title">
-                        <i class="fas fa-bug"></i> Quality Metrics
+                        <i class="fas fa-flask"></i> Test Cases (${project.totalTestCases || 0} Total)
                     </h4>
-                    <div class="metrics-grid">
-                        <div class="metric-item">
-                            <div class="metric-icon">
-                                <i class="fas fa-exclamation-triangle"></i>
+                    <div class="metrics-content">
+                        <div class="complete-breakdown">
+                            <div class="breakdown-grid">
+                                <div class="breakdown-item success">
+                                    <span class="breakdown-label">Passed</span>
+                                    <span class="breakdown-value">${project.passedTestCases || 0}</span>
+                                </div>
+                                <div class="breakdown-item warning">
+                                    <span class="breakdown-label">Passed w/ Issues</span>
+                                    <span class="breakdown-value">${project.passedWithIssuesTestCases || 0}</span>
+                                </div>
+                                <div class="breakdown-item error">
+                                    <span class="breakdown-label">Failed</span>
+                                    <span class="breakdown-value">${project.failedTestCases || 0}</span>
+                                </div>
+                                <div class="breakdown-item blocked">
+                                    <span class="breakdown-label">Blocked</span>
+                                    <span class="breakdown-value">${project.blockedTestCases || 0}</span>
+                                </div>
+                                <div class="breakdown-item cancelled">
+                                    <span class="breakdown-label">Cancelled</span>
+                                    <span class="breakdown-value">${project.cancelledTestCases || 0}</span>
+                                </div>
+                                <div class="breakdown-item deferred">
+                                    <span class="breakdown-label">Deferred</span>
+                                    <span class="breakdown-value">${project.deferredTestCases || 0}</span>
+                                </div>
+                                <div class="breakdown-item not-testable">
+                                    <span class="breakdown-label">Not Testable</span>
+                                    <span class="breakdown-value">${project.notTestableTestCases || 0}</span>
+                                </div>
                             </div>
-                            <div class="metric-content">
-                                <span class="metric-value">${project.totalIssues}</span>
-                                <span class="metric-label">Issues</span>
-                            </div>
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-icon">
-                                <i class="fas fa-magic"></i>
-                            </div>
-                            <div class="metric-content">
-                                <span class="metric-value">${project.totalEnhancements}</span>
-                                <span class="metric-label">Enhancements</span>
+                            <div class="success-rate">
+                                <span class="rate-label">Success Rate:</span>
+                                <span class="rate-value rate-${getRateClass(project.testCasesSuccessRate || 0)}">${project.testCasesSuccessRate || 0}%</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Issues - COMPLETE BY PRIORITY & STATUS -->
+                <div class="metrics-section">
+                    <h4 class="metrics-title">
+                        <i class="fas fa-bug"></i> Issues (${project.totalIssues || 0} Total)
+                    </h4>
+                    <div class="metrics-content">
+                        <div class="issues-breakdown">
+                            <div class="issues-section">
+                                <h5 class="breakdown-title">By Priority</h5>
+                                <div class="breakdown-grid priority-grid">
+                                    <div class="breakdown-item critical">
+                                        <span class="breakdown-label">Critical</span>
+                                        <span class="breakdown-value">${project.criticalIssues || 0}</span>
+                                    </div>
+                                    <div class="breakdown-item high-priority">
+                                        <span class="breakdown-label">High</span>
+                                        <span class="breakdown-value">${project.highIssues || 0}</span>
+                                    </div>
+                                    <div class="breakdown-item medium">
+                                        <span class="breakdown-label">Medium</span>
+                                        <span class="breakdown-value">${project.mediumIssues || 0}</span>
+                                    </div>
+                                    <div class="breakdown-item low">
+                                        <span class="breakdown-label">Low</span>
+                                        <span class="breakdown-value">${project.lowIssues || 0}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="issues-section">
+                                <h5 class="breakdown-title">By Status</h5>
+                                <div class="breakdown-grid status-grid">
+                                    <div class="breakdown-item new">
+                                        <span class="breakdown-label">New</span>
+                                        <span class="breakdown-value">${project.newIssues || 0}</span>
+                                    </div>
+                                    <div class="breakdown-item success">
+                                        <span class="breakdown-label">Fixed</span>
+                                        <span class="breakdown-value">${project.fixedIssues || 0}</span>
+                                    </div>
+                                    <div class="breakdown-item error">
+                                        <span class="breakdown-label">Not Fixed</span>
+                                        <span class="breakdown-value">${project.notFixedIssues || 0}</span>
+                                    </div>
+                                    <div class="breakdown-item reopened">
+                                        <span class="breakdown-label">Reopened</span>
+                                        <span class="breakdown-value">${project.reopenedIssues || 0}</span>
+                                    </div>
+                                    <div class="breakdown-item deferred">
+                                        <span class="breakdown-label">Deferred</span>
+                                        <span class="breakdown-value">${project.deferredIssues || 0}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="success-rate">
+                                <span class="rate-label">Resolution Rate:</span>
+                                <span class="rate-value rate-${getRateClass(project.issuesResolutionRate || 0)}">${project.issuesResolutionRate || 0}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhancements - COMPLETE -->
+                ${(project.totalEnhancements || 0) > 0 ? `
+                <div class="metrics-section">
+                    <h4 class="metrics-title">
+                        <i class="fas fa-magic"></i> Enhancements (${project.totalEnhancements || 0} Total)
+                    </h4>
+                    <div class="metrics-content">
+                        <div class="complete-breakdown">
+                            <div class="breakdown-grid">
+                                <div class="breakdown-item new">
+                                    <span class="breakdown-label">New</span>
+                                    <span class="breakdown-value">${project.newEnhancements || 0}</span>
+                                </div>
+                                <div class="breakdown-item success">
+                                    <span class="breakdown-label">Implemented</span>
+                                    <span class="breakdown-value">${project.implementedEnhancements || 0}</span>
+                                </div>
+                                <div class="breakdown-item exists">
+                                    <span class="breakdown-label">Already Exists</span>
+                                    <span class="breakdown-value">${project.existsEnhancements || 0}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Automation - COMPLETE -->
+                ${(project.automationTotalTests || 0) > 0 ? `
+                <div class="metrics-section">
+                    <h4 class="metrics-title">
+                        <i class="fas fa-robot"></i> Automation (${project.automationTotalTests || 0} Total Tests)
+                    </h4>
+                    <div class="metrics-content">
+                        <div class="automation-breakdown">
+                            <div class="automation-section">
+                                <h5 class="breakdown-title">Test Results</h5>
+                                <div class="breakdown-grid">
+                                    <div class="breakdown-item success">
+                                        <span class="breakdown-label">Passed</span>
+                                        <span class="breakdown-value">${project.automationPassedTests || 0}</span>
+                                    </div>
+                                    <div class="breakdown-item error">
+                                        <span class="breakdown-label">Failed</span>
+                                        <span class="breakdown-value">${project.automationFailedTests || 0}</span>
+                                    </div>
+                                    <div class="breakdown-item warning">
+                                        <span class="breakdown-label">Skipped</span>
+                                        <span class="breakdown-value">${project.automationSkippedTests || 0}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="automation-section">
+                                <h5 class="breakdown-title">Test Stability</h5>
+                                <div class="breakdown-grid">
+                                    <div class="breakdown-item success">
+                                        <span class="breakdown-label">Stable</span>
+                                        <span class="breakdown-value">${project.automationStableTests || 0}</span>
+                                    </div>
+                                    <div class="breakdown-item flaky">
+                                        <span class="breakdown-label">Flaky</span>
+                                        <span class="breakdown-value">${project.automationFlakyTests || 0}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="success-rate">
+                                <span class="rate-label">Pass Rate:</span>
+                                <span class="rate-value rate-${getRateClass(project.automationPassRate || 0)}">${project.automationPassRate || 0}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Evaluation Scores - DISABLED (fields don't exist in data model) -->
+                ${false && (project.avgEvaluationScore > 0 || project.avgProjectEvaluationScore > 0) ? `
+                <div class="metrics-section">
+                    <h4 class="metrics-title">
+                        <i class="fas fa-star"></i> Evaluation Scores
+                    </h4>
+                    <div class="metrics-content">
+                        <div class="evaluation-breakdown">
+                            ${project.avgEvaluationScore > 0 ? `
+                            <div class="evaluation-item">
+                                <span class="evaluation-label">Average Evaluation Score</span>
+                                <span class="evaluation-value">${project.avgEvaluationScore}</span>
+                            </div>
+                            ` : ''}
+                            ${project.avgProjectEvaluationScore > 0 ? `
+                            <div class="evaluation-item">
+                                <span class="evaluation-label">Average Project Score</span>
+                                <span class="evaluation-value">${project.avgProjectEvaluationScore}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
             </div>
         </div>
     `).join('');
+}
+
+// Helper function for progress bar colors
+function getProgressBarColor(percentage) {
+    if (percentage >= 80) return '#4CAF50'; // Green
+    if (percentage >= 60) return '#FF9800'; // Orange
+    if (percentage >= 40) return '#FFC107'; // Yellow
+    return '#F44336'; // Red
+}
+
+// Helper function for rate class determination
+function getRateClass(percentage) {
+    if (percentage >= 80) return 'excellent';
+    if (percentage >= 60) return 'good';
+    if (percentage >= 40) return 'fair';
+    return 'poor';
 }
 
 async function exportDashboardReport() {

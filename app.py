@@ -1468,6 +1468,7 @@ def get_portfolio_projects_detailed(portfolio_id):
 @app.route('/api/dashboard/stats/cached', methods=['GET'])
 def get_cached_dashboard_stats():
     """Get dashboard statistics from cache tables"""
+    from sqlalchemy import func
     try:
         # Try to get from cache first
         dashboard_stats = DashboardStats.query.first()
@@ -1479,6 +1480,14 @@ def get_cached_dashboard_stats():
         # Get project stats from cache
         project_stats = ProjectStats.query.all()
         
+        # Calculate automation totals across all projects for overall stats
+        automation_totals = db.session.query(
+            func.sum(Report.automationTotalTestCases).label('total_automation'),
+            func.sum(Report.automationPassedTestCases).label('passed_automation'),
+            func.sum(Report.automationFailedTestCases).label('failed_automation'),
+            func.sum(Report.automationSkippedTestCases).label('skipped_automation')
+        ).first()
+        
         overall_stats = {
             'totalReports': dashboard_stats.total_reports,
             'completedReports': dashboard_stats.completed_reports,
@@ -1487,20 +1496,216 @@ def get_cached_dashboard_stats():
             'totalUserStories': dashboard_stats.total_user_stories,
             'totalTestCases': dashboard_stats.total_test_cases,
             'totalIssues': dashboard_stats.total_issues,
-            'totalEnhancements': dashboard_stats.total_enhancements        }
+            'totalEnhancements': dashboard_stats.total_enhancements,
+            # Add automation metrics to overall stats
+            'automationTotalTestCases': automation_totals.total_automation or 0,
+            'automationPassedTestCases': automation_totals.passed_automation or 0,
+            'automationFailedTestCases': automation_totals.failed_automation or 0,
+            'automationSkippedTestCases': automation_totals.skipped_automation or 0
+        }
         
         projects_data = []
         for ps in project_stats:
+            # Get ALL detailed breakdown data for this project from the database
+            detailed_stats = db.session.query(
+                # User Stories - ALL fields
+                func.sum(Report.passedUserStories).label('passed_user_stories'),
+                func.sum(Report.passedWithIssuesUserStories).label('passed_with_issues_user_stories'),
+                func.sum(Report.failedUserStories).label('failed_user_stories'),
+                func.sum(Report.blockedUserStories).label('blocked_user_stories'),
+                func.sum(Report.cancelledUserStories).label('cancelled_user_stories'),
+                func.sum(Report.deferredUserStories).label('deferred_user_stories'),
+                func.sum(Report.notTestableUserStories).label('not_testable_user_stories'),
+                
+                # Test Cases - ALL fields
+                func.sum(Report.passedTestCases).label('passed_test_cases'),
+                func.sum(Report.passedWithIssuesTestCases).label('passed_with_issues_test_cases'),
+                func.sum(Report.failedTestCases).label('failed_test_cases'),
+                func.sum(Report.blockedTestCases).label('blocked_test_cases'),
+                func.sum(Report.cancelledTestCases).label('cancelled_test_cases'),
+                func.sum(Report.deferredTestCases).label('deferred_test_cases'),
+                func.sum(Report.notTestableTestCases).label('not_testable_test_cases'),
+                
+                # Issues - ALL Priority fields
+                func.sum(Report.criticalIssues).label('critical_issues'),
+                func.sum(Report.highIssues).label('high_issues'),
+                func.sum(Report.mediumIssues).label('medium_issues'),
+                func.sum(Report.lowIssues).label('low_issues'),
+                
+                # Issues - ALL Status fields
+                func.sum(Report.newIssues).label('new_issues'),
+                func.sum(Report.fixedIssues).label('fixed_issues'),
+                func.sum(Report.notFixedIssues).label('not_fixed_issues'),
+                func.sum(Report.reopenedIssues).label('reopened_issues'),
+                func.sum(Report.deferredIssues).label('deferred_issues'),
+                
+                # Enhancements - ALL fields
+                func.sum(Report.newEnhancements).label('new_enhancements'),
+                func.sum(Report.implementedEnhancements).label('implemented_enhancements'),
+                func.sum(Report.existsEnhancements).label('exists_enhancements'),
+                
+                # Automation - ALL fields
+                func.sum(Report.automationTotalTestCases).label('automation_total'),
+                func.sum(Report.automationPassedTestCases).label('automation_passed'),
+                func.sum(Report.automationFailedTestCases).label('automation_failed'),
+                func.sum(Report.automationSkippedTestCases).label('automation_skipped'),
+                func.sum(Report.automationStableTests).label('automation_stable'),
+                func.sum(Report.automationFlakyTests).label('automation_flaky')
+            ).filter(
+                Report.portfolioName == ps.portfolio_name,
+                Report.projectName == ps.project_name
+            ).first()
+            
+            # Use cached totals from ProjectStats (these are correct) but get ALL breakdowns from detailed query
+            total_user_stories = ps.total_user_stories or 0
+            total_test_cases = ps.total_test_cases or 0  
+            total_issues = ps.total_issues or 0
+            total_enhancements = ps.total_enhancements or 0
+            
+            # Extract ALL data from detailed query
+            if detailed_stats:
+                # User Stories - ALL statuses
+                passed_user_stories = detailed_stats.passed_user_stories or 0
+                passed_with_issues_user_stories = detailed_stats.passed_with_issues_user_stories or 0
+                failed_user_stories = detailed_stats.failed_user_stories or 0
+                blocked_user_stories = detailed_stats.blocked_user_stories or 0
+                cancelled_user_stories = detailed_stats.cancelled_user_stories or 0
+                deferred_user_stories = detailed_stats.deferred_user_stories or 0
+                not_testable_user_stories = detailed_stats.not_testable_user_stories or 0
+                
+                # Test Cases - ALL statuses
+                passed_test_cases = detailed_stats.passed_test_cases or 0
+                passed_with_issues_test_cases = detailed_stats.passed_with_issues_test_cases or 0
+                failed_test_cases = detailed_stats.failed_test_cases or 0
+                blocked_test_cases = detailed_stats.blocked_test_cases or 0
+                cancelled_test_cases = detailed_stats.cancelled_test_cases or 0
+                deferred_test_cases = detailed_stats.deferred_test_cases or 0
+                not_testable_test_cases = detailed_stats.not_testable_test_cases or 0
+                
+                # Issues - ALL priorities
+                critical_issues = detailed_stats.critical_issues or 0
+                high_issues = detailed_stats.high_issues or 0
+                medium_issues = detailed_stats.medium_issues or 0
+                low_issues = detailed_stats.low_issues or 0
+                
+                # Issues - ALL statuses
+                new_issues = detailed_stats.new_issues or 0
+                fixed_issues = detailed_stats.fixed_issues or 0
+                not_fixed_issues = detailed_stats.not_fixed_issues or 0
+                reopened_issues = detailed_stats.reopened_issues or 0
+                deferred_issues = detailed_stats.deferred_issues or 0
+                
+                # Enhancements - ALL statuses
+                new_enhancements = detailed_stats.new_enhancements or 0
+                implemented_enhancements = detailed_stats.implemented_enhancements or 0
+                exists_enhancements = detailed_stats.exists_enhancements or 0
+                
+                # Automation - ALL fields
+                automation_total = detailed_stats.automation_total or 0
+                automation_passed = detailed_stats.automation_passed or 0
+                automation_failed = detailed_stats.automation_failed or 0
+                automation_skipped = detailed_stats.automation_skipped or 0
+                automation_stable = detailed_stats.automation_stable or 0
+                automation_flaky = detailed_stats.automation_flaky or 0
+            else:
+                # Set all to 0 if no detailed stats
+                passed_user_stories = passed_with_issues_user_stories = failed_user_stories = 0
+                blocked_user_stories = cancelled_user_stories = deferred_user_stories = not_testable_user_stories = 0
+                passed_test_cases = passed_with_issues_test_cases = failed_test_cases = 0
+                blocked_test_cases = cancelled_test_cases = deferred_test_cases = not_testable_test_cases = 0
+                critical_issues = high_issues = medium_issues = low_issues = 0
+                new_issues = fixed_issues = not_fixed_issues = reopened_issues = deferred_issues = 0
+                new_enhancements = implemented_enhancements = exists_enhancements = 0
+                automation_total = automation_passed = automation_failed = automation_skipped = 0
+                automation_stable = automation_flaky = 0
+            
+            # Calculate success rates
+            user_stories_success_rate = 0
+            if total_user_stories > 0:
+                successful_user_stories = passed_user_stories + passed_with_issues_user_stories
+                user_stories_success_rate = round((successful_user_stories / total_user_stories) * 100, 1)
+            
+            test_cases_success_rate = 0
+            if total_test_cases > 0:
+                successful_test_cases = passed_test_cases + passed_with_issues_test_cases
+                test_cases_success_rate = round((successful_test_cases / total_test_cases) * 100, 1)
+            
+            issues_resolution_rate = 0
+            if total_issues > 0:
+                issues_resolution_rate = round((fixed_issues / total_issues) * 100, 1)
+            
+            automation_pass_rate = 0
+            if automation_total > 0:
+                automation_pass_rate = round((automation_passed / automation_total) * 100, 1)
+            
+            # Determine risk level
+            risk_level = 'Low'
+            if critical_issues > 0:
+                risk_level = 'High'
+            elif high_issues > 0:
+                risk_level = 'Medium'
+            
             projects_data.append({
                 'portfolioName': ps.portfolio_name,
                 'projectName': ps.project_name,
                 'totalReports': ps.total_reports,
-                'totalUserStories': ps.total_user_stories,
-                'totalTestCases': ps.total_test_cases,
-                'totalIssues': ps.total_issues,
-                'totalEnhancements': ps.total_enhancements,
                 'lastReportDate': ps.last_report_date,
-                'testingStatus': ps.latest_testing_status
+                'testingStatus': ps.latest_testing_status,
+                'riskLevel': risk_level,
+                
+                # TOTALS - Main counts
+                'totalUserStories': total_user_stories,
+                'totalTestCases': total_test_cases,
+                'totalIssues': total_issues,
+                'totalEnhancements': total_enhancements,
+                
+                # USER STORIES - Complete breakdown
+                'passedUserStories': passed_user_stories,
+                'passedWithIssuesUserStories': passed_with_issues_user_stories,
+                'failedUserStories': failed_user_stories,
+                'blockedUserStories': blocked_user_stories,
+                'cancelledUserStories': cancelled_user_stories,
+                'deferredUserStories': deferred_user_stories,
+                'notTestableUserStories': not_testable_user_stories,
+                'userStoriesSuccessRate': user_stories_success_rate,
+                
+                # TEST CASES - Complete breakdown
+                'passedTestCases': passed_test_cases,
+                'passedWithIssuesTestCases': passed_with_issues_test_cases,
+                'failedTestCases': failed_test_cases,
+                'blockedTestCases': blocked_test_cases,
+                'cancelledTestCases': cancelled_test_cases,
+                'deferredTestCases': deferred_test_cases,
+                'notTestableTestCases': not_testable_test_cases,
+                'testCasesSuccessRate': test_cases_success_rate,
+                
+                # ISSUES - By Priority
+                'criticalIssues': critical_issues,
+                'highIssues': high_issues,
+                'mediumIssues': medium_issues,
+                'lowIssues': low_issues,
+                
+                # ISSUES - By Status
+                'newIssues': new_issues,
+                'fixedIssues': fixed_issues,
+                'notFixedIssues': not_fixed_issues,
+                'reopenedIssues': reopened_issues,
+                'deferredIssues': deferred_issues,
+                'issuesResolutionRate': issues_resolution_rate,
+                
+                # ENHANCEMENTS - Complete breakdown
+                'newEnhancements': new_enhancements,
+                'implementedEnhancements': implemented_enhancements,
+                'existsEnhancements': exists_enhancements,
+                
+                # AUTOMATION - Complete breakdown
+                'automationTotalTests': automation_total,
+                'automationPassedTests': automation_passed,
+                'automationFailedTests': automation_failed,
+                'automationSkippedTests': automation_skipped,
+                'automationStableTests': automation_stable,
+                'automationFlakyTests': automation_flaky,
+                'automationPassRate': automation_pass_rate
             })
         
         return jsonify({

@@ -712,6 +712,425 @@ p {
     margin-bottom: 25px;
 }
 
+/* Status badges */
+.status-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.risk-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.risk-badge.risk-low {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.risk-badge.risk-medium {
+    background: rgba(255, 152, 0, 0.2);
+    color: #FF9800;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.risk-badge.risk-high {
+    background: rgba(244, 67, 54, 0.2);
+    color: #F44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Quality Score Card */
+.quality-score-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(79, 172, 254, 0.1);
+    border: 1px solid rgba(79, 172, 254, 0.2);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.score-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.score-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.score-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.score-breakdown {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--surface);
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--border);
+}
+
+.breakdown-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.breakdown-value {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* Summary Stats */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+}
+
+.summary-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.summary-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    flex-shrink: 0;
+}
+
+.summary-icon.quality-icon {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+}
+
+.summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.summary-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.summary-value.quality-score {
+    color: #FFD700;
+}
+
+.summary-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Enhanced Metric Content */
+.metric-rate {
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.metric-rate.success-rate {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+}
+
+.metric-rate.resolution-rate {
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196F3;
+}
+
+.metric-rate.high-risk {
+    background: rgba(244, 67, 54, 0.2);
+    color: #F44336;
+}
+
+.metric-rate.medium-risk {
+    background: rgba(255, 152, 0, 0.2);
+    color: #FF9800;
+}
+
+.metric-rate.low-risk {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+}
+
+.metric-rate.enhancement-rate {
+    background: rgba(156, 39, 176, 0.2);
+    color: #9C27B0;
+}
+
+/* Critical and High Priority Styling */
+.metric-value.critical {
+    color: #F44336;
+    font-weight: 700;
+}
+
+.metric-value.high-priority {
+    color: #FF9800;
+    font-weight: 700;
+}
+
+.metric-icon.critical-icon {
+    background: linear-gradient(135deg, #F44336, #E91E63);
+}
+
+.metric-icon.high-priority-icon {
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+}
+
+/* Performance Indicators */
+.performance-indicators {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+}
+
+.indicators-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.indicator-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.indicator-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.indicator-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.indicator-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Restructured Metrics Content */
+.metrics-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    background: var(--surface);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+}
+
+.metric-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.metric-total {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.metric-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: var(--surface);
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--border);
+}
+
+.breakdown-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.breakdown-value {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.breakdown-value.success {
+    color: #4CAF50;
+}
+
+.breakdown-value.warning {
+    color: #FF9800;
+}
+
+.breakdown-value.error {
+    color: #F44336;
+}
+
+.breakdown-value.critical {
+    color: #F44336;
+    font-weight: 700;
+}
+
+.breakdown-value.high-priority {
+    color: #FF9800;
+    font-weight: 700;
+}
+
+.metric-rate {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: var(--surface);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+}
+
+.rate-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.rate-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.rate-value.rate-excellent {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.rate-value.rate-good {
+    background: rgba(139, 195, 74, 0.2);
+    color: #8BC34A;
+    border: 1px solid rgba(139, 195, 74, 0.3);
+}
+
+.rate-value.rate-fair {
+    background: rgba(255, 152, 0, 0.2);
+    color: #FF9800;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.rate-value.rate-poor {
+    background: rgba(244, 67, 54, 0.2);
+    color: #F44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Responsive adjustments for new layout */
+@media (max-width: 768px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .summary-item {
+        padding: 12px;
+    }
+    
+    .summary-value {
+        font-size: 1.2rem;
+    }
+    
+    .metric-total {
+        font-size: 1.6rem;
+    }
+    
+    .breakdown-row {
+        padding: 4px 8px;
+    }
+    
+    .metric-rate {
+        padding: 8px 12px;
+    }
+}
+
 .project-title-section {
     display: flex;
     align-items: center;
@@ -2182,5 +2601,483 @@ p {
 @media (max-width: 480px) {
     .metrics-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Comprehensive Project Metrics Styling */
+.metrics-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.metrics-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.metrics-title i {
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.breakdown-item:hover {
+    background: rgba(var(--primary-rgb), 0.1);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.breakdown-item.success .breakdown-value {
+    color: var(--success);
+    font-weight: 700;
+}
+
+.breakdown-item.warning .breakdown-value {
+    color: var(--warning);
+    font-weight: 700;
+}
+
+.breakdown-item.error .breakdown-value {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.breakdown-item.critical .breakdown-value {
+    color: var(--danger);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.breakdown-item.high-priority .breakdown-value {
+    color: var(--warning);
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.breakdown-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.breakdown-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+/* Automation Section Styling */
+.automation-section {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.05));
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.automation-section .metrics-title {
+    color: #8b5cf6;
+    border-bottom-color: rgba(139, 92, 246, 0.3);
+}
+
+.automation-section .breakdown-item {
+    background: rgba(139, 92, 246, 0.05);
+    border-color: rgba(139, 92, 246, 0.2);
+}
+
+.automation-section .breakdown-item:hover {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: #8b5cf6;
+}
+
+/* Evaluation Scores Styling */
+.evaluation-section {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05));
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.evaluation-section .metrics-title {
+    color: var(--success);
+    border-bottom-color: rgba(34, 197, 94, 0.3);
+}
+
+.evaluation-section .breakdown-item {
+    background: rgba(34, 197, 94, 0.05);
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+.evaluation-section .breakdown-item:hover {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: var(--success);
+}
+
+.score-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--success);
+}
+
+/* Light theme adjustments for comprehensive metrics */
+[data-theme="light"] .metrics-section {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: var(--border);
+}
+
+[data-theme="light"] .breakdown-item {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] .breakdown-item:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--primary);
+}
+
+[data-theme="light"] .automation-section {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(59, 130, 246, 0.02));
+    border-color: rgba(139, 92, 246, 0.15);
+}
+
+[data-theme="light"] .automation-section .breakdown-item {
+    background: rgba(139, 92, 246, 0.03);
+    border-color: rgba(139, 92, 246, 0.15);
+}
+
+[data-theme="light"] .evaluation-section {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(16, 185, 129, 0.02));
+    border-color: rgba(34, 197, 94, 0.15);
+}
+
+[data-theme="light"] .evaluation-section .breakdown-item {
+    background: rgba(34, 197, 94, 0.03);
+    border-color: rgba(34, 197, 94, 0.15);
+}
+
+/* Responsive adjustments for comprehensive metrics */
+@media (max-width: 768px) {
+    .breakdown-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .metrics-section {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .breakdown-item {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .breakdown-label {
+        font-size: 0.8rem;
+    }
+    
+    .breakdown-value {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .breakdown-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .metrics-title {
+        font-size: 1rem;
+    }
+    
+    .automation-section,
+    .evaluation-section {
+        padding: 1rem;
+    }
+}
+
+/* Complete Breakdown Styling for Project Cards */
+.complete-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.success-rate {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: rgba(var(--primary-rgb), 0.1);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
+    margin-top: 0.5rem;
+}
+
+.rate-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.rate-value {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.rate-value.rate-excellent {
+    color: var(--success);
+}
+
+.rate-value.rate-good {
+    color: #10b981;
+}
+
+.rate-value.rate-fair {
+    color: var(--warning);
+}
+
+.rate-value.rate-poor {
+    color: var(--danger);
+}
+
+/* Automation Breakdown Styling */
+.automation-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.automation-section {
+    background: rgba(139, 92, 246, 0.05);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+}
+
+.breakdown-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.breakdown-item.flaky .breakdown-value {
+    color: #e91e63;
+    font-weight: 700;
+}
+
+/* Evaluation Breakdown Styling */
+.evaluation-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.evaluation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: rgba(34, 197, 94, 0.05);
+    border: 1px solid rgba(34, 197, 94, 0.15);
+    border-radius: var(--border-radius);
+}
+
+.evaluation-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.evaluation-value {
+    font-weight: 700;
+    color: var(--success);
+    font-size: 1.1rem;
+}
+
+/* Priority and Status Breakdown */
+.priority-status-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.priority-breakdown,
+.status-breakdown {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+}
+
+.priority-breakdown h5,
+.status-breakdown h5 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.breakdown-item.critical .breakdown-value {
+    color: var(--danger);
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.breakdown-item.high-priority .breakdown-value {
+    color: #ff6b35;
+    font-weight: 700;
+}
+
+.breakdown-item.medium .breakdown-value {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+.breakdown-item.low .breakdown-value {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.breakdown-item.new .breakdown-value {
+    color: #06b6d4;
+    font-weight: 600;
+}
+
+.breakdown-item.fixed .breakdown-value {
+    color: var(--success);
+    font-weight: 700;
+}
+
+.breakdown-item.not-fixed .breakdown-value {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.breakdown-item.reopened .breakdown-value {
+    color: #f59e0b;
+    font-weight: 700;
+}
+
+.breakdown-item.deferred .breakdown-value {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+/* Enhancement Breakdown */
+.enhancement-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.breakdown-item.implemented .breakdown-value {
+    color: var(--success);
+    font-weight: 700;
+}
+
+.breakdown-item.exists .breakdown-value {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+/* Light theme adjustments for project card breakdowns */
+[data-theme="light"] .complete-breakdown {
+    background: transparent;
+}
+
+[data-theme="light"] .success-rate {
+    background: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.15);
+}
+
+[data-theme="light"] .automation-section {
+    background: rgba(139, 92, 246, 0.03);
+    border-color: rgba(139, 92, 246, 0.1);
+}
+
+[data-theme="light"] .evaluation-item {
+    background: rgba(34, 197, 94, 0.03);
+    border-color: rgba(34, 197, 94, 0.1);
+}
+
+[data-theme="light"] .priority-breakdown,
+[data-theme="light"] .status-breakdown {
+    background: rgba(0, 0, 0, 0.01);
+    border-color: #e5e7eb;
+}
+
+/* Responsive adjustments for project card breakdowns */
+@media (max-width: 768px) {
+    .priority-status-breakdown {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .automation-breakdown {
+        gap: 1rem;
+    }
+    
+    .automation-section {
+        padding: 0.75rem;
+    }
+    
+    .evaluation-item {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .success-rate {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .complete-breakdown {
+        gap: 0.75rem;
+    }
+    
+    .evaluation-breakdown {
+        gap: 0.5rem;
+    }
+    
+    .rate-value {
+        font-size: 0.9rem;
+    }
+    
+    .evaluation-value {
+        font-size: 1rem;
     }
 }

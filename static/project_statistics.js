@@ -758,9 +758,9 @@ function renderAdditionalCharts(overallStats) {
                 labels: ['Passed', 'Failed', 'Skipped'],
                 datasets: [{
                     data: [
-                        stats.overall.automationPassedTestCases || 0,
-                        stats.overall.automationFailedTestCases || 0,
-                        stats.overall.automationSkippedTestCases || 0
+                        overallStats.automationPassedTestCases || 0,
+                        overallStats.automationFailedTestCases || 0,
+                        overallStats.automationSkippedTestCases || 0
                     ],
                     backgroundColor: ['#4CAF50', '#F44336', '#FF9800'],
                     borderWidth: 3,
@@ -817,8 +817,8 @@ function renderAdditionalCharts(overallStats) {
                 labels: ['Stable', 'Flaky'],
                 datasets: [{
                     data: [
-                        stats.overall.automationStableTests || 0,
-                        stats.overall.automationFlakyTests || 0
+                        overallStats.automationStableTests || 0,
+                        overallStats.automationFlakyTests || 0
                     ],
                     backgroundColor: ['#4CAF50', '#E91E63'],
                     borderWidth: 3,
