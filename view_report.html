@@ -157,7 +157,7 @@
                     <div class="chart-section card">
                         <h3 class="chart-title">Issues by Priority Chart</h3>
                         <div class="chart-container">
-                            <canvas id="issuesPriorityViewChart" width="400" height="300"></canvas>
+                            <canvas id="issuesPriorityViewChart" width="300" height="300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -174,7 +174,7 @@
                     <div class="chart-section card">
                         <h3 class="chart-title">Issues by Status Chart</h3>
                         <div class="chart-container">
-                            <canvas id="issuesStatusViewChart" width="400" height="300"></canvas>
+                            <canvas id="issuesStatusViewChart" width="300" height="300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -191,7 +191,7 @@
                     <div class="chart-section card">
                         <h3 class="chart-title">Enhancements Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="enhancementsViewChart" width="400" height="300"></canvas>
+                            <canvas id="enhancementsViewChart" width="300" height="300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -358,6 +358,9 @@
         }
 
         function renderReportView(report) {
+            // Determine current theme
+            const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
+
             // Update header
             document.getElementById('reportTitle').textContent = `${report.portfolioName} - Sprint ${report.sprintNumber}`;
             document.getElementById('reportSubtitle').textContent = `${report.projectName} | Version ${report.reportVersion} | ${formatDate(report.reportDate)}`;
@@ -372,11 +375,11 @@
             renderMetricsOverview(report);
             
             // Render charts and tables
-            renderUserStoriesView(report);
-            renderTestCasesView(report);
-            renderIssuesView(report); // This function now handles both priority and status
-            renderEnhancementsView(report);
-            renderAutomationRegressionView(report);
+            renderUserStoriesView(report, isLightMode);
+            renderTestCasesView(report, isLightMode);
+            renderIssuesView(report, isLightMode); // This function now handles both priority and status
+            renderEnhancementsView(report, isLightMode);
+            renderAutomationRegressionView(report, isLightMode);
             
             // Render additional sections
             renderAdditionalInfo(report);
@@ -455,7 +458,7 @@
             `;
         }
 
-        function renderUserStoriesView(report) {
+        function renderUserStoriesView(report, isLightMode) {
             const table = document.getElementById('userStoriesViewTable');
             const total = report.totalUserStories || 0;
             
@@ -542,11 +545,11 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
-        function renderTestCasesView(report) {
+        function renderTestCasesView(report, isLightMode) {
             const table = document.getElementById('testCasesViewTable');
             const total = report.totalTestCases || 0;
             
@@ -633,11 +636,11 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
-        function renderIssuesView(report) {
+        function renderIssuesView(report, isLightMode) {
             const priorityTable = document.getElementById('issuesPriorityViewTable');
             const statusTable = document.getElementById('issuesStatusViewTable');
             const total = report.totalIssues || 0;
@@ -743,7 +746,7 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
 
             // Status chart with more vibrant colors
@@ -773,11 +776,11 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
-        function renderEnhancementsView(report) {
+        function renderEnhancementsView(report, isLightMode) {
             const table = document.getElementById('enhancementsViewTable');
             const total = report.totalEnhancements || 0;
             
@@ -836,11 +839,11 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
-        function renderAutomationRegressionView(report) {
+        function renderAutomationRegressionView(report, isLightMode) {
             // Render Test Cases Table
             const testCasesTable = document.getElementById('automationTestCasesViewTable');
             const total = report.automationTotalTestCases || 0;
@@ -900,7 +903,7 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
 
             // Render Stability Table
@@ -955,7 +958,7 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
@@ -963,6 +966,8 @@
         function updateChartsForTheme() {
             if (!currentReport) return;
             
+            const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
+
             // Destroy existing charts
             Object.values(viewCharts).forEach(chart => {
                 if (chart && chart.destroy) {
@@ -974,17 +979,17 @@
             viewCharts = {};
             
             // Recreate only the charts (not tables) with new theme colors
-            renderUserStoriesChart(currentReport);
-            renderTestCasesChart(currentReport);
-            renderIssuesPriorityChart(currentReport);
-            renderIssuesStatusChart(currentReport);
-            renderEnhancementsChart(currentReport);
-            renderAutomationTestCasesChart(currentReport);
-            renderAutomationStabilityChart(currentReport);
+            renderUserStoriesChart(currentReport, isLightMode);
+            renderTestCasesChart(currentReport, isLightMode);
+            renderIssuesPriorityChart(currentReport, isLightMode);
+            renderIssuesStatusChart(currentReport, isLightMode);
+            renderEnhancementsChart(currentReport, isLightMode);
+            renderAutomationTestCasesChart(currentReport, isLightMode);
+            renderAutomationStabilityChart(currentReport, isLightMode);
         }
 
         // Individual chart rendering functions for theme updates
-        function renderUserStoriesChart(report) {
+        function renderUserStoriesChart(report, isLightMode) {
             const ctx = document.getElementById('userStoriesViewChart').getContext('2d');
             if (viewCharts.userStories) viewCharts.userStories.destroy();
             
@@ -1010,11 +1015,11 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
-        function renderTestCasesChart(report) {
+        function renderTestCasesChart(report, isLightMode) {
             const ctx = document.getElementById('testCasesViewChart').getContext('2d');
             if (viewCharts.testCases) viewCharts.testCases.destroy();
             
@@ -1040,11 +1045,11 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
-        function renderIssuesPriorityChart(report) {
+        function renderIssuesPriorityChart(report, isLightMode) {
             const priorityCtx = document.getElementById('issuesPriorityViewChart').getContext('2d');
             if (viewCharts.issuesPriority) viewCharts.issuesPriority.destroy();
             
@@ -1066,11 +1071,11 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
-        function renderIssuesStatusChart(report) {
+        function renderIssuesStatusChart(report, isLightMode) {
             const statusCtx = document.getElementById('issuesStatusViewChart').getContext('2d');
             if (viewCharts.issuesStatus) viewCharts.issuesStatus.destroy();
             
@@ -1093,11 +1098,11 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
-        function renderEnhancementsChart(report) {
+        function renderEnhancementsChart(report, isLightMode) {
             const ctx = document.getElementById('enhancementsViewChart').getContext('2d');
             if (viewCharts.enhancements) viewCharts.enhancements.destroy();
             
@@ -1118,11 +1123,11 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
-        function renderAutomationTestCasesChart(report) {
+        function renderAutomationTestCasesChart(report, isLightMode) {
             const ctx = document.getElementById('automationTestCasesViewChart').getContext('2d');
             if (viewCharts.automationTestCases) viewCharts.automationTestCases.destroy();
             
@@ -1143,11 +1148,11 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
-        function renderAutomationStabilityChart(report) {
+        function renderAutomationStabilityChart(report, isLightMode) {
             const ctx = document.getElementById('automationStabilityViewChart').getContext('2d');
             if (viewCharts.automationStability) viewCharts.automationStability.destroy();
             
@@ -1167,7 +1172,7 @@
                         borderColor: 'var(--surface)'
                     }]
                 },
-                options: getViewChartOptions()
+                options: getViewChartOptions(isLightMode)
             });
         }
 
@@ -1315,7 +1320,7 @@
             
         }
 
-                function getViewChartOptions() {
+                function getViewChartOptions(isLightMode) {
             // Get current theme
             const isLightTheme = document.documentElement.getAttribute('data-theme') === 'light';
             const textColor = isLightTheme ? '#1e293b' : '#f1f5f9';
@@ -1347,8 +1352,8 @@
                         },
                         titleColor: textColor,
                         bodyColor: textColor,
-                        backgroundColor: 'var(--surface)',
-                        borderColor: 'var(--border)',
+                        backgroundColor: isLightMode ? '#ffffff' : '#1e293b',
+                        borderColor: isLightMode ? '#e2e8f0' : '#334155',
                         borderWidth: 1,
                         titleFont: {
                             family: 'Poppins'
@@ -1361,7 +1366,7 @@
             };
         }
 
-                function getBarChartOptions(yAxisLabel) {
+                function getBarChartOptions(yAxisLabel, isLightMode) {
             return {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -1377,8 +1382,8 @@
                         },
                         titleColor: '#f1f5f9',
                         bodyColor: '#f1f5f9',
-                        backgroundColor: 'var(--surface)',
-                        borderColor: 'var(--border)',
+                        backgroundColor: isLightMode ? '#ffffff' : '#1e293b',
+                        borderColor: isLightMode ? '#e2e8f0' : '#334155',
                         borderWidth: 1,
                         titleFont: {
                             family: 'Poppins'
@@ -1518,24 +1523,29 @@
             };
 
             // Header
-            doc.setFontSize(20);
+            doc.setFontSize(24);
             doc.setFont(undefined, 'bold');
             doc.text('QA Testing Report', pageWidth / 2, yPos, { align: 'center' });
-            yPos += 25;
-
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'normal');
-            doc.text(`${currentReport.portfolioName} - Sprint ${currentReport.sprintNumber}`, pageWidth / 2, yPos, { align: 'center' });
-            yPos += 15;
-            doc.text(`${currentReport.projectName} | Version ${currentReport.reportVersion} | ${formatDate(currentReport.reportDate)}`, pageWidth / 2, yPos, { align: 'center' });
             yPos += 30;
 
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${currentReport.portfolioName} - Sprint ${currentReport.sprintNumber}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 18;
+            doc.text(`${currentReport.projectName} | Version ${currentReport.reportVersion} | ${formatDate(currentReport.reportDate)}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 40; // Increased space after header
+
+            // Helper function to add a section title
+            const addSectionTitle = (title) => {
+                checkNewPage(50); // Ensure space for title + some content
+                doc.setFontSize(18);
+                doc.setFont(undefined, 'bold');
+                doc.text(title, margin, yPos);
+                yPos += 25; // Space after title
+            };
+
             // 1. General Information
-            checkNewPage(150);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('General Information', margin, yPos);
-            yPos += 20;
+            addSectionTitle('General Information');
 
             const coverData = [
                 ['Portfolio Name', currentReport.portfolioName || 'N/A'],
@@ -1553,17 +1563,14 @@
                 head: [['Field', 'Value']],
                 body: coverData,
                 theme: 'grid',
-                headStyles: { fillColor: [22, 163, 74] },
+                headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' }, // Blue-ish header
+                styles: { fontSize: 10, cellPadding: 4 },
                 margin: { left: margin, right: margin }
             });
             yPos = doc.lastAutoTable.finalY + 30;
 
             // 2. Test Summary & Status
-            checkNewPage(100);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Test Summary & Status', margin, yPos);
-            yPos += 20;
+            addSectionTitle('Test Summary & Status');
 
             const testSummaryData = [
                 ['Testing Status', getStatusText(currentReport.testingStatus)],
@@ -1575,20 +1582,17 @@
                 head: [['Field', 'Value']],
                 body: testSummaryData,
                 theme: 'grid',
-                headStyles: { fillColor: [59, 130, 246] },
+                headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
+                styles: { fontSize: 10, cellPadding: 4 },
                 margin: { left: margin, right: margin },
                 columnStyles: {
-                    1: { cellWidth: 350 }
+                    1: { cellWidth: 'auto', minCellWidth: 350 } // Auto-width for summary text, with a minimum
                 }
             });
             yPos = doc.lastAutoTable.finalY + 30;
 
             // 3. Testing Metrics Overview
-            checkNewPage(150);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Testing Metrics Overview', margin, yPos);
-            yPos += 20;
+            addSectionTitle('Testing Metrics Overview');
 
             const metricsData = [
                 ['Total User Stories', currentReport.totalUserStories || 0],
@@ -1602,17 +1606,14 @@
                 head: [['Metric', 'Count']],
                 body: metricsData,
                 theme: 'grid',
-                headStyles: { fillColor: [168, 85, 247] },
+                headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
+                styles: { fontSize: 10, cellPadding: 4 },
                 margin: { left: margin, right: margin }
             });
             yPos = doc.lastAutoTable.finalY + 30;
 
             // 4. User Stories Analysis
-            checkNewPage(250);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('User Stories Analysis', margin, yPos);
-            yPos += 20;
+            addSectionTitle('User Stories Analysis');
 
             const total = currentReport.totalUserStories || 0;
             const userStoriesData = [
@@ -1631,16 +1632,15 @@
             const tableStartY = yPos;
             const tableWidth = 260;
             const chartStartX = margin + tableWidth + 20;
-            const webChartRatio = 400/300; // Original web chart ratio
-            const chartHeight = 160;
-            const chartWidth = chartHeight * webChartRatio; // Maintain aspect ratio
+            const chartHeight = 150; // Set to 150pt for square charts
+            const chartWidth = 150;  // Set to 150pt for square charts
 
             doc.autoTable({
                 startY: tableStartY,
                 head: [userStoriesData[0]],
                 body: userStoriesData.slice(1),
                 theme: 'grid',
-                headStyles: { fillColor: [34, 197, 94] },
+                headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
                 margin: { left: margin, right: chartStartX },
                 tableWidth: tableWidth,
                 styles: { fontSize: 9, cellPadding: 3 }
@@ -1652,24 +1652,20 @@
                 // Create a temporary canvas with higher resolution
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                const scale = 2; // Higher resolution
+                const scale = 4; // Higher resolution
                 tempCanvas.width = userStoriesCanvas.width * scale;
                 tempCanvas.height = userStoriesCanvas.height * scale;
                 tempCtx.scale(scale, scale);
                 tempCtx.drawImage(userStoriesCanvas, 0, 0);
                 
                 const imgData = tempCanvas.toDataURL('image/png', 1.0);
-                doc.addImage(imgData, 'PNG', chartStartX, tableStartY + 5, chartWidth, chartHeight);
+                doc.addImage(imgData, 'PNG', chartStartX, tableStartY + 5, chartWidth, chartHeight, null, 'FAST');
             }
 
             yPos = Math.max(doc.lastAutoTable.finalY, tableStartY + chartHeight) + 30;
 
             // 5. Test Cases Analysis
-            checkNewPage(250);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Test Cases Analysis', margin, yPos);
-            yPos += 20;
+            addSectionTitle('Test Cases Analysis');
 
             const totalTestCases = currentReport.totalTestCases || 0;
             const testCasesData = [
@@ -1692,7 +1688,7 @@
                 head: [testCasesData[0]],
                 body: testCasesData.slice(1),
                 theme: 'grid',
-                headStyles: { fillColor: [236, 72, 153] },
+                headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
                 margin: { left: margin, right: chartStartX },
                 tableWidth: tableWidth,
                 styles: { fontSize: 9, cellPadding: 3 }
@@ -1704,24 +1700,20 @@
                 // Create a temporary canvas with higher resolution
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                const scale = 2;
+                const scale = 4;
                 tempCanvas.width = testCasesCanvas.width * scale;
                 tempCanvas.height = testCasesCanvas.height * scale;
                 tempCtx.scale(scale, scale);
                 tempCtx.drawImage(testCasesCanvas, 0, 0);
                 
                 const imgData = tempCanvas.toDataURL('image/png', 1.0);
-                doc.addImage(imgData, 'PNG', chartStartX, testCasesTableStartY + 5, chartWidth, chartHeight);
+                doc.addImage(imgData, 'PNG', chartStartX, testCasesTableStartY + 5, chartWidth, chartHeight, null, 'FAST');
             }
 
             yPos = Math.max(doc.lastAutoTable.finalY, testCasesTableStartY + chartHeight) + 30;
 
             // 6. Issues by Priority
-            checkNewPage(220);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Issues by Priority', margin, yPos);
-            yPos += 20;
+            addSectionTitle('Issues by Priority');
 
             const totalIssues = currentReport.totalIssues || 0;
             const issuesPriorityData = [
@@ -1741,7 +1733,7 @@
                 head: [issuesPriorityData[0]],
                 body: issuesPriorityData.slice(1),
                 theme: 'grid',
-                headStyles: { fillColor: [239, 68, 68] },
+                headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
                 margin: { left: margin, right: chartStartX },
                 tableWidth: tableWidth,
                 styles: { fontSize: 9, cellPadding: 3 }
@@ -1753,24 +1745,20 @@
                 // Create a temporary canvas with higher resolution
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                const scale = 2;
+                const scale = 4;
                 tempCanvas.width = issuesPriorityCanvas.width * scale;
                 tempCanvas.height = issuesPriorityCanvas.height * scale;
                 tempCtx.scale(scale, scale);
                 tempCtx.drawImage(issuesPriorityCanvas, 0, 0);
                 
                 const imgData = tempCanvas.toDataURL('image/png', 1.0);
-                doc.addImage(imgData, 'PNG', chartStartX, issuesPriorityTableStartY + 5, chartWidth, chartHeight);
+                doc.addImage(imgData, 'PNG', chartStartX, issuesPriorityTableStartY + 5, chartWidth, chartHeight, null, 'FAST');
             }
 
             yPos = Math.max(doc.lastAutoTable.finalY, issuesPriorityTableStartY + chartHeight) + 30;
 
             // 7. Issues by Status
-            checkNewPage(220);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Issues by Status', margin, yPos);
-            yPos += 20;
+            addSectionTitle('Issues by Status');
 
             const issuesStatusData = [
                 ['Status', 'Count', 'Percentage'],
@@ -1789,7 +1777,7 @@
                 head: [issuesStatusData[0]],
                 body: issuesStatusData.slice(1),
                 theme: 'grid',
-                headStyles: { fillColor: [245, 158, 11] },
+                headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
                 margin: { left: margin, right: chartStartX },
                 tableWidth: tableWidth,
                 styles: { fontSize: 9, cellPadding: 3 }
@@ -1801,24 +1789,20 @@
                 // Create a temporary canvas with higher resolution
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                const scale = 2;
+                const scale = 4;
                 tempCanvas.width = issuesStatusCanvas.width * scale;
                 tempCanvas.height = issuesStatusCanvas.height * scale;
                 tempCtx.scale(scale, scale);
                 tempCtx.drawImage(issuesStatusCanvas, 0, 0);
                 
                 const imgData = tempCanvas.toDataURL('image/png', 1.0);
-                doc.addImage(imgData, 'PNG', chartStartX, issuesStatusTableStartY + 5, chartWidth, chartHeight);
+                doc.addImage(imgData, 'PNG', chartStartX, issuesStatusTableStartY + 5, chartWidth, chartHeight, null, 'FAST');
             }
 
             yPos = Math.max(doc.lastAutoTable.finalY, issuesStatusTableStartY + chartHeight) + 30;
 
             // 8. Enhancements Analysis
-            checkNewPage(220);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Enhancements Analysis', margin, yPos);
-            yPos += 20;
+            addSectionTitle('Enhancements Analysis');
 
             const totalEnhancements = currentReport.totalEnhancements || 0;
             const enhancementsData = [
@@ -1837,7 +1821,7 @@
                 head: [enhancementsData[0]],
                 body: enhancementsData.slice(1),
                 theme: 'grid',
-                headStyles: { fillColor: [14, 165, 233] },
+                headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
                 margin: { left: margin, right: chartStartX },
                 tableWidth: tableWidth,
                 styles: { fontSize: 9, cellPadding: 3 }
@@ -1849,24 +1833,20 @@
                 // Create a temporary canvas with higher resolution
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                const scale = 2;
+                const scale = 4;
                 tempCanvas.width = enhancementsCanvas.width * scale;
                 tempCanvas.height = enhancementsCanvas.height * scale;
                 tempCtx.scale(scale, scale);
                 tempCtx.drawImage(enhancementsCanvas, 0, 0);
                 
                 const imgData = tempCanvas.toDataURL('image/png', 1.0);
-                doc.addImage(imgData, 'PNG', chartStartX, enhancementsTableStartY + 5, chartWidth, chartHeight);
+                doc.addImage(imgData, 'PNG', chartStartX, enhancementsTableStartY + 5, chartWidth, chartHeight, null, 'FAST');
             }
 
             yPos = Math.max(doc.lastAutoTable.finalY, enhancementsTableStartY + chartHeight) + 30;
 
             // 9. Automation Regression - Test Cases
-            checkNewPage(220);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Automation Regression - Test Cases', margin, yPos);
-            yPos += 20;
+            addSectionTitle('Automation Regression - Test Cases');
 
             const automationTotal = currentReport.automationTotalTestCases || 0;
             const automationTestCasesData = [
@@ -1885,7 +1865,7 @@
                 head: [automationTestCasesData[0]],
                 body: automationTestCasesData.slice(1),
                 theme: 'grid',
-                headStyles: { fillColor: [139, 69, 19] },
+                headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
                 margin: { left: margin, right: chartStartX },
                 tableWidth: tableWidth,
                 styles: { fontSize: 9, cellPadding: 3 }
@@ -1897,24 +1877,20 @@
                 // Create a temporary canvas with higher resolution
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                const scale = 2;
+                const scale = 4;
                 tempCanvas.width = automationTestCasesCanvas.width * scale;
                 tempCanvas.height = automationTestCasesCanvas.height * scale;
                 tempCtx.scale(scale, scale);
                 tempCtx.drawImage(automationTestCasesCanvas, 0, 0);
                 
                 const imgData = tempCanvas.toDataURL('image/png', 1.0);
-                doc.addImage(imgData, 'PNG', chartStartX, automationTestCasesTableStartY + 5, chartWidth, chartHeight);
+                doc.addImage(imgData, 'PNG', chartStartX, automationTestCasesTableStartY + 5, chartWidth, chartHeight, null, 'FAST');
             }
 
             yPos = Math.max(doc.lastAutoTable.finalY, automationTestCasesTableStartY + chartHeight) + 30;
 
             // 10. Automation Regression - Test Stability
-            checkNewPage(220);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('Automation Regression - Test Stability', margin, yPos);
-            yPos += 20;
+            addSectionTitle('Automation Regression - Test Stability');
 
             const stabilityTotal = currentReport.automationStabilityTotal || 0;
             const automationStabilityData = [
@@ -1932,7 +1908,7 @@
                 head: [automationStabilityData[0]],
                 body: automationStabilityData.slice(1),
                 theme: 'grid',
-                headStyles: { fillColor: [107, 114, 128] },
+                headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
                 margin: { left: margin, right: chartStartX },
                 tableWidth: tableWidth,
                 styles: { fontSize: 9, cellPadding: 3 }
@@ -1944,75 +1920,28 @@
                 // Create a temporary canvas with higher resolution
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                const scale = 2;
+                const scale = 4;
                 tempCanvas.width = automationStabilityCanvas.width * scale;
                 tempCanvas.height = automationStabilityCanvas.height * scale;
                 tempCtx.scale(scale, scale);
                 tempCtx.drawImage(automationStabilityCanvas, 0, 0);
                 
                 const imgData = tempCanvas.toDataURL('image/png', 1.0);
-                doc.addImage(imgData, 'PNG', chartStartX, automationStabilityTableStartY + 5, chartWidth, chartHeight);
+                doc.addImage(imgData, 'PNG', chartStartX, automationStabilityTableStartY + 5, chartWidth, chartHeight, null, 'FAST');
             }
 
             yPos = Math.max(doc.lastAutoTable.finalY, automationStabilityTableStartY + chartHeight) + 30;
 
             // 11. Additional Information Sections
             if (currentReport.requestData && currentReport.requestData.length > 0) {
-                checkNewPage(150);
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text('Request Information', margin, yPos);
-                yPos += 20;
-
-                const requestHeaders = ['Request ID', 'URL'];
-                const requestData = currentReport.requestData.map(req => [req.id, req.url]);
-
-                doc.autoTable({
-                    startY: yPos,
-                    head: [requestHeaders],
-                    body: requestData,
-                    theme: 'grid',
-                    headStyles: { fillColor: [79, 70, 229] },
-                    margin: { left: margin, right: margin },
-                    columnStyles: {
-                        1: { cellWidth: 300 }
-                    }
-                });
-                yPos = doc.lastAutoTable.finalY + 30;
+                addSectionTitle('Request Information');
             }
-
             if (currentReport.buildData && currentReport.buildData.length > 0) {
-                checkNewPage(150);
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text('Build Information', margin, yPos);
-                yPos += 20;
-
-                const buildHeaders = ['Request ID', 'URL', 'Environment', 'Cycles'];
-                const buildData = currentReport.buildData.map(build => [
-                    build.requestId,
-                    build.requestUrl.length > 40 ? build.requestUrl.substring(0, 40) + '...' : build.requestUrl,
-                    build.environment,
-                    build.cycles
-                ]);
-
-                doc.autoTable({
-                    startY: yPos,
-                    head: [buildHeaders],
-                    body: buildData,
-                    theme: 'grid',
-                    headStyles: { fillColor: [16, 185, 129] },
-                    margin: { left: margin, right: margin }
-                });
-                yPos = doc.lastAutoTable.finalY + 30;
+                addSectionTitle('Build Information');
             }
 
             if (currentReport.testerData && currentReport.testerData.length > 0) {
-                checkNewPage(150);
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text('Tester Information', margin, yPos);
-                yPos += 20;
+                addSectionTitle('Tester Information');
 
                 const testerHeaders = ['Tester Name', 'Email', 'Roles'];
                 const testerData = currentReport.testerData.map(tester => {
@@ -2028,18 +1957,18 @@
                     head: [testerHeaders],
                     body: testerData,
                     theme: 'grid',
-                    headStyles: { fillColor: [217, 119, 6] },
-                    margin: { left: margin, right: margin }
+                    headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
+                    styles: { fontSize: 9, cellPadding: 3 },
+                    margin: { left: margin, right: margin },
+                    columnStyles: {
+                        2: { cellWidth: 'auto' } // Auto-width for roles
+                    }
                 });
                 yPos = doc.lastAutoTable.finalY + 30;
             }
 
             if (currentReport.teamMemberData && currentReport.teamMemberData.length > 0) {
-                checkNewPage(150);
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text('Team Members', margin, yPos);
-                yPos += 20;
+                addSectionTitle('Team Members');
 
                 const teamHeaders = ['Team Member Name', 'Email', 'Role'];
                 const teamData = currentReport.teamMemberData.map(member => [
@@ -2053,19 +1982,19 @@
                     head: [teamHeaders],
                     body: teamData,
                     theme: 'grid',
-                    headStyles: { fillColor: [147, 51, 234] },
-                    margin: { left: margin, right: margin }
+                    headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
+                    styles: { fontSize: 9, cellPadding: 3 },
+                    margin: { left: margin, right: margin },
+                    columnStyles: {
+                        2: { cellWidth: 'auto' } // Auto-width for role
+                    }
                 });
                 yPos = doc.lastAutoTable.finalY + 30;
             }
 
             // 12. QA Notes
             if (currentReport.qaNotesData && currentReport.qaNotesData.length > 0) {
-                checkNewPage(150);
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text('QA Notes', margin, yPos);
-                yPos += 20;
+                addSectionTitle('QA Notes');
 
                 const qaNotesHeaders = ['Note'];
                 const qaNotesDataForTable = currentReport.qaNotesData
@@ -2078,11 +2007,9 @@
                         head: [qaNotesHeaders],
                         body: qaNotesDataForTable,
                         theme: 'grid',
-                        headStyles: { fillColor: [185, 28, 28] },
-                        margin: { left: margin, right: margin },
-                        columnStyles: {
-                            0: { cellWidth: 450 }
-                        }
+                        headStyles: { fillColor: [60, 141, 188], textColor: 255, fontStyle: 'bold' },
+                        styles: { fontSize: 9, cellPadding: 3, cellWidth: 'auto' },
+                        margin: { left: margin, right: margin }
                     });
                     yPos = doc.lastAutoTable.finalY + 30;
                 }
@@ -2364,7 +2291,7 @@
                         yPosition = 15;
                     }
 
-                    pdf.addImage(imgData, 'PNG', 10, yPosition, imgWidth, imgHeight);
+                    pdf.addImage(imgData, 'PNG', 10, yPosition, imgWidth, imgHeight, null, 'FAST');
                     yPosition += imgHeight + 5;
 
                 } catch (error) {
