@@ -55,25 +55,40 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Wait a bit for the main script to load and fetch data first
     setTimeout(checkForCachedStats, 100);
+    
+    // Setup MutationObserver to watch for theme attribute changes (fallback)
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                console.log('Dashboard charts: Theme attribute changed, recreating charts...');
+                // Trigger chart recreation with same logic as themeChanged event
+                setTimeout(() => {
+                    if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
+                        console.log('Using cached dashboard stats for theme attribute update');
+                        // Destroy existing charts first
+                        Object.values(dashboardCharts).forEach(chart => {
+                            if (chart && chart.destroy) {
+                                chart.destroy();
+                            }
+                        });
+                        dashboardCharts = {};
+                        createDashboardCharts(window.dashboardStatsCache.overall);
+                    }
+                }, 100);
+            }
+        });
+    });
+    
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+    });
 });
 
-// Listen for theme changes and recreate charts with new colors
+// Listen for theme changes and recreate charts with fresh data
 window.addEventListener('themeChanged', (event) => {
     console.log('Dashboard charts: Theme changed event received, theme:', event.detail?.theme);
-    console.log('Dashboard charts: Recreating charts...');
-
-    // Store current chart data before destroying charts
-    const chartData = {};
-    Object.keys(dashboardCharts).forEach(key => {
-        const chart = dashboardCharts[key];
-        if (chart && chart.data) {
-            chartData[key] = {
-                data: chart.data.datasets[0].data,
-                labels: chart.data.labels,
-                type: chart.config.type
-            };
-        }
-    });
+    console.log('Dashboard charts: Recreating charts with fresh data...');
 
     // Destroy all existing charts
     Object.values(dashboardCharts).forEach(chart => {
@@ -85,145 +100,39 @@ window.addEventListener('themeChanged', (event) => {
     // Clear the charts object
     dashboardCharts = {};
 
-    // Recreate charts with new theme colors
+    // Recreate charts with fresh data from cache or refetch
     setTimeout(() => {
-        recreateDashboardCharts(chartData);
+        if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
+            console.log('Using cached dashboard stats for theme update');
+            createDashboardCharts(window.dashboardStatsCache.overall);
+        } else if (typeof fetchDashboardStats === 'function') {
+            console.log('Fetching fresh dashboard stats for theme update');
+            fetchDashboardStats().then(stats => {
+                if (stats && stats.overall) {
+                    createDashboardCharts(stats.overall);
+                } else {
+                    createDashboardCharts({});
+                }
+            }).catch(error => {
+                console.error('Error fetching dashboard stats for theme update:', error);
+                createDashboardCharts({});
+            });
+        } else {
+            console.log('Fetching dashboard stats locally for theme update');
+            fetchDashboardStatsLocal().then(stats => {
+                if (stats && stats.overall) {
+                    createDashboardCharts(stats.overall);
+                } else {
+                    createDashboardCharts({});
+                }
+            }).catch(error => {
+                console.error('Error fetching local dashboard stats for theme update:', error);
+                createDashboardCharts({});
+            });
+        }
     }, 100);
 });
 
-// Function to recreate dashboard charts with stored data
-function recreateDashboardCharts(chartData) {
-    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
-    const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
-
-    // Recreate user stories chart
-    if (chartData.userStories) {
-        const canvas = document.getElementById('dashboardUserStoriesChart');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            dashboardCharts.userStories = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: chartData.userStories.labels,
-                    datasets: [{
-                        data: chartData.userStories.data,
-                        backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E', '#2196F3', '#673AB7', '#00BCD4'],
-                        borderWidth: 3,
-                        borderColor: borderColor
-                    }]
-                },
-                options: getDashboardChartOptions()
-            });
-        }
-    }
-
-    // Recreate test cases chart
-    if (chartData.testCases) {
-        const canvas = document.getElementById('dashboardTestCasesChart');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            dashboardCharts.testCases = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: chartData.testCases.labels,
-                    datasets: [{
-                        data: chartData.testCases.data,
-                        backgroundColor: ['#8BC34A', '#FFEB3B', '#E91E63', '#607D8B', '#9C27B0', '#FF5722', '#795548'],
-                        borderWidth: 3,
-                        borderColor: borderColor
-                    }]
-                },
-                options: getDashboardChartOptions()
-            });
-        }
-    }
-
-    // Recreate issues priority chart
-    if (chartData.issuesPriority) {
-        const canvas = document.getElementById('dashboardIssuesPriorityChart');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            dashboardCharts.issuesPriority = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: chartData.issuesPriority.labels,
-                    datasets: [{
-                        data: chartData.issuesPriority.data,
-                        backgroundColor: ['#F44336', '#FF9800', '#FFC107', '#4CAF50'],
-                        borderWidth: 3,
-                        borderColor: borderColor
-                    }]
-                },
-                options: getDashboardChartOptions()
-            });
-        }
-    }
-
-    // Recreate issues status chart
-    if (chartData.issuesStatus) {
-        const canvas = document.getElementById('dashboardIssuesStatusChart');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            dashboardCharts.issuesStatus = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: chartData.issuesStatus.labels,
-                    datasets: [{
-                        data: chartData.issuesStatus.data,
-                        backgroundColor: ['#2196F3', '#4CAF50', '#E91E63', '#FF5722', '#673AB7'],
-                        borderWidth: 3,
-                        borderColor: borderColor
-                    }]
-                },
-                options: getDashboardChartOptions()
-            });
-        }
-    }
-
-    // Recreate automation test cases chart
-    if (chartData.automationTestCases) {
-        const canvas = document.getElementById('dashboardAutomationTestCasesChart');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            dashboardCharts.automationTestCases = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: chartData.automationTestCases.labels,
-                    datasets: [{
-                        data: chartData.automationTestCases.data,
-                        backgroundColor: ['#4CAF50', '#F44336', '#FF9800'],
-                        borderWidth: 3,
-                        borderColor: borderColor
-                    }]
-                },
-                options: getDashboardChartOptions()
-            });
-        }
-    }
-
-    // Recreate automation stability chart
-    if (chartData.automationStability) {
-        const canvas = document.getElementById('dashboardAutomationStabilityChart');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            dashboardCharts.automationStability = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: chartData.automationStability.labels,
-                    datasets: [{
-                        data: chartData.automationStability.data,
-                        backgroundColor: ['#4CAF50', '#E91E63'],
-                        borderWidth: 3,
-                        borderColor: borderColor
-                    }]
-                },
-                options: getDashboardChartOptions()
-            });
-        }
-    }
-
-    console.log('Dashboard charts recreated with new theme colors');
-}
 
 function createDashboardCharts(overallStats) {
     console.log('Creating dashboard charts with data:', overallStats);
@@ -288,7 +197,6 @@ function createDashboardCharts(overallStats) {
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
-        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const userStoriesCtx = userStoriesCanvas.getContext('2d');
         const userStoriesChartData = [
@@ -309,7 +217,7 @@ function createDashboardCharts(overallStats) {
                     data: userStoriesChartData,
                     backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E', '#2196F3', '#673AB7', '#00BCD4'],
                     borderWidth: 3,
-                    borderColor: borderColor
+                    borderColor: 'var(--surface)'
                 }]
             },
             options: getDashboardChartOptions()
@@ -327,7 +235,6 @@ function createDashboardCharts(overallStats) {
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
-        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const testCasesCtx = testCasesCanvas.getContext('2d');
         const testCasesChartData = [
@@ -348,7 +255,7 @@ function createDashboardCharts(overallStats) {
                     data: testCasesChartData,
                     backgroundColor: ['#8BC34A', '#FFEB3B', '#E91E63', '#607D8B', '#9C27B0', '#FF5722', '#795548'],
                     borderWidth: 3,
-                    borderColor: borderColor
+                    borderColor: 'var(--surface)'
                 }]
             },
             options: getDashboardChartOptions()
@@ -366,7 +273,6 @@ function createDashboardCharts(overallStats) {
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
-        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const issuesPriorityCtx = issuesPriorityCanvas.getContext('2d');
         const issuesPriorityChartData = [
@@ -384,7 +290,7 @@ function createDashboardCharts(overallStats) {
                     data: issuesPriorityChartData,
                     backgroundColor: ['#F44336', '#FF9800', '#FFC107', '#4CAF50'],
                     borderWidth: 3,
-                    borderColor: borderColor
+                    borderColor: 'var(--surface)'
                 }]
             },
             options: getDashboardChartOptions()
@@ -402,7 +308,6 @@ function createDashboardCharts(overallStats) {
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
-        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const issuesStatusCtx = issuesStatusCanvas.getContext('2d');
         const issuesStatusChartData = [
@@ -421,7 +326,7 @@ function createDashboardCharts(overallStats) {
                     data: issuesStatusChartData,
                     backgroundColor: ['#2196F3', '#4CAF50', '#E91E63', '#FF5722', '#673AB7'],
                     borderWidth: 3,
-                    borderColor: borderColor
+                    borderColor: 'var(--surface)'
                 }]
             },
             options: getDashboardChartOptions()
@@ -439,7 +344,6 @@ function createDashboardCharts(overallStats) {
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
-        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const automationTestCasesCtx = automationTestCasesCanvas.getContext('2d');
         const automationTestCasesChartData = [
@@ -456,7 +360,7 @@ function createDashboardCharts(overallStats) {
                     data: automationTestCasesChartData,
                     backgroundColor: ['#4CAF50', '#F44336', '#FF9800'],
                     borderWidth: 3,
-                    borderColor: borderColor
+                    borderColor: 'var(--surface)'
                 }]
             },
             options: getDashboardChartOptions()
@@ -474,7 +378,6 @@ function createDashboardCharts(overallStats) {
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
-        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const automationStabilityCtx = automationStabilityCanvas.getContext('2d');
         const automationStabilityChartData = [
@@ -490,13 +393,48 @@ function createDashboardCharts(overallStats) {
                     data: automationStabilityChartData,
                     backgroundColor: ['#4CAF50', '#E91E63'],
                     borderWidth: 3,
-                    borderColor: borderColor
+                    borderColor: 'var(--surface)'
                 }]
             },
             options: getDashboardChartOptions()
         });
     } catch (error) {
         console.error('Error creating automation stability chart:', error);
+    }
+
+    try {
+        const enhancementsCanvas = document.getElementById('dashboardEnhancementsChart');
+        if (!enhancementsCanvas) {
+            console.error('Enhancements chart canvas not found');
+            return;
+        }
+
+        // Get theme colors for this chart
+        const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
+    
+
+        const enhancementsCtx = enhancementsCanvas.getContext('2d');
+        const enhancementsChartData = [
+            overallStats.newEnhancements || 0,
+            overallStats.implementedEnhancements || 0,
+            overallStats.existsEnhancements || 0
+        ];
+        console.log('Enhancements Chart Data:', enhancementsChartData);
+        dashboardCharts.enhancements = new Chart(enhancementsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['New', 'Implemented', 'Exists'],
+                datasets: [{
+                    data: enhancementsChartData,
+                    backgroundColor: ['#00BCD4', '#4CAF50', '#9E9E9E'],
+                    borderWidth: 3,
+                    borderColor: 'var(--surface)'
+                }]
+            },
+            options: getDashboardChartOptions()
+        });
+    } catch (error) {
+        console.error('Error creating enhancements chart:', error);
     }
 
     // Create enhanced visual elements
@@ -511,7 +449,8 @@ function getDashboardChartOptions() {
     // Explicit color definitions
     const textColor = isLightTheme ? '#1e293b' : '#f1f5f9';
     const gridColor = isLightTheme ? '#e2e8f0' : '#334155';
-    const tooltipBg = isLightTheme ? '#ffffff' : '#334155';
+    const tooltipBg = isLightTheme ? '#ffffff' : '#1e293b';
+    const borderColor = 'var(--surface)';
     
     console.log('Dashboard chart options - isLightTheme:', isLightTheme, 'textColor:', textColor);
 
@@ -525,20 +464,28 @@ function getDashboardChartOptions() {
                     padding: 15,
                     usePointStyle: true,
                     font: {
-                        size: 10,
-                        family: 'Poppins'
+                        size: 10, // Aligned with view_report.html
+                        family: 'Poppins' // Aligned with view_report.html
                     },
                     color: textColor
                 }
             },
             tooltip: {
+                callbacks: { // Added callbacks for percentage display, aligned with view_report.html
+                    label: function(context) {
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const value = context.parsed || 0;
+                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                        return `${context.label}: ${value} (${percentage}%)`;
+                    }
+                },
                 titleColor: textColor,
                 bodyColor: textColor,
                 backgroundColor: tooltipBg,
-                borderColor: gridColor,
+                borderColor: 'var(--surface)',
                 borderWidth: 1,
-                titleFont: { family: 'Poppins' },
-                bodyFont: { family: 'Poppins' }
+                titleFont: { family: 'Poppins' }, // Aligned with view_report.html
+                bodyFont: { family: 'Poppins' } // Aligned with view_report.html
             }
         }
     };
