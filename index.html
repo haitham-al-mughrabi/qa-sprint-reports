@@ -1,33 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sprint Reports System</title>
-    
+
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload" as="style" onload="this.rel='stylesheet'">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload"
+        as="style" onload="this.rel='stylesheet'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
 
     <!-- Theme manager (loads early) -->
     <script src="/static/theme-manager.js"></script>
-    
+
     <!-- External libraries (defer non-critical) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
+        defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
-    
+
     <!-- Load non-critical CSS asynchronously -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"></noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+    </noscript>
 </head>
+
 <body>
     <!-- Navigation Header -->
     <nav class="main-nav">
@@ -39,7 +49,8 @@
                     <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
                     <a href="/create-report" class="nav-link"><i class="fas fa-plus-circle"></i> New Report</a>
                     <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
+                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project
+                        Statistics</a>
                 </div>
                 <button class="theme-toggle" onclick="toggleTheme()">
                     <i class="fas fa-sun" id="theme-icon"></i>
@@ -58,793 +69,913 @@
                     <p>Comprehensive Quality Assurance Management System</p>
                 </div>
 
-            <!-- Overall Statistics -->
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-chart-line"></i> Overall Statistics</h2>
-                <div class="dashboard-stats">
-                    <div class="stat-card">
-                        <div class="icon"><i class="fas fa-clipboard"></i></div>
-                        <h3 id="totalReports">0</h3>
-                        <p>Total Reports</p>
+                <!-- Overall Statistics -->
+                <div class="dashboard-section">
+                    <h2 class="section-title"><i class="fas fa-chart-line"></i> Overall Statistics</h2>
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="icon"><i class="fas fa-clipboard"></i></div>
+                            <h3 id="totalReports">0</h3>
+                            <p>Total Reports</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="icon"><i class="fas fa-check"></i></div>
+                            <h3 id="completedReports">0</h3>
+                            <p>Completed</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="icon"><i class="fas fa-sync"></i></div>
+                            <h3 id="inProgressReports">0</h3>
+                            <p>In Progress</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="icon"><i class="fas fa-hourglass-half"></i></div>
+                            <h3 id="pendingReports">0</h3>
+                            <p>Pending</p>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="icon"><i class="fas fa-check"></i></div>
-                        <h3 id="completedReports">0</h3>
-                        <p>Completed</p>
-                    </div>
-                    <div class="stat-card">
-                        <div class="icon"><i class="fas fa-sync"></i></div>
-                        <h3 id="inProgressReports">0</h3>
-                        <p>In Progress</p>
-                    </div>
-                    <div class="stat-card">
-                        <div class="icon"><i class="fas fa-hourglass-half"></i></div>
-                        <h3 id="pendingReports">0</h3>
-                        <p>Pending</p>
+
+                    <!-- Aggregate Metrics -->
+                    <div class="aggregate-metrics">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-file-alt"></i></div>
+                            <div class="metric-content">
+                                <h3 id="totalUserStories">0</h3>
+                                <p>Total User Stories</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-vial"></i></div>
+                            <div class="metric-content">
+                                <h3 id="totalTestCases">0</h3>
+                                <p>Total Test Cases</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-bug"></i></div>
+                            <div class="metric-content">
+                                <h3 id="totalIssues">0</h3>
+                                <p>Total Issues</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-bolt"></i></div>
+                            <div class="metric-content">
+                                <h3 id="totalEnhancements">0</h3>
+                                <p>Total Enhancements</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Aggregate Metrics -->
-                <div class="aggregate-metrics">
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-file-alt"></i></div>
-                        <div class="metric-content">
-                            <h3 id="totalUserStories">0</h3>
-                            <p>Total User Stories</p>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-vial"></i></div>
-                        <div class="metric-content">
-                            <h3 id="totalTestCases">0</h3>
-                            <p>Total Test Cases</p>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-bug"></i></div>
-                        <div class="metric-content">
-                            <h3 id="totalIssues">0</h3>
-                            <p>Total Issues</p>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-bolt"></i></div>
-                        <div class="metric-content">
-                            <h3 id="totalEnhancements">0</h3>
-                            <p>Total Enhancements</p>
-                        </div>
+                <!-- Project-Specific Metrics -->
+                <div class="dashboard-section">
+                    <h2 class="section-title"><i class="fas fa-rocket"></i> Project Metrics</h2>
+                    <div id="projectMetrics" class="project-metrics-container">
+                        <!-- Project cards will be dynamically generated here -->
                     </div>
                 </div>
-            </div>
 
-            <!-- Project-Specific Metrics -->
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-rocket"></i> Project Metrics</h2>
-                <div id="projectMetrics" class="project-metrics-container">
-                    <!-- Project cards will be dynamically generated here -->
-                </div>
-            </div>
-
-            <div class="quick-actions">
-                <h2 style="margin-bottom: 30px; color: white; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);"><i class="fas fa-bolt"></i> Quick Actions</h2>
-                <div class="action-buttons">
-                    <button class="action-btn" onclick="createNewReport()"><i class="fas fa-plus-circle"></i> Create New Report</button>
-                    <button class="action-btn secondary" onclick="showPage('reportsPage')"><i class="fas fa-chart-bar"></i> View All Reports</button>
-                    <button class="action-btn secondary" onclick="exportDashboardReport()"><i class="fas fa-file-export"></i> Export Dashboard Report</button>
+                <div class="quick-actions">
+                    <h2 style="margin-bottom: 30px; color: white; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);"><i
+                            class="fas fa-bolt"></i> Quick Actions</h2>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="createNewReport()"><i class="fas fa-plus-circle"></i> Create
+                            New Report</button>
+                        <button class="action-btn secondary" onclick="showPage('reportsPage')"><i
+                                class="fas fa-chart-bar"></i> View All Reports</button>
+                        <button class="action-btn secondary" onclick="exportDashboardReport()"><i
+                                class="fas fa-file-export"></i> Export Dashboard Report</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Reports List Page -->
-    <div id="reportsPage" class="page">
-        <div class="reports-container">
-            <div class="page-header">
-                <h1><i class="fas fa-chart-bar"></i> Reports Management</h1>
-                <div class="header-actions">
-                    <div class="search-container">
-                        <i class="fas fa-search"></i>
-                        <input type="text" class="search-box" placeholder="Search reports..." id="searchInput" onkeyup="searchReports()">
+        <!-- Reports List Page -->
+        <div id="reportsPage" class="page">
+            <div class="reports-container">
+                <div class="page-header">
+                    <h1><i class="fas fa-chart-bar"></i> Reports Management</h1>
+                    <div class="header-actions">
+                        <div class="search-container">
+                            <i class="fas fa-search"></i>
+                            <input type="text" class="search-box" placeholder="Search reports..." id="searchInput"
+                                onkeyup="searchReports()">
+                        </div>
+                        <button class="action-btn" onclick="createNewReport()"><i class="fas fa-plus"></i> New
+                            Report</button>
                     </div>
-                    <button class="action-btn" onclick="createNewReport()"><i class="fas fa-plus"></i> New Report</button>
                 </div>
-            </div>
 
-            <div class="reports-table-container">
-                <div id="reports-loading" class="loading" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Loading reports...</p>
-                </div>
-                <table class="reports-table" id="reportsTable">
-                    <thead>
-                        <tr>
-                            <th>Report Title</th>
-                            <th>Project</th>
-                            <th>Portfolio</th>
-                            <th>Sprint</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reportsTableBody">
-                        <!-- Reports will be rendered here by script.js -->
-                    </tbody>
-                </table>
+                <div class="reports-table-container">
+                    <div id="reports-loading" class="loading" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Loading reports...</p>
+                    </div>
+                    <table class="reports-table" id="reportsTable">
+                        <thead>
+                            <tr>
+                                <th>Report Title</th>
+                                <th>Project</th>
+                                <th>Portfolio</th>
+                                <th>Sprint</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody">
+                            <!-- Reports will be rendered here by script.js -->
+                        </tbody>
+                    </table>
 
-                <div class="pagination" id="pagination">
-                    <!-- Pagination will be rendered here by script.js -->
+                    <div class="pagination" id="pagination">
+                        <!-- Pagination will be rendered here by script.js -->
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Enhanced QA Form Page -->
-    <div id="formPage" class="page">
-        <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-        
-        <div class="form-container">
-            <!-- Sidebar Navigation -->
-            <nav class="sidebar" id="sidebar">
-                <div class="sidebar-header">
-                    <h2><i class="fas fa-clipboard"></i> Report Sections</h2>
-                    <button class="back-btn" onclick="backToDashboard()"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
-                </div>
-                <a href="#" class="nav-item active" onclick="showSection(0)"><i class="fas fa-info-circle"></i> General Details</a>
-                <a href="#" class="nav-item" onclick="showSection(1)"><i class="fas fa-file-alt"></i> Test Summary</a>
-                <a href="#" class="nav-item" onclick="showSection(2)"><i class="fas fa-plus-square"></i> Additional Info</a>
-                <a href="#" class="nav-item" onclick="showSection(3)"><i class="fas fa-user-check"></i> User Stories</a>
-                <a href="#" class="nav-item" onclick="showSection(4)"><i class="fas fa-vial"></i> Test Cases</a>
-                <a href="#" class="nav-item" onclick="showSection(5)"><i class="fas fa-bug"></i> Issues Analysis</a>
-                <a href="#" class="nav-item" onclick="showSection(6)"><i class="fas fa-bolt"></i> Enhancements</a>
-                <a href="#" class="nav-item" onclick="showSection(7)"><i class="fas fa-note-sticky"></i> QA Notes</a>
-            </nav>
+        <!-- Enhanced QA Form Page -->
+        <div id="formPage" class="page">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
 
-            <!-- Main Content -->
-            <div class="main-content">
-                <div class="content-header">
-                    <h1 id="formTitle">Create Sprint Report</h1>
-                    <p>Complete all sections to generate your comprehensive QA testing report</p>
-                </div>
+            <div class="form-container">
+                <!-- Sidebar Navigation -->
+                <nav class="sidebar" id="sidebar">
+                    <div class="sidebar-header">
+                        <h2><i class="fas fa-clipboard"></i> Report Sections</h2>
+                        <button class="back-btn" onclick="backToDashboard()"><i class="fas fa-arrow-left"></i> Back to
+                            Dashboard</button>
+                    </div>
+                    <a href="#" class="nav-item active" onclick="showSection(0)"><i class="fas fa-info-circle"></i>
+                        General Details</a>
+                    <a href="#" class="nav-item" onclick="showSection(1)"><i class="fas fa-file-alt"></i> Test
+                        Summary</a>
+                    <a href="#" class="nav-item" onclick="showSection(2)"><i class="fas fa-plus-square"></i> Additional
+                        Info</a>
+                    <a href="#" class="nav-item" onclick="showSection(3)"><i class="fas fa-user-check"></i> User
+                        Stories</a>
+                    <a href="#" class="nav-item" onclick="showSection(4)"><i class="fas fa-vial"></i> Test Cases</a>
+                    <a href="#" class="nav-item" onclick="showSection(5)"><i class="fas fa-bug"></i> Issues Analysis</a>
+                    <a href="#" class="nav-item" onclick="showSection(6)"><i class="fas fa-bolt"></i> Enhancements</a>
+                    <a href="#" class="nav-item" onclick="showSection(7)"><i class="fas fa-note-sticky"></i> QA
+                        Notes</a>
+                </nav>
 
-                <div class="content-area">
-                    <form id="qaReportForm">
-                        <!-- Section 1: General Details -->
-                        <div class="section active" id="section-0">
-                            <h2 class="section-title">📝 General Details</h2>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="portfolioName">Portfolio Name</label>
-                                    <div class="select-with-add">
-                                        <select id="portfolioName" name="portfolioName" required>
+                <!-- Main Content -->
+                <div class="main-content">
+                    <div class="content-header">
+                        <h1 id="formTitle">Create Sprint Report</h1>
+                        <p>Complete all sections to generate your comprehensive QA testing report</p>
+                    </div>
+
+                    <div class="content-area">
+                        <form id="qaReportForm">
+                            <!-- Section 1: General Details -->
+                            <div class="section active" id="section-0">
+                                <h2 class="section-title">📝 General Details</h2>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="portfolioName">Portfolio Name</label>
+                                        <div class="select-with-add">
+                                            <select id="portfolioName" name="portfolioName" required>
+                                            </select>
+                                            <button type="button" class="add-btn" onclick="showAddPortfolioModal()">+
+                                                Add</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="projectName">Project Name</label>
+                                        <div class="select-with-add">
+                                            <select id="projectName" name="projectName" required>
+                                                <option value="">Select Project</option>
+                                            </select>
+                                            <button type="button" class="add-btn" onclick="showAddProjectModal()">+
+                                                Add</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="sprintNumber">Sprint Number</label>
+                                        <input type="number" id="sprintNumber" name="sprintNumber" min="1"
+                                            placeholder="Enter sprint number" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="reportVersion">Report Version</label>
+                                        <input type="text" id="reportVersion" name="reportVersion"
+                                            placeholder="e.g., 1.0, 2.1" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="cycleNumber">Cycle Number</label>
+                                        <input type="number" id="cycleNumber" name="cycleNumber" min="1"
+                                            placeholder="Enter cycle number" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="releaseNumber">Release Number</label>
+                                        <input type="text" id="releaseNumber" name="releaseNumber"
+                                            placeholder="e.g., R1.0, R2.1" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="reportDate">Report Date (dd-mm-yyyy)</label>
+                                        <input type="text" id="reportDate" name="reportDate" pattern="\d{2}-\d{2}-\d{4}"
+                                            placeholder="dd-mm-yyyy" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 2: Test Summary -->
+                            <div class="section" id="section-1">
+                                <h2 class="section-title"><i class="fas fa-chart-bar"></i> Test Summary & Status</h2>
+                                <div class="form-grid">
+                                    <div class="form-group full-width">
+                                        <label for="testSummary">Test Summary</label>
+                                        <textarea id="testSummary" name="testSummary"
+                                            placeholder="Provide a comprehensive summary of the testing activities..."
+                                            rows="6" required></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="testingStatus">Testing Status</label>
+                                        <select id="testingStatus" name="testingStatus" required>
+                                            <option value="">Select Status</option>
+                                            <option value="passed">✅ Passed</option>
+                                            <option value="passed-with-issues">⚠️ Passed with Issues</option>
+                                            <option value="failed">❌ Failed</option>
+                                            <option value="blocked">🚫 Blocked</option>
+                                            <option value="cancelled">🚮 Cancelled</option>
+                                            <option value="deferred">⏸️ Deferred</option>
+                                            <option value="not-testable">❓ Not Testable</option>
                                         </select>
-                                        <button type="button" class="add-btn" onclick="showAddPortfolioModal()">+ Add</button>
                                     </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label for="projectName">Project Name</label>
-                                    <div class="select-with-add">
-                                        <select id="projectName" name="projectName" required>
-                                            <option value="">Select Project</option>
-                                        </select>
-                                        <button type="button" class="add-btn" onclick="showAddProjectModal()">+ Add</button>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="sprintNumber">Sprint Number</label>
-                                    <input type="number" id="sprintNumber" name="sprintNumber" min="1" placeholder="Enter sprint number" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="reportVersion">Report Version</label>
-                                    <input type="text" id="reportVersion" name="reportVersion" placeholder="e.g., 1.0, 2.1" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="cycleNumber">Cycle Number</label>
-                                    <input type="number" id="cycleNumber" name="cycleNumber" min="1" placeholder="Enter cycle number" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="releaseNumber">Release Number</label>
-                                    <input type="text" id="releaseNumber" name="releaseNumber" placeholder="e.g., R1.0, R2.1" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="reportDate">Report Date (dd-mm-yyyy)</label>
-                                    <input type="text" id="reportDate" name="reportDate" pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Section 2: Test Summary -->
-                        <div class="section" id="section-1">
-                            <h2 class="section-title"><i class="fas fa-chart-bar"></i> Test Summary & Status</h2>
-                            <div class="form-grid">
-                                <div class="form-group full-width">
-                                    <label for="testSummary">Test Summary</label>
-                                    <textarea id="testSummary" name="testSummary" placeholder="Provide a comprehensive summary of the testing activities..." rows="6" required></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="testingStatus">Testing Status</label>
-                                    <select id="testingStatus" name="testingStatus" required>
-                                        <option value="">Select Status</option>
-                                        <option value="passed">✅ Passed</option>
-                                        <option value="passed-with-issues">⚠️ Passed with Issues</option>
-                                        <option value="failed">❌ Failed</option>
-                                        <option value="blocked">🚫 Blocked</option>
-                                        <option value="cancelled">🚮 Cancelled</option>
-                                        <option value="deferred">⏸️ Deferred</option>
-                                        <option value="not-testable">❓ Not Testable</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="table-container">
-                                <h3 style="margin-bottom: 20px; color: white; font-size: 1.4em;"><i class="fas fa-chart-line"></i> Testing Metrics (Auto-Calculated)</h3>
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Metric</th>
-                                            <th>Value</th>
-                                            <th>Source</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><strong>📝 User Stories</strong><br><small>Auto-calculated from section 4</small></td>
-                                            <td><input type="number" id="userStoriesMetric" name="userStoriesMetric" readonly class="readonly-field"></td>
-                                            <td><small>Sum of all user story statuses</small></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>🧪 Test Cases</strong><br><small>Auto-calculated from section 5</small></td>
-                                            <td><input type="number" id="testCasesMetric" name="testCasesMetric" readonly class="readonly-field"></td>
-                                            <td><small>Sum of all test case statuses</small></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>🐛 Issues</strong><br><small>Auto-calculated from section 6</small></td>
-                                            <td><input type="number" id="issuesMetric" name="issuesMetric" readonly class="readonly-field"></td>
-                                            <td><small>Sum of all issue priorities</small></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong><i class="fas fa-bolt"></i> Enhancements</strong><br><small>Auto-calculated from section 7</small></td>
-                                            <td><input type="number" id="enhancementsMetric" name="enhancementsMetric" readonly class="readonly-field"></td>
-                                            <td><small>Sum of all enhancement statuses</small></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong><i class="fas fa-chart-bar"></i> QA Notes Count</strong><br><small>Manual entry</small></td>
-                                            <td><input type="number" name="qaNotesMetric" min="0" placeholder="0"></td>
-                                            <td><small>Number of QA notes</small></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Section 3: Additional Information -->
-                        <div class="section" id="section-2">
-                            <h2 class="section-title">ℹ️ Additional Information</h2>
-                            
-                            <div class="dynamic-section">
-                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
-                                    📋 Request Information
-                                    <button type="button" class="section-btn" onclick="showRequestModal()">+ Add Request</button>
-                                </h3>
-                                <div class="dynamic-list" id="requestList">
-                                    <div class="empty-state">No requests added yet. Click "Add Request" to get started.</div>
-                                </div>
-                            </div>
-
-                            <div class="dynamic-section">
-                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
-                                    🏗️ Build Information
-                                    <button type="button" class="section-btn" onclick="showBuildModal()">+ Add Build</button>
-                                </h3>
-                                <div class="dynamic-list" id="buildList">
-                                    <div class="empty-state">No builds added yet. Click "Add Build" to get started.</div>
-                                </div>
-                            </div>
-
-                            <div class="dynamic-section">
-                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
-                                    🧪 Tester(s) Information
-                                    <button type="button" class="section-btn" onclick="showTesterModal()">+ Add/Select Tester</button>
-                                </h3>
-                                <div class="dynamic-list" id="testerList">
-                                    <div class="empty-state">No testers added yet. Click "Add/Select Tester" to get started.</div>
-                                </div>
-                            </div>
-
-                            <div class="dynamic-section">
-                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
-                                    👥 Team Members
-                                    <button type="button" class="section-btn" onclick="showTeamMemberModal()">+ Add Team Member</button>
-                                </h3>
-                                <div class="dynamic-list" id="teamMemberList">
-                                    <div class="empty-state">No team members added yet.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Section 4: User Stories -->
-                        <div class="section" id="section-3">
-                            <h2 class="section-title">📝 User Stories Analysis</h2>
-                            
-                            <div class="user-stories-container">
-                                <div class="stories-table-section">
-                                    <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i> User Stories Summary</h3>
-                                    <table class="data-table" id="userStoriesTable">
+                                <div class="table-container">
+                                    <h3 style="margin-bottom: 20px; color: white; font-size: 1.4em;"><i
+                                            class="fas fa-chart-line"></i> Testing Metrics (Auto-Calculated)</h3>
+                                    <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th>Status</th>
-                                                <th>Count</th>
-                                                <th>Percentage</th>
+                                                <th>Metric</th>
+                                                <th>Value</th>
+                                                <th>Source</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td><strong>Total Number of Stories</strong></td>
-                                                <td><input type="number" id="totalStories" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
-                                                <td class="percentage-cell">100%</td>
+                                                <td><strong>📝 User Stories</strong><br><small>Auto-calculated from
+                                                        section 4</small></td>
+                                                <td><input type="number" id="userStoriesMetric" name="userStoriesMetric"
+                                                        readonly class="readonly-field"></td>
+                                                <td><small>Sum of all user story statuses</small></td>
                                             </tr>
                                             <tr>
-                                                <td>✅ Passed</td>
-                                                <td><input type="number" id="passedStories" name="passedUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="passedPercentage">0%</td>
+                                                <td><strong>🧪 Test Cases</strong><br><small>Auto-calculated from
+                                                        section 5</small></td>
+                                                <td><input type="number" id="testCasesMetric" name="testCasesMetric"
+                                                        readonly class="readonly-field"></td>
+                                                <td><small>Sum of all test case statuses</small></td>
                                             </tr>
                                             <tr>
-                                                <td>⚠️ Passed with Issue/s</td>
-                                                <td><input type="number" id="passedWithIssuesStories" name="passedWithIssuesUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="passedWithIssuesPercentage">0%</td>
+                                                <td><strong>🐛 Issues</strong><br><small>Auto-calculated from section
+                                                        6</small></td>
+                                                <td><input type="number" id="issuesMetric" name="issuesMetric" readonly
+                                                        class="readonly-field"></td>
+                                                <td><small>Sum of all issue priorities</small></td>
                                             </tr>
                                             <tr>
-                                                <td>❌ Failed</td>
-                                                <td><input type="number" id="failedStories" name="failedUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="failedPercentage">0%</td>
+                                                <td><strong><i class="fas fa-bolt"></i>
+                                                        Enhancements</strong><br><small>Auto-calculated from section
+                                                        7</small></td>
+                                                <td><input type="number" id="enhancementsMetric"
+                                                        name="enhancementsMetric" readonly class="readonly-field"></td>
+                                                <td><small>Sum of all enhancement statuses</small></td>
                                             </tr>
                                             <tr>
-                                                <td>🚫 Blocked</td>
-                                                <td><input type="number" id="blockedStories" name="blockedUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="blockedPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>🚮 Cancelled</td>
-                                                <td><input type="number" id="cancelledStories" name="cancelledUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="cancelledPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>⏸️ Deferred</td>
-                                                <td><input type="number" id="deferredStories" name="deferredUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="deferredPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>❓ Not Testable</td>
-                                                <td><input type="number" id="notTestableStories" name="notTestableUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="notTestablePercentage">0%</td>
+                                                <td><strong><i class="fas fa-chart-bar"></i> QA Notes
+                                                        Count</strong><br><small>Manual entry</small></td>
+                                                <td><input type="number" name="qaNotesMetric" min="0" placeholder="0">
+                                                </td>
+                                                <td><small>Number of QA notes</small></td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
-
-                                <div class="chart-section">
-                                    <h3 style="margin-bottom: 20px; color: white; text-align: center;"><i class="fas fa-chart-line"></i> User Stories Distribution</h3>
-                                    <div class="chart-container">
-                                        <canvas id="userStoriesChart" width="400" height="400"></canvas>
-                                    </div>
-                                </div>
                             </div>
-                        </div>
 
-                        <!-- Section 5: Test Cases -->
-                        <div class="section" id="section-4">
-                            <h2 class="section-title">🧪 Test Cases Analysis</h2>
-                            
-                            <div class="user-stories-container">
-                                <div class="stories-table-section">
-                                    <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i> Test Cases Summary</h3>
-                                    <table class="data-table" id="testCasesTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Status</th>
-                                                <th>Count</th>
-                                                <th>Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><strong>Total Number of Test Cases</strong></td>
-                                                <td><input type="number" id="totalTestCases" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
-                                                <td class="percentage-cell">100%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>✅ Passed</td>
-                                                <td><input type="number" id="passedTestCases" name="passedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="passedTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>⚠️ Passed with Issue/s</td>
-                                                <td><input type="number" id="passedWithIssuesTestCases" name="passedWithIssuesTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="passedWithIssuesTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>❌ Failed</td>
-                                                <td><input type="number" id="failedTestCases" name="failedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="failedTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>🚫 Blocked</td>
-                                                <td><input type="number" id="blockedTestCases" name="blockedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="blockedTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>🚮 Cancelled</td>
-                                                <td><input type="number" id="cancelledTestCases" name="cancelledTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="cancelledTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>⏸️ Deferred</td>
-                                                <td><input type="number" id="deferredTestCases" name="deferredTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="deferredTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>❓ Not Testable</td>
-                                                <td><input type="number" id="notTestableTestCases" name="notTestableTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="notTestableTestCasesPercentage">0%</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <!-- Section 3: Additional Information -->
+                            <div class="section" id="section-2">
+                                <h2 class="section-title">ℹ️ Additional Information</h2>
 
-                                <div class="chart-section">
-                                    <h3 style="margin-bottom: 20px; color: white; text-align: center;"><i class="fas fa-chart-line"></i> Test Cases Distribution</h3>
-                                    <div class="chart-container">
-                                        <canvas id="testCasesChart" width="400" height="400"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Section 6: Issues Analysis -->
-                        <div class="section" id="section-5">
-                            <h2 class="section-title">🐛 Issues Analysis</h2>
-                            
-                            <div class="issues-container">
-                                <div class="issues-priority-section">
-                                    <h3 style="margin-bottom: 20px; color: white;">🔥 Issues by Priority</h3>
-                                    <table class="data-table" id="issuesPriorityTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Priority</th>
-                                                <th>Count</th>
-                                                <th>Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><strong>Total Issues</strong></td>
-                                                <td><input type="number" id="totalIssues" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
-                                                <td class="percentage-cell">100%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>🔴 Critical</td>
-                                                <td><input type="number" id="criticalIssues" name="criticalIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
-                                                <td class="percentage-cell" id="criticalIssuesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>🟠 High</td>
-                                                <td><input type="number" id="highIssues" name="highIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
-                                                <td class="percentage-cell" id="highIssuesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>🟡 Medium</td>
-                                                <td><input type="number" id="mediumIssues" name="mediumIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
-                                                <td class="percentage-cell" id="mediumIssuesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>🟢 Low</td>
-                                                <td><input type="number" id="lowIssues" name="lowIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
-                                                <td class="percentage-cell" id="lowIssuesPercentage">0%</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <div class="chart-container">
-                                        <canvas id="issuesPriorityChart" width="400" height="300"></canvas>
+                                <div class="dynamic-section">
+                                    <h3
+                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
+                                        📋 Request Information
+                                        <button type="button" class="section-btn" onclick="showRequestModal()">+ Add
+                                            Request</button>
+                                    </h3>
+                                    <div class="dynamic-list" id="requestList">
+                                        <div class="empty-state">No requests added yet. Click "Add Request" to get
+                                            started.</div>
                                     </div>
                                 </div>
 
-                                <div class="issues-status-section">
-                                    <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i> Issues by Status</h3>
-                                    <table class="data-table" id="issuesStatusTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Status</th>
-                                                <th>Count</th>
-                                                <th>Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>🆕 New</td>
-                                                <td><input type="number" id="newIssues" name="newIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
-                                                <td class="percentage-cell" id="newIssuesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>✅ Fixed</td>
-                                                <td><input type="number" id="fixedIssues" name="fixedIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
-                                                <td class="percentage-cell" id="fixedIssuesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>❌ Not Fixed</td>
-                                                <td><input type="number" id="notFixedIssues" name="notFixedIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
-                                                <td class="percentage-cell" id="notFixedIssuesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>🔄 Re-opened</td>
-                                                <td><input type="number" id="reopenedIssues" name="reopenedIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
-                                                <td class="percentage-cell" id="reopenedIssuesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>⏸️ Deferred</td>
-                                                <td><input type="number" id="deferredIssues" name="deferredIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
-                                                <td class="percentage-cell" id="deferredIssuesPercentage">0%</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <div class="chart-container">
-                                        <canvas id="issuesStatusChart" width="400" height="300"></canvas>
+                                <div class="dynamic-section">
+                                    <h3
+                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
+                                        🏗️ Build Information
+                                        <button type="button" class="section-btn" onclick="showBuildModal()">+ Add
+                                            Build</button>
+                                    </h3>
+                                    <div class="dynamic-list" id="buildList">
+                                        <div class="empty-state">No builds added yet. Click "Add Build" to get started.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="dynamic-section">
+                                    <h3
+                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
+                                        🧪 Tester(s) Information
+                                        <button type="button" class="section-btn" onclick="showTesterModal()">+
+                                            Add/Select Tester</button>
+                                    </h3>
+                                    <div class="dynamic-list" id="testerList">
+                                        <div class="empty-state">No testers added yet. Click "Add/Select Tester" to get
+                                            started.</div>
+                                    </div>
+                                </div>
+
+                                <div class="dynamic-section">
+                                    <h3
+                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white;">
+                                        👥 Team Members
+                                        <button type="button" class="section-btn" onclick="showTeamMemberModal()">+ Add
+                                            Team Member</button>
+                                    </h3>
+                                    <div class="dynamic-list" id="teamMemberList">
+                                        <div class="empty-state">No team members added yet.</div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Section 7: Enhancements -->
-                        <div class="section" id="section-6">
-                            <h2 class="section-title"><i class="fas fa-bolt"></i> Enhancements Analysis</h2>
-                            
-                            <div class="user-stories-container">
-                                <div class="stories-table-section">
-                                    <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i> Enhancements Summary</h3>
-                                    <table class="data-table" id="enhancementsTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Status</th>
-                                                <th>Count</th>
-                                                <th>Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><strong>Total Enhancements</strong></td>
-                                                <td><input type="number" id="totalEnhancements" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
-                                                <td class="percentage-cell">100%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>🆕 New</td>
-                                                <td><input type="number" id="newEnhancements" name="newEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
-                                                <td class="percentage-cell" id="newEnhancementsPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>✅ Implemented</td>
-                                                <td><input type="number" id="implementedEnhancements" name="implementedEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
-                                                <td class="percentage-cell" id="implementedEnhancementsPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>✨ Exists</td>
-                                                <td><input type="number" id="existsEnhancements" name="existsEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
-                                                <td class="percentage-cell" id="existsEnhancementsPercentage">0%</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <!-- Section 4: User Stories -->
+                            <div class="section" id="section-3">
+                                <h2 class="section-title">📝 User Stories Analysis</h2>
 
-                                <div class="chart-section">
-                                    <h3 style="margin-bottom: 20px; color: white; text-align: center;"><i class="fas fa-chart-line"></i> Enhancements Distribution</h3>
-                                    <div class="chart-container">
-                                        <canvas id="enhancementsChart" width="400" height="400"></canvas>
+                                <div class="user-stories-container">
+                                    <div class="stories-table-section">
+                                        <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i>
+                                            User Stories Summary</h3>
+                                        <table class="data-table" id="userStoriesTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Total Number of Stories</strong></td>
+                                                    <td><input type="number" id="totalStories" min="0" placeholder="0"
+                                                            readonly class="readonly-field calculated-total"></td>
+                                                    <td class="percentage-cell">100%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>✅ Passed</td>
+                                                    <td><input type="number" id="passedStories" name="passedUserStories"
+                                                            min="0" placeholder="0" oninput="calculatePercentages()">
+                                                    </td>
+                                                    <td class="percentage-cell" id="passedPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>⚠️ Passed with Issue/s</td>
+                                                    <td><input type="number" id="passedWithIssuesStories"
+                                                            name="passedWithIssuesUserStories" min="0" placeholder="0"
+                                                            oninput="calculatePercentages()"></td>
+                                                    <td class="percentage-cell" id="passedWithIssuesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>❌ Failed</td>
+                                                    <td><input type="number" id="failedStories" name="failedUserStories"
+                                                            min="0" placeholder="0" oninput="calculatePercentages()">
+                                                    </td>
+                                                    <td class="percentage-cell" id="failedPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>🚫 Blocked</td>
+                                                    <td><input type="number" id="blockedStories"
+                                                            name="blockedUserStories" min="0" placeholder="0"
+                                                            oninput="calculatePercentages()"></td>
+                                                    <td class="percentage-cell" id="blockedPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>🚮 Cancelled</td>
+                                                    <td><input type="number" id="cancelledStories"
+                                                            name="cancelledUserStories" min="0" placeholder="0"
+                                                            oninput="calculatePercentages()"></td>
+                                                    <td class="percentage-cell" id="cancelledPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>⏸️ Deferred</td>
+                                                    <td><input type="number" id="deferredStories"
+                                                            name="deferredUserStories" min="0" placeholder="0"
+                                                            oninput="calculatePercentages()"></td>
+                                                    <td class="percentage-cell" id="deferredPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>❓ Not Testable</td>
+                                                    <td><input type="number" id="notTestableStories"
+                                                            name="notTestableUserStories" min="0" placeholder="0"
+                                                            oninput="calculatePercentages()"></td>
+                                                    <td class="percentage-cell" id="notTestablePercentage">0%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="chart-section">
+                                        <h3 style="margin-bottom: 20px; color: white; text-align: center;"><i
+                                                class="fas fa-chart-line"></i> User Stories Distribution</h3>
+                                        <div class="chart-container">
+                                            <canvas id="userStoriesChart" width="400" height="400"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Section 8: QA Notes -->
-                        <div class="section" id="section-7">
-                            <h2 class="section-title">📝 QA Notes</h2>
-                            
-                            <div class="form-grid">
-                                <div class="form-group full-width">
-                                    <label for="qaNotesText">General Notes</label>
-                                    <textarea id="qaNotesText" name="qaNotesText" placeholder="Add all your QA notes, observations, or comments here..." rows="12"></textarea>
+                            <!-- Section 5: Test Cases -->
+                            <div class="section" id="section-4">
+                                <h2 class="section-title">🧪 Test Cases Analysis</h2>
+
+                                <div class="user-stories-container">
+                                    <div class="stories-table-section">
+                                        <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i>
+                                            Test Cases Summary</h3>
+                                        <table class="data-table" id="testCasesTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Total Number of Test Cases</strong></td>
+                                                    <td><input type="number" id="totalTestCases" min="0" placeholder="0"
+                                                            readonly class="readonly-field calculated-total"></td>
+                                                    <td class="percentage-cell">100%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>✅ Passed</td>
+                                                    <td><input type="number" id="passedTestCases" name="passedTestCases"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="passedTestCasesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>⚠️ Passed with Issue/s</td>
+                                                    <td><input type="number" id="passedWithIssuesTestCases"
+                                                            name="passedWithIssuesTestCases" min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell"
+                                                        id="passedWithIssuesTestCasesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>❌ Failed</td>
+                                                    <td><input type="number" id="failedTestCases" name="failedTestCases"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="failedTestCasesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>🚫 Blocked</td>
+                                                    <td><input type="number" id="blockedTestCases"
+                                                            name="blockedTestCases" min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="blockedTestCasesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>🚮 Cancelled</td>
+                                                    <td><input type="number" id="cancelledTestCases"
+                                                            name="cancelledTestCases" min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="cancelledTestCasesPercentage">0%
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>⏸️ Deferred</td>
+                                                    <td><input type="number" id="deferredTestCases"
+                                                            name="deferredTestCases" min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="deferredTestCasesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>❓ Not Testable</td>
+                                                    <td><input type="number" id="notTestableTestCases"
+                                                            name="notTestableTestCases" min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="notTestableTestCasesPercentage">0%
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="chart-section">
+                                        <h3 style="margin-bottom: 20px; color: white; text-align: center;"><i
+                                                class="fas fa-chart-line"></i> Test Cases Distribution</h3>
+                                        <div class="chart-container">
+                                            <canvas id="testCasesChart" width="400" height="400"></canvas>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Navigation Buttons -->
-                        <div class="navigation-buttons">
-                            <button type="button" class="nav-btn" id="prevBtn" onclick="previousSection()" disabled>← Previous</button>
-                            <button type="button" class="nav-btn" id="nextBtn" onclick="nextSection()">Next →</button>
-                            <button type="submit" class="nav-btn submit-btn" id="submitBtn" style="display: none;">💾 Save Report</button>
-                        </div>
-                    </form>
+                            <!-- Section 6: Issues Analysis -->
+                            <div class="section" id="section-5">
+                                <h2 class="section-title">🐛 Issues Analysis</h2>
+
+                                <div class="issues-container">
+                                    <div class="issues-priority-section">
+                                        <h3 style="margin-bottom: 20px; color: white;">🔥 Issues by Priority</h3>
+                                        <table class="data-table" id="issuesPriorityTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Priority</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Total Issues</strong></td>
+                                                    <td><input type="number" id="totalIssues" min="0" placeholder="0"
+                                                            readonly class="readonly-field calculated-total"></td>
+                                                    <td class="percentage-cell">100%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>🔴 Critical</td>
+                                                    <td><input type="number" id="criticalIssues" name="criticalIssues"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateIssuesPercentages()"></td>
+                                                    <td class="percentage-cell" id="criticalIssuesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>🟠 High</td>
+                                                    <td><input type="number" id="highIssues" name="highIssues" min="0"
+                                                            placeholder="0" oninput="calculateIssuesPercentages()"></td>
+                                                    <td class="percentage-cell" id="highIssuesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>🟡 Medium</td>
+                                                    <td><input type="number" id="mediumIssues" name="mediumIssues"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateIssuesPercentages()"></td>
+                                                    <td class="percentage-cell" id="mediumIssuesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>🟢 Low</td>
+                                                    <td><input type="number" id="lowIssues" name="lowIssues" min="0"
+                                                            placeholder="0" oninput="calculateIssuesPercentages()"></td>
+                                                    <td class="percentage-cell" id="lowIssuesPercentage">0%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="chart-container">
+                                            <canvas id="issuesPriorityChart" width="400" height="300"></canvas>
+                                        </div>
+                                    </div>
+
+                                    <div class="issues-status-section">
+                                        <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i>
+                                            Issues by Status</h3>
+                                        <table class="data-table" id="issuesStatusTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>🆕 New</td>
+                                                    <td><input type="number" id="newIssues" name="newIssues" min="0"
+                                                            placeholder="0"
+                                                            oninput="calculateIssuesStatusPercentages()"></td>
+                                                    <td class="percentage-cell" id="newIssuesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>✅ Fixed</td>
+                                                    <td><input type="number" id="fixedIssues" name="fixedIssues" min="0"
+                                                            placeholder="0"
+                                                            oninput="calculateIssuesStatusPercentages()"></td>
+                                                    <td class="percentage-cell" id="fixedIssuesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>❌ Not Fixed</td>
+                                                    <td><input type="number" id="notFixedIssues" name="notFixedIssues"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateIssuesStatusPercentages()"></td>
+                                                    <td class="percentage-cell" id="notFixedIssuesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>🔄 Re-opened</td>
+                                                    <td><input type="number" id="reopenedIssues" name="reopenedIssues"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateIssuesStatusPercentages()"></td>
+                                                    <td class="percentage-cell" id="reopenedIssuesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>⏸️ Deferred</td>
+                                                    <td><input type="number" id="deferredIssues" name="deferredIssues"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateIssuesStatusPercentages()"></td>
+                                                    <td class="percentage-cell" id="deferredIssuesPercentage">0%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="chart-container">
+                                            <canvas id="issuesStatusChart" width="400" height="300"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 7: Enhancements -->
+                            <div class="section" id="section-6">
+                                <h2 class="section-title"><i class="fas fa-bolt"></i> Enhancements Analysis</h2>
+
+                                <div class="user-stories-container">
+                                    <div class="stories-table-section">
+                                        <h3 style="margin-bottom: 20px; color: white;"><i class="fas fa-chart-bar"></i>
+                                            Enhancements Summary</h3>
+                                        <table class="data-table" id="enhancementsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Total Enhancements</strong></td>
+                                                    <td><input type="number" id="totalEnhancements" min="0"
+                                                            placeholder="0" readonly
+                                                            class="readonly-field calculated-total"></td>
+                                                    <td class="percentage-cell">100%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>🆕 New</td>
+                                                    <td><input type="number" id="newEnhancements" name="newEnhancements"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateEnhancementsPercentages()"></td>
+                                                    <td class="percentage-cell" id="newEnhancementsPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>✅ Implemented</td>
+                                                    <td><input type="number" id="implementedEnhancements"
+                                                            name="implementedEnhancements" min="0" placeholder="0"
+                                                            oninput="calculateEnhancementsPercentages()"></td>
+                                                    <td class="percentage-cell" id="implementedEnhancementsPercentage">
+                                                        0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>✨ Exists</td>
+                                                    <td><input type="number" id="existsEnhancements"
+                                                            name="existsEnhancements" min="0" placeholder="0"
+                                                            oninput="calculateEnhancementsPercentages()"></td>
+                                                    <td class="percentage-cell" id="existsEnhancementsPercentage">0%
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="chart-section">
+                                        <h3 style="margin-bottom: 20px; color: white; text-align: center;"><i
+                                                class="fas fa-chart-line"></i> Enhancements Distribution</h3>
+                                        <div class="chart-container">
+                                            <canvas id="enhancementsChart" width="400" height="400"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 8: QA Notes -->
+                            <div class="section" id="section-7">
+                                <h2 class="section-title">📝 QA Notes</h2>
+
+                                <div class="form-grid">
+                                    <div class="form-group full-width">
+                                        <label for="qaNotesText">General Notes</label>
+                                        <textarea id="qaNotesText" name="qaNotesText"
+                                            placeholder="Add all your QA notes, observations, or comments here..."
+                                            rows="12"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Navigation Buttons -->
+                            <div class="navigation-buttons">
+                                <button type="button" class="nav-btn" id="prevBtn" onclick="previousSection()"
+                                    disabled>← Previous</button>
+                                <button type="button" class="nav-btn" id="nextBtn" onclick="nextSection()">Next
+                                    →</button>
+                                <button type="submit" class="nav-btn submit-btn" id="submitBtn"
+                                    style="display: none;">💾 Save Report</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Enhanced Modals -->
-    <!-- Portfolio Modal -->
-    <div id="addPortfolioModal" class="modal">
-        <div class="modal-content">
-            <h3>📁 Add New Portfolio</h3>
-            <div class="modal-form">
-                <div class="form-group">
-                    <label for="newPortfolioName">Portfolio Name:</label>
-                    <input type="text" id="newPortfolioName" placeholder="Enter portfolio name">
+        <!-- Enhanced Modals -->
+        <!-- Portfolio Modal -->
+        <div id="addPortfolioModal" class="modal">
+            <div class="modal-content">
+                <h3>📁 Add New Portfolio</h3>
+                <div class="modal-form">
+                    <div class="form-group">
+                        <label for="newPortfolioName">Portfolio Name:</label>
+                        <input type="text" id="newPortfolioName" placeholder="Enter portfolio name">
+                    </div>
                 </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('addPortfolioModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addPortfolio()">Add Portfolio</button>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('addPortfolioModal')">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addPortfolio()">Add Portfolio</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Project Modal -->
-    <div id="addProjectModal" class="modal">
-        <div class="modal-content">
-            <h3><i class="fas fa-rocket"></i> Add New Project</h3>
-            <div class="modal-form">
-                <div class="form-group">
-                    <label for="newProjectName">Project Name:</label>
-                    <input type="text" id="newProjectName" placeholder="Enter project name">
+        <!-- Project Modal -->
+        <div id="addProjectModal" class="modal">
+            <div class="modal-content">
+                <h3><i class="fas fa-rocket"></i> Add New Project</h3>
+                <div class="modal-form">
+                    <div class="form-group">
+                        <label for="newProjectName">Project Name:</label>
+                        <input type="text" id="newProjectName" placeholder="Enter project name">
+                    </div>
                 </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('addProjectModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addProject()">Add Project</button>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('addProjectModal')">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addProject()">Add Project</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Request Modal -->
-    <div id="requestModal" class="modal">
-        <div class="modal-content">
-            <h3>📋 Add Request Information</h3>
-            <div class="modal-form">
-                <div class="form-group">
-                    <label for="requestId">Request ID:</label>
-                    <input type="text" id="requestId" placeholder="Enter request ID">
+        <!-- Request Modal -->
+        <div id="requestModal" class="modal">
+            <div class="modal-content">
+                <h3>📋 Add Request Information</h3>
+                <div class="modal-form">
+                    <div class="form-group">
+                        <label for="requestId">Request ID:</label>
+                        <input type="text" id="requestId" placeholder="Enter request ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="requestUrl">Request URL:</label>
+                        <input type="url" id="requestUrl" placeholder="Enter request URL">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="requestUrl">Request URL:</label>
-                    <input type="url" id="requestUrl" placeholder="Enter request URL">
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('requestModal')">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addRequest()">Add Request</button>
                 </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('requestModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addRequest()">Add Request</button>
             </div>
         </div>
-    </div>
 
-    <!-- Build Modal -->
-    <div id="buildModal" class="modal">
-        <div class="modal-content">
-            <h3>🏗️ Add Build Information</h3>
-            <div class="modal-form">
-                <div class="form-group">
-                    <label for="buildRequestId">Request ID:</label>
-                    <input type="text" id="buildRequestId" placeholder="Enter request ID">
+        <!-- Build Modal -->
+        <div id="buildModal" class="modal">
+            <div class="modal-content">
+                <h3>🏗️ Add Build Information</h3>
+                <div class="modal-form">
+                    <div class="form-group">
+                        <label for="buildRequestId">Request ID:</label>
+                        <input type="text" id="buildRequestId" placeholder="Enter request ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="buildRequestUrl">Request URL:</label>
+                        <input type="url" id="buildRequestUrl" placeholder="Enter request URL">
+                    </div>
+                    <div class="form-group">
+                        <label for="buildEnvironment">Environment:</label>
+                        <input type="text" id="buildEnvironment" placeholder="Enter environment">
+                    </div>
+                    <div class="form-group">
+                        <label for="buildCycles">Cycles:</label>
+                        <input type="text" id="buildCycles" placeholder="Enter cycles">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="buildRequestUrl">Request URL:</label>
-                    <input type="url" id="buildRequestUrl" placeholder="Enter request URL">
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('buildModal')">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addBuild()">Add Build</button>
                 </div>
-                <div class="form-group">
-                    <label for="buildEnvironment">Environment:</label>
-                    <input type="text" id="buildEnvironment" placeholder="Enter environment">
-                </div>
-                <div class="form-group">
-                    <label for="buildCycles">Cycles:</label>
-                    <input type="text" id="buildCycles" placeholder="Enter cycles">
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('buildModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addBuild()">Add Build</button>
             </div>
         </div>
-    </div>
 
-    <!-- Tester Modal -->
-    <div id="testerModal" class="modal">
-        <div class="modal-content">
-            <h3>🧪 Add/Select Tester</h3>
-            <div class="modal-form">
-                <div class="form-group">
-                    <label for="existingTesterSelect">Select Existing Tester:</label>
-                    <select id="existingTesterSelect" onchange="handleTesterSelection()">
-                        <option value="">-- Select from existing testers --</option>
-                    </select>
+        <!-- Tester Modal -->
+        <div id="testerModal" class="modal">
+            <div class="modal-content">
+                <h3>🧪 Add/Select Tester</h3>
+                <div class="modal-form">
+                    <div class="form-group">
+                        <label for="existingTesterSelect">Select Existing Tester:</label>
+                        <select id="existingTesterSelect" onchange="handleTesterSelection()">
+                            <option value="">-- Select from existing testers --</option>
+                        </select>
+                    </div>
+
+                    <div style="text-align: center; margin: 20px 0; color: rgba(255,255,255,0.6); font-weight: 600;">
+                        OR
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newTesterName">Add New Tester Name:</label>
+                        <input type="text" id="newTesterName" placeholder="Enter new tester name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newTesterEmail">New Tester Email:</label>
+                        <input type="email" id="newTesterEmail" placeholder="Enter new tester email">
+                    </div>
                 </div>
-                
-                <div style="text-align: center; margin: 20px 0; color: rgba(255,255,255,0.6); font-weight: 600;">
-                    OR
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('testerModal')">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addSelectedTester()">Add Tester</button>
                 </div>
-                
-                <div class="form-group">
-                    <label for="newTesterName">Add New Tester Name:</label>
-                    <input type="text" id="newTesterName" placeholder="Enter new tester name">
-                </div>
-                
-                <div class="form-group">
-                    <label for="newTesterEmail">New Tester Email:</label>
-                    <input type="email" id="newTesterEmail" placeholder="Enter new tester email">
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('testerModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addSelectedTester()">Add Tester</button>
             </div>
         </div>
-    </div>
 
-    <!-- Team Member Modal -->
-    <div id="teamMemberModal" class="modal">
-        <div class="modal-content">
-            <h3>👥 Add/Select Team Member</h3>
-            <div class="modal-form">
-                <div class="form-group">
-                    <label for="existingTeamMemberSelect">Select Existing Team Member:</label>
-                    <select id="existingTeamMemberSelect" onchange="handleTeamMemberSelection()">
-                        <option value="">-- Select from existing team members --</option>
-                    </select>
+        <!-- Team Member Modal -->
+        <div id="teamMemberModal" class="modal">
+            <div class="modal-content">
+                <h3>👥 Add/Select Team Member</h3>
+                <div class="modal-form">
+                    <div class="form-group">
+                        <label for="existingTeamMemberSelect">Select Existing Team Member:</label>
+                        <select id="existingTeamMemberSelect" onchange="handleTeamMemberSelection()">
+                            <option value="">-- Select from existing team members --</option>
+                        </select>
+                    </div>
+
+                    <div style="text-align: center; margin: 20px 0; color: rgba(255,255,255,0.6); font-weight: 600;">
+                        OR
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newTeamMemberName">Add New Team Member Name:</label>
+                        <input type="text" id="newTeamMemberName" placeholder="Enter new team member name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newTeamMemberEmail">New Team Member Email:</label>
+                        <input type="email" id="newTeamMemberEmail" placeholder="Enter new team member email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newTeamMemberRole">Role:</label>
+                        <select id="newTeamMemberRole">
+                            <option value="">Select Role</option>
+                            <option value="Project Owner">👑 Project Owner</option>
+                            <option value="Project Analyst"><i class="fas fa-chart-bar"></i> Project Analyst</option>
+                            <option value="Project Manager">🎯 Project Manager</option>
+                            <option value="Business Analyst">💼 Business Analyst</option>
+                            <option value="Technical Lead"><i class="fas fa-bolt"></i> Technical Lead</option>
+                            <option value="Scrum Master">🏃 Scrum Master</option>
+                            <option value="Product Owner"><i class="fas fa-rocket"></i> Product Owner</option>
+                            <option value="Quality Assurance Lead">🔍 Quality Assurance Lead</option>
+                            <option value="DevOps Engineer">🔧 DevOps Engineer</option>
+                            <option value="UI/UX Designer">🎨 UI/UX Designer</option>
+                            <option value="Database Administrator">🗄️ Database Administrator</option>
+                            <option value="Security Analyst">🛡️ Security Analyst</option>
+                            <option value="System Administrator">⚙️ System Administrator</option>
+                            <option value="Stakeholder">👔 Stakeholder</option>
+                            <option value="Client Representative">🤝 Client Representative</option>
+                        </select>
+                    </div>
                 </div>
-                
-                <div style="text-align: center; margin: 20px 0; color: rgba(255,255,255,0.6); font-weight: 600;">
-                    OR
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('teamMemberModal')">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addSelectedTeamMember()">Add Team
+                        Member</button>
                 </div>
-                
-                <div class="form-group">
-                    <label for="newTeamMemberName">Add New Team Member Name:</label>
-                    <input type="text" id="newTeamMemberName" placeholder="Enter new team member name">
-                </div>
-                
-                <div class="form-group">
-                    <label for="newTeamMemberEmail">New Team Member Email:</label>
-                    <input type="email" id="newTeamMemberEmail" placeholder="Enter new team member email">
-                </div>
-                
-                <div class="form-group">
-                    <label for="newTeamMemberRole">Role:</label>
-                    <select id="newTeamMemberRole">
-                        <option value="">Select Role</option>
-                        <option value="Project Owner">👑 Project Owner</option>
-                        <option value="Project Analyst"><i class="fas fa-chart-bar"></i> Project Analyst</option>
-                        <option value="Project Manager">🎯 Project Manager</option>
-                        <option value="Business Analyst">💼 Business Analyst</option>
-                        <option value="Technical Lead"><i class="fas fa-bolt"></i> Technical Lead</option>
-                        <option value="Scrum Master">🏃 Scrum Master</option>
-                        <option value="Product Owner"><i class="fas fa-rocket"></i> Product Owner</option>
-                        <option value="Quality Assurance Lead">🔍 Quality Assurance Lead</option>
-                        <option value="DevOps Engineer">🔧 DevOps Engineer</option>
-                        <option value="UI/UX Designer">🎨 UI/UX Designer</option>
-                        <option value="Database Administrator">🗄️ Database Administrator</option>
-                        <option value="Security Analyst">🛡️ Security Analyst</option>
-                        <option value="System Administrator">⚙️ System Administrator</option>
-                        <option value="Stakeholder">👔 Stakeholder</option>
-                        <option value="Client Representative">🤝 Client Representative</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('teamMemberModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addSelectedTeamMember()">Add Team Member</button>
             </div>
         </div>
-    </div>
     </div>
 
     <!-- Footer -->
@@ -852,7 +983,7 @@
     <!-- Link to the external JavaScript files -->
     <script src="/static/enhanced_script.js"></script>
     <script src="/static/Charts.js"></script>
-    
+
     <script>
         // Initialize theme on page load
         document.addEventListener('DOMContentLoaded', () => {
@@ -863,4 +994,5 @@
         });
     </script>
 </body>
+
 </html>

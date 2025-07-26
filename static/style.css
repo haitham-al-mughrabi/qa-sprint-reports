@@ -3080,4 +3080,20 @@ p {
     .evaluation-value {
         font-size: 1rem;
     }
+}/* Ensure al
+l buttons have white text in light theme */
+[data-theme="light"] .btn-primary,
+[data-theme="light"] .action-btn,
+[data-theme="light"] .nav-btn,
+[data-theme="light"] .back-btn,
+[data-theme="light"] .submit-btn {
+    color: white !important;
+}
+
+[data-theme="light"] .btn-primary:hover,
+[data-theme="light"] .action-btn:hover,
+[data-theme="light"] .nav-btn:hover,
+[data-theme="light"] .back-btn:hover,
+[data-theme="light"] .submit-btn:hover {
+    color: white !important;
 }

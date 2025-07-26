@@ -823,10 +823,12 @@ ight theme background adjustment */
 
 [data-theme="light"] .action-btn {
     box-shadow: var(--shadow-light);
+    color: white !important;
 }
 
 [data-theme="light"] .action-btn:hover {
     box-shadow: var(--shadow-heavy);
+    color: white !important;
 }
 
 [data-theme="light"] .status-badge {

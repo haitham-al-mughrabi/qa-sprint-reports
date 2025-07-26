@@ -210,4 +210,20 @@ html { scrollbar-width: none; }
 
 [data-theme="light"] .dropdown-content a:hover {
     background-color: rgba(59, 130, 246, 0.1);
+}/* E
+nsure all buttons have white text in light theme */
+[data-theme="light"] .btn-primary,
+[data-theme="light"] .action-btn,
+[data-theme="light"] .nav-btn,
+[data-theme="light"] .back-btn,
+[data-theme="light"] .submit-btn {
+    color: white !important;
+}
+
+[data-theme="light"] .btn-primary:hover,
+[data-theme="light"] .action-btn:hover,
+[data-theme="light"] .nav-btn:hover,
+[data-theme="light"] .back-btn:hover,
+[data-theme="light"] .submit-btn:hover {
+    color: white !important;
 }

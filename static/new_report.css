@@ -1026,7 +1026,7 @@
 
 /* Card Header */
 .info-card-v2-header {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
     color: white;
     padding: 1.25rem 1.5rem;
     display: flex;
@@ -1238,7 +1238,7 @@
 }
 
 .additional-info-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--accent), var(--primary));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1305,7 +1305,7 @@
 }
 
 .test-summary-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--accent), var(--primary));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 .metrics-table-card {
@@ -1313,7 +1313,7 @@
 }
 
 .metrics-table-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--success), var(--primary));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 /* ========================================
@@ -1349,11 +1349,11 @@
 }
 
 .analysis-table-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 .analysis-chart-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 .analysis-table-card .info-card-v2-content,
@@ -1403,11 +1403,11 @@
 }
 
 .issues-priority-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--danger), var(--warning));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 .issues-status-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--primary), var(--accent));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 .issues-content-layout {
@@ -1461,11 +1461,11 @@
 }
 
 .enhancements-table-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--success), var(--primary));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 .enhancements-chart-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--accent), var(--success));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 /* ========================================
@@ -1496,7 +1496,7 @@
 }
 
 .qa-notes-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--warning), var(--accent));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1714,15 +1714,15 @@
 }
 
 .automation-test-cases-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--primary), var(--accent));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 .automation-percentage-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--success), var(--primary));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 .automation-stability-card .info-card-v2-header {
-    background: linear-gradient(135deg, var(--warning), var(--danger));
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.8), rgba(var(--accent-rgb), 0.8));
 }
 
 .automation-content-layout {
@@ -2840,4 +2840,33 @@ body {
         padding: 15px 0;
         font-size: 0.8rem;
     }
+}/* En
+sure all navigation and action buttons have white text in light theme */
+[data-theme="light"] .nav-btn,
+[data-theme="light"] .back-btn,
+[data-theme="light"] .btn-primary,
+[data-theme="light"] .action-btn,
+[data-theme="light"] .submit-btn {
+    color: white !important;
+}
+
+[data-theme="light"] .nav-btn:hover,
+[data-theme="light"] .back-btn:hover,
+[data-theme="light"] .btn-primary:hover,
+[data-theme="light"] .action-btn:hover,
+[data-theme="light"] .submit-btn:hover {
+    color: white !important;
+}
+
+/* Ensure clear section and clear all buttons have white text */
+[data-theme="light"] .clear-section-btn,
+[data-theme="light"] .clear-all-btn,
+[data-theme="light"] .section-btn {
+    color: white !important;
+}
+
+[data-theme="light"] .clear-section-btn:hover,
+[data-theme="light"] .clear-all-btn:hover,
+[data-theme="light"] .section-btn:hover {
+    color: white !important;
 }
