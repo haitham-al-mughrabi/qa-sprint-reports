@@ -246,7 +246,7 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Link to the external JavaScript files -->
-    <script src="/static/enhanced_script.js" defer></script>
+    <script src="/static/enhanced_script.js"></script>
     <script src="/static/Charts.js" defer></script>
     <script src="/static/dashboard_charts.js" defer></script>
     <script>
@@ -267,7 +267,7 @@
             // Show loading spinner and load dashboard stats
             showDashboardLoading();
             fetchDashboardStats().then(stats => {
-                dashboardStatsCache = stats;
+                window.dashboardStatsCache = stats; // Make it globally available
                 updateDashboardStats(stats);
                 hideDashboardLoading();
             }).catch(error => {

@@ -34,7 +34,7 @@ let weightReasonVisible = false; // Not directly used in this version but kept f
 
 // --- API Communication ---
 const API_URL = '/api/reports';
-const DASHBOARD_API_URL = '/api/dashboard/stats/cached';
+const DASHBOARD_API_URL = '/api/dashboard/stats';
 
 
 
@@ -59,19 +59,33 @@ async function fetchDashboardStats() {
             return dashboardStatsCache.data;
         }
 
-        const response = await fetch(DASHBOARD_API_URL);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+        // Fetch both regular and cached data to get complete information
+        const [regularResponse, cachedResponse] = await Promise.all([
+            fetch('/api/dashboard/stats'),
+            fetch('/api/dashboard/stats/cached')
+        ]);
         
-        // Cache the dashboard stats
+        if (!regularResponse.ok || !cachedResponse.ok) {
+            throw new Error(`HTTP error! regular: ${regularResponse.status}, cached: ${cachedResponse.status}`);
+        }
+        
+        const regularData = await regularResponse.json();
+        const cachedData = await cachedResponse.json();
+        
+        // Combine the data: use detailed overall stats from regular endpoint
+        // and detailed project stats from cached endpoint
+        const combinedData = {
+            overall: regularData.overall, // Detailed breakdown for charts
+            projects: cachedData.projects // Detailed breakdown for project metrics
+        };
+        
+        // Cache the combined dashboard stats
         dashboardStatsCache = {
-            data: data,
+            data: combinedData,
             cacheTime: Date.now()
         };
         
-        return data;
+        return combinedData;
     } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
         return null;

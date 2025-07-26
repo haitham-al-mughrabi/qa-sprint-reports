@@ -282,6 +282,36 @@ def dashboard_page():
     """Serves the dashboard HTML page."""
     return render_template('dashboard.html')
 
+@app.route('/debug-dashboard')
+def debug_dashboard_page():
+    """Serves the debug dashboard HTML page."""
+    return render_template('debug_dashboard.html')
+
+@app.route('/test-project-metrics')
+def test_project_metrics_page():
+    """Serves the project metrics test page."""
+    return render_template('test_project_metrics.html')
+
+@app.route('/test-complete-dashboard')
+def test_complete_dashboard_page():
+    """Serves the complete dashboard test page."""
+    return render_template('test_complete_dashboard.html')
+
+@app.route('/test-general-details')
+def test_general_details_page():
+    """Serves the general details design test page."""
+    return render_template('test_general_details.html')
+
+@app.route('/test-all-sections')
+def test_all_sections_page():
+    """Serves the all sections design test page."""
+    return render_template('test_all_sections.html')
+
+@app.route('/debug-theme')
+def debug_theme_page():
+    """Serves the theme debug test page."""
+    return render_template('debug_theme.html')
+
 @app.route('/reports')
 def reports_page():
     """Serves the reports management HTML page."""
@@ -2041,5 +2071,5 @@ if __name__ == '__main__':
         db.create_all()
         # Handle migration for existing databases
         migrate_database()
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)
 

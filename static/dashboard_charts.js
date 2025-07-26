@@ -1,20 +1,60 @@
 let dashboardCharts = {};
 
-document.addEventListener('DOMContentLoaded', () => {
-    fetchDashboardStats().then(stats => {
-        console.log('Dashboard stats received:', stats);
-        if (stats && stats.overall) {
-            createDashboardCharts(stats.overall);
-        } else {
-            console.error('No overall stats data available:', stats);
-            // Create charts with empty/default data
-            createDashboardCharts({});
+// Self-contained fetch function for dashboard stats
+async function fetchDashboardStatsLocal() {
+    try {
+        const response = await fetch('/api/dashboard/stats');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    }).catch(error => {
-        console.error('Error fetching dashboard stats:', error);
-        // Create charts with empty/default data
-        createDashboardCharts({});
-    });
+        return await response.json();
+    } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+        return null;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Dashboard charts: DOM loaded, checking for cached stats...');
+    
+    // Check if stats are already cached by the main dashboard script
+    const checkForCachedStats = () => {
+        if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
+            console.log('Using cached dashboard stats for charts');
+            createDashboardCharts(window.dashboardStatsCache.overall);
+        } else if (typeof fetchDashboardStats === 'function') {
+            console.log('No cached stats, fetching from main function...');
+            fetchDashboardStats().then(stats => {
+                console.log('Dashboard stats received:', stats);
+                if (stats && stats.overall) {
+                    createDashboardCharts(stats.overall);
+                } else {
+                    console.error('No overall stats data available:', stats);
+                    createDashboardCharts({});
+                }
+            }).catch(error => {
+                console.error('Error fetching dashboard stats:', error);
+                createDashboardCharts({});
+            });
+        } else {
+            console.log('Main fetch function not available, using local fetch...');
+            fetchDashboardStatsLocal().then(stats => {
+                console.log('Dashboard stats received:', stats);
+                if (stats && stats.overall) {
+                    createDashboardCharts(stats.overall);
+                } else {
+                    console.error('No overall stats data available:', stats);
+                    createDashboardCharts({});
+                }
+            }).catch(error => {
+                console.error('Error fetching dashboard stats:', error);
+                createDashboardCharts({});
+            });
+        }
+    };
+    
+    // Wait a bit for the main script to load and fetch data first
+    setTimeout(checkForCachedStats, 100);
 });
 
 // Listen for theme changes and recreate charts with new colors
@@ -189,9 +229,12 @@ function createDashboardCharts(overallStats) {
     console.log('Creating dashboard charts with data:', overallStats);
 
     if (!window.Chart) {
-        console.error('Chart.js is not loaded');
+        console.error('Chart.js is not loaded, waiting...');
+        setTimeout(() => createDashboardCharts(overallStats), 100);
         return;
     }
+    
+    console.log('Chart.js is available, proceeding with chart creation...');
 
     // Use actual database data, provide minimal fallbacks only when data is completely unavailable
     overallStats = overallStats || {};
@@ -233,7 +276,7 @@ function createDashboardCharts(overallStats) {
             ...overallStats // Keep any real data that exists
         };
     }
-    console.log('Using stats data:', overallStats);
+    console.log('Using stats data for charts:', overallStats);
 
     try {
         const userStoriesCanvas = document.getElementById('dashboardUserStoriesChart');
@@ -241,26 +284,29 @@ function createDashboardCharts(overallStats) {
             console.error('User stories chart canvas not found');
             return;
         }
+        console.log('User stories canvas found, creating chart...');
 
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
         const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const userStoriesCtx = userStoriesCanvas.getContext('2d');
+        const userStoriesChartData = [
+            overallStats.passedUserStories || 0,
+            overallStats.passedWithIssuesUserStories || 0,
+            overallStats.failedUserStories || 0,
+            overallStats.blockedUserStories || 0,
+            overallStats.cancelledUserStories || 0,
+            overallStats.deferredUserStories || 0,
+            overallStats.notTestableUserStories || 0
+        ];
+        console.log('User Stories Chart Data:', userStoriesChartData);
         dashboardCharts.userStories = new Chart(userStoriesCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
                 datasets: [{
-                    data: [
-                        overallStats.passedUserStories || 0,
-                        overallStats.passedWithIssuesUserStories || 0,
-                        overallStats.failedUserStories || 0,
-                        overallStats.blockedUserStories || 0,
-                        overallStats.cancelledUserStories || 0,
-                        overallStats.deferredUserStories || 0,
-                        overallStats.notTestableUserStories || 0
-                    ],
+                    data: userStoriesChartData,
                     backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E', '#2196F3', '#673AB7', '#00BCD4'],
                     borderWidth: 3,
                     borderColor: borderColor
@@ -284,20 +330,22 @@ function createDashboardCharts(overallStats) {
         const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const testCasesCtx = testCasesCanvas.getContext('2d');
+        const testCasesChartData = [
+            overallStats.passedTestCases || 0,
+            overallStats.passedWithIssuesTestCases || 0,
+            overallStats.failedTestCases || 0,
+            overallStats.blockedTestCases || 0,
+            overallStats.cancelledTestCases || 0,
+            overallStats.deferredTestCases || 0,
+            overallStats.notTestableTestCases || 0
+        ];
+        console.log('Test Cases Chart Data:', testCasesChartData);
         dashboardCharts.testCases = new Chart(testCasesCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
                 datasets: [{
-                    data: [
-                        overallStats.passedTestCases || 0,
-                        overallStats.passedWithIssuesTestCases || 0,
-                        overallStats.failedTestCases || 0,
-                        overallStats.blockedTestCases || 0,
-                        overallStats.cancelledTestCases || 0,
-                        overallStats.deferredTestCases || 0,
-                        overallStats.notTestableTestCases || 0
-                    ],
+                    data: testCasesChartData,
                     backgroundColor: ['#8BC34A', '#FFEB3B', '#E91E63', '#607D8B', '#9C27B0', '#FF5722', '#795548'],
                     borderWidth: 3,
                     borderColor: borderColor
@@ -321,17 +369,19 @@ function createDashboardCharts(overallStats) {
         const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const issuesPriorityCtx = issuesPriorityCanvas.getContext('2d');
+        const issuesPriorityChartData = [
+            overallStats.criticalIssues || 0,
+            overallStats.highIssues || 0,
+            overallStats.mediumIssues || 0,
+            overallStats.lowIssues || 0
+        ];
+        console.log('Issues Priority Chart Data:', issuesPriorityChartData);
         dashboardCharts.issuesPriority = new Chart(issuesPriorityCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Critical', 'High', 'Medium', 'Low'],
                 datasets: [{
-                    data: [
-                        overallStats.criticalIssues || 0,
-                        overallStats.highIssues || 0,
-                        overallStats.mediumIssues || 0,
-                        overallStats.lowIssues || 0
-                    ],
+                    data: issuesPriorityChartData,
                     backgroundColor: ['#F44336', '#FF9800', '#FFC107', '#4CAF50'],
                     borderWidth: 3,
                     borderColor: borderColor
@@ -355,18 +405,20 @@ function createDashboardCharts(overallStats) {
         const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const issuesStatusCtx = issuesStatusCanvas.getContext('2d');
+        const issuesStatusChartData = [
+            overallStats.newIssues || 0,
+            overallStats.fixedIssues || 0,
+            overallStats.notFixedIssues || 0,
+            overallStats.reopenedIssues || 0,
+            overallStats.deferredIssues || 0
+        ];
+        console.log('Issues Status Chart Data:', issuesStatusChartData);
         dashboardCharts.issuesStatus = new Chart(issuesStatusCtx, {
             type: 'doughnut',
             data: {
                 labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'],
                 datasets: [{
-                    data: [
-                        overallStats.newIssues || 0,
-                        overallStats.fixedIssues || 0,
-                        overallStats.notFixedIssues || 0,
-                        overallStats.reopenedIssues || 0,
-                        overallStats.deferredIssues || 0
-                    ],
+                    data: issuesStatusChartData,
                     backgroundColor: ['#2196F3', '#4CAF50', '#E91E63', '#FF5722', '#673AB7'],
                     borderWidth: 3,
                     borderColor: borderColor
@@ -390,16 +442,18 @@ function createDashboardCharts(overallStats) {
         const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const automationTestCasesCtx = automationTestCasesCanvas.getContext('2d');
+        const automationTestCasesChartData = [
+            overallStats.automationPassedTestCases || 0,
+            overallStats.automationFailedTestCases || 0,
+            overallStats.automationSkippedTestCases || 0
+        ];
+        console.log('Automation Test Cases Chart Data:', automationTestCasesChartData);
         dashboardCharts.automationTestCases = new Chart(automationTestCasesCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Passed', 'Failed', 'Skipped'],
                 datasets: [{
-                    data: [
-                        overallStats.automationPassedTestCases || 0,
-                        overallStats.automationFailedTestCases || 0,
-                        overallStats.automationSkippedTestCases || 0
-                    ],
+                    data: automationTestCasesChartData,
                     backgroundColor: ['#4CAF50', '#F44336', '#FF9800'],
                     borderWidth: 3,
                     borderColor: borderColor
@@ -423,15 +477,17 @@ function createDashboardCharts(overallStats) {
         const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
         const automationStabilityCtx = automationStabilityCanvas.getContext('2d');
+        const automationStabilityChartData = [
+            overallStats.automationStableTests || 0,
+            overallStats.automationFlakyTests || 0
+        ];
+        console.log('Automation Stability Chart Data:', automationStabilityChartData);
         dashboardCharts.automationStability = new Chart(automationStabilityCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Stable', 'Flaky'],
                 datasets: [{
-                    data: [
-                        overallStats.automationStableTests || 0,
-                        overallStats.automationFlakyTests || 0
-                    ],
+                    data: automationStabilityChartData,
                     backgroundColor: ['#4CAF50', '#E91E63'],
                     borderWidth: 3,
                     borderColor: borderColor

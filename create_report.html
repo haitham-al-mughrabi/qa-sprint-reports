@@ -159,30 +159,40 @@
                         <!-- Section 2: Test Summary -->
                         <div class="section" id="section-1">
                             <h2 class="section-title"><i class="fas fa-chart-bar"></i> Test Summary & Status</h2>
-                            <div class="form-grid">
-                                <div class="form-group full-width">
-                                    <label for="testSummary">Test Summary</label>
-                                    <textarea id="testSummary" name="testSummary" placeholder="Provide a comprehensive summary of the testing activities..." rows="6"></textarea>
+                            <div class="test-summary-layout">
+                                <div class="test-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-file-alt"></i>
+                                        <h3>Test Summary & Status</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="form-group">
+                                            <label for="testSummary">Test Summary</label>
+                                            <textarea id="testSummary" name="testSummary" placeholder="Provide a comprehensive summary of the testing activities..." rows="6"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="testingStatus">Testing Status</label>
+                                            <select id="testingStatus" name="testingStatus">
+                                                <option value="">Select Status</option>
+                                                <option value="passed"><i class="fas fa-check-circle"></i> Passed</option>
+                                                <option value="passed-with-issues"><i class="fas fa-exclamation-triangle"></i> Passed with Issues</option>
+                                                <option value="failed"><i class="fas fa-times-circle"></i> Failed</option>
+                                                <option value="blocked"><i class="fas fa-ban"></i> Blocked</option>
+                                                <option value="cancelled"><i class="fas fa-trash-alt"></i> Cancelled</option>
+                                                <option value="deferred"><i class="fas fa-pause"></i> Deferred</option>
+                                                <option value="not-testable"><i class="fas fa-question-circle"></i> Not Testable</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label for="testingStatus">Testing Status</label>
-                                    <select id="testingStatus" name="testingStatus">
-                                        <option value="">Select Status</option>
-                                        <option value="passed"><i class="fas fa-check-circle"></i> Passed</option>
-                                        <option value="passed-with-issues"><i class="fas fa-exclamation-triangle"></i> Passed with Issues</option>
-                                        <option value="failed"><i class="fas fa-times-circle"></i> Failed</option>
-                                        <option value="blocked"><i class="fas fa-ban"></i> Blocked</option>
-                                        <option value="cancelled"><i class="fas fa-trash-alt"></i> Cancelled</option>
-                                        <option value="deferred"><i class="fas fa-pause"></i> Deferred</option>
-                                        <option value="not-testable"><i class="fas fa-question-circle"></i> Not Testable</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="table-container">
-                                <h3 style="margin-bottom: 20px; font-size: 1.4em;"><i class="fas fa-chart-line"></i> Testing Metrics (Auto-Calculated)</h3>
-                                <table class="data-table">
+                                <div class="metrics-table-card test-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-line"></i>
+                                        <h3>Testing Metrics (Auto-Calculated)</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <table class="data-table">
                                     <thead>
                                         <tr>
                                             <th>Metric</th>
@@ -218,6 +228,8 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -225,35 +237,33 @@
                         <div class="section" id="section-2">
                             <h2 class="section-title"><i class="fas fa-info-circle"></i> Additional Information</h2>
                             
-                            <!-- 2x2 Grid Layout for Additional Information Cards -->
-                            <div class="additional-info-grid">
+                            <!-- Modern 2x2 Grid Layout for Additional Information Cards -->
+                            <div class="additional-info-layout">
                                 <!-- Row 1 -->
-                                <div class="info-card">
-                                    <div class="card-header">
-                                        <h3 class="card-title">
-                                            <i class="fas fa-clipboard-list"></i> Request Information
-                                        </h3>
+                                <div class="info-card-v2 additional-info-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-clipboard-list"></i>
+                                        <h3>Request Information</h3>
                                         <button type="button" class="card-btn" onclick="showRequestModal()">
                                             <i class="fas fa-plus"></i> Add Request
                                         </button>
                                     </div>
-                                    <div class="card-content">
+                                    <div class="info-card-v2-content">
                                         <div class="dynamic-list" id="requestList">
                                             <div class="empty-state">No requests added yet. Click "Add Request" to get started.</div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="info-card">
-                                    <div class="card-header">
-                                        <h3 class="card-title">
-                                            <i class="fas fa-hammer"></i> Build Information
-                                        </h3>
+                                <div class="info-card-v2 additional-info-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-hammer"></i>
+                                        <h3>Build Information</h3>
                                         <button type="button" class="card-btn" onclick="showBuildModal()">
                                             <i class="fas fa-plus"></i> Add Build
                                         </button>
                                     </div>
-                                    <div class="card-content">
+                                    <div class="info-card-v2-content">
                                         <div class="dynamic-list" id="buildList">
                                             <div class="empty-state">No builds added yet. Click "Add Build" to get started.</div>
                                         </div>
@@ -261,32 +271,30 @@
                                 </div>
 
                                 <!-- Row 2 -->
-                                <div class="info-card">
-                                    <div class="card-header">
-                                        <h3 class="card-title">
-                                            <i class="fas fa-user-cog"></i> Tester(s) Information
-                                        </h3>
+                                <div class="info-card-v2 additional-info-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-user-cog"></i>
+                                        <h3>Tester(s) Information</h3>
                                         <button type="button" class="card-btn" onclick="showTesterModal()">
                                             <i class="fas fa-user-plus"></i> Select Tester
                                         </button>
                                     </div>
-                                    <div class="card-content">
+                                    <div class="info-card-v2-content">
                                         <div class="dynamic-list" id="testerList">
                                             <div class="empty-state">No testers added yet. Click "Add/Select Tester" to get started.</div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="info-card">
-                                    <div class="card-header">
-                                        <h3 class="card-title">
-                                            <i class="fas fa-users"></i> Team Members
-                                        </h3>
+                                <div class="info-card-v2 additional-info-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-users"></i>
+                                        <h3>Team Members</h3>
                                         <button type="button" class="card-btn" onclick="showTeamMemberModal()">
                                             <i class="fas fa-users"></i> Select Team Member
                                         </button>
                                     </div>
-                                    <div class="card-content">
+                                    <div class="info-card-v2-content">
                                         <div class="dynamic-list" id="teamMemberList">
                                             <div class="empty-state">No team members added yet.</div>
                                         </div>
@@ -299,9 +307,13 @@
                         <div class="section" id="section-3">
                             <h2 class="section-title"><i class="fas fa-user-check"></i> User Stories Analysis</h2>
                             
-                            <div class="user-stories-container">
-                                <div class="stories-table-section">
-                                    <h3 style="margin-bottom: 20px;"><i class="fas fa-chart-bar"></i> User Stories Summary</h3>
+                            <div class="analysis-layout">
+                                <div class="analysis-table-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <h3>User Stories Summary</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
                                     <table class="data-table" id="userStoriesTable">
                                         <thead>
                                             <tr>
@@ -353,12 +365,18 @@
                                             </tr>
                                         </tbody>
                                     </table>
+                                    </div>
                                 </div>
 
-                                <div class="chart-section">
-                                    <h3 style="margin-bottom: 20px; text-align: center;"><i class="fas fa-chart-line"></i> User Stories Distribution</h3>
-                                    <div class="chart-container">
-                                        <canvas id="userStoriesChart" width="400" height="400"></canvas>
+                                <div class="analysis-chart-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <h3>User Stories Distribution</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="chart-container">
+                                            <canvas id="userStoriesChart" width="400" height="400"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -368,9 +386,13 @@
                         <div class="section" id="section-4">
                             <h2 class="section-title"><i class="fas fa-flask"></i> Test Cases Analysis</h2>
                             
-                            <div class="user-stories-container">
-                                <div class="stories-table-section">
-                                    <h3 style="margin-bottom: 20px;"><i class="fas fa-chart-bar"></i> Test Cases Summary</h3>
+                            <div class="analysis-layout">
+                                <div class="analysis-table-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <h3>Test Cases Summary</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
                                     <table class="data-table" id="testCasesTable">
                                         <thead>
                                             <tr>
@@ -422,12 +444,18 @@
                                             </tr>
                                         </tbody>
                                     </table>
+                                    </div>
                                 </div>
 
-                                <div class="chart-section">
-                                    <h3 style="margin-bottom: 20px; text-align: center;"><i class="fas fa-chart-line"></i> Test Cases Distribution</h3>
-                                    <div class="chart-container">
-                                        <canvas id="testCasesChart" width="400" height="400"></canvas>
+                                <div class="analysis-chart-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <h3>Test Cases Distribution</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="chart-container">
+                                            <canvas id="testCasesChart" width="400" height="400"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -437,11 +465,14 @@
                         <div class="section" id="section-5">
                             <h2 class="section-title"><i class="fas fa-bug"></i> Issues Analysis</h2>
                             
-                            <div class="issues-container">
-                                <div class="issues-priority-section">
-                                    <h3 style="margin-bottom: 20px;"><i class="fas fa-exclamation-triangle"></i> Issues by Priority</h3>
-                                    <div class="table-chart-layout">
-                                        <div class="table-section">
+                            <div class="issues-analysis-layout">
+                                <div class="issues-priority-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <h3>Issues by Priority</h3>
+                                    </div>
+                                    <div class="issues-content-layout">
+                                        <div class="issues-table-section">
                                             <table class="data-table" id="issuesPriorityTable">
                                                 <thead>
                                                     <tr>
@@ -479,8 +510,7 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div class="chart-section">
-                                            <h3 class="chart-title">Issues Priority Distribution</h3>
+                                        <div class="issues-chart-section">
                                             <div class="chart-container">
                                                 <canvas id="issuesPriorityChart" width="400" height="300"></canvas>
                                             </div>
@@ -488,10 +518,13 @@
                                     </div>
                                 </div>
 
-                                <div class="issues-status-section">
-                                    <h3 style="margin-bottom: 20px;"><i class="fas fa-chart-bar"></i> Issues by Status</h3>
-                                    <div class="table-chart-layout">
-                                        <div class="table-section">
+                                <div class="issues-status-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <h3>Issues by Status</h3>
+                                    </div>
+                                    <div class="issues-content-layout">
+                                        <div class="issues-table-section">
                                             <table class="data-table" id="issuesStatusTable">
                                                 <thead>
                                                     <tr>
@@ -529,8 +562,7 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div class="chart-section">
-                                            <h3 class="chart-title">Issues Status Distribution</h3>
+                                        <div class="issues-chart-section">
                                             <div class="chart-container">
                                                 <canvas id="issuesStatusChart" width="400" height="300"></canvas>
                                             </div>
@@ -544,9 +576,13 @@
                         <div class="section" id="section-6">
                             <h2 class="section-title"><i class="fas fa-bolt"></i> Enhancements Analysis</h2>
                             
-                            <div class="user-stories-container">
-                                <div class="stories-table-section">
-                                    <h3 style="margin-bottom: 20px;"><i class="fas fa-chart-bar"></i> Enhancements Summary</h3>
+                            <div class="enhancements-layout">
+                                <div class="enhancements-table-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <h3>Enhancements Summary</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
                                     <table class="data-table" id="enhancementsTable">
                                         <thead>
                                             <tr>
@@ -578,12 +614,18 @@
                                             </tr>
                                         </tbody>
                                     </table>
+                                    </div>
                                 </div>
 
-                                <div class="chart-section">
-                                    <h3 style="margin-bottom: 20px; text-align: center;"><i class="fas fa-chart-line"></i> Enhancements Distribution</h3>
-                                    <div class="chart-container">
-                                        <canvas id="enhancementsChart" width="400" height="400"></canvas>
+                                <div class="enhancements-chart-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <h3>Enhancements Distribution</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="chart-container">
+                                            <canvas id="enhancementsChart" width="400" height="400"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -592,13 +634,22 @@
                         <!-- Section 8: QA Notes -->
                         <div class="section" id="section-7">
                             <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
-                            <div class="dynamic-section">
-                                <h3 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                    <i class="fas fa-clipboard-list"></i> QA Notes
-                                    <button type="button" class="section-btn" onclick="showAddQANoteModal()">+ Add Note</button>
-                                </h3>
-                                <div class="dynamic-list" id="qaNotesList">
-                                    <div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>
+                            <div class="qa-notes-layout">
+                                <div class="qa-notes-card">
+                                    <div class="info-card-v2-header">
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <i class="fas fa-clipboard-list"></i>
+                                            <h3>QA Notes</h3>
+                                        </div>
+                                        <button type="button" class="card-btn" onclick="showAddQANoteModal()">
+                                            <i class="fas fa-plus"></i> Add Note
+                                        </button>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="dynamic-list" id="qaNotesList">
+                                            <div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -607,11 +658,15 @@
                         <div class="section" id="section-8">
                             <h2 class="section-title"><i class="fas fa-robot"></i> Automation Regression</h2>
                             
-                            <!-- Section 1: Test Cases Summary -->
-                            <div class="automation-section">
-                                <h3 style="margin-bottom: 20px;"><i class="fas fa-chart-bar"></i> Test Cases Summary</h3>
-                                <div class="user-stories-container">
-                                    <div class="stories-table-section">
+                            <div class="automation-layout">
+                                <!-- Section 1: Test Cases Summary -->
+                                <div class="automation-section-card automation-test-cases-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <h3>Test Cases Summary</h3>
+                                    </div>
+                                    <div class="automation-content-layout">
+                                        <div class="automation-table-section">
                                         <table class="data-table" id="automationTestCasesTable">
                                             <thead>
                                                 <tr>
@@ -643,21 +698,23 @@
                                                 </tr>
                                             </tbody>
                                         </table>
-                                    </div>
-                                    <div class="chart-section">
-                                        <h3 style="margin-bottom: 20px; text-align: center;"><i class="fas fa-chart-line"></i> Test Cases Distribution</h3>
-                                        <div class="chart-container">
-                                            <canvas id="automationTestCasesChart" width="400" height="400"></canvas>
+                                        </div>
+                                        <div class="automation-chart-section">
+                                            <div class="chart-container">
+                                                <canvas id="automationTestCasesChart" width="400" height="400"></canvas>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Section 2: Percentage Analysis -->
-                            <div class="automation-section" style="margin-top: 30px;">
-                                <h3 style="margin-bottom: 20px;"><i class="fas fa-percentage"></i> Percentage Analysis (Auto-calculated)</h3>
-                                <div class="user-stories-container">
-                                    <div class="stories-table-section">
+                                <!-- Section 2: Percentage Analysis -->
+                                <div class="automation-section-card automation-percentage-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-percentage"></i>
+                                        <h3>Percentage Analysis (Auto-calculated)</h3>
+                                    </div>
+                                    <div class="automation-content-layout">
+                                        <div class="automation-table-section">
                                         <table class="data-table" id="automationPercentageTable">
                                             <thead>
                                                 <tr>
@@ -684,21 +741,23 @@
                                                 </tr>
                                             </tbody>
                                         </table>
-                                    </div>
-                                    <div class="chart-section">
-                                        <h3 style="margin-bottom: 20px; text-align: center;"><i class="fas fa-chart-pie"></i> Percentage Distribution</h3>
-                                        <div class="chart-container">
-                                            <canvas id="automationPercentageChart" width="400" height="400"></canvas>
+                                        </div>
+                                        <div class="automation-chart-section">
+                                            <div class="chart-container">
+                                                <canvas id="automationPercentageChart" width="400" height="400"></canvas>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Section 3: Test Stability -->
-                            <div class="automation-section" style="margin-top: 30px;">
-                                <h3 style="margin-bottom: 20px;"><i class="fas fa-balance-scale"></i> Test Stability Analysis</h3>
-                                <div class="user-stories-container">
-                                    <div class="stories-table-section">
+                                <!-- Section 3: Test Stability -->
+                                <div class="automation-section-card automation-stability-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-balance-scale"></i>
+                                        <h3>Test Stability Analysis</h3>
+                                    </div>
+                                    <div class="automation-content-layout">
+                                        <div class="automation-table-section">
                                         <table class="data-table" id="automationStabilityTable">
                                             <thead>
                                                 <tr>
@@ -725,11 +784,11 @@
                                                 </tr>
                                             </tbody>
                                         </table>
-                                    </div>
-                                    <div class="chart-section">
-                                        <h3 style="margin-bottom: 20px; text-align: center;"><i class="fas fa-chart-donut"></i> Stability Distribution</h3>
-                                        <div class="chart-container">
-                                            <canvas id="automationStabilityChart" width="400" height="400"></canvas>
+                                        </div>
+                                        <div class="automation-chart-section">
+                                            <div class="chart-container">
+                                                <canvas id="automationStabilityChart" width="400" height="400"></canvas>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -965,6 +1024,12 @@
             loadFormDropdownData();
             initializeCharts(); // Ensure charts are initialized when the form page loads
             
+            // Remove hardcoded width/height from chart canvases after initialization
+            document.querySelectorAll('.chart-container canvas').forEach(canvas => {
+                canvas.removeAttribute('width');
+                canvas.removeAttribute('height');
+            });
+
             // Check if there's a report ID in the URL for editing
             const urlParams = new URLSearchParams(window.location.search);
             const reportId = urlParams.get('id');
