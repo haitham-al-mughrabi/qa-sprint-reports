@@ -197,6 +197,36 @@
                 </div>
             </div>
 
+            <div class="dashboard-section">
+                <h2 class="section-title"><i class="fas fa-robot"></i> Automation Regression</h2>
+                <div class="charts-container">
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Automation Test Cases Summary</h3>
+                        <table class="data-table" id="automationTestCasesViewTable">
+                            </table>
+                    </div>
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Automation Test Cases Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="automationTestCasesViewChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-container">
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Test Stability Summary</h3>
+                        <table class="data-table" id="automationStabilityViewTable">
+                            </table>
+                    </div>
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Test Stability Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="automationStabilityViewChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="dashboard-section" id="additionalInfoSection">
                 <h2 class="section-title"><i class="fas fa-info"></i> Additional Information</h2>
                 </div>
@@ -346,6 +376,7 @@
             renderTestCasesView(report);
             renderIssuesView(report); // This function now handles both priority and status
             renderEnhancementsView(report);
+            renderAutomationRegressionView(report);
             
             // Render additional sections
             renderAdditionalInfo(report);
@@ -809,6 +840,125 @@
             });
         }
 
+        function renderAutomationRegressionView(report) {
+            // Render Test Cases Table
+            const testCasesTable = document.getElementById('automationTestCasesViewTable');
+            const total = report.automationTotalTestCases || 0;
+            
+            testCasesTable.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Total Test Cases</strong></td>
+                        <td>${total}</td>
+                        <td class="percentage-cell">100%</td>
+                    </tr>
+                    <tr>
+                        <td>Passed</td>
+                        <td>${report.automationPassedTestCases || 0}</td>
+                        <td class="percentage-cell">${report.automationPassedPercentage || 0}%</td>
+                    </tr>
+                    <tr>
+                        <td>Failed</td>
+                        <td>${report.automationFailedTestCases || 0}</td>
+                        <td class="percentage-cell">${report.automationFailedPercentage || 0}%</td>
+                    </tr>
+                    <tr>
+                        <td>Skipped</td>
+                        <td>${report.automationSkippedTestCases || 0}</td>
+                        <td class="percentage-cell">${report.automationSkippedPercentage || 0}%</td>
+                    </tr>
+                </tbody>
+            `;
+
+            // Create Test Cases Chart
+            const testCasesCtx = document.getElementById('automationTestCasesViewChart').getContext('2d');
+            if (viewCharts.automationTestCases) viewCharts.automationTestCases.destroy();
+            
+            viewCharts.automationTestCases = new Chart(testCasesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Passed', 'Failed', 'Skipped'],
+                    datasets: [{
+                        data: [
+                            report.automationPassedTestCases || 0,
+                            report.automationFailedTestCases || 0,
+                            report.automationSkippedTestCases || 0
+                        ],
+                        backgroundColor: [
+                            '#28a745', // Green - Passed
+                            '#dc3545', // Red - Failed
+                            '#ffc107'  // Yellow - Skipped
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getViewChartOptions()
+            });
+
+            // Render Stability Table
+            const stabilityTable = document.getElementById('automationStabilityViewTable');
+            const stabilityTotal = report.automationStabilityTotal || 0;
+            
+            stabilityTable.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Stability</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Total Tests</strong></td>
+                        <td>${stabilityTotal}</td>
+                        <td class="percentage-cell">100%</td>
+                    </tr>
+                    <tr>
+                        <td>Stable</td>
+                        <td>${report.automationStableTests || 0}</td>
+                        <td class="percentage-cell">${report.automationStablePercentage || 0}%</td>
+                    </tr>
+                    <tr>
+                        <td>Flaky</td>
+                        <td>${report.automationFlakyTests || 0}</td>
+                        <td class="percentage-cell">${report.automationFlakyPercentage || 0}%</td>
+                    </tr>
+                </tbody>
+            `;
+
+            // Create Stability Chart
+            const stabilityCtx = document.getElementById('automationStabilityViewChart').getContext('2d');
+            if (viewCharts.automationStability) viewCharts.automationStability.destroy();
+            
+            viewCharts.automationStability = new Chart(stabilityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Stable', 'Flaky'],
+                    datasets: [{
+                        data: [
+                            report.automationStableTests || 0,
+                            report.automationFlakyTests || 0
+                        ],
+                        backgroundColor: [
+                            '#28a745', // Green - Stable
+                            '#fd7e14'  // Orange - Flaky
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getViewChartOptions()
+            });
+        }
+
         // Function to update all charts when theme changes
         function updateChartsForTheme() {
             if (!currentReport) return;
@@ -829,6 +979,8 @@
             renderIssuesPriorityChart(currentReport);
             renderIssuesStatusChart(currentReport);
             renderEnhancementsChart(currentReport);
+            renderAutomationTestCasesChart(currentReport);
+            renderAutomationStabilityChart(currentReport);
         }
 
         // Individual chart rendering functions for theme updates
@@ -961,6 +1113,55 @@
                         ],
                         backgroundColor: [
                             '#00BCD4', '#4CAF50', '#9E9E9E'
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getViewChartOptions()
+            });
+        }
+
+        function renderAutomationTestCasesChart(report) {
+            const ctx = document.getElementById('automationTestCasesViewChart').getContext('2d');
+            if (viewCharts.automationTestCases) viewCharts.automationTestCases.destroy();
+            
+            viewCharts.automationTestCases = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Passed', 'Failed', 'Skipped'],
+                    datasets: [{
+                        data: [
+                            report.automationPassedTestCases || 0,
+                            report.automationFailedTestCases || 0,
+                            report.automationSkippedTestCases || 0
+                        ],
+                        backgroundColor: [
+                            '#28a745', '#dc3545', '#ffc107'
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getViewChartOptions()
+            });
+        }
+
+        function renderAutomationStabilityChart(report) {
+            const ctx = document.getElementById('automationStabilityViewChart').getContext('2d');
+            if (viewCharts.automationStability) viewCharts.automationStability.destroy();
+            
+            viewCharts.automationStability = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Stable', 'Flaky'],
+                    datasets: [{
+                        data: [
+                            report.automationStableTests || 0,
+                            report.automationFlakyTests || 0
+                        ],
+                        backgroundColor: [
+                            '#28a745', '#fd7e14'
                         ],
                         borderWidth: 3,
                         borderColor: 'var(--surface)'
@@ -1347,8 +1548,8 @@
             yPos = doc.lastAutoTable.finalY + 30;
 
             // Charts
-            const chartIds = ['userStoriesViewChart', 'testCasesViewChart', 'issuesPriorityViewChart', 'issuesStatusViewChart', 'enhancementsViewChart'];
-            const chartTitles = ['User Stories Distribution', 'Test Cases Distribution', 'Issues by Priority', 'Issues by Status', 'Enhancements Distribution'];
+            const chartIds = ['userStoriesViewChart', 'testCasesViewChart', 'issuesPriorityViewChart', 'issuesStatusViewChart', 'enhancementsViewChart', 'automationTestCasesViewChart', 'automationStabilityViewChart'];
+            const chartTitles = ['User Stories Distribution', 'Test Cases Distribution', 'Issues by Priority', 'Issues by Status', 'Enhancements Distribution', 'Automation Test Cases', 'Automation Test Stability'];
 
             for (let i = 0; i < chartIds.length; i++) {
                 const chartId = chartIds[i];
@@ -1412,6 +1613,14 @@
                 ["Total Test Cases", currentReport.totalTestCases || 0],
                 ["Total Issues", currentReport.totalIssues || 0],
                 ["Total Enhancements", currentReport.totalEnhancements || 0],
+                ["", ""],
+                ["AUTOMATION REGRESSION", ""],
+                ["Automation Total Test Cases", currentReport.automationTotalTestCases || 0],
+                ["Automation Passed Test Cases", currentReport.automationPassedTestCases || 0],
+                ["Automation Failed Test Cases", currentReport.automationFailedTestCases || 0],
+                ["Automation Skipped Test Cases", currentReport.automationSkippedTestCases || 0],
+                ["Automation Stable Tests", currentReport.automationStableTests || 0],
+                ["Automation Flaky Tests", currentReport.automationFlakyTests || 0],
                 ["QA Notes", currentReport.qaNotesData && currentReport.qaNotesData.length > 0 ? `${currentReport.qaNotesData.length} notes` : 'N/A']
             ];
             const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
@@ -1474,6 +1683,24 @@
             ];
             const wsEnhancements = XLSX.utils.aoa_to_sheet(enhancementsData);
             XLSX.utils.book_append_sheet(workbook, wsEnhancements, "Enhancements");
+
+            // Automation Regression Sheets
+            const automationTestCasesData = [
+                ["Status", "Count", "Percentage"],
+                ["Passed", currentReport.automationPassedTestCases || 0, currentReport.automationPassedPercentage || 0],
+                ["Failed", currentReport.automationFailedTestCases || 0, currentReport.automationFailedPercentage || 0],
+                ["Skipped", currentReport.automationSkippedTestCases || 0, currentReport.automationSkippedPercentage || 0]
+            ];
+            const wsAutomationTestCases = XLSX.utils.aoa_to_sheet(automationTestCasesData);
+            XLSX.utils.book_append_sheet(workbook, wsAutomationTestCases, "Automation Test Cases");
+
+            const automationStabilityData = [
+                ["Stability", "Count", "Percentage"],
+                ["Stable", currentReport.automationStableTests || 0, currentReport.automationStablePercentage || 0],
+                ["Flaky", currentReport.automationFlakyTests || 0, currentReport.automationFlakyPercentage || 0]
+            ];
+            const wsAutomationStability = XLSX.utils.aoa_to_sheet(automationStabilityData);
+            XLSX.utils.book_append_sheet(workbook, wsAutomationStability, "Automation Stability");
 
             // Add all the additional sheets like in the main function - REMOVED evaluation
             // if (currentReport.evaluationData && Object.keys(currentReport.evaluationData).length > 0) {

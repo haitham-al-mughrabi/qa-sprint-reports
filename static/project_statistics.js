@@ -737,6 +737,123 @@ function renderAdditionalCharts(overallStats) {
     } catch (error) {
         console.error('Error creating quality trends chart:', error);
     }
+
+    // Automation Test Cases Chart
+    try {
+        const automationTestCasesCanvas = document.getElementById('projectAutomationTestCasesChart');
+        if (!automationTestCasesCanvas) {
+            console.error('Automation test cases chart canvas not found');
+            return;
+        }
+
+        const isLightTheme3 = window.themeManager ? window.themeManager.isLightTheme() : true;
+        const borderColor3 = isLightTheme3 ? '#ffffff' : '#1e293b';
+        const textColor3 = isLightTheme3 ? '#1e293b' : '#f1f5f9';
+        const tooltipBg3 = isLightTheme3 ? '#ffffff' : '#334155';
+        const gridColor3 = isLightTheme3 ? '#e2e8f0' : '#334155';
+
+        projectCharts['automationTestCases'] = new Chart(automationTestCasesCanvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Passed', 'Failed', 'Skipped'],
+                datasets: [{
+                    data: [
+                        stats.overall.automationPassedTestCases || 0,
+                        stats.overall.automationFailedTestCases || 0,
+                        stats.overall.automationSkippedTestCases || 0
+                    ],
+                    backgroundColor: ['#4CAF50', '#F44336', '#FF9800'],
+                    borderWidth: 3,
+                    borderColor: borderColor3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            font: {
+                                size: 10,
+                                family: 'Poppins'
+                            },
+                            color: textColor3
+                        }
+                    },
+                    tooltip: {
+                        titleColor: textColor3,
+                        bodyColor: textColor3,
+                        backgroundColor: tooltipBg3,
+                        borderColor: gridColor3,
+                        borderWidth: 1
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error creating automation test cases chart:', error);
+    }
+
+    // Automation Stability Chart
+    try {
+        const automationStabilityCanvas = document.getElementById('projectAutomationStabilityChart');
+        if (!automationStabilityCanvas) {
+            console.error('Automation stability chart canvas not found');
+            return;
+        }
+
+        const isLightTheme4 = window.themeManager ? window.themeManager.isLightTheme() : true;
+        const borderColor4 = isLightTheme4 ? '#ffffff' : '#1e293b';
+        const textColor4 = isLightTheme4 ? '#1e293b' : '#f1f5f9';
+        const tooltipBg4 = isLightTheme4 ? '#ffffff' : '#334155';
+        const gridColor4 = isLightTheme4 ? '#e2e8f0' : '#334155';
+
+        projectCharts['automationStability'] = new Chart(automationStabilityCanvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Stable', 'Flaky'],
+                datasets: [{
+                    data: [
+                        stats.overall.automationStableTests || 0,
+                        stats.overall.automationFlakyTests || 0
+                    ],
+                    backgroundColor: ['#4CAF50', '#E91E63'],
+                    borderWidth: 3,
+                    borderColor: borderColor4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            font: {
+                                size: 10,
+                                family: 'Poppins'
+                            },
+                            color: textColor4
+                        }
+                    },
+                    tooltip: {
+                        titleColor: textColor4,
+                        bodyColor: textColor4,
+                        backgroundColor: tooltipBg4,
+                        borderColor: gridColor4,
+                        borderWidth: 1
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error creating automation stability chart:', error);
+    }
 }
 
 function renderProjectTesters(testers) {

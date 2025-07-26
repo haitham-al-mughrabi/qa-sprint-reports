@@ -68,6 +68,7 @@
                 <a href="#" class="nav-item" onclick="showSection(5)"><i class="fas fa-bug"></i> Issues Analysis</a>
                 <a href="#" class="nav-item" onclick="showSection(6)"><i class="fas fa-bolt"></i> Enhancements</a>
                 <a href="#" class="nav-item" onclick="showSection(7)"><i class="fas fa-note-sticky"></i> QA Notes</a>
+                <a href="#" class="nav-item" onclick="showSection(8)"><i class="fas fa-robot"></i> Automation Regression</a>
             </nav>
 
             <!-- Main Content -->
@@ -598,6 +599,139 @@
                                 </h3>
                                 <div class="dynamic-list" id="qaNotesList">
                                     <div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 9: Automation Regression -->
+                        <div class="section" id="section-8">
+                            <h2 class="section-title"><i class="fas fa-robot"></i> Automation Regression</h2>
+                            
+                            <!-- Section 1: Test Cases Summary -->
+                            <div class="automation-section">
+                                <h3 style="margin-bottom: 20px;"><i class="fas fa-chart-bar"></i> Test Cases Summary</h3>
+                                <div class="user-stories-container">
+                                    <div class="stories-table-section">
+                                        <table class="data-table" id="automationTestCasesTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Total Test Cases</strong></td>
+                                                    <td><input type="number" id="automationTotalTestCases" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
+                                                    <td class="percentage-cell">100%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-check-circle text-success"></i> Passed</td>
+                                                    <td><input type="number" id="automationPassedTestCases" name="automationPassedTestCases" min="0" placeholder="0" oninput="calculateAutomationPercentages()"></td>
+                                                    <td class="percentage-cell" id="automationPassedPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-times-circle text-danger"></i> Failed</td>
+                                                    <td><input type="number" id="automationFailedTestCases" name="automationFailedTestCases" min="0" placeholder="0" oninput="calculateAutomationPercentages()"></td>
+                                                    <td class="percentage-cell" id="automationFailedPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-forward text-warning"></i> Skipped</td>
+                                                    <td><input type="number" id="automationSkippedTestCases" name="automationSkippedTestCases" min="0" placeholder="0" oninput="calculateAutomationPercentages()"></td>
+                                                    <td class="percentage-cell" id="automationSkippedPercentage">0%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="chart-section">
+                                        <h3 style="margin-bottom: 20px; text-align: center;"><i class="fas fa-chart-line"></i> Test Cases Distribution</h3>
+                                        <div class="chart-container">
+                                            <canvas id="automationTestCasesChart" width="400" height="400"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 2: Percentage Analysis -->
+                            <div class="automation-section" style="margin-top: 30px;">
+                                <h3 style="margin-bottom: 20px;"><i class="fas fa-percentage"></i> Percentage Analysis (Auto-calculated)</h3>
+                                <div class="user-stories-container">
+                                    <div class="stories-table-section">
+                                        <table class="data-table" id="automationPercentageTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Metric</th>
+                                                    <th>Percentage</th>
+                                                    <th>Notes</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><i class="fas fa-check-circle text-success"></i> Passed Test Cases</td>
+                                                    <td><input type="number" id="automationPassedPercentageDisplay" step="0.01" min="0" max="100" readonly class="readonly-field">%</td>
+                                                    <td><small>Percentage of total automation test cases</small></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-times-circle text-danger"></i> Failed Test Cases</td>
+                                                    <td><input type="number" id="automationFailedPercentageDisplay" step="0.01" min="0" max="100" readonly class="readonly-field">%</td>
+                                                    <td><small>Percentage of total automation test cases</small></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-forward text-warning"></i> Skipped Test Cases</td>
+                                                    <td><input type="number" id="automationSkippedPercentageDisplay" step="0.01" min="0" max="100" readonly class="readonly-field">%</td>
+                                                    <td><small>Percentage of total automation test cases</small></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="chart-section">
+                                        <h3 style="margin-bottom: 20px; text-align: center;"><i class="fas fa-chart-pie"></i> Percentage Distribution</h3>
+                                        <div class="chart-container">
+                                            <canvas id="automationPercentageChart" width="400" height="400"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Test Stability -->
+                            <div class="automation-section" style="margin-top: 30px;">
+                                <h3 style="margin-bottom: 20px;"><i class="fas fa-balance-scale"></i> Test Stability Analysis</h3>
+                                <div class="user-stories-container">
+                                    <div class="stories-table-section">
+                                        <table class="data-table" id="automationStabilityTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Stability</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Total Tests</strong></td>
+                                                    <td><input type="number" id="automationStabilityTotal" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
+                                                    <td class="percentage-cell">100%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-shield-alt text-success"></i> Stable</td>
+                                                    <td><input type="number" id="automationStableTests" name="automationStableTests" min="0" placeholder="0" oninput="calculateAutomationStabilityPercentages()"></td>
+                                                    <td class="percentage-cell" id="automationStablePercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-exclamation-triangle text-warning"></i> Flaky</td>
+                                                    <td><input type="number" id="automationFlakyTests" name="automationFlakyTests" min="0" placeholder="0" oninput="calculateAutomationStabilityPercentages()"></td>
+                                                    <td class="percentage-cell" id="automationFlakyPercentage">0%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="chart-section">
+                                        <h3 style="margin-bottom: 20px; text-align: center;"><i class="fas fa-chart-donut"></i> Stability Distribution</h3>
+                                        <div class="chart-container">
+                                            <canvas id="automationStabilityChart" width="400" height="400"></canvas>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

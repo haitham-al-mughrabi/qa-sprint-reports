@@ -88,6 +88,25 @@ class Report(db.Model):
     qaNotesData = db.Column(db.Text, default='[]')  # Store multiple QA notes as JSON array
     qaNoteFieldsData = db.Column(db.Text, default='[]')  # Store custom QA note fields as JSON array
     
+    # Automation Regression Data
+    # Section 1: Test Cases (auto-calculated from existing test cases)
+    automationPassedTestCases = db.Column(db.Integer, default=0)
+    automationFailedTestCases = db.Column(db.Integer, default=0)
+    automationSkippedTestCases = db.Column(db.Integer, default=0)
+    automationTotalTestCases = db.Column(db.Integer, default=0)  # Auto-calculated
+    
+    # Section 2: Percentages (auto-calculated from section 1)
+    automationPassedPercentage = db.Column(db.Float, default=0.0)
+    automationFailedPercentage = db.Column(db.Float, default=0.0)
+    automationSkippedPercentage = db.Column(db.Float, default=0.0)
+    
+    # Section 3: Test Stability
+    automationStableTests = db.Column(db.Integer, default=0)
+    automationFlakyTests = db.Column(db.Integer, default=0)
+    automationStabilityTotal = db.Column(db.Integer, default=0)  # Auto-calculated
+    automationStablePercentage = db.Column(db.Float, default=0.0)
+    automationFlakyPercentage = db.Column(db.Float, default=0.0)
+    
     # Metadata
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
     updatedAt = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -134,6 +153,36 @@ class Report(db.Model):
             (self.existsEnhancements or 0)
         )
         self.enhancementsMetric = self.totalEnhancements
+        
+        # Calculate Automation Regression totals and percentages
+        self.automationTotalTestCases = (
+            (self.automationPassedTestCases or 0) +
+            (self.automationFailedTestCases or 0) +
+            (self.automationSkippedTestCases or 0)
+        )
+        
+        # Calculate automation test percentages
+        if self.automationTotalTestCases > 0:
+            self.automationPassedPercentage = round(((self.automationPassedTestCases or 0) / self.automationTotalTestCases) * 100, 2)
+            self.automationFailedPercentage = round(((self.automationFailedTestCases or 0) / self.automationTotalTestCases) * 100, 2)
+            self.automationSkippedPercentage = round(((self.automationSkippedTestCases or 0) / self.automationTotalTestCases) * 100, 2)
+        else:
+            self.automationPassedPercentage = 0.0
+            self.automationFailedPercentage = 0.0
+            self.automationSkippedPercentage = 0.0
+        
+        # Calculate automation stability totals and percentages
+        self.automationStabilityTotal = (
+            (self.automationStableTests or 0) +
+            (self.automationFlakyTests or 0)
+        )
+        
+        if self.automationStabilityTotal > 0:
+            self.automationStablePercentage = round(((self.automationStableTests or 0) / self.automationStabilityTotal) * 100, 2)
+            self.automationFlakyPercentage = round(((self.automationFlakyTests or 0) / self.automationStabilityTotal) * 100, 2)
+        else:
+            self.automationStablePercentage = 0.0
+            self.automationFlakyPercentage = 0.0
 
     def to_dict(self):
         """Converts the Report object to a dictionary for JSON serialization."""
@@ -201,6 +250,20 @@ class Report(db.Model):
             'enhancementsMetric': self.enhancementsMetric,
             'qaNotesData': json.loads(self.qaNotesData or '[]'),
             'qaNoteFieldsData': json.loads(self.qaNoteFieldsData or '[]'),
+            
+            # Automation Regression Data
+            'automationPassedTestCases': self.automationPassedTestCases,
+            'automationFailedTestCases': self.automationFailedTestCases,
+            'automationSkippedTestCases': self.automationSkippedTestCases,
+            'automationTotalTestCases': self.automationTotalTestCases,
+            'automationPassedPercentage': self.automationPassedPercentage,
+            'automationFailedPercentage': self.automationFailedPercentage,
+            'automationSkippedPercentage': self.automationSkippedPercentage,
+            'automationStableTests': self.automationStableTests,
+            'automationFlakyTests': self.automationFlakyTests,
+            'automationStabilityTotal': self.automationStabilityTotal,
+            'automationStablePercentage': self.automationStablePercentage,
+            'automationFlakyPercentage': self.automationFlakyPercentage,
             
             # Metadata
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
@@ -313,6 +376,12 @@ def get_dashboard_stats():
         func.sum(Report.reopenedIssues).label('reopened_issues'),
         func.sum(Report.deferredIssues).label('deferred_issues'),
         func.sum(Report.totalEnhancements).label('total_enhancements'),
+        func.sum(Report.automationTotalTestCases).label('total_automation_test_cases'),
+        func.sum(Report.automationPassedTestCases).label('automation_passed_test_cases'),
+        func.sum(Report.automationFailedTestCases).label('automation_failed_test_cases'),
+        func.sum(Report.automationSkippedTestCases).label('automation_skipped_test_cases'),
+        func.sum(Report.automationStableTests).label('automation_stable_tests'),
+        func.sum(Report.automationFlakyTests).label('automation_flaky_tests'),
     ).first()
     
     # Project-specific metrics using optimized query
@@ -399,6 +468,12 @@ def get_dashboard_stats():
             'reopenedIssues': aggregate_result.reopened_issues or 0,
             'deferredIssues': aggregate_result.deferred_issues or 0,
             'totalEnhancements': aggregate_result.total_enhancements or 0,
+            'totalAutomationTestCases': aggregate_result.total_automation_test_cases or 0,
+            'automationPassedTestCases': aggregate_result.automation_passed_test_cases or 0,
+            'automationFailedTestCases': aggregate_result.automation_failed_test_cases or 0,
+            'automationSkippedTestCases': aggregate_result.automation_skipped_test_cases or 0,
+            'automationStableTests': aggregate_result.automation_stable_tests or 0,
+            'automationFlakyTests': aggregate_result.automation_flaky_tests or 0,
         },
         'projects': list(projects.values())
     })
@@ -473,6 +548,13 @@ def create_report():
             # Other metrics
             qaNotesData=json.dumps(data.get('qaNotesData', [])),
             qaNoteFieldsData=json.dumps(data.get('qaNoteFieldsData', [])),
+            
+            # Automation Regression Data
+            automationPassedTestCases=int(data.get('automationPassedTestCases') or 0),
+            automationFailedTestCases=int(data.get('automationFailedTestCases') or 0),
+            automationSkippedTestCases=int(data.get('automationSkippedTestCases') or 0),
+            automationStableTests=int(data.get('automationStableTests') or 0),
+            automationFlakyTests=int(data.get('automationFlakyTests') or 0),
             
         )
         
@@ -1211,7 +1293,9 @@ def update_report(id):
                   'deferredTestCases', 'notTestableTestCases', 'criticalIssues',
                   'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues',
                   'notFixedIssues', 'reopenedIssues', 'deferredIssues', 'newEnhancements',
-                  'implementedEnhancements', 'existsEnhancements']:
+                  'implementedEnhancements', 'existsEnhancements', 'automationPassedTestCases',
+                  'automationFailedTestCases', 'automationSkippedTestCases', 'automationStableTests',
+                  'automationFlakyTests']:
         if field in data:
             setattr(report, field, data[field])
     
@@ -1469,13 +1553,23 @@ def get_project_stats(project_id):
                 'passedUserStories': 0,
                 'passedTestCases': 0,
                 'fixedIssues': 0,
-                'implementedEnhancements': 0
+                'implementedEnhancements': 0,
+                'totalAutomationTestCases': 0,
+                'automationPassedTestCases': 0,
+                'automationFailedTestCases': 0,
+                'automationSkippedTestCases': 0,
+                'automationStableTests': 0,
+                'automationFlakyTests': 0,
+                'automationPassRate': 0,
+                'automationStabilityRate': 0
             },
             'charts': {
                 'userStories': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]},
                 'testCases': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]},
                 'issuesPriority': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]},
-                'issuesStatus': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]}
+                'issuesStatus': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]},
+                'automationTestCases': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]},
+                'automationStability': {'labels': [], 'datasets': [{'data': [], 'backgroundColor': []}]}
             },
             'testers': [],
             'reports': [],
@@ -1501,6 +1595,18 @@ def get_project_stats(project_id):
     test_case_success_rate = (passed_test_cases / total_test_cases * 100) if total_test_cases > 0 else 0
     issue_fix_rate = (fixed_issues / total_issues * 100) if total_issues > 0 else 0
     enhancement_completion_rate = (implemented_enhancements / total_enhancements * 100) if total_enhancements > 0 else 0
+    
+    # Calculate automation regression stats
+    total_automation_test_cases = sum(r.automationTotalTestCases or 0 for r in reports)
+    automation_passed_test_cases = sum(r.automationPassedTestCases or 0 for r in reports)
+    automation_failed_test_cases = sum(r.automationFailedTestCases or 0 for r in reports)
+    automation_skipped_test_cases = sum(r.automationSkippedTestCases or 0 for r in reports)
+    automation_stable_tests = sum(r.automationStableTests or 0 for r in reports)
+    automation_flaky_tests = sum(r.automationFlakyTests or 0 for r in reports)
+    
+    # Calculate automation rates
+    automation_pass_rate = (automation_passed_test_cases / total_automation_test_cases * 100) if total_automation_test_cases > 0 else 0
+    automation_stability_rate = (automation_stable_tests / (automation_stable_tests + automation_flaky_tests) * 100) if (automation_stable_tests + automation_flaky_tests) > 0 else 0
     
     # Get unique testers
     testers = []
@@ -1588,6 +1694,31 @@ def get_project_stats(project_id):
                 'borderWidth': 3,
                 'borderColor': 'var(--surface)'
             }]
+        },
+        'automationTestCases': {
+            'labels': ['Passed', 'Failed', 'Skipped'],
+            'datasets': [{
+                'data': [
+                    automation_passed_test_cases,
+                    automation_failed_test_cases,
+                    automation_skipped_test_cases
+                ],
+                'backgroundColor': ['#28a745', '#dc3545', '#ffc107'],
+                'borderWidth': 3,
+                'borderColor': 'var(--surface)'
+            }]
+        },
+        'automationStability': {
+            'labels': ['Stable', 'Flaky'],
+            'datasets': [{
+                'data': [
+                    automation_stable_tests,
+                    automation_flaky_tests
+                ],
+                'backgroundColor': ['#28a745', '#fd7e14'],
+                'borderWidth': 3,
+                'borderColor': 'var(--surface)'
+            }]
         }
     }
 
@@ -1607,7 +1738,15 @@ def get_project_stats(project_id):
             'passedUserStories': passed_user_stories,
             'passedTestCases': passed_test_cases,
             'fixedIssues': fixed_issues,
-            'implementedEnhancements': implemented_enhancements
+            'implementedEnhancements': implemented_enhancements,
+            'totalAutomationTestCases': total_automation_test_cases,
+            'automationPassedTestCases': automation_passed_test_cases,
+            'automationFailedTestCases': automation_failed_test_cases,
+            'automationSkippedTestCases': automation_skipped_test_cases,
+            'automationStableTests': automation_stable_tests,
+            'automationFlakyTests': automation_flaky_tests,
+            'automationPassRate': round(automation_pass_rate, 2),
+            'automationStabilityRate': round(automation_stability_rate, 2)
         },
         'charts': chart_data,
         'testers': testers,
@@ -1639,7 +1778,19 @@ def migrate_database():
         migrations = [
             ('releaseNumber', 'VARCHAR(50)'),
             ('qaNotesData', 'TEXT DEFAULT "[]"'),
-            ('qaNoteFieldsData', 'TEXT DEFAULT "[]"')
+            ('qaNoteFieldsData', 'TEXT DEFAULT "[]"'),
+            ('automationPassedTestCases', 'INTEGER DEFAULT 0'),
+            ('automationFailedTestCases', 'INTEGER DEFAULT 0'),
+            ('automationSkippedTestCases', 'INTEGER DEFAULT 0'),
+            ('automationTotalTestCases', 'INTEGER DEFAULT 0'),
+            ('automationPassedPercentage', 'REAL DEFAULT 0.0'),
+            ('automationFailedPercentage', 'REAL DEFAULT 0.0'),
+            ('automationSkippedPercentage', 'REAL DEFAULT 0.0'),
+            ('automationStableTests', 'INTEGER DEFAULT 0'),
+            ('automationFlakyTests', 'INTEGER DEFAULT 0'),
+            ('automationStabilityTotal', 'INTEGER DEFAULT 0'),
+            ('automationStablePercentage', 'REAL DEFAULT 0.0'),
+            ('automationFlakyPercentage', 'REAL DEFAULT 0.0')
         ]
         
         for column_name, column_type in migrations:

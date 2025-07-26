@@ -140,7 +140,47 @@ function recreateDashboardCharts(chartData) {
         }
     }
 
+    // Recreate automation test cases chart
+    if (chartData.automationTestCases) {
+        const canvas = document.getElementById('dashboardAutomationTestCasesChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            dashboardCharts.automationTestCases = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.automationTestCases.labels,
+                    datasets: [{
+                        data: chartData.automationTestCases.data,
+                        backgroundColor: ['#4CAF50', '#F44336', '#FF9800'],
+                        borderWidth: 3,
+                        borderColor: borderColor
+                    }]
+                },
+                options: getDashboardChartOptions()
+            });
+        }
+    }
 
+    // Recreate automation stability chart
+    if (chartData.automationStability) {
+        const canvas = document.getElementById('dashboardAutomationStabilityChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            dashboardCharts.automationStability = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.automationStability.labels,
+                    datasets: [{
+                        data: chartData.automationStability.data,
+                        backgroundColor: ['#4CAF50', '#E91E63'],
+                        borderWidth: 3,
+                        borderColor: borderColor
+                    }]
+                },
+                options: getDashboardChartOptions()
+            });
+        }
+    }
 
     console.log('Dashboard charts recreated with new theme colors');
 }
@@ -338,6 +378,70 @@ function createDashboardCharts(overallStats) {
         console.error('Error creating issues status chart:', error);
     }
 
+    try {
+        const automationTestCasesCanvas = document.getElementById('dashboardAutomationTestCasesChart');
+        if (!automationTestCasesCanvas) {
+            console.error('Automation test cases chart canvas not found');
+            return;
+        }
+
+        // Get theme colors for this chart
+        const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
+        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
+
+        const automationTestCasesCtx = automationTestCasesCanvas.getContext('2d');
+        dashboardCharts.automationTestCases = new Chart(automationTestCasesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Passed', 'Failed', 'Skipped'],
+                datasets: [{
+                    data: [
+                        overallStats.automationPassedTestCases || 0,
+                        overallStats.automationFailedTestCases || 0,
+                        overallStats.automationSkippedTestCases || 0
+                    ],
+                    backgroundColor: ['#4CAF50', '#F44336', '#FF9800'],
+                    borderWidth: 3,
+                    borderColor: borderColor
+                }]
+            },
+            options: getDashboardChartOptions()
+        });
+    } catch (error) {
+        console.error('Error creating automation test cases chart:', error);
+    }
+
+    try {
+        const automationStabilityCanvas = document.getElementById('dashboardAutomationStabilityChart');
+        if (!automationStabilityCanvas) {
+            console.error('Automation stability chart canvas not found');
+            return;
+        }
+
+        // Get theme colors for this chart
+        const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
+        const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
+
+        const automationStabilityCtx = automationStabilityCanvas.getContext('2d');
+        dashboardCharts.automationStability = new Chart(automationStabilityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Stable', 'Flaky'],
+                datasets: [{
+                    data: [
+                        overallStats.automationStableTests || 0,
+                        overallStats.automationFlakyTests || 0
+                    ],
+                    backgroundColor: ['#4CAF50', '#E91E63'],
+                    borderWidth: 3,
+                    borderColor: borderColor
+                }]
+            },
+            options: getDashboardChartOptions()
+        });
+    } catch (error) {
+        console.error('Error creating automation stability chart:', error);
+    }
 
     // Create enhanced visual elements
     createProgressCircles(overallStats);

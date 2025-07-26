@@ -26,6 +26,9 @@ let testCasesChart = null;
 let issuesPriorityChart = null;
 let issuesStatusChart = null;
 let enhancementsChart = null;
+let automationTestCasesChart = null;
+let automationPercentageChart = null;
+let automationStabilityChart = null;
 let scoreColumnCount = 0; // Not directly used in this version but kept for consistency
 let weightReasonVisible = false; // Not directly used in this version but kept for consistency
 
@@ -200,6 +203,14 @@ function updateDashboardStats(stats) {
     document.getElementById('totalTestCases').textContent = overall.totalTestCases || 0;
     document.getElementById('totalIssues').textContent = overall.totalIssues || 0;
     document.getElementById('totalEnhancements').textContent = overall.totalEnhancements || 0;
+    
+    // Update automation regression metrics
+    document.getElementById('totalAutomationTests').textContent = overall.automationTotalTestCases || 0;
+    const automationTotal = overall.automationTotalTestCases || 0;
+    const automationPassed = overall.automationPassedTestCases || 0;
+    const automationPassRate = automationTotal > 0 ? Math.round((automationPassed / automationTotal) * 100) : 0;
+    document.getElementById('automationPassRate').textContent = `${automationPassRate}%`;
+    
     // Update project-specific metrics
     renderProjectMetrics(stats.projects);
 }
@@ -387,6 +398,9 @@ function initializeCharts() {
     initializeIssuesPriorityChart();
     initializeIssuesStatusChart();
     initializeEnhancementsChart();
+    initializeAutomationTestCasesChart();
+    initializeAutomationPercentageChart();
+    initializeAutomationStabilityChart();
 }
 
 function getChartOptions() {
@@ -486,6 +500,27 @@ function initializeEnhancementsChart() {
     const colors = ['#17a2b8', '#28a745', '#6c757d'];
     if(enhancementsChart) enhancementsChart.destroy();
     enhancementsChart = initializeDoughnutChart('enhancementsChart', labels, colors);
+}
+
+function initializeAutomationTestCasesChart() {
+    const labels = ['Passed', 'Failed', 'Skipped'];
+    const colors = ['#28a745', '#dc3545', '#ffc107'];
+    if(automationTestCasesChart) automationTestCasesChart.destroy();
+    automationTestCasesChart = initializeDoughnutChart('automationTestCasesChart', labels, colors);
+}
+
+function initializeAutomationPercentageChart() {
+    const labels = ['Passed', 'Failed', 'Skipped'];
+    const colors = ['#28a745', '#dc3545', '#ffc107'];
+    if(automationPercentageChart) automationPercentageChart.destroy();
+    automationPercentageChart = initializeDoughnutChart('automationPercentageChart', labels, colors);
+}
+
+function initializeAutomationStabilityChart() {
+    const labels = ['Stable', 'Flaky'];
+    const colors = ['#28a745', '#fd7e14'];
+    if(automationStabilityChart) automationStabilityChart.destroy();
+    automationStabilityChart = initializeDoughnutChart('automationStabilityChart', labels, colors);
 }
 
 // --- Calculation and Chart Update Functions ---
@@ -664,6 +699,78 @@ function calculateEnhancementsTotal() {
     return fields.reduce((sum, field) => sum + (parseInt(document.getElementById(field)?.value) || 0), 0);
 }
 
+// Automation Regression calculation functions
+function calculateAutomationTotal() {
+    const passed = parseInt(document.getElementById('automationPassedTestCases')?.value) || 0;
+    const failed = parseInt(document.getElementById('automationFailedTestCases')?.value) || 0;
+    const skipped = parseInt(document.getElementById('automationSkippedTestCases')?.value) || 0;
+    return passed + failed + skipped;
+}
+
+function calculateAutomationStabilityTotal() {
+    const stable = parseInt(document.getElementById('automationStableTests')?.value) || 0;
+    const flaky = parseInt(document.getElementById('automationFlakyTests')?.value) || 0;
+    return stable + flaky;
+}
+
+function calculateAutomationPercentages() {
+    const total = calculateAutomationTotal();
+    const values = {
+        passed: parseInt(document.getElementById('automationPassedTestCases')?.value) || 0,
+        failed: parseInt(document.getElementById('automationFailedTestCases')?.value) || 0,
+        skipped: parseInt(document.getElementById('automationSkippedTestCases')?.value) || 0,
+    };
+
+    // Update total field (readonly)
+    document.getElementById('automationTotalTestCases').value = total;
+
+    // Update percentages
+    Object.keys(values).forEach(key => {
+        const percentageElement = document.getElementById(`automation${key.charAt(0).toUpperCase() + key.slice(1)}Percentage`);
+        const percentageDisplayElement = document.getElementById(`automation${key.charAt(0).toUpperCase() + key.slice(1)}PercentageDisplay`);
+        if (percentageElement) {
+            const percentage = total > 0 ? Math.round((values[key] / total) * 100) : 0;
+            percentageElement.textContent = `${percentage}%`;
+            if (percentageDisplayElement) {
+                percentageDisplayElement.value = percentage;
+            }
+        }
+    });
+
+    // Update charts if they exist
+    if (automationTestCasesChart) {
+        updateChart(automationTestCasesChart, Object.values(values));
+    }
+    if (automationPercentageChart) {
+        updateChart(automationPercentageChart, Object.values(values));
+    }
+}
+
+function calculateAutomationStabilityPercentages() {
+    const total = calculateAutomationStabilityTotal();
+    const values = {
+        stable: parseInt(document.getElementById('automationStableTests')?.value) || 0,
+        flaky: parseInt(document.getElementById('automationFlakyTests')?.value) || 0,
+    };
+
+    // Update total field (readonly)
+    document.getElementById('automationStabilityTotal').value = total;
+
+    // Update percentages
+    Object.keys(values).forEach(key => {
+        const percentageElement = document.getElementById(`automation${key.charAt(0).toUpperCase() + key.slice(1)}Percentage`);
+        if (percentageElement) {
+            const percentage = total > 0 ? Math.round((values[key] / total) * 100) : 0;
+            percentageElement.textContent = `${percentage}%`;
+        }
+    });
+
+    // Update charts if they exist
+    if (automationStabilityChart) {
+        updateChart(automationStabilityChart, Object.values(values));
+    }
+}
+
 // --- Dynamic Form Sections (Request, Build, Tester) ---
 function showRequestModal() { showModal('requestModal'); }
 function showBuildModal() { showModal('buildModal'); }
@@ -796,6 +903,9 @@ function clearCurrentSection() {
                 calculateIssuesPercentages();
             } else if (section.id === 'section-6') {
                 calculateEnhancementsPercentages();
+            } else if (section.id === 'section-8') {
+                calculateAutomationPercentages();
+                calculateAutomationStabilityPercentages();
             }
 
             showToast('Current section fields have been cleared.', 'info');
@@ -1104,6 +1214,8 @@ function loadReportForEditing(report) {
     calculateTestCasesPercentages();
     calculateIssuesPercentages();
     calculateEnhancementsPercentages();
+    calculateAutomationPercentages();
+    calculateAutomationStabilityPercentages();
 }
 
 // Form submission handler
@@ -2636,6 +2748,8 @@ window.calculateTestCasesPercentages = calculateTestCasesPercentages;
 window.calculateIssuesPercentages = calculateIssuesPercentages;
 window.calculateIssuesStatusPercentages = calculateIssuesStatusPercentages;
 window.calculateEnhancementsPercentages = calculateEnhancementsPercentages;
+window.calculateAutomationPercentages = calculateAutomationPercentages;
+window.calculateAutomationStabilityPercentages = calculateAutomationStabilityPercentages;
 window.goToPage = goToPage;
 window.exportReportAsPdf = exportReportAsPdf;
 window.exportReportAsExcel = exportReportAsExcel;
@@ -2873,6 +2987,8 @@ function loadFormDataFromLocalStorage() {
                 if (typeof calculateIssuesPercentages === 'function') calculateIssuesPercentages();
                 if (typeof calculateIssuesStatusPercentages === 'function') calculateIssuesStatusPercentages();
                 if (typeof calculateEnhancementsPercentages === 'function') calculateEnhancementsPercentages();
+                if (typeof calculateAutomationPercentages === 'function') calculateAutomationPercentages();
+                if (typeof calculateAutomationStabilityPercentages === 'function') calculateAutomationStabilityPercentages();
                 if (typeof updateAutoCalculatedFields === 'function') updateAutoCalculatedFields();
             }, 500);
         } else {
