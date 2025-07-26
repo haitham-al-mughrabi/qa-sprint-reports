@@ -522,6 +522,24 @@
 }
 
 /* Light theme specific adjustments */
+[data-theme="light"] .btn,
+[data-theme="light"] .nav-btn,
+[data-theme="light"] .card-btn {
+    color: white;
+}
+
+[data-theme="light"] h3 {
+    color: black important;
+}
+
+[data-theme="light"] .back-btn {
+    color: white;
+}
+
+[data-theme="light"] h3[style*="color: white"] {
+    color: black !important;
+}
+
 [data-theme="light"] .subsection {
     background: rgba(248, 250, 252, 0.8);
     border: 1px solid var(--border);
