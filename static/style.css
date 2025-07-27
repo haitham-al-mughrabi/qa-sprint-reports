@@ -3445,20 +3445,112 @@ p {
     .evaluation-value {
         font-size: 1rem;
     }
-}/* Ensure al
-l buttons have white text in light theme */
-[data-theme="light"] .btn-primary,
-[data-theme="light"] .action-btn,
-[data-theme="light"] .nav-btn,
-[data-theme="light"] .back-btn,
-[data-theme="light"] .submit-btn {
+}
+
+/* Light Theme Button Fixes */
+[data-theme="light"] .btn-primary {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+}
+
+[data-theme="light"] .btn-primary:hover {
+    background: var(--secondary) !important;
     color: white !important;
 }
 
-[data-theme="light"] .btn-primary:hover,
-[data-theme="light"] .action-btn:hover,
+[data-theme="light"] .action-btn {
+    background: var(--accent) !important;
+    color: white !important;
+    border: none !important;
+}
+
+[data-theme="light"] .action-btn:hover {
+    background: #a78bfa !important;
+    color: white !important;
+}
+
+[data-theme="light"] .nav-btn,
+[data-theme="light"] .back-btn,
+[data-theme="light"] .submit-btn {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+}
+
 [data-theme="light"] .nav-btn:hover,
 [data-theme="light"] .back-btn:hover,
 [data-theme="light"] .submit-btn:hover {
+    background: var(--secondary) !important;
     color: white !important;
+}
+
+/* Fix secondary action buttons in light theme */
+[data-theme="light"] .action-btn.secondary {
+    background: var(--surface) !important;
+    color: var(--primary) !important;
+    border: 2px solid var(--primary) !important;
+}
+
+[data-theme="light"] .action-btn.secondary:hover {
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+}
+
+/* Fix secondary buttons in light theme */
+[data-theme="light"] .btn-secondary {
+    background: var(--surface) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+}
+
+[data-theme="light"] .btn-secondary:hover {
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+}
+
+/* Fix small buttons in light theme */
+[data-theme="light"] .btn-sm {
+    color: white !important;
+}
+
+[data-theme="light"] .btn-sm:hover {
+    color: white !important;
+}
+
+/* Fix specific button types in light theme */
+[data-theme="light"] .btn-view {
+    background-color: var(--primary) !important;
+    color: white !important;
+}
+
+[data-theme="light"] .btn-regenerate {
+    background-color: var(--accent) !important;
+    color: white !important;
+}
+
+[data-theme="light"] .btn-export-pdf {
+    background-color: var(--danger) !important;
+    color: white !important;
+}
+
+[data-theme="light"] .btn-export-excel {
+    background-color: var(--success) !important;
+    color: white !important;
+}
+
+[data-theme="light"] .btn-delete {
+    background-color: var(--warning) !important;
+    color: white !important;
+}
+
+[data-theme="light"] .btn-view:hover,
+[data-theme="light"] .btn-regenerate:hover,
+[data-theme="light"] .btn-export-pdf:hover,
+[data-theme="light"] .btn-export-excel:hover,
+[data-theme="light"] .btn-delete:hover {
+    color: white !important;
+    opacity: 0.9;
 }
