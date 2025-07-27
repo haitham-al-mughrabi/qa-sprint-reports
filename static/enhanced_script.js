@@ -38,16 +38,45 @@ const DASHBOARD_API_URL = '/api/dashboard/stats';
 
 
 
-async function fetchReports() {
+async function fetchReports(page = 1, search = '', limit = reportsPerPage) {
     try {
-        const response = await fetch(API_URL);
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString()
+        });
+        
+        if (search) {
+            params.append('search', search);
+        }
+        
+        const response = await fetch(`${API_URL}?${params}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return await response.json();
+        
+        const data = await response.json();
+        
+        // Ensure consistent data structure
+        if (Array.isArray(data)) {
+            // If API returns array directly, wrap it in expected structure
+            return {
+                reports: data,
+                total: data.length,
+                page: page,
+                totalPages: Math.ceil(data.length / limit)
+            };
+        }
+        
+        // If API returns structured data, use it as is
+        return data;
     } catch (error) {
         console.error("Failed to fetch reports:", error);
-        return []; // Return empty array on error
+        return {
+            reports: [],
+            total: 0,
+            page: 1,
+            totalPages: 1
+        };
     }
 }
 
@@ -1187,12 +1216,29 @@ function toggleSidebar() {
     sidebar.classList.toggle('show'); // Also toggle 'show' for compatibility
 }
 
-// --- Reports Table Functions ---
+// --- Enhanced Reports Table Functions with Filtering ---
 // Debounced search to reduce API calls
 let searchTimeout;
 
+// Filter state management
+let currentFilters = {
+    search: '',
+    project: '',
+    portfolio: '',
+    tester: '',
+    status: '',
+    dateFrom: '',
+    dateTo: '',
+    sprint: '',
+    sort: 'date-desc'
+};
+
+let filtersVisible = false;
+let allReports = []; // Cache for client-side filtering
+
 async function searchReports() {
     const searchQuery = document.getElementById('searchInput')?.value || '';
+    currentFilters.search = searchQuery;
     
     // Clear existing timeout
     if (searchTimeout) {
@@ -1200,14 +1246,996 @@ async function searchReports() {
     }
     
     // Set new timeout for debounced search
-    searchTimeout = setTimeout(async () => {
-        showReportsLoading();
-        const result = await fetchReports(currentPage, searchQuery);
-        hideReportsLoading();
-
-        renderReportsTable(result.reports);
-        renderPagination(result);
+    searchTimeout = setTimeout(() => {
+        applyFilters();
     }, 300); // 300ms delay
+}
+
+// Enhanced filter functions
+async function applyFilters() {
+    showReportsLoading();
+    
+    // Update filter state from form inputs
+    updateFilterState();
+    
+    console.log('Applying filters:', currentFilters);
+    
+    try {
+        // Fetch all reports if not cached or if we need fresh data
+        if (allReports.length === 0) {
+            console.log('Fetching reports for filtering...');
+            const result = await fetchReports(1, '', 1000); // Fetch large number to get all
+            allReports = result.reports || [];
+            console.log('Fetched', allReports.length, 'reports for filtering');
+        }
+        
+        // Apply client-side filtering
+        let filteredReports = filterReports(allReports);
+        console.log('After filtering:', filteredReports.length, 'reports');
+        
+        // Apply sorting
+        filteredReports = sortReports(filteredReports);
+        console.log('After sorting:', filteredReports.length, 'reports');
+        
+        // Update results count and active filters display
+        updateFilterResultsDisplay(filteredReports.length);
+        
+        // Render filtered results
+        renderReportsTable(filteredReports);
+        
+        // Update pagination for filtered results (disable pagination for filtered results)
+        renderPagination({
+            reports: filteredReports,
+            total: filteredReports.length,
+            page: 1,
+            totalPages: 1 // Show all filtered results on one page
+        });
+        
+    } catch (error) {
+        console.error('Error applying filters:', error);
+        showToast('Error applying filters', 'error');
+        
+        // Fallback: try to show all reports without filtering
+        try {
+            const result = await fetchReports(1, '', 100);
+            renderReportsTable(result.reports || []);
+        } catch (fallbackError) {
+            console.error('Fallback also failed:', fallbackError);
+        }
+    }
+    
+    hideReportsLoading();
+}
+
+function updateFilterState() {
+    currentFilters.search = document.getElementById('searchInput')?.value || '';
+    currentFilters.project = document.getElementById('projectFilter')?.value || '';
+    currentFilters.portfolio = document.getElementById('portfolioFilter')?.value || '';
+    currentFilters.tester = document.getElementById('testerFilter')?.value || '';
+    currentFilters.status = document.getElementById('statusFilter')?.value || '';
+    currentFilters.dateFrom = document.getElementById('dateFromFilter')?.value || '';
+    currentFilters.dateTo = document.getElementById('dateToFilter')?.value || '';
+    currentFilters.sprint = document.getElementById('sprintFilter')?.value || '';
+    currentFilters.sort = document.getElementById('sortFilter')?.value || 'date-desc';
+}
+
+function filterReports(reports) {
+    if (!Array.isArray(reports)) {
+        console.warn('filterReports: reports is not an array', reports);
+        return [];
+    }
+    
+    return reports.filter(report => {
+        if (!report) return false;
+        
+        // Search filter - make it more robust
+        if (currentFilters.search) {
+            const searchTerm = currentFilters.search.toLowerCase();
+            const searchableFields = [
+                report.title || '',
+                report.project || '',
+                report.portfolio || '',
+                report.reportName || '',
+                report.projectName || '',
+                report.portfolioName || ''
+            ];
+            const searchableText = searchableFields.join(' ').toLowerCase();
+            if (!searchableText.includes(searchTerm)) {
+                return false;
+            }
+        }
+        
+        // Project filter - handle different field names
+        if (currentFilters.project) {
+            const projectName = report.project || report.projectName || '';
+            if (projectName !== currentFilters.project) {
+                return false;
+            }
+        }
+        
+        // Portfolio filter - handle different field names
+        if (currentFilters.portfolio) {
+            const portfolioName = report.portfolio || report.portfolioName || '';
+            if (portfolioName !== currentFilters.portfolio) {
+                return false;
+            }
+        }
+        
+        // Tester filter - handle different data structures
+        if (currentFilters.tester) {
+            let hasMatchingTester = false;
+            
+            // Get all possible tester values from the report
+            const allTesterValues = [];
+            
+            // Check testers array
+            if (Array.isArray(report.testers)) {
+                report.testers.forEach(tester => {
+                    if (typeof tester === 'string') {
+                        allTesterValues.push(tester.trim());
+                    } else if (typeof tester === 'object' && tester.name) {
+                        allTesterValues.push(tester.name.trim());
+                    }
+                });
+            }
+            // Check testerData array (from form)
+            else if (Array.isArray(report.testerData)) {
+                report.testerData.forEach(tester => {
+                    if (tester && typeof tester === 'object' && tester.name) {
+                        allTesterValues.push(tester.name.trim());
+                    }
+                });
+            }
+            // Check tester_data array (from database)
+            else if (Array.isArray(report.tester_data)) {
+                report.tester_data.forEach(tester => {
+                    if (tester && typeof tester === 'object' && tester.name) {
+                        allTesterValues.push(tester.name.trim());
+                    }
+                });
+            }
+            // Check testers as JSON string
+            else if (typeof report.testers === 'string') {
+                try {
+                    const parsedTesters = JSON.parse(report.testers);
+                    if (Array.isArray(parsedTesters)) {
+                        parsedTesters.forEach(tester => {
+                            const name = typeof tester === 'object' ? tester.name : tester;
+                            if (name) allTesterValues.push(name.toString().trim());
+                        });
+                    }
+                } catch (e) {
+                    // If not JSON, treat as comma-separated string
+                    const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
+                    allTesterValues.push(...testerList);
+                }
+            }
+            
+            // Check single tester fields
+            const singleTesterFields = ['tester', 'testerName', 'assignedTester'];
+            singleTesterFields.forEach(field => {
+                if (report[field] && typeof report[field] === 'string') {
+                    allTesterValues.push(report[field].trim());
+                }
+            });
+            
+            // Check if any tester value matches
+            hasMatchingTester = allTesterValues.some(testerValue => 
+                testerValue === currentFilters.tester
+            );
+            
+            if (!hasMatchingTester) {
+                // Only log for debugging if needed
+                // console.log('Tester filter failed for report:', report.id || report.title, 'Looking for:', currentFilters.tester, 'Found values:', allTesterValues);
+                return false;
+            }
+        }
+        
+        // Status filter - handle different field names
+        if (currentFilters.status) {
+            const status = report.status || report.testingStatus || '';
+            if (status !== currentFilters.status) {
+                return false;
+            }
+        }
+        
+        // Date range filter - handle different date formats
+        if (currentFilters.dateFrom || currentFilters.dateTo) {
+            // Try multiple date field names
+            const reportDateStr = report.date || report.reportDate || report.createdAt || report.created_at || report.dateCreated || '';
+            
+            // If no date found, skip date filtering for this report (don't exclude it)
+            if (!reportDateStr) {
+                // Only log for debugging if needed
+                // console.log('No date found for report:', report.id || report.title, 'Skipping date filter');
+                // Don't return false - let report pass through if no date available
+            } else {
+                // Handle different date formats
+                let reportDate;
+                
+                // Try parsing as-is first
+                reportDate = new Date(reportDateStr);
+                
+                // If invalid, try parsing DD-MM-YYYY format
+                if (isNaN(reportDate.getTime()) && typeof reportDateStr === 'string') {
+                    const parts = reportDateStr.split('-');
+                    if (parts.length === 3) {
+                        // Try DD-MM-YYYY
+                        if (parts[0].length === 2) {
+                            reportDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        }
+                        // Try YYYY-MM-DD (should work with new Date())
+                        else if (parts[0].length === 4) {
+                            reportDate = new Date(reportDateStr);
+                        }
+                    }
+                }
+                
+                // Only apply date filtering if we have a valid date
+                if (!isNaN(reportDate.getTime())) {
+                    if (currentFilters.dateFrom) {
+                        const fromDate = new Date(currentFilters.dateFrom);
+                        fromDate.setHours(0, 0, 0, 0); // Start of day
+                        if (reportDate < fromDate) {
+                            return false;
+                        }
+                    }
+                    
+                    if (currentFilters.dateTo) {
+                        const toDate = new Date(currentFilters.dateTo);
+                        toDate.setHours(23, 59, 59, 999); // End of day
+                        if (reportDate > toDate) {
+                            return false;
+                        }
+                    }
+                } else {
+                    // Invalid date format - log for debugging but don't exclude report
+                    // console.log('Invalid date format:', reportDateStr, 'for report:', report.id || report.title);
+                }
+            }
+        }
+        
+        // Sprint filter - handle different field names and types
+        if (currentFilters.sprint) {
+            const sprintNumber = report.sprint || report.sprintNumber || '';
+            const filterSprint = currentFilters.sprint.toString();
+            const reportSprint = sprintNumber.toString();
+            
+            if (reportSprint !== filterSprint) {
+                return false;
+            }
+        }
+        
+        return true;
+    });
+}
+
+function sortReports(reports) {
+    if (!Array.isArray(reports)) {
+        console.warn('sortReports: reports is not an array', reports);
+        return [];
+    }
+    
+    const [field, direction] = currentFilters.sort.split('-');
+    
+    return [...reports].sort((a, b) => {
+        let aValue, bValue;
+        
+        switch (field) {
+            case 'date':
+                aValue = new Date(a.date || a.reportDate || a.createdAt || 0);
+                bValue = new Date(b.date || b.reportDate || b.createdAt || 0);
+                // Handle invalid dates
+                if (isNaN(aValue.getTime())) aValue = new Date(0);
+                if (isNaN(bValue.getTime())) bValue = new Date(0);
+                break;
+            case 'title':
+                aValue = (a.title || a.reportName || '').toLowerCase();
+                bValue = (b.title || b.reportName || '').toLowerCase();
+                break;
+            case 'project':
+                aValue = (a.project || a.projectName || '').toLowerCase();
+                bValue = (b.project || b.projectName || '').toLowerCase();
+                break;
+            case 'sprint':
+                aValue = parseInt(a.sprint || a.sprintNumber || 0) || 0;
+                bValue = parseInt(b.sprint || b.sprintNumber || 0) || 0;
+                break;
+            default:
+                return 0;
+        }
+        
+        // Handle null/undefined values
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return direction === 'asc' ? -1 : 1;
+        if (bValue == null) return direction === 'asc' ? 1 : -1;
+        
+        if (direction === 'asc') {
+            return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+        } else {
+            return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+        }
+    });
+}
+
+function updateFilterResultsDisplay(count) {
+    const resultsCountElement = document.getElementById('resultsCount');
+    if (resultsCountElement) {
+        resultsCountElement.textContent = count;
+    }
+    
+    // Update active filters display
+    updateActiveFiltersDisplay();
+}
+
+function updateActiveFiltersDisplay() {
+    const activeFiltersContainer = document.getElementById('activeFilters');
+    if (!activeFiltersContainer) return;
+    
+    activeFiltersContainer.innerHTML = '';
+    
+    const filterLabels = {
+        search: 'Search',
+        project: 'Project',
+        portfolio: 'Portfolio',
+        tester: 'Tester',
+        status: 'Status',
+        dateFrom: 'From Date',
+        dateTo: 'To Date',
+        sprint: 'Sprint'
+    };
+    
+    Object.entries(currentFilters).forEach(([key, value]) => {
+        if (value && key !== 'sort') {
+            const tag = document.createElement('div');
+            tag.className = 'active-filter-tag';
+            tag.innerHTML = `
+                <span>${filterLabels[key]}: ${value}</span>
+                <i class="fas fa-times remove-filter" onclick="removeFilter('${key}')"></i>
+            `;
+            activeFiltersContainer.appendChild(tag);
+        }
+    });
+}
+
+function removeFilter(filterKey) {
+    // Clear the filter
+    currentFilters[filterKey] = '';
+    
+    // Update the corresponding form input
+    const inputElement = document.getElementById(filterKey + 'Filter') || document.getElementById('searchInput');
+    if (inputElement) {
+        inputElement.value = '';
+    }
+    
+    // Reapply filters
+    applyFilters();
+}
+
+function clearAllFilters() {
+    // Reset all filters
+    Object.keys(currentFilters).forEach(key => {
+        if (key !== 'sort') {
+            currentFilters[key] = '';
+        }
+    });
+    
+    // Reset sort to default
+    currentFilters.sort = 'date-desc';
+    
+    // Clear all form inputs safely
+    const inputs = [
+        'searchInput',
+        'projectFilter',
+        'portfolioFilter', 
+        'testerFilter',
+        'statusFilter',
+        'dateFromFilter',
+        'dateToFilter',
+        'sprintFilter'
+    ];
+    
+    inputs.forEach(inputId => {
+        const element = document.getElementById(inputId);
+        if (element) {
+            element.value = '';
+        }
+    });
+    
+    // Reset sort filter
+    const sortFilter = document.getElementById('sortFilter');
+    if (sortFilter) {
+        sortFilter.value = 'date-desc';
+    }
+    
+    // Remove active quick filter buttons
+    document.querySelectorAll('.quick-filter-btn.active').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    console.log('All filters cleared');
+    
+    // Reapply filters (which will show all reports)
+    applyFilters();
+}
+
+function toggleFiltersVisibility() {
+    const filtersContainer = document.getElementById('filtersContainer');
+    const toggleText = document.getElementById('toggleText');
+    const toggleIcon = document.querySelector('.toggle-filters i');
+    
+    filtersVisible = !filtersVisible;
+    
+    if (filtersVisible) {
+        filtersContainer.classList.remove('hidden');
+        toggleText.textContent = 'Hide Filters';
+        toggleIcon.className = 'fas fa-eye';
+    } else {
+        filtersContainer.classList.add('hidden');
+        toggleText.textContent = 'Show Filters';
+        toggleIcon.className = 'fas fa-eye-slash';
+    }
+}
+
+function applyQuickFilter(type) {
+    // Remove active class from all quick filter buttons
+    document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Add active class to clicked button
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
+    
+    // Clear existing filters first (except search)
+    const searchValue = document.getElementById('searchInput').value;
+    clearAllFilters();
+    document.getElementById('searchInput').value = searchValue;
+    currentFilters.search = searchValue;
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    switch (type) {
+        case 'today':
+            document.getElementById('dateFromFilter').value = todayStr;
+            document.getElementById('dateToFilter').value = todayStr;
+            currentFilters.dateFrom = todayStr;
+            currentFilters.dateTo = todayStr;
+            break;
+            
+        case 'week':
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay());
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            
+            const weekStartStr = weekStart.toISOString().split('T')[0];
+            const weekEndStr = weekEnd.toISOString().split('T')[0];
+            
+            document.getElementById('dateFromFilter').value = weekStartStr;
+            document.getElementById('dateToFilter').value = weekEndStr;
+            currentFilters.dateFrom = weekStartStr;
+            currentFilters.dateTo = weekEndStr;
+            break;
+            
+        case 'month':
+            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            const monthStartStr = monthStart.toISOString().split('T')[0];
+            const monthEndStr = monthEnd.toISOString().split('T')[0];
+            
+            document.getElementById('dateFromFilter').value = monthStartStr;
+            document.getElementById('dateToFilter').value = monthEndStr;
+            currentFilters.dateFrom = monthStartStr;
+            currentFilters.dateTo = monthEndStr;
+            break;
+            
+        case 'failed':
+            document.getElementById('statusFilter').value = 'failed';
+            currentFilters.status = 'failed';
+            break;
+            
+        case 'recent':
+            const recentStart = new Date(today);
+            recentStart.setDate(today.getDate() - 7);
+            
+            const recentStartStr = recentStart.toISOString().split('T')[0];
+            
+            document.getElementById('dateFromFilter').value = recentStartStr;
+            document.getElementById('dateToFilter').value = todayStr;
+            currentFilters.dateFrom = recentStartStr;
+            currentFilters.dateTo = todayStr;
+            break;
+    }
+    
+    applyFilters();
+}
+
+// Function to refresh filter data
+async function refreshFilterData() {
+    console.log('🔄 Refreshing filter data...');
+    allReports = []; // Clear cache
+    await initializeFilterDropdowns();
+    applyFilters();
+}
+
+// Function to show all reports without filtering
+async function showAllReports() {
+    console.log('📋 Showing all reports without filtering...');
+    showReportsLoading();
+    
+    try {
+        // Fetch all reports
+        const result = await fetchReports(1, '', 1000);
+        const reports = result.reports || [];
+        
+        console.log('Total reports fetched:', reports.length);
+        
+        // Show all reports without any filtering
+        renderReportsTable(reports);
+        
+        // Update results count
+        const resultsCountElement = document.getElementById('resultsCount');
+        if (resultsCountElement) {
+            resultsCountElement.textContent = reports.length;
+        }
+        
+        // Clear active filters display
+        const activeFiltersContainer = document.getElementById('activeFilters');
+        if (activeFiltersContainer) {
+            activeFiltersContainer.innerHTML = '';
+        }
+        
+        console.log('All reports displayed successfully');
+        
+    } catch (error) {
+        console.error('Error showing all reports:', error);
+        showToast('Error loading reports', 'error');
+    }
+    
+    hideReportsLoading();
+}
+
+// Test API function
+async function testAPI() {
+    console.log('🧪 Testing API endpoint...');
+    try {
+        const response = await fetch('/api/reports');
+        console.log('API Response status:', response.status);
+        console.log('API Response headers:', [...response.headers.entries()]);
+        
+        const data = await response.json();
+        console.log('Raw API data:', data);
+        console.log('Data type:', typeof data);
+        console.log('Is array:', Array.isArray(data));
+        
+        if (Array.isArray(data)) {
+            console.log('Array length:', data.length);
+            if (data.length > 0) {
+                console.log('First item:', data[0]);
+                console.log('First item keys:', Object.keys(data[0]));
+            }
+        } else if (data && typeof data === 'object') {
+            console.log('Object keys:', Object.keys(data));
+            if (data.reports) {
+                console.log('Reports array length:', data.reports.length);
+                if (data.reports.length > 0) {
+                    console.log('First report:', data.reports[0]);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('API test failed:', error);
+    }
+}
+
+// Test testers API function
+async function testTestersAPI() {
+    console.log('🧪 Testing testers API endpoint...');
+    try {
+        const response = await fetch('/api/testers');
+        console.log('Testers API Response status:', response.status);
+        
+        const data = await response.json();
+        console.log('Raw testers data:', data);
+        console.log('Testers count:', data.length);
+        
+        if (data.length > 0) {
+            console.log('First tester:', data[0]);
+            console.log('Tester keys:', Object.keys(data[0]));
+        }
+    } catch (error) {
+        console.error('Testers API test failed:', error);
+    }
+}
+
+// Test individual filters function
+function testIndividualFilters() {
+    console.log('🧪 Testing individual filters...');
+    
+    if (allReports.length === 0) {
+        console.log('No reports loaded. Run refreshFilterData() first.');
+        return;
+    }
+    
+    console.log('Total reports:', allReports.length);
+    
+    // Test each filter individually
+    const originalFilters = { ...currentFilters };
+    
+    // Test search filter
+    currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
+    currentFilters.search = 'test';
+    let filtered = filterReports(allReports);
+    console.log('Search "test" results:', filtered.length);
+    
+    // Test project filter (use first available project)
+    const projects = [...new Set(allReports.map(r => r.project || r.projectName).filter(Boolean))];
+    if (projects.length > 0) {
+        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
+        currentFilters.project = projects[0];
+        filtered = filterReports(allReports);
+        console.log(`Project "${projects[0]}" results:`, filtered.length);
+    }
+    
+    // Test tester filter (use first available tester)
+    const testers = new Set();
+    allReports.forEach(report => {
+        // Extract testers using same logic as initialization
+        if (Array.isArray(report.testers)) {
+            report.testers.forEach(tester => {
+                const name = typeof tester === 'object' ? tester.name : tester;
+                if (name) testers.add(name.toString().trim());
+            });
+        } else if (Array.isArray(report.testerData)) {
+            report.testerData.forEach(tester => {
+                if (tester && tester.name) testers.add(tester.name.trim());
+            });
+        }
+    });
+    
+    const testersList = [...testers];
+    if (testersList.length > 0) {
+        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
+        currentFilters.tester = testersList[0];
+        filtered = filterReports(allReports);
+        console.log(`Tester "${testersList[0]}" results:`, filtered.length);
+        
+        // Debug first few reports for tester data
+        console.log('First 3 reports tester data:');
+        allReports.slice(0, 3).forEach((report, i) => {
+            console.log(`Report ${i + 1}:`, {
+                title: report.title,
+                testers: report.testers,
+                testerData: report.testerData,
+                tester_data: report.tester_data
+            });
+        });
+    }
+    
+    // Test status filter
+    const statuses = [...new Set(allReports.map(r => r.status || r.testingStatus).filter(Boolean))];
+    if (statuses.length > 0) {
+        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
+        currentFilters.status = statuses[0];
+        filtered = filterReports(allReports);
+        console.log(`Status "${statuses[0]}" results:`, filtered.length);
+    }
+    
+    // Test no filters (should return all)
+    currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
+    filtered = filterReports(allReports);
+    console.log('No filters results (should be all):', filtered.length);
+    
+    // Restore original filters
+    currentFilters = originalFilters;
+    
+    console.log('Individual filter testing complete!');
+}
+
+// Debug function to analyze report data structure
+function debugReportData() {
+    console.log('🔍 Debugging report data structure...');
+    console.log('Total reports:', allReports.length);
+    
+    if (allReports.length > 0) {
+        const sampleReport = allReports[0];
+        console.log('Sample report structure:', sampleReport);
+        console.log('Available fields:', Object.keys(sampleReport));
+        
+        // Analyze tester data
+        console.log('\n👤 Tester data analysis:');
+        allReports.slice(0, 5).forEach((report, index) => {
+            console.log(`Report ${index + 1}:`, {
+                id: report.id,
+                title: report.title,
+                testers: report.testers,
+                tester: report.tester,
+                testerName: report.testerName,
+                assignedTester: report.assignedTester
+            });
+        });
+        
+        // Analyze date data
+        console.log('\n📅 Date data analysis:');
+        allReports.slice(0, 5).forEach((report, index) => {
+            console.log(`Report ${index + 1}:`, {
+                id: report.id,
+                title: report.title,
+                date: report.date,
+                reportDate: report.reportDate,
+                createdAt: report.createdAt,
+                created_at: report.created_at,
+                dateCreated: report.dateCreated
+            });
+        });
+        
+        // Count unique testers
+        const allTesters = new Set();
+        allReports.forEach(report => {
+            if (Array.isArray(report.testers)) {
+                report.testers.forEach(tester => {
+                    if (tester) allTesters.add(typeof tester === 'object' ? tester.name : tester);
+                });
+            } else if (report.testers) {
+                allTesters.add(report.testers);
+            } else if (report.tester) {
+                allTesters.add(report.tester);
+            }
+        });
+        
+        console.log('\n📊 Summary:');
+        console.log('Unique testers found:', [...allTesters]);
+        console.log('Total unique testers:', allTesters.size);
+    }
+}
+
+// Initialize filter dropdowns with data
+async function initializeFilterDropdowns() {
+    try {
+        // Fetch all reports to populate filter options
+        const result = await fetchReports(1, '', 1000);
+        allReports = result.reports || [];
+        
+        console.log('Initializing filters with', allReports.length, 'reports');
+        console.log('Raw API result:', result);
+        
+        // If no reports, try to understand why
+        if (allReports.length === 0) {
+            console.warn('No reports found. API result structure:', result);
+            console.warn('Possible issues: 1) No data in database, 2) API endpoint issue, 3) Data structure mismatch');
+            return;
+        }
+        
+        // Extract unique values for dropdowns with robust field handling
+        const projects = new Set();
+        const portfolios = new Set();
+        const testers = new Set();
+        
+        // Debug: Log first few reports to understand data structure
+        if (allReports.length > 0) {
+            console.log('Sample report data structure:', allReports[0]);
+            console.log('All report keys:', Object.keys(allReports[0]));
+            
+            // Specifically check tester-related fields
+            const sampleReport = allReports[0];
+            console.log('Tester-related fields in sample report:', {
+                testers: sampleReport.testers,
+                tester: sampleReport.tester,
+                testerData: sampleReport.testerData,
+                tester_data: sampleReport.tester_data,
+                assignedTesters: sampleReport.assignedTesters,
+                testTeam: sampleReport.testTeam
+            });
+        }
+        
+        allReports.forEach((report, index) => {
+            // Debug first few reports
+            if (index < 3) {
+                console.log(`Report ${index}:`, {
+                    project: report.project,
+                    projectName: report.projectName,
+                    portfolio: report.portfolio,
+                    portfolioName: report.portfolioName,
+                    testers: report.testers,
+                    tester: report.tester,
+                    date: report.date,
+                    reportDate: report.reportDate,
+                    createdAt: report.createdAt
+                });
+            }
+            
+            // Extract project names
+            const projectName = report.project || report.projectName;
+            if (projectName) projects.add(projectName);
+            
+            // Extract portfolio names
+            const portfolioName = report.portfolio || report.portfolioName;
+            if (portfolioName) portfolios.add(portfolioName);
+            
+            // Extract tester names - handle different data structures
+            const possibleTesterFields = [
+                'testers', 'tester', 'testerData', 'tester_data', 
+                'assignedTesters', 'testTeam', 'testerName', 'assignedTester'
+            ];
+            
+            // Log tester fields for debugging (only for first few reports)
+            if (index < 3) {
+                console.log(`Report ${index} tester fields:`, 
+                    possibleTesterFields.reduce((acc, field) => {
+                        acc[field] = report[field];
+                        return acc;
+                    }, {})
+                );
+            }
+            
+            // Check for testers array
+            if (Array.isArray(report.testers)) {
+                report.testers.forEach(tester => {
+                    if (tester && typeof tester === 'string') {
+                        testers.add(tester.trim());
+                    } else if (tester && typeof tester === 'object') {
+                        // Handle different object structures
+                        const name = tester.name || tester.testerName || tester.email || tester.id;
+                        if (name) testers.add(name.toString().trim());
+                    }
+                });
+            } 
+            // Check for testerData array (from form)
+            else if (Array.isArray(report.testerData)) {
+                report.testerData.forEach(tester => {
+                    if (tester && typeof tester === 'object' && tester.name) {
+                        testers.add(tester.name.trim());
+                    }
+                });
+            }
+            // Check for tester_data array (snake_case from database)
+            else if (Array.isArray(report.tester_data)) {
+                report.tester_data.forEach(tester => {
+                    if (tester && typeof tester === 'object' && tester.name) {
+                        testers.add(tester.name.trim());
+                    }
+                });
+            }
+            // Check for testers as JSON string
+            else if (report.testers && typeof report.testers === 'string') {
+                try {
+                    // Try to parse as JSON first
+                    const parsedTesters = JSON.parse(report.testers);
+                    if (Array.isArray(parsedTesters)) {
+                        parsedTesters.forEach(tester => {
+                            const name = typeof tester === 'object' ? tester.name : tester;
+                            if (name) testers.add(name.toString().trim());
+                        });
+                    }
+                } catch (e) {
+                    // If not JSON, treat as comma-separated string
+                    const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
+                    testerList.forEach(tester => testers.add(tester));
+                }
+            } 
+            // Check for single tester field
+            else if (report.tester && typeof report.tester === 'string') {
+                testers.add(report.tester.trim());
+            }
+            // Check for additional possible tester fields
+            else if (report.testerName) {
+                testers.add(report.testerName.toString().trim());
+            }
+            else if (report.assignedTester) {
+                testers.add(report.assignedTester.toString().trim());
+            }
+        });
+        
+        // Convert sets to sorted arrays
+        const sortedProjects = [...projects].sort();
+        const sortedPortfolios = [...portfolios].sort();
+        const sortedTesters = [...testers].sort();
+        
+        console.log('Filter options extracted:', {
+            projects: sortedProjects,
+            portfolios: sortedPortfolios,
+            testers: sortedTesters
+        });
+        
+        console.log('Filter counts:', {
+            projects: sortedProjects.length,
+            portfolios: sortedPortfolios.length,
+            testers: sortedTesters.length
+        });
+        
+        // If no testers found in reports, try to load from testers API
+        if (sortedTesters.length === 0) {
+            console.log('No testers found in reports, trying to load from testers API...');
+            try {
+                const testersResponse = await fetch('/api/testers');
+                if (testersResponse.ok) {
+                    const testersData = await testersResponse.json();
+                    console.log('Loaded testers from API:', testersData);
+                    testersData.forEach(tester => {
+                        if (tester.name) {
+                            testers.add(tester.name);
+                        }
+                    });
+                    const updatedSortedTesters = [...testers].sort();
+                    console.log('Updated testers list:', updatedSortedTesters);
+                    
+                    // Update the tester dropdown with API data
+                    const testerFilter = document.getElementById('testerFilter');
+                    if (testerFilter) {
+                        // Clear existing options except the first one
+                        while (testerFilter.children.length > 1) {
+                            testerFilter.removeChild(testerFilter.lastChild);
+                        }
+                        
+                        updatedSortedTesters.forEach(tester => {
+                            const option = document.createElement('option');
+                            option.value = tester;
+                            option.textContent = tester;
+                            testerFilter.appendChild(option);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading testers from API:', error);
+            }
+        }
+        
+        // Populate project dropdown
+        const projectFilter = document.getElementById('projectFilter');
+        if (projectFilter) {
+            // Clear existing options except the first one
+            while (projectFilter.children.length > 1) {
+                projectFilter.removeChild(projectFilter.lastChild);
+            }
+            
+            sortedProjects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project;
+                option.textContent = project;
+                projectFilter.appendChild(option);
+            });
+        }
+        
+        // Populate portfolio dropdown
+        const portfolioFilter = document.getElementById('portfolioFilter');
+        if (portfolioFilter) {
+            // Clear existing options except the first one
+            while (portfolioFilter.children.length > 1) {
+                portfolioFilter.removeChild(portfolioFilter.lastChild);
+            }
+            
+            sortedPortfolios.forEach(portfolio => {
+                const option = document.createElement('option');
+                option.value = portfolio;
+                option.textContent = portfolio;
+                portfolioFilter.appendChild(option);
+            });
+        }
+        
+        // Populate tester dropdown
+        const testerFilter = document.getElementById('testerFilter');
+        if (testerFilter) {
+            // Clear existing options except the first one
+            while (testerFilter.children.length > 1) {
+                testerFilter.removeChild(testerFilter.lastChild);
+            }
+            
+            sortedTesters.forEach(tester => {
+                const option = document.createElement('option');
+                option.value = tester;
+                option.textContent = tester;
+                testerFilter.appendChild(option);
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error initializing filter dropdowns:', error);
+        showToast('Error loading filter options', 'error');
+    }
 }
 
 // Immediate search for pagination and buttons
@@ -2961,6 +3989,18 @@ window.previousSection = previousSection;
 window.nextSection = nextSection;
 window.showAddPortfolioModal = showAddPortfolioModal;
 window.addPortfolio = addPortfolio;
+window.applyFilters = applyFilters;
+window.clearAllFilters = clearAllFilters;
+window.toggleFiltersVisibility = toggleFiltersVisibility;
+window.applyQuickFilter = applyQuickFilter;
+window.removeFilter = removeFilter;
+window.initializeFilterDropdowns = initializeFilterDropdowns;
+window.refreshFilterData = refreshFilterData;
+window.debugReportData = debugReportData;
+window.testAPI = testAPI;
+window.testTestersAPI = testTestersAPI;
+window.testIndividualFilters = testIndividualFilters;
+window.showAllReports = showAllReports;
 window.showAddProjectModal = showAddProjectModal;
 window.addProject = addProject;
 window.closeModal = closeModal;

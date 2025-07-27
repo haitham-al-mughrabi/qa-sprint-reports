@@ -541,6 +541,21 @@
     margin-bottom: 1.5rem;
 }
 
+/* Modal select styling */
+.modal-form select {
+    background-color: rgba(var(--primary-rgb), 0.02) !important;
+    border-left: 3px solid rgba(var(--primary-rgb), 0.3) !important;
+    background-image: 
+        linear-gradient(45deg, transparent 25%, rgba(var(--primary-rgb), 0.05) 25%, rgba(var(--primary-rgb), 0.05) 50%, transparent 50%, transparent 75%, rgba(var(--primary-rgb), 0.05) 75%),
+        url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+    background-size: 8px 8px, 1rem !important;
+    background-position: 0 0, right 0.75rem center !important;
+    background-repeat: repeat, no-repeat !important;
+    appearance: none;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
 .modal-buttons {
     display: flex;
     gap: 1rem;
@@ -1137,6 +1152,30 @@
     transition: var(--transition);
 }
 
+/* Enhanced visual distinction for select elements */
+.info-card-v2-content select {
+    background-color: rgba(var(--primary-rgb), 0.02);
+    border-left: 3px solid rgba(var(--primary-rgb), 0.3);
+    background-image: 
+        linear-gradient(45deg, transparent 25%, rgba(var(--primary-rgb), 0.05) 25%, rgba(var(--primary-rgb), 0.05) 50%, transparent 50%, transparent 75%, rgba(var(--primary-rgb), 0.05) 75%),
+        url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-size: 8px 8px, 1rem;
+    background-position: 0 0, right 0.75rem center;
+    background-repeat: repeat, no-repeat;
+}
+
+/* Global select styling enhancement */
+select {
+    background-color: rgba(var(--primary-rgb), 0.02) !important;
+    border-left: 3px solid rgba(var(--primary-rgb), 0.3) !important;
+    background-image: 
+        linear-gradient(45deg, transparent 25%, rgba(var(--primary-rgb), 0.05) 25%, rgba(var(--primary-rgb), 0.05) 50%, transparent 50%, transparent 75%, rgba(var(--primary-rgb), 0.05) 75%),
+        url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+    background-size: 8px 8px, 1rem !important;
+    background-position: 0 0, right 0.75rem center !important;
+    background-repeat: repeat, no-repeat !important;
+}
+
 .info-card-v2-content input:focus,
 .info-card-v2-content select:focus,
 .info-card-v2-content textarea:focus {
@@ -1144,6 +1183,22 @@
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
     transform: translateY(-1px);
+}
+
+/* Enhanced focus state for select elements */
+.info-card-v2-content select:focus {
+    border-left-color: var(--primary);
+    background-image: 
+        linear-gradient(45deg, transparent 25%, rgba(var(--primary-rgb), 0.1) 25%, rgba(var(--primary-rgb), 0.1) 50%, transparent 50%, transparent 75%, rgba(var(--primary-rgb), 0.1) 75%),
+        url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+/* Global select focus state */
+select:focus {
+    border-left-color: var(--primary) !important;
+    background-image: 
+        linear-gradient(45deg, transparent 25%, rgba(var(--primary-rgb), 0.1) 25%, rgba(var(--primary-rgb), 0.1) 50%, transparent 50%, transparent 75%, rgba(var(--primary-rgb), 0.1) 75%),
+        url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e") !important;
 }
 
 .info-card-v2-content .field-hint {
@@ -1203,11 +1258,57 @@
 /* Enhanced Select Styling */
 .info-card-v2-content select {
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1rem;
     padding-right: 2.5rem;
+    position: relative;
+}
+
+/* Global select styling for all dropdowns */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Dark theme select icon */
+[data-theme="dark"] select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+/* Light theme select icon */
+[data-theme="light"] select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+/* Select hover and focus states */
+select:hover {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+select:focus {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+/* Additional visual distinction for dropdowns */
+select::before {
+    content: '\f0d7';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
 }
 
 /* Placeholder Styling */

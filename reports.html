@@ -52,14 +52,126 @@
         <!-- Reports List Page -->
         <div id="reportsPage" class="page active">
             <div class="reports-container">
-            <div class="page-header">
+            <div class="dashboard-header">
                 <h1><i class="fas fa-chart-line"></i> Reports Management</h1>
+                <p>Search, filter, and manage your quality assurance reports</p>
                 <div class="header-actions">
-                    <div class="search-container">
-                        <i class="fas fa-search"></i>
-                        <input type="text" class="search-box" placeholder="Search reports..." id="searchInput" onkeyup="searchReports()">
-                    </div>
                     <button class="action-btn" onclick="window.location.href='/create-report'"><i class="fas fa-plus-circle"></i> New Report</button>
+                </div>
+            </div>
+
+            <!-- Enhanced Filters Section -->
+            <div class="filters-section">
+                <div class="filters-header">
+                    <h2><i class="fas fa-filter"></i> Search & Filters</h2>
+                    <div class="filters-actions">
+                        <button class="filter-btn" onclick="showAllReports()"><i class="fas fa-list"></i> Show All</button>
+                        <button class="filter-btn" onclick="refreshFilterData()"><i class="fas fa-sync"></i> Refresh Data</button>
+                        <button class="filter-btn" onclick="clearAllFilters()"><i class="fas fa-times"></i> Clear All</button>
+                        <button class="filter-btn toggle-filters" onclick="toggleFiltersVisibility()"><i class="fas fa-eye-slash"></i> <span id="toggleText">Show Filters</span></button>
+                    </div>
+                </div>
+                
+                <div class="filters-container hidden" id="filtersContainer">
+                    <!-- Search Row -->
+                    <div class="filter-row">
+                        <div class="filter-group full-width">
+                            <label for="searchInput"><i class="fas fa-search"></i> Search Reports</label>
+                            <div class="search-input-container">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" class="filter-input search-input" placeholder="Search by report title, project, or portfolio..." id="searchInput" onkeyup="searchReports()">
+                                <button class="search-btn" onclick="searchReports()"><i class="fas fa-search"></i> Search</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Controls Row 1 -->
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="projectFilter"><i class="fas fa-project-diagram"></i> Project</label>
+                            <select id="projectFilter" class="filter-select" onchange="applyFilters()">
+                                <option value="">All Projects</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="portfolioFilter"><i class="fas fa-briefcase"></i> Portfolio</label>
+                            <select id="portfolioFilter" class="filter-select" onchange="applyFilters()">
+                                <option value="">All Portfolios</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="testerFilter"><i class="fas fa-user-check"></i> Tester</label>
+                            <select id="testerFilter" class="filter-select" onchange="applyFilters()">
+                                <option value="">All Testers</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="statusFilter"><i class="fas fa-flag"></i> Status</label>
+                            <select id="statusFilter" class="filter-select" onchange="applyFilters()">
+                                <option value="">All Statuses</option>
+                                <option value="passed">Passed</option>
+                                <option value="passed-with-issues">Passed with Issues</option>
+                                <option value="failed">Failed</option>
+                                <option value="blocked">Blocked</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="deferred">Deferred</option>
+                                <option value="not-testable">Not Testable</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Filter Controls Row 2 - Date Ranges -->
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="dateFromFilter"><i class="fas fa-calendar-alt"></i> Date From</label>
+                            <input type="date" id="dateFromFilter" class="filter-input date-input" onchange="applyFilters()">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="dateToFilter"><i class="fas fa-calendar-alt"></i> Date To</label>
+                            <input type="date" id="dateToFilter" class="filter-input date-input" onchange="applyFilters()">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="sprintFilter"><i class="fas fa-running"></i> Sprint Number</label>
+                            <input type="number" id="sprintFilter" class="filter-input" placeholder="Sprint #" min="1" onchange="applyFilters()">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="sortFilter"><i class="fas fa-sort"></i> Sort By</label>
+                            <select id="sortFilter" class="filter-select" onchange="applyFilters()">
+                                <option value="date-desc">Date (Newest First)</option>
+                                <option value="date-asc">Date (Oldest First)</option>
+                                <option value="title-asc">Title (A-Z)</option>
+                                <option value="title-desc">Title (Z-A)</option>
+                                <option value="project-asc">Project (A-Z)</option>
+                                <option value="sprint-desc">Sprint (Highest First)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Quick Filter Buttons -->
+                    <div class="filter-row quick-filters">
+                        <div class="filter-group full-width">
+                            <label><i class="fas fa-bolt"></i> Quick Filters</label>
+                            <div class="quick-filter-buttons">
+                                <button class="quick-filter-btn" onclick="applyQuickFilter('today')"><i class="fas fa-calendar-day"></i> Today</button>
+                                <button class="quick-filter-btn" onclick="applyQuickFilter('week')"><i class="fas fa-calendar-week"></i> This Week</button>
+                                <button class="quick-filter-btn" onclick="applyQuickFilter('month')"><i class="fas fa-calendar-alt"></i> This Month</button>
+                                <button class="quick-filter-btn" onclick="applyQuickFilter('failed')"><i class="fas fa-times-circle"></i> Failed Reports</button>
+                                <button class="quick-filter-btn" onclick="applyQuickFilter('recent')"><i class="fas fa-clock"></i> Recent (7 days)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Results Summary -->
+                <div class="filter-results-summary" id="filterResultsSummary">
+                    <span class="results-count">Showing <strong id="resultsCount">0</strong> reports</span>
+                    <div class="active-filters" id="activeFilters"></div>
                 </div>
             </div>
 
@@ -102,6 +214,7 @@
     <!-- Link to the external JavaScript files -->
     <script src="/static/enhanced_script.js" defer></script>
     <script src="/static/Charts.js" defer></script>
+    <script src="/test-filters.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize theme first
@@ -117,8 +230,12 @@
                     link.classList.remove('active');
                 }
             });
-            // Initial data load
-            searchReports();
+            
+            // Initialize filter dropdowns and load data
+            await initializeFilterDropdowns();
+            
+            // Initial data load with filters
+            applyFilters();
         });
         
         function showReportsLoading() {
