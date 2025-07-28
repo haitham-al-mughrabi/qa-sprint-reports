@@ -1187,11 +1187,12 @@ function showSection(sectionIndex) {
 
     currentSection = sectionIndex;
     updateNavigationButtons();
+    updateProgressBar();
     window.scrollTo(0, 0);
 }
 
 function nextSection() {
-    if (currentSection < 7) { // Max section index is 7 (QA Notes)
+    if (currentSection < 8) { // Max section index is 8 (Automation Regression)
         showSection(currentSection + 1);
     }
 }
@@ -1203,17 +1204,99 @@ function previousSection() {
 
 function updateNavigationButtons() {
     document.getElementById('prevBtn').disabled = currentSection === 0;
-    const isLastSection = currentSection === 7;
+    const isLastSection = currentSection === 8;
     document.getElementById('nextBtn').style.display = isLastSection ? 'none' : 'inline-block';
     document.getElementById('submitBtn').style.display = isLastSection ? 'inline-block' : 'none';
+}
+
+function updateProgressBar() {
+    const totalSections = 9;
+    const sectionTitles = [
+        'General Details',
+        'Test Summary',
+        'Additional Info',
+        'User Stories',
+        'Test Cases',
+        'Issues Analysis',
+        'Enhancements',
+        'QA Notes',
+        'Automation Regression'
+    ];
+    
+    // Calculate progress - show completion based on current section
+    const completedSections = currentSection; // Sections completed (0-based)
+    const currentStepNumber = currentSection + 1; // Current step being worked on (1-based)
+    const percentage = (completedSections / totalSections) * 100;
+    
+    // Update progress percentage and fill
+    document.getElementById('progressPercent').textContent = `${Math.round(percentage)}%`;
+    document.getElementById('progressFill').style.width = `${percentage}%`;
+    
+    // Update step and title text
+    document.getElementById('progressStep').textContent = `Step ${currentStepNumber} of ${totalSections}`;
+    document.getElementById('progressTitle').textContent = sectionTitles[currentSection] || 'Unknown Section';
+    
+    // Update step indicators
+    document.querySelectorAll('.step').forEach((step, index) => {
+        step.classList.remove('active', 'completed');
+        
+        if (index === currentSection) {
+            step.classList.add('active');
+        } else if (index < currentSection) {
+            step.classList.add('completed');
+            // Change icon to checkmark for completed steps
+            const icon = step.querySelector('.step-circle i');
+            if (icon && !icon.classList.contains('fa-check')) {
+                icon.className = 'fas fa-check';
+            }
+        } else {
+            // Reset icon for future steps
+            const icon = step.querySelector('.step-circle i');
+            const stepIcons = [
+                'fas fa-info-circle',
+                'fas fa-chart-bar',
+                'fas fa-plus-square',
+                'fas fa-user-check',
+                'fas fa-vial',
+                'fas fa-bug',
+                'fas fa-bolt',
+                'fas fa-note-sticky',
+                'fas fa-robot'
+            ];
+            if (icon) {
+                icon.className = stepIcons[index] || 'fas fa-circle';
+            }
+        }
+    });
+}
+
+// Add click functionality to progress steps
+function initializeProgressSteps() {
+    document.querySelectorAll('.step').forEach((step, index) => {
+        step.addEventListener('click', () => {
+            showSection(index);
+        });
+    });
 }
 
 // backToDashboard now redirects to the dashboard page
 function backToDashboard() { window.location.href = '/dashboard'; }
 function toggleSidebar() { 
     const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('open');
-    sidebar.classList.toggle('show'); // Also toggle 'show' for compatibility
+    const formContainer = document.querySelector('.form-container');
+    const toggleBtn = document.querySelector('.sidebar-toggle-btn i');
+    
+    sidebar.classList.toggle('collapsed');
+    formContainer.classList.toggle('sidebar-collapsed');
+    
+    // Update toggle button icon
+    if (sidebar.classList.contains('collapsed')) {
+        toggleBtn.classList.remove('fa-bars');
+        toggleBtn.classList.add('fa-arrow-right');
+    } else {
+        toggleBtn.classList.remove('fa-arrow-right');
+        toggleBtn.classList.add('fa-bars');
+    }
 }
 
 // --- Enhanced Reports Table Functions with Filtering ---

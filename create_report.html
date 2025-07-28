@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,11 @@
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload" as="style" onload="this.rel='stylesheet'">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload"
+        as="style" onload="this.rel='stylesheet'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
@@ -21,13 +25,19 @@
     <!-- External libraries (defer non-critical) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
+        defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
 
     <!-- Load non-critical CSS asynchronously -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"></noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+    </noscript>
 </head>
+
 <body>
     <!-- Navigation Header -->
     <nav class="main-nav">
@@ -39,7 +49,8 @@
                     <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
                     <a href="/create-report" class="nav-link active"><i class="fas fa-plus-circle"></i> New Report</a>
                     <a href="/manage" class="nav-link"><i class="fas fa-cogs"></i> Manage Data</a>
-                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project Statistics</a>
+                    <a href="/project-statistics" class="nav-link"><i class="fas fa-chart-pie"></i> Project
+                        Statistics</a>
                 </div>
                 <button class="theme-toggle" onclick="toggleTheme()">
                     <i class="fas fa-sun" id="theme-icon"></i>
@@ -49,26 +60,30 @@
         </div>
     </nav>
 
-        <!-- Enhanced QA Form Page -->
-        <div id="formPage" class="page active">
-            <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-            
-            <div class="form-container">
+    <!-- Enhanced QA Form Page -->
+    <div id="formPage" class="page active">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+        <div class="form-container">
             <!-- Sidebar Navigation -->
             <nav class="sidebar" id="sidebar">
                 <div class="sidebar-header">
                     <h2><i class="fas fa-clipboard"></i> Report Sections</h2>
-                    <button class="back-btn" onclick="window.location.href='/dashboard'"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                    <button class="back-btn" onclick="window.location.href='/dashboard'"><i
+                            class="fas fa-arrow-left"></i> Back to Dashboard</button>
                 </div>
-                <a href="#" class="nav-item active" onclick="showSection(0)"><i class="fas fa-info-circle"></i> General Details</a>
+                <a href="#" class="nav-item active" onclick="showSection(0)"><i class="fas fa-info-circle"></i> General
+                    Details</a>
                 <a href="#" class="nav-item" onclick="showSection(1)"><i class="fas fa-file-alt"></i> Test Summary</a>
-                <a href="#" class="nav-item" onclick="showSection(2)"><i class="fas fa-plus-square"></i> Additional Info</a>
+                <a href="#" class="nav-item" onclick="showSection(2)"><i class="fas fa-plus-square"></i> Additional
+                    Info</a>
                 <a href="#" class="nav-item" onclick="showSection(3)"><i class="fas fa-user-check"></i> User Stories</a>
                 <a href="#" class="nav-item" onclick="showSection(4)"><i class="fas fa-vial"></i> Test Cases</a>
                 <a href="#" class="nav-item" onclick="showSection(5)"><i class="fas fa-bug"></i> Issues Analysis</a>
                 <a href="#" class="nav-item" onclick="showSection(6)"><i class="fas fa-bolt"></i> Enhancements</a>
                 <a href="#" class="nav-item" onclick="showSection(7)"><i class="fas fa-note-sticky"></i> QA Notes</a>
-                <a href="#" class="nav-item" onclick="showSection(8)"><i class="fas fa-robot"></i> Automation Regression</a>
+                <a href="#" class="nav-item" onclick="showSection(8)"><i class="fas fa-robot"></i> Automation
+                    Regression</a>
             </nav>
 
             <!-- Main Content -->
@@ -77,6 +92,85 @@
                     <div class="header-content">
                         <h1 id="formTitle">Create Sprint Report</h1>
                         <p>Complete all sections to generate your comprehensive QA testing report</p>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="progress-info">
+                            <div class="progress-text" style="top:15%">
+                                <span id="progressStep">Step 1 of 9</span>
+                                <span id="progressTitle">General Details</span>
+                            </div>
+                            <div class="progress-percentage">
+                                <span id="progressPercent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-steps">
+                            <div class="step active" data-step="0">
+                                <div class="step-circle">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <span class="step-label">General</span>
+                            </div>
+                            <div class="step" data-step="1">
+                                <div class="step-circle">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <span class="step-label">Summary</span>
+                            </div>
+                            <div class="step" data-step="2">
+                                <div class="step-circle">
+                                    <i class="fas fa-plus-square"></i>
+                                </div>
+                                <span class="step-label">Additional</span>
+                            </div>
+                            <div class="step" data-step="3">
+                                <div class="step-circle">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <span class="step-label">Stories</span>
+                            </div>
+                            <div class="step" data-step="4">
+                                <div class="step-circle">
+                                    <i class="fas fa-vial"></i>
+                                </div>
+                                <span class="step-label">Tests</span>
+                            </div>
+                            <div class="step" data-step="5">
+                                <div class="step-circle">
+                                    <i class="fas fa-bug"></i>
+                                </div>
+                                <span class="step-label">Issues</span>
+                            </div>
+                            <div class="step" data-step="6">
+                                <div class="step-circle">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <span class="step-label">Enhance</span>
+                            </div>
+                            <div class="step" data-step="7">
+                                <div class="step-circle">
+                                    <i class="fas fa-note-sticky"></i>
+                                </div>
+                                <span class="step-label">Notes</span>
+                            </div>
+                            <div class="step" data-step="8">
+                                <div class="step-circle">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <span class="step-label">Auto</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -95,7 +189,8 @@
                                     <div class="info-card-v2-content form-row-fields">
                                         <div class="form-group">
                                             <label for="portfolioName">Portfolio Name</label>
-                                            <select id="portfolioName" name="portfolioName" onchange="onPortfolioSelection()">
+                                            <select id="portfolioName" name="portfolioName"
+                                                onchange="onPortfolioSelection()">
                                                 <option value="">Select Portfolio</option>
                                             </select>
                                         </div>
@@ -118,15 +213,18 @@
                                         <div class="info-card-v2-content">
                                             <div class="form-group">
                                                 <label for="sprintNumber">Sprint Number</label>
-                                                <input type="number" id="sprintNumber" name="sprintNumber" min="1" placeholder="Enter sprint number">
+                                                <input type="number" id="sprintNumber" name="sprintNumber" min="1"
+                                                    placeholder="Enter sprint number">
                                             </div>
                                             <div class="form-group">
                                                 <label for="cycleNumber">Cycle Number</label>
-                                                <input type="number" id="cycleNumber" name="cycleNumber" min="1" placeholder="Enter cycle number">
+                                                <input type="number" id="cycleNumber" name="cycleNumber" min="1"
+                                                    placeholder="Enter cycle number">
                                             </div>
                                             <div class="form-group">
                                                 <label for="releaseNumber">Release Number</label>
-                                                <input type="text" id="releaseNumber" name="releaseNumber" placeholder="e.g., R1.0, R2.1">
+                                                <input type="text" id="releaseNumber" name="releaseNumber"
+                                                    placeholder="e.g., R1.0, R2.1">
                                             </div>
                                         </div>
                                     </div>
@@ -139,16 +237,20 @@
                                         <div class="info-card-v2-content">
                                             <div class="form-group">
                                                 <label for="reportName">Report Name</label>
-                                                <input type="text" id="reportName" name="reportName" placeholder="Enter custom report name" oninput="updateReportTitle()">
+                                                <input type="text" id="reportName" name="reportName"
+                                                    placeholder="Enter custom report name"
+                                                    oninput="updateReportTitle()">
                                                 <small class="field-hint">Leave blank to use default name</small>
                                             </div>
                                             <div class="form-group">
                                                 <label for="reportVersion">Report Version</label>
-                                                <input type="text" id="reportVersion" name="reportVersion" placeholder="e.g., 1.0, 2.1">
+                                                <input type="text" id="reportVersion" name="reportVersion"
+                                                    placeholder="e.g., 1.0, 2.1">
                                             </div>
                                             <div class="form-group">
                                                 <label for="reportDate">Report Date (dd-mm-yyyy)</label>
-                                                <input type="text" id="reportDate" name="reportDate" pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy">
+                                                <input type="text" id="reportDate" name="reportDate"
+                                                    pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy">
                                             </div>
                                         </div>
                                     </div>
@@ -168,19 +270,27 @@
                                     <div class="info-card-v2-content">
                                         <div class="form-group">
                                             <label for="testSummary">Test Summary</label>
-                                            <textarea id="testSummary" name="testSummary" placeholder="Provide a comprehensive summary of the testing activities..." rows="6"></textarea>
+                                            <textarea id="testSummary" name="testSummary"
+                                                placeholder="Provide a comprehensive summary of the testing activities..."
+                                                rows="6"></textarea>
                                         </div>
                                         <div class="form-group">
                                             <label for="testingStatus">Testing Status</label>
                                             <select id="testingStatus" name="testingStatus">
                                                 <option value="">Select Status</option>
-                                                <option value="passed"><i class="fas fa-check-circle"></i> Passed</option>
-                                                <option value="passed-with-issues"><i class="fas fa-exclamation-triangle"></i> Passed with Issues</option>
-                                                <option value="failed"><i class="fas fa-times-circle"></i> Failed</option>
+                                                <option value="passed"><i class="fas fa-check-circle"></i> Passed
+                                                </option>
+                                                <option value="passed-with-issues"><i
+                                                        class="fas fa-exclamation-triangle"></i> Passed with Issues
+                                                </option>
+                                                <option value="failed"><i class="fas fa-times-circle"></i> Failed
+                                                </option>
                                                 <option value="blocked"><i class="fas fa-ban"></i> Blocked</option>
-                                                <option value="cancelled"><i class="fas fa-trash-alt"></i> Cancelled</option>
+                                                <option value="cancelled"><i class="fas fa-trash-alt"></i> Cancelled
+                                                </option>
                                                 <option value="deferred"><i class="fas fa-pause"></i> Deferred</option>
-                                                <option value="not-testable"><i class="fas fa-question-circle"></i> Not Testable</option>
+                                                <option value="not-testable"><i class="fas fa-question-circle"></i> Not
+                                                    Testable</option>
                                             </select>
                                         </div>
                                     </div>
@@ -193,41 +303,59 @@
                                     </div>
                                     <div class="info-card-v2-content">
                                         <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Metric</th>
-                                            <th>Value</th>
-                                            <th>Source</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><strong><i class="fas fa-user-check"></i> User Stories</strong><br><small>Auto-calculated from section 4</small></td>
-                                            <td><input type="number" id="userStoriesMetric" name="userStoriesMetric" readonly class="readonly-field"></td>
-                                            <td><small>Sum of all user story statuses</small></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong><i class="fas fa-flask"></i> Test Cases</strong><br><small>Auto-calculated from section 5</small></td>
-                                            <td><input type="number" id="testCasesMetric" name="testCasesMetric" readonly class="readonly-field"></td>
-                                            <td><small>Sum of all test case statuses</small></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong><i class="fas fa-bug"></i> Issues</strong><br><small>Auto-calculated from section 6</small></td>
-                                            <td><input type="number" id="issuesMetric" name="issuesMetric" readonly class="readonly-field"></td>
-                                            <td><small>Sum of all issue priorities</small></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong><i class="fas fa-bolt"></i> Enhancements</strong><br><small>Auto-calculated from section 7</small></td>
-                                            <td><input type="number" id="enhancementsMetric" name="enhancementsMetric" readonly class="readonly-field"></td>
-                                            <td><small>Sum of all enhancement statuses</small></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong><i class="fas fa-chart-bar"></i> QA Notes Count</strong><br><small>Auto-calculated from section 8</small></td>
-                                            <td><input type="number" name="qaNotesMetric" id="qaNotesMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
-                                            <td><small>Number of QA notes</small></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Metric</th>
+                                                    <th>Value</th>
+                                                    <th>Source</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong><i class="fas fa-user-check"></i> User
+                                                            Stories</strong><br><small>Auto-calculated from section
+                                                            4</small></td>
+                                                    <td><input type="number" id="userStoriesMetric"
+                                                            name="userStoriesMetric" readonly class="readonly-field">
+                                                    </td>
+                                                    <td><small>Sum of all user story statuses</small></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong><i class="fas fa-flask"></i> Test
+                                                            Cases</strong><br><small>Auto-calculated from section
+                                                            5</small></td>
+                                                    <td><input type="number" id="testCasesMetric" name="testCasesMetric"
+                                                            readonly class="readonly-field"></td>
+                                                    <td><small>Sum of all test case statuses</small></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong><i class="fas fa-bug"></i>
+                                                            Issues</strong><br><small>Auto-calculated from section
+                                                            6</small></td>
+                                                    <td><input type="number" id="issuesMetric" name="issuesMetric"
+                                                            readonly class="readonly-field"></td>
+                                                    <td><small>Sum of all issue priorities</small></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong><i class="fas fa-bolt"></i>
+                                                            Enhancements</strong><br><small>Auto-calculated from section
+                                                            7</small></td>
+                                                    <td><input type="number" id="enhancementsMetric"
+                                                            name="enhancementsMetric" readonly class="readonly-field">
+                                                    </td>
+                                                    <td><small>Sum of all enhancement statuses</small></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong><i class="fas fa-chart-bar"></i> QA Notes
+                                                            Count</strong><br><small>Auto-calculated from section
+                                                            8</small></td>
+                                                    <td><input type="number" name="qaNotesMetric" id="qaNotesMetric"
+                                                            min="0" placeholder="0" readonly class="readonly-field">
+                                                    </td>
+                                                    <td><small>Number of QA notes</small></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -236,7 +364,7 @@
                         <!-- Section 3: Additional Information -->
                         <div class="section" id="section-2">
                             <h2 class="section-title"><i class="fas fa-info-circle"></i> Additional Information</h2>
-                            
+
                             <!-- Modern 2x2 Grid Layout for Additional Information Cards -->
                             <div class="additional-info-layout">
                                 <!-- Row 1 -->
@@ -250,7 +378,8 @@
                                     </div>
                                     <div class="info-card-v2-content">
                                         <div class="dynamic-list" id="requestList">
-                                            <div class="empty-state">No requests added yet. Click "Add Request" to get started.</div>
+                                            <div class="empty-state">No requests added yet. Click "Add Request" to get
+                                                started.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -265,7 +394,8 @@
                                     </div>
                                     <div class="info-card-v2-content">
                                         <div class="dynamic-list" id="buildList">
-                                            <div class="empty-state">No builds added yet. Click "Add Build" to get started.</div>
+                                            <div class="empty-state">No builds added yet. Click "Add Build" to get
+                                                started.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -281,7 +411,8 @@
                                     </div>
                                     <div class="info-card-v2-content">
                                         <div class="dynamic-list" id="testerList">
-                                            <div class="empty-state">No testers added yet. Click "Add/Select Tester" to get started.</div>
+                                            <div class="empty-state">No testers added yet. Click "Add/Select Tester" to
+                                                get started.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -306,7 +437,7 @@
                         <!-- Section 4: User Stories -->
                         <div class="section" id="section-3">
                             <h2 class="section-title"><i class="fas fa-user-check"></i> User Stories Analysis</h2>
-                            
+
                             <div class="analysis-layout">
                                 <div class="analysis-table-card">
                                     <div class="info-card-v2-header">
@@ -314,57 +445,74 @@
                                         <h3>User Stories Summary</h3>
                                     </div>
                                     <div class="info-card-v2-content">
-                                    <table class="data-table" id="userStoriesTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Status</th>
-                                                <th>Count</th>
-                                                <th>Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><strong>Total Number of Stories</strong></td>
-                                                <td><input type="number" id="totalStories" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
-                                                <td class="percentage-cell">100%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-check-circle text-success"></i> Passed</td>
-                                                <td><input type="number" id="passedStories" name="passedUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="passedPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-exclamation-triangle text-warning"></i> Passed with Issue/s</td>
-                                                <td><input type="number" id="passedWithIssuesStories" name="passedWithIssuesUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="passedWithIssuesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-times-circle text-danger"></i> Failed</td>
-                                                <td><input type="number" id="failedStories" name="failedUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="failedPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-ban text-warning"></i> Blocked</td>
-                                                <td><input type="number" id="blockedStories" name="blockedUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="blockedPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-trash-alt text-danger"></i> Cancelled</td>
-                                                <td><input type="number" id="cancelledStories" name="cancelledUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="cancelledPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-pause"></i> Deferred</td>
-                                                <td><input type="number" id="deferredStories" name="deferredUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="deferredPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-question-circle text-info"></i> Not Testable</td>
-                                                <td><input type="number" id="notTestableStories" name="notTestableUserStories" min="0" placeholder="0" oninput="calculatePercentages()"></td>
-                                                <td class="percentage-cell" id="notTestablePercentage">0%</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                        <table class="data-table" id="userStoriesTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Total Number of Stories</strong></td>
+                                                    <td><input type="number" id="totalStories" min="0" placeholder="0"
+                                                            readonly class="readonly-field calculated-total"></td>
+                                                    <td class="percentage-cell">100%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-check-circle text-success"></i> Passed</td>
+                                                    <td><input type="number" id="passedStories" name="passedUserStories"
+                                                            min="0" placeholder="0" oninput="calculatePercentages()">
+                                                    </td>
+                                                    <td class="percentage-cell" id="passedPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-exclamation-triangle text-warning"></i> Passed
+                                                        with Issue/s</td>
+                                                    <td><input type="number" id="passedWithIssuesStories"
+                                                            name="passedWithIssuesUserStories" min="0" placeholder="0"
+                                                            oninput="calculatePercentages()"></td>
+                                                    <td class="percentage-cell" id="passedWithIssuesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-times-circle text-danger"></i> Failed</td>
+                                                    <td><input type="number" id="failedStories" name="failedUserStories"
+                                                            min="0" placeholder="0" oninput="calculatePercentages()">
+                                                    </td>
+                                                    <td class="percentage-cell" id="failedPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-ban text-warning"></i> Blocked</td>
+                                                    <td><input type="number" id="blockedStories"
+                                                            name="blockedUserStories" min="0" placeholder="0"
+                                                            oninput="calculatePercentages()"></td>
+                                                    <td class="percentage-cell" id="blockedPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-trash-alt text-danger"></i> Cancelled</td>
+                                                    <td><input type="number" id="cancelledStories"
+                                                            name="cancelledUserStories" min="0" placeholder="0"
+                                                            oninput="calculatePercentages()"></td>
+                                                    <td class="percentage-cell" id="cancelledPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-pause"></i> Deferred</td>
+                                                    <td><input type="number" id="deferredStories"
+                                                            name="deferredUserStories" min="0" placeholder="0"
+                                                            oninput="calculatePercentages()"></td>
+                                                    <td class="percentage-cell" id="deferredPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-question-circle text-info"></i> Not Testable
+                                                    </td>
+                                                    <td><input type="number" id="notTestableStories"
+                                                            name="notTestableUserStories" min="0" placeholder="0"
+                                                            oninput="calculatePercentages()"></td>
+                                                    <td class="percentage-cell" id="notTestablePercentage">0%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
 
@@ -385,7 +533,7 @@
                         <!-- Section 5: Test Cases -->
                         <div class="section" id="section-4">
                             <h2 class="section-title"><i class="fas fa-flask"></i> Test Cases Analysis</h2>
-                            
+
                             <div class="analysis-layout">
                                 <div class="analysis-table-card">
                                     <div class="info-card-v2-header">
@@ -393,57 +541,77 @@
                                         <h3>Test Cases Summary</h3>
                                     </div>
                                     <div class="info-card-v2-content">
-                                    <table class="data-table" id="testCasesTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Status</th>
-                                                <th>Count</th>
-                                                <th>Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><strong>Total Number of Test Cases</strong></td>
-                                                <td><input type="number" id="totalTestCases" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
-                                                <td class="percentage-cell">100%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-check-circle text-success"></i> Passed</td>
-                                                <td><input type="number" id="passedTestCases" name="passedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="passedTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-exclamation-triangle text-warning"></i> Passed with Issue/s</td>
-                                                <td><input type="number" id="passedWithIssuesTestCases" name="passedWithIssuesTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="passedWithIssuesTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-times-circle text-danger"></i> Failed</td>
-                                                <td><input type="number" id="failedTestCases" name="failedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="failedTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-ban text-warning"></i> Blocked</td>
-                                                <td><input type="number" id="blockedTestCases" name="blockedTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="blockedTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-trash-alt text-danger"></i> Cancelled</td>
-                                                <td><input type="number" id="cancelledTestCases" name="cancelledTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="cancelledTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-pause"></i> Deferred</td>
-                                                <td><input type="number" id="deferredTestCases" name="deferredTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="deferredTestCasesPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-question-circle text-info"></i> Not Testable</td>
-                                                <td><input type="number" id="notTestableTestCases" name="notTestableTestCases" min="0" placeholder="0" oninput="calculateTestCasesPercentages()"></td>
-                                                <td class="percentage-cell" id="notTestableTestCasesPercentage">0%</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                        <table class="data-table" id="testCasesTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Total Number of Test Cases</strong></td>
+                                                    <td><input type="number" id="totalTestCases" min="0" placeholder="0"
+                                                            readonly class="readonly-field calculated-total"></td>
+                                                    <td class="percentage-cell">100%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-check-circle text-success"></i> Passed</td>
+                                                    <td><input type="number" id="passedTestCases" name="passedTestCases"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="passedTestCasesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-exclamation-triangle text-warning"></i> Passed
+                                                        with Issue/s</td>
+                                                    <td><input type="number" id="passedWithIssuesTestCases"
+                                                            name="passedWithIssuesTestCases" min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell"
+                                                        id="passedWithIssuesTestCasesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-times-circle text-danger"></i> Failed</td>
+                                                    <td><input type="number" id="failedTestCases" name="failedTestCases"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="failedTestCasesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-ban text-warning"></i> Blocked</td>
+                                                    <td><input type="number" id="blockedTestCases"
+                                                            name="blockedTestCases" min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="blockedTestCasesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-trash-alt text-danger"></i> Cancelled</td>
+                                                    <td><input type="number" id="cancelledTestCases"
+                                                            name="cancelledTestCases" min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="cancelledTestCasesPercentage">0%
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-pause"></i> Deferred</td>
+                                                    <td><input type="number" id="deferredTestCases"
+                                                            name="deferredTestCases" min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="deferredTestCasesPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-question-circle text-info"></i> Not Testable
+                                                    </td>
+                                                    <td><input type="number" id="notTestableTestCases"
+                                                            name="notTestableTestCases" min="0" placeholder="0"
+                                                            oninput="calculateTestCasesPercentages()"></td>
+                                                    <td class="percentage-cell" id="notTestableTestCasesPercentage">0%
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
 
@@ -464,7 +632,7 @@
                         <!-- Section 6: Issues Analysis -->
                         <div class="section" id="section-5">
                             <h2 class="section-title"><i class="fas fa-bug"></i> Issues Analysis</h2>
-                            
+
                             <div class="issues-analysis-layout">
                                 <div class="issues-priority-card">
                                     <div class="info-card-v2-header">
@@ -484,27 +652,38 @@
                                                 <tbody>
                                                     <tr>
                                                         <td><strong>Total Issues</strong></td>
-                                                        <td><input type="number" id="totalIssues" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
+                                                        <td><input type="number" id="totalIssues" min="0"
+                                                                placeholder="0" readonly
+                                                                class="readonly-field calculated-total"></td>
                                                         <td class="percentage-cell">100%</td>
                                                     </tr>
                                                     <tr>
                                                         <td><i class="fas fa-circle text-danger"></i> Critical</td>
-                                                        <td><input type="number" id="criticalIssues" name="criticalIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
-                                                        <td class="percentage-cell" id="criticalIssuesPercentage">0%</td>
+                                                        <td><input type="number" id="criticalIssues"
+                                                                name="criticalIssues" min="0" placeholder="0"
+                                                                oninput="calculateIssuesPercentages()"></td>
+                                                        <td class="percentage-cell" id="criticalIssuesPercentage">0%
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td><i class="fas fa-circle text-warning"></i> High</td>
-                                                        <td><input type="number" id="highIssues" name="highIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
+                                                        <td><input type="number" id="highIssues" name="highIssues"
+                                                                min="0" placeholder="0"
+                                                                oninput="calculateIssuesPercentages()"></td>
                                                         <td class="percentage-cell" id="highIssuesPercentage">0%</td>
                                                     </tr>
                                                     <tr>
                                                         <td><i class="fas fa-circle text-info"></i> Medium</td>
-                                                        <td><input type="number" id="mediumIssues" name="mediumIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
+                                                        <td><input type="number" id="mediumIssues" name="mediumIssues"
+                                                                min="0" placeholder="0"
+                                                                oninput="calculateIssuesPercentages()"></td>
                                                         <td class="percentage-cell" id="mediumIssuesPercentage">0%</td>
                                                     </tr>
                                                     <tr>
                                                         <td><i class="fas fa-circle text-success"></i> Low</td>
-                                                        <td><input type="number" id="lowIssues" name="lowIssues" min="0" placeholder="0" oninput="calculateIssuesPercentages()"></td>
+                                                        <td><input type="number" id="lowIssues" name="lowIssues" min="0"
+                                                                placeholder="0" oninput="calculateIssuesPercentages()">
+                                                        </td>
                                                         <td class="percentage-cell" id="lowIssuesPercentage">0%</td>
                                                     </tr>
                                                 </tbody>
@@ -536,28 +715,42 @@
                                                 <tbody>
                                                     <tr>
                                                         <td><i class="fas fa-plus-circle text-primary"></i> New</td>
-                                                        <td><input type="number" id="newIssues" name="newIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
+                                                        <td><input type="number" id="newIssues" name="newIssues" min="0"
+                                                                placeholder="0"
+                                                                oninput="calculateIssuesStatusPercentages()"></td>
                                                         <td class="percentage-cell" id="newIssuesPercentage">0%</td>
                                                     </tr>
                                                     <tr>
                                                         <td><i class="fas fa-check-circle text-success"></i> Fixed</td>
-                                                        <td><input type="number" id="fixedIssues" name="fixedIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
+                                                        <td><input type="number" id="fixedIssues" name="fixedIssues"
+                                                                min="0" placeholder="0"
+                                                                oninput="calculateIssuesStatusPercentages()"></td>
                                                         <td class="percentage-cell" id="fixedIssuesPercentage">0%</td>
                                                     </tr>
                                                     <tr>
-                                                        <td><i class="fas fa-times-circle text-danger"></i> Not Fixed</td>
-                                                        <td><input type="number" id="notFixedIssues" name="notFixedIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
-                                                        <td class="percentage-cell" id="notFixedIssuesPercentage">0%</td>
+                                                        <td><i class="fas fa-times-circle text-danger"></i> Not Fixed
+                                                        </td>
+                                                        <td><input type="number" id="notFixedIssues"
+                                                                name="notFixedIssues" min="0" placeholder="0"
+                                                                oninput="calculateIssuesStatusPercentages()"></td>
+                                                        <td class="percentage-cell" id="notFixedIssuesPercentage">0%
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td><i class="fas fa-redo text-warning"></i> Re-opened</td>
-                                                        <td><input type="number" id="reopenedIssues" name="reopenedIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
-                                                        <td class="percentage-cell" id="reopenedIssuesPercentage">0%</td>
+                                                        <td><input type="number" id="reopenedIssues"
+                                                                name="reopenedIssues" min="0" placeholder="0"
+                                                                oninput="calculateIssuesStatusPercentages()"></td>
+                                                        <td class="percentage-cell" id="reopenedIssuesPercentage">0%
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td><i class="fas fa-pause"></i> Deferred</td>
-                                                        <td><input type="number" id="deferredIssues" name="deferredIssues" min="0" placeholder="0" oninput="calculateIssuesStatusPercentages()"></td>
-                                                        <td class="percentage-cell" id="deferredIssuesPercentage">0%</td>
+                                                        <td><input type="number" id="deferredIssues"
+                                                                name="deferredIssues" min="0" placeholder="0"
+                                                                oninput="calculateIssuesStatusPercentages()"></td>
+                                                        <td class="percentage-cell" id="deferredIssuesPercentage">0%
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -575,7 +768,7 @@
                         <!-- Section 7: Enhancements -->
                         <div class="section" id="section-6">
                             <h2 class="section-title"><i class="fas fa-bolt"></i> Enhancements Analysis</h2>
-                            
+
                             <div class="enhancements-layout">
                                 <div class="enhancements-table-card">
                                     <div class="info-card-v2-header">
@@ -583,37 +776,48 @@
                                         <h3>Enhancements Summary</h3>
                                     </div>
                                     <div class="info-card-v2-content">
-                                    <table class="data-table" id="enhancementsTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Status</th>
-                                                <th>Count</th>
-                                                <th>Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><strong>Total Enhancements</strong></td>
-                                                <td><input type="number" id="totalEnhancements" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
-                                                <td class="percentage-cell">100%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-plus-circle text-primary"></i> New</td>
-                                                <td><input type="number" id="newEnhancements" name="newEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
-                                                <td class="percentage-cell" id="newEnhancementsPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-check-circle text-success"></i> Implemented</td>
-                                                <td><input type="number" id="implementedEnhancements" name="implementedEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
-                                                <td class="percentage-cell" id="implementedEnhancementsPercentage">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="fas fa-star text-warning"></i> Exists</td>
-                                                <td><input type="number" id="existsEnhancements" name="existsEnhancements" min="0" placeholder="0" oninput="calculateEnhancementsPercentages()"></td>
-                                                <td class="percentage-cell" id="existsEnhancementsPercentage">0%</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                        <table class="data-table" id="enhancementsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Total Enhancements</strong></td>
+                                                    <td><input type="number" id="totalEnhancements" min="0"
+                                                            placeholder="0" readonly
+                                                            class="readonly-field calculated-total"></td>
+                                                    <td class="percentage-cell">100%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-plus-circle text-primary"></i> New</td>
+                                                    <td><input type="number" id="newEnhancements" name="newEnhancements"
+                                                            min="0" placeholder="0"
+                                                            oninput="calculateEnhancementsPercentages()"></td>
+                                                    <td class="percentage-cell" id="newEnhancementsPercentage">0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-check-circle text-success"></i> Implemented
+                                                    </td>
+                                                    <td><input type="number" id="implementedEnhancements"
+                                                            name="implementedEnhancements" min="0" placeholder="0"
+                                                            oninput="calculateEnhancementsPercentages()"></td>
+                                                    <td class="percentage-cell" id="implementedEnhancementsPercentage">
+                                                        0%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-star text-warning"></i> Exists</td>
+                                                    <td><input type="number" id="existsEnhancements"
+                                                            name="existsEnhancements" min="0" placeholder="0"
+                                                            oninput="calculateEnhancementsPercentages()"></td>
+                                                    <td class="percentage-cell" id="existsEnhancementsPercentage">0%
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
 
@@ -647,7 +851,8 @@
                                     </div>
                                     <div class="info-card-v2-content">
                                         <div class="dynamic-list" id="qaNotesList">
-                                            <div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>
+                                            <div class="empty-state">No QA notes added yet. Click "Add Note" to get
+                                                started.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -657,7 +862,7 @@
                         <!-- Section 9: Automation Regression -->
                         <div class="section" id="section-8">
                             <h2 class="section-title"><i class="fas fa-robot"></i> Automation Regression</h2>
-                            
+
                             <div class="automation-layout">
                                 <!-- Section 1: Test Cases Summary -->
                                 <div class="automation-section-card automation-test-cases-card">
@@ -667,37 +872,49 @@
                                     </div>
                                     <div class="automation-content-layout">
                                         <div class="automation-table-section">
-                                        <table class="data-table" id="automationTestCasesTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>Status</th>
-                                                    <th>Count</th>
-                                                    <th>Percentage</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td><strong>Total Test Cases</strong></td>
-                                                    <td><input type="number" id="automationTotalTestCases" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
-                                                    <td class="percentage-cell">100%</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><i class="fas fa-check-circle text-success"></i> Passed</td>
-                                                    <td><input type="number" id="automationPassedTestCases" name="automationPassedTestCases" min="0" placeholder="0" oninput="calculateAutomationPercentages()"></td>
-                                                    <td class="percentage-cell" id="automationPassedPercentage">0%</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><i class="fas fa-times-circle text-danger"></i> Failed</td>
-                                                    <td><input type="number" id="automationFailedTestCases" name="automationFailedTestCases" min="0" placeholder="0" oninput="calculateAutomationPercentages()"></td>
-                                                    <td class="percentage-cell" id="automationFailedPercentage">0%</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><i class="fas fa-forward text-warning"></i> Skipped</td>
-                                                    <td><input type="number" id="automationSkippedTestCases" name="automationSkippedTestCases" min="0" placeholder="0" oninput="calculateAutomationPercentages()"></td>
-                                                    <td class="percentage-cell" id="automationSkippedPercentage">0%</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                            <table class="data-table" id="automationTestCasesTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Status</th>
+                                                        <th>Count</th>
+                                                        <th>Percentage</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><strong>Total Test Cases</strong></td>
+                                                        <td><input type="number" id="automationTotalTestCases" min="0"
+                                                                placeholder="0" readonly
+                                                                class="readonly-field calculated-total"></td>
+                                                        <td class="percentage-cell">100%</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-check-circle text-success"></i> Passed</td>
+                                                        <td><input type="number" id="automationPassedTestCases"
+                                                                name="automationPassedTestCases" min="0" placeholder="0"
+                                                                oninput="calculateAutomationPercentages()"></td>
+                                                        <td class="percentage-cell" id="automationPassedPercentage">0%
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-times-circle text-danger"></i> Failed</td>
+                                                        <td><input type="number" id="automationFailedTestCases"
+                                                                name="automationFailedTestCases" min="0" placeholder="0"
+                                                                oninput="calculateAutomationPercentages()"></td>
+                                                        <td class="percentage-cell" id="automationFailedPercentage">0%
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-forward text-warning"></i> Skipped</td>
+                                                        <td><input type="number" id="automationSkippedTestCases"
+                                                                name="automationSkippedTestCases" min="0"
+                                                                placeholder="0"
+                                                                oninput="calculateAutomationPercentages()"></td>
+                                                        <td class="percentage-cell" id="automationSkippedPercentage">0%
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                         <div class="automation-chart-section">
                                             <div class="chart-container">
@@ -715,36 +932,49 @@
                                     </div>
                                     <div class="automation-content-layout">
                                         <div class="automation-table-section">
-                                        <table class="data-table" id="automationPercentageTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>Metric</th>
-                                                    <th>Percentage</th>
-                                                    <th>Notes</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td><i class="fas fa-check-circle text-success"></i> Passed Test Cases</td>
-                                                    <td><input type="number" id="automationPassedPercentageDisplay" step="0.01" min="0" max="100" readonly class="readonly-field">%</td>
-                                                    <td><small>Percentage of total automation test cases</small></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><i class="fas fa-times-circle text-danger"></i> Failed Test Cases</td>
-                                                    <td><input type="number" id="automationFailedPercentageDisplay" step="0.01" min="0" max="100" readonly class="readonly-field">%</td>
-                                                    <td><small>Percentage of total automation test cases</small></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><i class="fas fa-forward text-warning"></i> Skipped Test Cases</td>
-                                                    <td><input type="number" id="automationSkippedPercentageDisplay" step="0.01" min="0" max="100" readonly class="readonly-field">%</td>
-                                                    <td><small>Percentage of total automation test cases</small></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                            <table class="data-table" id="automationPercentageTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Metric</th>
+                                                        <th>Percentage</th>
+                                                        <th>Notes</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><i class="fas fa-check-circle text-success"></i> Passed Test
+                                                            Cases</td>
+                                                        <td><input type="number" id="automationPassedPercentageDisplay"
+                                                                step="0.01" min="0" max="100" readonly
+                                                                class="readonly-field">%</td>
+                                                        <td><small>Percentage of total automation test cases</small>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-times-circle text-danger"></i> Failed Test
+                                                            Cases</td>
+                                                        <td><input type="number" id="automationFailedPercentageDisplay"
+                                                                step="0.01" min="0" max="100" readonly
+                                                                class="readonly-field">%</td>
+                                                        <td><small>Percentage of total automation test cases</small>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-forward text-warning"></i> Skipped Test
+                                                            Cases</td>
+                                                        <td><input type="number" id="automationSkippedPercentageDisplay"
+                                                                step="0.01" min="0" max="100" readonly
+                                                                class="readonly-field">%</td>
+                                                        <td><small>Percentage of total automation test cases</small>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                         <div class="automation-chart-section">
                                             <div class="chart-container">
-                                                <canvas id="automationPercentageChart" width="400" height="400"></canvas>
+                                                <canvas id="automationPercentageChart" width="400"
+                                                    height="400"></canvas>
                                             </div>
                                         </div>
                                     </div>
@@ -758,32 +988,43 @@
                                     </div>
                                     <div class="automation-content-layout">
                                         <div class="automation-table-section">
-                                        <table class="data-table" id="automationStabilityTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>Stability</th>
-                                                    <th>Count</th>
-                                                    <th>Percentage</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td><strong>Total Tests</strong></td>
-                                                    <td><input type="number" id="automationStabilityTotal" min="0" placeholder="0" readonly class="readonly-field calculated-total"></td>
-                                                    <td class="percentage-cell">100%</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><i class="fas fa-shield-alt text-success"></i> Stable</td>
-                                                    <td><input type="number" id="automationStableTests" name="automationStableTests" min="0" placeholder="0" oninput="calculateAutomationStabilityPercentages()"></td>
-                                                    <td class="percentage-cell" id="automationStablePercentage">0%</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><i class="fas fa-exclamation-triangle text-warning"></i> Flaky</td>
-                                                    <td><input type="number" id="automationFlakyTests" name="automationFlakyTests" min="0" placeholder="0" oninput="calculateAutomationStabilityPercentages()"></td>
-                                                    <td class="percentage-cell" id="automationFlakyPercentage">0%</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                            <table class="data-table" id="automationStabilityTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Stability</th>
+                                                        <th>Count</th>
+                                                        <th>Percentage</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><strong>Total Tests</strong></td>
+                                                        <td><input type="number" id="automationStabilityTotal" min="0"
+                                                                placeholder="0" readonly
+                                                                class="readonly-field calculated-total"></td>
+                                                        <td class="percentage-cell">100%</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-shield-alt text-success"></i> Stable</td>
+                                                        <td><input type="number" id="automationStableTests"
+                                                                name="automationStableTests" min="0" placeholder="0"
+                                                                oninput="calculateAutomationStabilityPercentages()">
+                                                        </td>
+                                                        <td class="percentage-cell" id="automationStablePercentage">0%
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-exclamation-triangle text-warning"></i>
+                                                            Flaky</td>
+                                                        <td><input type="number" id="automationFlakyTests"
+                                                                name="automationFlakyTests" min="0" placeholder="0"
+                                                                oninput="calculateAutomationStabilityPercentages()">
+                                                        </td>
+                                                        <td class="percentage-cell" id="automationFlakyPercentage">0%
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                         <div class="automation-chart-section">
                                             <div class="chart-container">
@@ -797,11 +1038,15 @@
 
                         <!-- Navigation Buttons -->
                         <div class="navigation-buttons">
-                            <button type="button" class="nav-btn" id="prevBtn" onclick="previousSection()" disabled>← Previous</button>
-                            <button type="button" class="nav-btn clear-btn" id="clearSectionBtn" onclick="clearCurrentSection()">Clear Section</button>
-                            <button type="button" class="nav-btn clear-btn" id="clearAllBtn" onclick="clearAllFields()">Clear All</button>
+                            <button type="button" class="nav-btn" id="prevBtn" onclick="previousSection()" disabled>←
+                                Previous</button>
+                            <button type="button" class="nav-btn clear-btn" id="clearSectionBtn"
+                                onclick="clearCurrentSection()">Clear Section</button>
+                            <button type="button" class="nav-btn clear-btn" id="clearAllBtn"
+                                onclick="clearAllFields()">Clear All</button>
                             <button type="button" class="nav-btn" id="nextBtn" onclick="nextSection()">Next →</button>
-                            <button type="submit" class="nav-btn submit-btn" id="submitBtn" style="display: none;">💾 Save Report</button>
+                            <button type="submit" class="nav-btn submit-btn" id="submitBtn" style="display: none;">💾
+                                Save Report</button>
                         </div>
                     </form>
                 </div>
@@ -821,7 +1066,8 @@
                 </div>
             </div>
             <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('addPortfolioModal')">Cancel</button>
+                <button type="button" class="btn btn-secondary"
+                    onclick="closeModal('addPortfolioModal')">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="addPortfolio()">Add Portfolio</button>
             </div>
         </div>
@@ -908,7 +1154,7 @@
                 <div class="form-group">
                     <p class="help-text">To add new testers, please use the <strong>Manage Data</strong> page.</p>
                 </div>
-                
+
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('testerModal')">Cancel</button>
@@ -934,7 +1180,8 @@
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('teamMemberModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addSelectedTeamMember()">Select Team Member</button>
+                <button type="button" class="btn btn-primary" onclick="addSelectedTeamMember()">Select Team
+                    Member</button>
             </div>
         </div>
     </div>
@@ -960,12 +1207,13 @@
     <div id="autoLoadDataModal" class="modal">
         <div class="modal-content auto-load-modal">
             <h3><i class="fas fa-download"></i> Load Previous Project Data</h3>
-            <p class="modal-description">We found previous reports for this project. Would you like to auto-fill the form with data from the latest report?</p>
-            
+            <p class="modal-description">We found previous reports for this project. Would you like to auto-fill the
+                form with data from the latest report?</p>
+
             <div class="data-preview" id="dataPreview">
                 <!-- Data preview will be populated by JavaScript -->
             </div>
-            
+
             <div class="data-selection">
                 <h4>Select data to load:</h4>
                 <div class="checkbox-grid">
@@ -991,7 +1239,7 @@
                     </label>
                 </div>
             </div>
-            
+
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('autoLoadDataModal')">Skip</button>
                 <button type="button" class="btn btn-primary" onclick="loadSelectedData()">Load Selected Data</button>
@@ -1023,7 +1271,11 @@
             resetFormData();
             loadFormDropdownData();
             initializeCharts(); // Ensure charts are initialized when the form page loads
-            
+
+            // Initialize progress bar and steps
+            initializeProgressSteps();
+            updateProgressBar();
+
             // Remove hardcoded width/height from chart canvases after initialization
             document.querySelectorAll('.chart-container canvas').forEach(canvas => {
                 canvas.removeAttribute('width');
@@ -1045,17 +1297,17 @@
                 }
             } else {
                 document.getElementById('formTitle').textContent = 'Create Enhanced QA Report';
-                
+
             }
-            
-            
-            
-            
+
+
+
+
             window.addEventListener('beforeunload', (event) => {
                 // Only clear if we're not editing a report (to avoid clearing during editing)
                 if (!editingReportId) {
-                    
-                    
+
+
                 }
             });
         });
@@ -1065,7 +1317,7 @@
             const reportNameInput = document.getElementById('reportName');
             const formTitle = document.getElementById('formTitle');
             const customName = reportNameInput.value.trim();
-            
+
             if (customName) {
                 formTitle.textContent = customName;
             } else {
@@ -1080,4 +1332,5 @@
     </script>
 
 </body>
+
 </html>
