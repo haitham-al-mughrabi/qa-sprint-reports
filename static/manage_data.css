@@ -1933,6 +1933,69 @@ nced Modal Styles */
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgb(139, 92, 246));
 }
 
+/* Portfolio Pills Specific Styles (Single Selection) */
+.portfolio-pill {
+    background: linear-gradient(135deg, var(--surface), rgba(59, 130, 246, 0.05));
+    border-color: rgba(59, 130, 246, 0.2);
+    color: var(--text-primary);
+}
+
+.portfolio-pill:hover {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.05));
+    color: var(--primary);
+    box-shadow: 0 6px 12px rgba(var(--primary-rgb), 0.2);
+}
+
+.portfolio-pill.selected {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 8px 16px rgba(var(--primary-rgb), 0.3);
+}
+
+.portfolio-pill.selected:hover {
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    box-shadow: 0 10px 20px rgba(var(--primary-rgb), 0.4);
+}
+
+/* Standalone pill special styling */
+.standalone-pill {
+    border-style: dashed !important;
+    border-width: 2px;
+}
+
+.standalone-pill:hover {
+    border-style: solid !important;
+}
+
+.standalone-pill.selected {
+    border-style: solid !important;
+}
+
+/* Light Theme Support for Portfolio Pills */
+[data-theme="light"] .portfolio-pill {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(59, 130, 246, 0.02));
+    border-color: rgba(59, 130, 246, 0.2);
+    color: rgba(51, 65, 85, 0.9);
+}
+
+[data-theme="light"] .portfolio-pill:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(59, 130, 246, 0.03));
+    color: rgb(59, 130, 246);
+}
+
+[data-theme="light"] .portfolio-pill.selected {
+    background: linear-gradient(135deg, rgb(59, 130, 246), rgba(59, 130, 246, 0.9));
+    border-color: rgb(59, 130, 246);
+    color: white;
+}
+
+[data-theme="light"] .portfolio-pill.selected:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgb(59, 130, 246));
+}
+
 /* Animation for tag pill selection */
 @keyframes tagPillSelect {
     0% {

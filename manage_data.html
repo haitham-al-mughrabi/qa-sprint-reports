@@ -265,14 +265,18 @@
                         <div class="input-hint">Choose a unique and descriptive project name</div>
                     </div>
                     <div class="form-group">
-                        <label for="projectPortfolio">
+                        <label>
                             <i class="fas fa-briefcase"></i>
                             Portfolio
                         </label>
-                        <select id="projectPortfolio">
-                            <option value="">No Portfolio (Standalone Project)</option>
-                        </select>
-                        <div class="input-hint">Optional: Assign to an existing portfolio</div>
+                        <div class="input-hint" style="margin-bottom: 1rem;">Optional: Assign to an existing portfolio or leave standalone</div>
+                        <div class="tag-pill-container" id="projectPortfoliosContainer">
+                            <div class="tag-pill portfolio-pill standalone-pill" data-portfolio-id="" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                                <i class="fas fa-project-diagram"></i>
+                                <span>Standalone Project</span>
+                            </div>
+                            <!-- Portfolio pills will be populated here -->
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -582,31 +586,73 @@
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize theme first
+            if (window.themeManager) {
+                window.themeManager.init();
+            }
+
+            // Set active class for navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === window.location.pathname) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Setup and load data
             setupRoleFilters();
             await loadAllData();
             updateAll();
-
         });
 
         function setupRoleFilters() {
             const roleFilter = document.getElementById('roleFilter');
-            const teamMemberRole = document.getElementById('teamMemberRole');
-            roles.forEach(role => {
-                roleFilter.innerHTML += `<option value="${role}">${role}</option>`;
-                teamMemberRole.innerHTML += `<option value="${role}">${role}</option>`;
-            });
+            // Only populate the filter dropdown, not the team member role dropdown (now using pills)
+            if (roleFilter) {
+                roles.forEach(role => {
+                    roleFilter.innerHTML += `<option value="${role}">${role}</option>`;
+                });
+            }
         }
 
         async function loadAllData() {
             try {
-                [portfolios, projects, testers, teamMembers] = await Promise.all([
-                    fetch('/api/portfolios').then(res => res.ok ? res.json() : []),
-                    fetch('/api/projects').then(res => res.ok ? res.json() : []),
-                    fetch('/api/testers').then(res => res.ok ? res.json() : []),
-                    fetch('/api/team-members').then(res => res.ok ? res.json() : [])
+                console.log('Loading all data...');
+                
+                const responses = await Promise.all([
+                    fetch('/api/portfolios'),
+                    fetch('/api/projects'), 
+                    fetch('/api/testers'),
+                    fetch('/api/team-members')
                 ]);
+                
+                // Check if all responses are ok
+                const results = await Promise.all(
+                    responses.map(async (response, index) => {
+                        const endpoints = ['portfolios', 'projects', 'testers', 'team-members'];
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log(`Loaded ${endpoints[index]}:`, data);
+                            return data;
+                        } else {
+                            console.warn(`Failed to load ${endpoints[index]}: ${response.status} ${response.statusText}`);
+                            return [];
+                        }
+                    })
+                );
+                
+                [portfolios, projects, testers, teamMembers] = results;
+                console.log('All data loaded successfully');
+                
             } catch (error) {
                 console.error("Failed to load data:", error);
+                showToast('Failed to load data. Please refresh the page.', 'error');
+                // Initialize with empty arrays as fallback
+                portfolios = [];
+                projects = [];
+                testers = [];
+                teamMembers = [];
             }
         }
 
@@ -614,7 +660,6 @@
             updateStats();
             displayAllLists();
             populatePortfolioFilter();
-            populatePortfolioDropdown();
         }
 
         function updateStats() {
@@ -809,6 +854,7 @@
         }
 
         function populatePortfolioDropdown(selectedId = '') {
+            // Legacy function - kept for compatibility if used elsewhere
             const select = document.getElementById('projectPortfolio');
             if (!select) return;
 
@@ -824,6 +870,60 @@
                     }
                     select.appendChild(option);
                 });
+            }
+        }
+        
+        function populatePortfolioPills(selectedId = '') {
+            const container = document.getElementById('projectPortfoliosContainer');
+            if (!container) return;
+            
+            // Find standalone pill and existing portfolio pills
+            const standalonePill = container.querySelector('.standalone-pill');
+            const existingPortfolioPills = container.querySelectorAll('.portfolio-pill:not(.standalone-pill)');
+            
+            // Remove existing portfolio pills (keep standalone)
+            existingPortfolioPills.forEach(pill => pill.remove());
+            
+            // Reset all pills
+            container.querySelectorAll('.portfolio-pill').forEach(pill => {
+                pill.classList.remove('selected');
+                pill.setAttribute('aria-pressed', 'false');
+            });
+            
+            // Add portfolio pills
+            if (portfolios && Array.isArray(portfolios)) {
+                portfolios.forEach(p => {
+                    const pill = document.createElement('div');
+                    pill.className = 'tag-pill portfolio-pill';
+                    pill.setAttribute('data-portfolio-id', p.id);
+                    pill.setAttribute('tabindex', '0');
+                    pill.setAttribute('role', 'button');
+                    pill.setAttribute('aria-pressed', 'false');
+                    pill.onclick = () => toggleSingleTagPill(pill);
+                    pill.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleSingleTagPill(pill);
+                        }
+                    };
+                    pill.innerHTML = `
+                        <i class="fas fa-briefcase"></i>
+                        <span>${p.name}</span>
+                    `;
+                    container.appendChild(pill);
+                    
+                    // Select if this is the selected portfolio
+                    if (p.id == selectedId) {
+                        pill.classList.add('selected');
+                        pill.setAttribute('aria-pressed', 'true');
+                    }
+                });
+            }
+            
+            // Select standalone if no portfolio selected or if selectedId is empty
+            if (!selectedId || selectedId === '') {
+                standalonePill.classList.add('selected');
+                standalonePill.setAttribute('aria-pressed', 'true');
             }
         }
         function populatePortfolioFilter() {
@@ -886,12 +986,12 @@
             document.getElementById('projectName').value = '';
             document.getElementById('projectDescription').value = '';
 
-            // Ensure data is loaded before populating dropdown
+            // Ensure data is loaded before populating pills
             if (!portfolios || portfolios.length === 0) {
                 await loadAllData();
             }
 
-            populatePortfolioDropdown();
+            populatePortfolioPills(); // Default to standalone
             showModal('addProjectModal');
         }
         async function showAddTesterModal() {
@@ -928,7 +1028,16 @@
 
         // Show Modals for Editing
         function editPortfolio(id) { const p = portfolios.find(i => i.id === id); if (!p) return; editingId = id; document.getElementById('portfolioName').value = p.name; document.getElementById('portfolioDescription').value = p.description; showModal('addPortfolioModal'); }
-        function editProject(id) { const p = projects.find(i => i.id === id); if (!p) return; editingId = id; document.getElementById('projectName').value = p.name; document.getElementById('projectDescription').value = p.description; populatePortfolioDropdown(p.portfolio_id); showModal('addProjectModal'); }
+        function editProject(id) { 
+            const p = projects.find(i => i.id === id); 
+            if (!p) return; 
+            
+            editingId = id; 
+            document.getElementById('projectName').value = p.name; 
+            document.getElementById('projectDescription').value = p.description; 
+            populatePortfolioPills(p.portfolio_id); 
+            showModal('addProjectModal'); 
+        }
         async function editTester(id) {
             const t = testers.find(i => i.id === id);
             if (!t) return;
@@ -1002,23 +1111,49 @@
         async function saveData(type, body, modalId) {
             const url = editingId ? `/api/${type}/${editingId}` : `/api/${type}`;
             const method = editingId ? 'PUT' : 'POST';
+            
+            console.log(`Saving ${type}:`, { method, url, body });
+            
             try {
-                const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                const response = await fetch(url, { 
+                    method, 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(body) 
+                });
+                
+                console.log(`Response for ${type}:`, response.status, response.statusText);
+                
                 if (response.ok) {
+                    const result = await response.json();
+                    console.log(`Successfully saved ${type}:`, result);
+                    
+                    // Reload all data to ensure consistency
                     await loadAllData();
                     updateAll();
                     closeModal(modalId);
-                    showToast(`${type.slice(0, -1)} ${editingId ? 'updated' : 'created'} successfully!`, 'success');
-                    return true; // Success
+                    
+                    const action = editingId ? 'updated' : 'created';
+                    const itemName = type.replace(/-/g, ' ').slice(0, -1); // Remove 's' and replace hyphens
+                    showToast(`${itemName.charAt(0).toUpperCase() + itemName.slice(1)} ${action} successfully!`, 'success');
+                    
+                    return true;
                 } else {
-                    const errorData = await response.json();
-                    alert(`Failed to save ${type}: ${errorData.error || 'Unknown error'}`);
-                    return false; // Failure
+                    let errorMessage = 'Unknown error';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorData.message || errorMessage;
+                    } catch (e) {
+                        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                    }
+                    
+                    console.error(`Failed to save ${type}:`, errorMessage);
+                    showToast(`Failed to save ${type.replace(/-/g, ' ')}: ${errorMessage}`, 'error');
+                    return false;
                 }
             } catch (error) {
-                console.error(`Error saving ${type}:`, error);
-                alert(`An error occurred while saving ${type}.`);
-                return false; // Failure
+                console.error(`Network error saving ${type}:`, error);
+                showToast(`Network error occurred while saving ${type.replace(/-/g, ' ')}.`, 'error');
+                return false;
             } finally {
                 editingId = null;
             }
@@ -1029,30 +1164,33 @@
             const description = document.getElementById('portfolioDescription').value.trim();
 
             if (!name) {
-                alert('Portfolio name is required');
+                showToast('Portfolio name is required', 'warning');
                 return;
             }
 
+            const wasCreating = !editingId; // Remember if we were creating (not editing)
             const result = await saveData('portfolios', { name, description }, 'addPortfolioModal');
-            if (result && !editingId) {
+            
+            if (result && wasCreating) {
                 // If it's a new portfolio (not editing), offer to add a project
                 setTimeout(() => {
                     if (confirm('Would you like to add a project to the new portfolio?')) {
-                        // Ensure data is loaded before opening modal
-                        loadAllData().then(() => {
-                            showAddProjectModal();
-                        });
+                        // Open project modal with portfolio pills refreshed
+                        showAddProjectModal();
                     }
                 }, 500);
             }
         }
         async function saveProject() {
             const name = document.getElementById('projectName').value.trim();
-            const portfolio_id = document.getElementById('projectPortfolio').value || null;
             const description = document.getElementById('projectDescription').value.trim();
+            
+            // Get selected portfolio from tag pills
+            const selectedPortfolioPill = document.querySelector('#projectPortfoliosContainer .portfolio-pill.selected');
+            const portfolio_id = selectedPortfolioPill ? selectedPortfolioPill.getAttribute('data-portfolio-id') || null : null;
 
             if (!name) {
-                alert('Project name is required');
+                showToast('Project name is required', 'warning');
                 return;
             }
 
@@ -1063,7 +1201,7 @@
             const email = document.getElementById('testerEmail').value.trim();
             
             if (!name || !email) {
-                alert('Name and email are required');
+                showToast('Name and email are required', 'warning');
                 return;
             }
             
@@ -1097,12 +1235,12 @@
             const role = selectedRolePill ? selectedRolePill.getAttribute('data-role') : null;
             
             if (!name || !email) {
-                alert('Please enter both name and email');
+                showToast('Please enter both name and email', 'warning');
                 return;
             }
             
             if (!role) {
-                alert('Please select a role');
+                showToast('Please select a role', 'warning');
                 return;
             }
             
@@ -1266,22 +1404,7 @@
 
         // Theme functions are now handled by theme-manager.js
 
-        // Initialize theme on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize theme first
-            if (window.themeManager) {
-                window.themeManager.init();
-            }
-
-            // Set active class for navigation
-            document.querySelectorAll('.nav-link').forEach(link => {
-                if (link.getAttribute('href') === window.location.pathname) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
-            });
-        });
+        // Theme functions are now handled by theme-manager.js
     </script>
     </div>
 
