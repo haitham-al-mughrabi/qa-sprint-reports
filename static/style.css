@@ -3554,3 +3554,411 @@ p {
     color: white !important;
     opacity: 0.9;
 }
+/* Ne
+w Report Section Styles */
+.new-report-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-large);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+}
+
+.new-report-section .section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.new-report-section .section-header h2 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.new-report-section .section-header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.new-report-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.primary-action-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-light);
+    min-width: 180px;
+    justify-content: center;
+}
+
+.primary-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.secondary-action-btn {
+    background: var(--background);
+    color: var(--text-primary);
+    border: 2px solid var(--border);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.secondary-action-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.recent-templates {
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+}
+
+.recent-templates h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.template-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.template-item {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.template-item:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+}
+
+.template-item h4 {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.template-item p {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.template-item .template-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .new-report-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .new-report-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .primary-action-btn,
+    .secondary-action-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .template-list {
+        grid-template-columns: 1fr;
+    }
+}/* N
+ew Report Section Styles */
+.new-report-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-large);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+}
+
+.new-report-section .section-header h2 {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.new-report-actions {
+    display: flex;
+    justify-content: flex-start;
+}/* New 
+Report Section Styles */
+.new-report-section {
+    background: linear-gradient(135deg, var(--surface), rgba(59, 130, 246, 0.05));
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-large);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-heavy);
+    position: relative;
+    overflow: hidden;
+}
+
+.new-report-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.new-report-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.new-report-info .section-header h2 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.new-report-info .section-header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+}
+
+.report-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.feature-item i {
+    color: var(--success);
+    font-size: 1rem;
+    width: 16px;
+}
+
+.new-report-actions {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.primary-create-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: var(--shadow-light);
+    min-width: 200px;
+    justify-content: center;
+}
+
+.primary-create-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.new-report-preview {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    height: fit-content;
+}
+
+.preview-header {
+    margin-bottom: 1rem;
+}
+
+.preview-header h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.preview-mockup {
+    border: 2px dashed var(--border);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    background: rgba(59, 130, 246, 0.02);
+}
+
+.mockup-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.mockup-title {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.mockup-meta {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.mockup-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mockup-section {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--surface);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.mockup-section:hover {
+    border-color: var(--primary);
+    transform: translateX(4px);
+}
+
+.mockup-section.more-sections {
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.section-icon {
+    color: var(--primary);
+    font-size: 0.9rem;
+    width: 20px;
+    text-align: center;
+}
+
+.section-name {
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .new-report-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .new-report-preview {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .new-report-section {
+        padding: 1.5rem;
+    }
+    
+    .new-report-info .section-header h2 {
+        font-size: 1.25rem;
+    }
+    
+    .primary-create-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .mockup-sections {
+        gap: 0.5rem;
+    }
+    
+    .mockup-section {
+        padding: 0.5rem;
+    }
+}

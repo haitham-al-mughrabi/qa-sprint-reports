@@ -55,8 +55,70 @@
             <div class="dashboard-header">
                 <h1><i class="fas fa-chart-line"></i> Reports Management</h1>
                 <p>Search, filter, and manage your quality assurance reports</p>
-                <div class="header-actions">
-                    <button class="action-btn" onclick="window.location.href='/create-report'"><i class="fas fa-plus-circle"></i> New Report</button>
+            </div>
+
+            <!-- New Report Section -->
+            <div class="new-report-section">
+                <div class="new-report-content">
+                    <div class="new-report-info">
+                        <div class="section-header">
+                            <h2><i class="fas fa-plus-circle"></i> Create New Report</h2>
+                            <p>Start building your comprehensive QA testing report with our guided form</p>
+                        </div>
+                        <div class="report-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>9-step guided process</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Auto-calculated metrics</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-file-export"></i>
+                                <span>Export to PDF/Excel</span>
+                            </div>
+                        </div>
+                        <div class="new-report-actions">
+                            <button class="primary-create-btn" onclick="window.location.href='/create-report'">
+                                <i class="fas fa-plus-circle"></i> 
+                                <span>Create New Report</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="new-report-preview">
+                        <div class="preview-header">
+                            <h3><i class="fas fa-eye"></i> Report Preview</h3>
+                        </div>
+                        <div class="preview-mockup">
+                            <div class="mockup-header">
+                                <div class="mockup-title">Sprint 24 - QA Report</div>
+                                <div class="mockup-meta">Project Alpha • Jan 2025</div>
+                            </div>
+                            <div class="mockup-sections">
+                                <div class="mockup-section">
+                                    <div class="section-icon"><i class="fas fa-info-circle"></i></div>
+                                    <div class="section-name">General Details</div>
+                                </div>
+                                <div class="mockup-section">
+                                    <div class="section-icon"><i class="fas fa-chart-bar"></i></div>
+                                    <div class="section-name">Test Summary</div>
+                                </div>
+                                <div class="mockup-section">
+                                    <div class="section-icon"><i class="fas fa-user-check"></i></div>
+                                    <div class="section-name">User Stories</div>
+                                </div>
+                                <div class="mockup-section">
+                                    <div class="section-icon"><i class="fas fa-vial"></i></div>
+                                    <div class="section-name">Test Cases</div>
+                                </div>
+                                <div class="mockup-section more-sections">
+                                    <div class="section-icon"><i class="fas fa-ellipsis-h"></i></div>
+                                    <div class="section-name">+5 more sections</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -247,6 +309,8 @@
             document.getElementById('reports-loading').style.display = 'none';
             document.getElementById('reportsTable').style.display = 'table';
         }
+
+
     </script>
 </body>
 </html>
