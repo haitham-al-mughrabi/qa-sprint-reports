@@ -759,7 +759,7 @@ nced Modal Styles */
 .modal.manage-modal .modal-buttons .btn-primary {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
-    border: none;
+    border: 2px solid transparent !important;
 }
 
 .modal.manage-modal .modal-buttons .btn-primary:hover {
@@ -771,7 +771,7 @@ nced Modal Styles */
 .modal.manage-modal .modal-buttons .btn-secondary {
     background: var(--surface);
     color: var(--text-primary);
-    border: 2px solid var(--border);
+    border: 2px solid var(--border) !important;
 }
 
 .modal.manage-modal .modal-buttons .btn-secondary:hover {
@@ -779,6 +779,138 @@ nced Modal Styles */
     color: var(--text-primary);
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced Modal Header Styles */
+.modal.manage-modal .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 2rem 2rem 1rem 2rem;
+    border-bottom: 2px solid var(--border);
+    position: relative;
+    z-index: 1;
+}
+
+.modal.manage-modal .modal-header .header-text {
+    flex: 1;
+}
+
+.modal.manage-modal .modal-header .header-text h3 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modal.manage-modal .modal-header .modal-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.modal.manage-modal .modal-close {
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--text-secondary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.modal.manage-modal .modal-close:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: white;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Enhanced Form Labels */
+.modal.manage-modal .form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.modal.manage-modal .form-group label i {
+    color: var(--primary);
+    font-size: 1rem;
+    width: 16px;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.modal.manage-modal .form-group:focus-within label i {
+    color: var(--accent);
+    transform: scale(1.1);
+}
+
+/* Input Hints */
+.modal.manage-modal .input-hint {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* Enhanced Button Styles */
+.modal.manage-modal .modal-buttons .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--border-radius-large);
+    transition: var(--transition);
+    box-shadow: var(--shadow-light);
+    min-width: 180px !important;
+    width: 180px !important;
+    max-width: 180px !important;
+    justify-content: center;
+    flex: 0 0 180px !important;
+    box-sizing: border-box;
+}
+
+.modal.manage-modal .modal-buttons .btn i {
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.modal.manage-modal .modal-buttons .btn:hover i {
+    transform: scale(1.1);
+}
+
+/* Selected Tester Info Styles */
+.selected-tester-info {
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(var(--accent-rgb), 0.05));
+    border: 2px solid rgba(var(--primary-rgb), 0.2);
+    border-radius: var(--border-radius-large);
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.selected-tester-info p {
+    margin: 0;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 1.1rem;
 }
 
 /* Enhanced Dashboard Section */
@@ -1718,6 +1850,27 @@ nced Modal Styles */
     background: linear-gradient(135deg, rgb(59, 130, 246), rgba(59, 130, 246, 0.9));
     border-color: rgb(59, 130, 246);
     color: white;
+}
+
+/* Light Theme Support for New Modal Elements */
+[data-theme="light"] .modal.manage-modal .modal-close {
+    border-color: rgba(203, 213, 225, 0.6);
+    color: rgba(51, 65, 85, 0.7);
+}
+
+[data-theme="light"] .modal.manage-modal .modal-close:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: white;
+}
+
+[data-theme="light"] .selected-tester-info {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.04));
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="light"] .selected-tester-info p {
+    color: rgb(59, 130, 246);
 }
 
 /* Animation for tag pill selection */

@@ -198,62 +198,144 @@
     <div id="addPortfolioModal" class="modal manage-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="icon-bg"><i class="fas fa-briefcase"></i></div>
-                <h3>Add New Portfolio</h3>
+                <div class="icon-bg">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="header-text">
+                    <h3>Add New Portfolio</h3>
+                    <p class="modal-subtitle">Create a new portfolio to organize your projects</p>
+                </div>
+                <button type="button" class="modal-close" onclick="closeModal('addPortfolioModal')">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-form">
-                <div class="form-group"><label for="portfolioName">Portfolio
-                        Name:</label><input type="text" id="portfolioName" required></div>
-                <div class="form-group"><label for="portfolioDescription">Description:</label><textarea id="portfolioDescription"
-                        rows="4"></textarea></div>
+                <div class="form-group">
+                    <label for="portfolioName">
+                        <i class="fas fa-briefcase"></i>
+                        Portfolio Name
+                    </label>
+                    <input type="text" id="portfolioName" placeholder="Enter portfolio name..." required>
+                    <div class="input-hint">Choose a descriptive name for your portfolio</div>
+                </div>
+                <div class="form-group">
+                    <label for="portfolioDescription">
+                        <i class="fas fa-align-left"></i>
+                        Description
+                    </label>
+                    <textarea id="portfolioDescription" rows="4" placeholder="Describe the purpose and scope of this portfolio..."></textarea>
+                    <div class="input-hint">Optional: Provide additional context about this portfolio</div>
+                </div>
             </div>
-            <div class="modal-buttons"><button type="button" class="btn btn-secondary"
-                    onclick="closeModal('addPortfolioModal')">Cancel</button><button type="button"
-                    class="btn btn-primary" onclick="savePortfolio()">Save</button></div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addPortfolioModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="savePortfolio()">
+                    <i class="fas fa-save"></i>
+                    Save Portfolio
+                </button>
+            </div>
         </div>
     </div>
 
     <div id="addProjectModal" class="modal manage-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="icon-bg"><i class="fas fa-project-diagram"></i></div>
-                <h3>Add New Project</h3>
+                <div class="icon-bg">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="header-text">
+                    <h3>Add New Project</h3>
+                    <p class="modal-subtitle">Create a new project and assign it to a portfolio</p>
+                </div>
+                <button type="button" class="modal-close" onclick="closeModal('addProjectModal')">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-form">
-                <div class="form-group"><label for="projectName">Project Name:</label><input
-                        type="text" id="projectName" required></div>
-                <div class="form-group"><label for="projectPortfolio">Portfolio:</label><select
-                        id="projectPortfolio">
-                        <option value="">No Portfolio (Standalone Project)</option>
-                    </select></div>
-                <div class="form-group"><label for="projectDescription">Description:</label><textarea id="projectDescription"
-                        rows="4"></textarea></div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="projectName">
+                            <i class="fas fa-project-diagram"></i>
+                            Project Name
+                        </label>
+                        <input type="text" id="projectName" placeholder="Enter project name..." required>
+                        <div class="input-hint">Choose a unique and descriptive project name</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectPortfolio">
+                            <i class="fas fa-briefcase"></i>
+                            Portfolio
+                        </label>
+                        <select id="projectPortfolio">
+                            <option value="">No Portfolio (Standalone Project)</option>
+                        </select>
+                        <div class="input-hint">Optional: Assign to an existing portfolio</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="projectDescription">
+                        <i class="fas fa-align-left"></i>
+                        Description
+                    </label>
+                    <textarea id="projectDescription" rows="4" placeholder="Describe the project's goals, scope, and key deliverables..."></textarea>
+                    <div class="input-hint">Optional: Provide detailed information about this project</div>
+                </div>
             </div>
-            <div class="modal-buttons"><button type="button" class="btn btn-secondary"
-                    onclick="closeModal('addProjectModal')">Cancel</button><button type="button"
-                    class="btn btn-primary" onclick="saveProject()">Save</button></div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addProjectModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveProject()">
+                    <i class="fas fa-save"></i>
+                    Save Project
+                </button>
+            </div>
         </div>
     </div>
 
     <div id="addTesterModal" class="modal manage-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="icon-bg"><i class="fas fa-user-cog"></i></div>
-                <h3>Add New Tester</h3>
+                <div class="icon-bg">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <div class="header-text">
+                    <h3>Add New Tester</h3>
+                    <p class="modal-subtitle">Add a tester with specific roles and project assignments</p>
+                </div>
+                <button type="button" class="modal-close" onclick="closeModal('addTesterModal')">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="testerName">Name:</label>
-                        <input type="text" id="testerName" required>
+                        <label for="testerName">
+                            <i class="fas fa-user"></i>
+                            Name
+                        </label>
+                        <input type="text" id="testerName" placeholder="Enter tester's full name..." required>
+                        <div class="input-hint">Provide the tester's complete name</div>
                     </div>
                     <div class="form-group">
-                        <label for="testerEmail">Email:</label>
-                        <input type="email" id="testerEmail" required>
+                        <label for="testerEmail">
+                            <i class="fas fa-envelope"></i>
+                            Email
+                        </label>
+                        <input type="email" id="testerEmail" placeholder="Enter tester's email address..." required>
+                        <div class="input-hint">Work email address for contact and notifications</div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Tester Roles:</label>
+                    <label>
+                        <i class="fas fa-tags"></i>
+                        Tester Roles
+                    </label>
+                    <div class="input-hint" style="margin-bottom: 1rem;">Select all applicable testing roles and specializations</div>
                     <div class="tag-pill-container" id="testerRolesContainer">
                         <div class="tag-pill" data-role="isAutomationEngineer" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
                             <i class="fas fa-robot"></i>
@@ -298,39 +380,83 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Assign to Projects:</label>
-                    <div id="projectAssignmentList" class="tag-pill-container project-pills" style="max-height: 200px; overflow-y: auto; padding: 1rem; border: 2px solid var(--border); border-radius: var(--border-radius-large); background: var(--surface);">
+                    <label>
+                        <i class="fas fa-project-diagram"></i>
+                        Assign to Projects
+                    </label>
+                    <div class="input-hint" style="margin-bottom: 1rem;">Optional: Select projects this tester will be assigned to</div>
+                    <div id="projectAssignmentList" class="tag-pill-container project-pills" style="max-height: 200px; overflow-y: auto;">
                         <!-- Project tag pills will be populated here -->
                     </div>
                 </div>
             </div>
-            <div class="modal-buttons"><button type="button" class="btn btn-secondary"
-                    onclick="closeModal('addTesterModal')">Cancel</button><button type="button"
-                    class="btn btn-primary" onclick="saveTester()">Save</button></div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addTesterModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveTester()">
+                    <i class="fas fa-save"></i>
+                    Save Tester
+                </button>
+            </div>
         </div>
     </div>
 
     <div id="addTeamMemberModal" class="modal manage-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="icon-bg"><i class="fas fa-users"></i></div>
-                <h3>Add New Team Member</h3>
+                <div class="icon-bg">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="header-text">
+                    <h3>Add New Team Member</h3>
+                    <p class="modal-subtitle">Add a team member and assign their role in the organization</p>
+                </div>
+                <button type="button" class="modal-close" onclick="closeModal('addTeamMemberModal')">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-form">
                 <div class="form-row">
-                    <div class="form-group"><label for="teamMemberName">Name:</label><input type="text"
-                            id="teamMemberName" required></div>
-                    <div class="form-group"><label for="teamMemberEmail">Email:</label><input
-                            type="email" id="teamMemberEmail" required></div>
+                    <div class="form-group">
+                        <label for="teamMemberName">
+                            <i class="fas fa-user"></i>
+                            Name
+                        </label>
+                        <input type="text" id="teamMemberName" placeholder="Enter team member's full name..." required>
+                        <div class="input-hint">Provide the team member's complete name</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="teamMemberEmail">
+                            <i class="fas fa-envelope"></i>
+                            Email
+                        </label>
+                        <input type="email" id="teamMemberEmail" placeholder="Enter team member's email address..." required>
+                        <div class="input-hint">Business email for professional communication</div>
+                    </div>
                 </div>
-                <div class="form-group"><label for="teamMemberRole">Role:</label><select
-                        id="teamMemberRole" required>
+                <div class="form-group">
+                    <label for="teamMemberRole">
+                        <i class="fas fa-id-badge"></i>
+                        Role
+                    </label>
+                    <select id="teamMemberRole" required>
                         <option value="">Select Role</option>
-                    </select></div>
+                    </select>
+                    <div class="input-hint">Choose the team member's primary role and responsibility</div>
+                </div>
             </div>
-            <div class="modal-buttons"><button type="button" class="btn btn-secondary"
-                    onclick="closeModal('addTeamMemberModal')">Cancel</button><button type="button"
-                    class="btn btn-primary" onclick="saveTeamMember()">Save</button></div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addTeamMemberModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveTeamMember()">
+                    <i class="fas fa-save"></i>
+                    Save Team Member
+                </button>
+            </div>
         </div>
     </div>
 
@@ -338,24 +464,48 @@
     <div id="assignTesterProjectsModal" class="modal manage-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="icon-bg"><i class="fas fa-link"></i></div>
-                <h3>Assign Tester to Projects</h3>
+                <div class="icon-bg">
+                    <i class="fas fa-link"></i>
+                </div>
+                <div class="header-text">
+                    <h3>Assign Tester to Projects</h3>
+                    <p class="modal-subtitle">Manage project assignments for the selected tester</p>
+                </div>
+                <button type="button" class="modal-close" onclick="closeModal('assignTesterProjectsModal')">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-form">
                 <div class="form-group">
-                    <label id="selectedTesterName">Selected Tester:</label>
-                    <p id="selectedTesterInfo" style="margin: 0; font-weight: bold; color: var(--primary);"></p>
+                    <label>
+                        <i class="fas fa-user-cog"></i>
+                        Selected Tester
+                    </label>
+                    <div class="selected-tester-info">
+                        <p id="selectedTesterInfo"></p>
+                    </div>
+                    <div class="input-hint">The tester you're managing project assignments for</div>
                 </div>
                 <div class="form-group">
-                    <label>Select Projects:</label>
+                    <label>
+                        <i class="fas fa-tasks"></i>
+                        Select Projects
+                    </label>
+                    <div class="input-hint" style="margin-bottom: 1rem;">Choose which projects this tester should be assigned to</div>
                     <div id="projectCheckboxList" class="checkbox-list">
                         <!-- Project checkboxes will be populated here -->
                     </div>
                 </div>
             </div>
             <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('assignTesterProjectsModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveTesterProjects()">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('assignTesterProjectsModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveTesterProjects()">
+                    <i class="fas fa-save"></i>
+                    Save Assignments
+                </button>
             </div>
         </div>
     </div>
