@@ -540,30 +540,7 @@ function renderProjectMetrics(projects) {
                 </div>
                 ` : ''}
 
-                <!-- Evaluation Scores - DISABLED (fields don't exist in data model) -->
-                ${false && (project.avgEvaluationScore > 0 || project.avgProjectEvaluationScore > 0) ? `
-                <div class="metrics-section">
-                    <h4 class="metrics-title">
-                        <i class="fas fa-star"></i> Evaluation Scores
-                    </h4>
-                    <div class="metrics-content">
-                        <div class="evaluation-breakdown">
-                            ${project.avgEvaluationScore > 0 ? `
-                            <div class="evaluation-item">
-                                <span class="evaluation-label">Average Evaluation Score</span>
-                                <span class="evaluation-value">${project.avgEvaluationScore}</span>
-                            </div>
-                            ` : ''}
-                            ${project.avgProjectEvaluationScore > 0 ? `
-                            <div class="evaluation-item">
-                                <span class="evaluation-label">Average Project Score</span>
-                                <span class="evaluation-value">${project.avgProjectEvaluationScore}</span>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
+                <!-- Evaluation Scores have been removed as per user request -->
             </div>
         </div>
     `).join('');

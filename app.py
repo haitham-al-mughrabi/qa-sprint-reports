@@ -1424,6 +1424,23 @@ def update_stats_cache():
         # Update Project Stats
         projects = Project.query.all()
         for project in projects:
+            project_name = project.name.strip()
+            # Try exact match first
+            reports = Report.query.filter(Report.projectName == project_name).all()
+            
+            # If no matches, try case-insensitive search
+            if not reports:
+                reports = Report.query.filter(Report.projectName.ilike(f'%{project_name}%')).all()
+                
+            # If still no matches, try in-memory filtering
+            if not reports:
+                all_reports = Report.query.all()
+                reports = [r for r in all_reports if r.projectName and r.projectName.strip().lower() == project_name.lower()]
+                
+            if not reports:
+                print(f"No reports found for project: {project_name}")
+                continue
+                
             project_stats = ProjectStats.query.filter_by(project_id=project.id).first()
             if not project_stats:
                 project_stats = ProjectStats(
@@ -1764,10 +1781,26 @@ def get_project_stats(project_id):
     all_reports = Report.query.all()
     print(f"Total reports in database: {len(all_reports)}")
     for r in all_reports:
-        print(f"Report ID: {r.id}, Project Name: {r.projectName}")
+        print(f"Report ID: {r.id}, Project Name: '{r.projectName}' (type: {type(r.projectName)})")
     
-    reports = Report.query.filter_by(projectName=project.name).all()
-    print(f"Found {len(reports)} reports for project name: {project.name}")
+    # Make the query case-insensitive and trim whitespace
+    project_name = project.name.strip()
+    print(f"Looking for reports with project name: '{project_name}' (type: {type(project_name)})")
+    
+    # First try exact match
+    reports = Report.query.filter(Report.projectName == project_name).all()
+    
+    # If no matches, try case-insensitive search
+    if not reports:
+        print("No reports found with exact match, trying case-insensitive search")
+        reports = Report.query.filter(Report.projectName.ilike(f'%{project_name}%')).all()
+    
+    # If still no matches, try trimming and normalizing whitespace
+    if not reports:
+        print("No reports found with case-insensitive match, trying trimmed search")
+        reports = [r for r in all_reports if r.projectName and r.projectName.strip().lower() == project_name.lower()]
+    
+    print(f"Found {len(reports)} reports for project name: '{project_name}'")
 
     if not reports:
         print(f"No reports found for project ID: {project_id}, project name: {project.name}")

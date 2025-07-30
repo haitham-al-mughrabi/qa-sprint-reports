@@ -99,9 +99,7 @@ async function exportCurrentReportAsPdf() {
         ['Total User Stories', currentReport.totalUserStories || 0],
         ['Total Test Cases', currentReport.totalTestCases || 0],
         ['Total Issues', currentReport.totalIssues || 0],
-        ['Total Enhancements', currentReport.totalEnhancements || 0],
-        ['Evaluation Score', currentReport.evaluationTotalScore || '0.0'],
-        ['Project Score', currentReport.projectEvaluationTotalScore || '0.0']
+        ['Total Enhancements', currentReport.totalEnhancements || 0]
     ];
 
     doc.autoTable({
@@ -326,77 +324,7 @@ async function exportCurrentReportAsPdf() {
         }
     }
 
-    // Evaluation Results
-    if (currentReport.evaluationData && Object.keys(currentReport.evaluationData).length > 0) {
-        yPos = checkPageBreak(yPos, 60);
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Evaluation Results', 10, yPos);
-        yPos += 15;
-
-        doc.setFontSize(12);
-        doc.text(`Total Evaluation Score: ${currentReport.evaluationTotalScore || '0.0'}`, 10, yPos);
-        yPos += 15;
-
-        const evalData = Object.entries(currentReport.evaluationData)
-            .filter(([key]) => key.includes('_score'))
-            .map(([key, value]) => {
-                const baseName = key.replace('eval_', '').replace('_score', '');
-                const weightKey = `eval_${baseName}_weight`;
-                return [
-                    baseName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    value || 'N/A',
-                    currentReport.evaluationData[weightKey] || 'N/A'
-                ];
-            });
-
-        if (evalData.length > 0) {
-            doc.autoTable({
-                startY: yPos,
-                head: [['Criteria', 'Score', 'Weight']],
-                body: evalData,
-                styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [79, 172, 254], textColor: 255 }
-            });
-            yPos = doc.lastAutoTable.finalY + 15;
-        }
-    }
-
-    // Project Evaluation Results
-    if (currentReport.projectEvaluationData && Object.keys(currentReport.projectEvaluationData).length > 0) {
-        yPos = checkPageBreak(yPos, 60);
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text('Project Evaluation Results', 10, yPos);
-        yPos += 15;
-
-        doc.setFontSize(12);
-        doc.text(`Total Project Score: ${currentReport.projectEvaluationTotalScore || '0.0'}`, 10, yPos);
-        yPos += 15;
-
-        const projEvalData = Object.entries(currentReport.projectEvaluationData)
-            .filter(([key]) => key.includes('_score'))
-            .map(([key, value]) => {
-                const baseName = key.replace('proj_', '').replace('_score', '');
-                const reasonKey = `proj_${baseName}_reason`;
-                return [
-                    baseName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                    value || 'N/A',
-                    currentReport.projectEvaluationData[reasonKey] || 'N/A'
-                ];
-            });
-
-        if (projEvalData.length > 0) {
-            doc.autoTable({
-                startY: yPos,
-                head: [['Criteria', 'Score', 'Reason']],
-                body: projEvalData,
-                styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [79, 172, 254], textColor: 255 }
-            });
-            yPos = doc.lastAutoTable.finalY + 15;
-        }
-    }
+    // Project Evaluation Results section has been removed as per user request
 
     // Custom Fields
     if (currentReport.customFields && Object.keys(currentReport.customFields).length > 0) {

@@ -58,40 +58,6 @@ def generate_test_summary():
     ]
     return random.choice(summaries)
 
-def generate_evaluation_data():
-    """Generate realistic evaluation scores and data"""
-    criteria = [
-        "involvement", "requirements", "qaplan", "ux", "cooperation",
-        "critical_bugs", "high_bugs", "medium_bugs", "low_bugs"
-    ]
-    
-    evaluation_data = {}
-    for criterion in criteria:
-        score = round(random.uniform(1.0, 10.0), 1)
-        evaluation_data[f"eval_{criterion}_score"] = str(score)
-        evaluation_data[f"eval_{criterion}_weight"] = str(random.randint(1, 5))
-        evaluation_data[f"eval_{criterion}_reason"] = f"Assessment based on sprint {criterion} performance"
-    
-    return evaluation_data
-
-def generate_project_evaluation_data():
-    """Generate realistic project evaluation scores and data"""
-    criteria = [
-        "involvement", "requirements", "qaplan", "ux", "cooperation",
-        "critical_bugs", "high_bugs", "medium_bugs", "low_bugs"
-    ]
-    
-    project_eval_data = {}
-    for criterion in criteria:
-        score = round(random.uniform(1.0, 10.0), 1)
-        project_eval_data[f"proj_{criterion}_score"] = str(score)
-        project_eval_data[f"proj_{criterion}_reason"] = f"Project-level assessment for {criterion}"
-    
-    # Add final score
-    project_eval_data["proj_final_score"] = str(round(random.uniform(70.0, 95.0), 1))
-    project_eval_data["proj_final_reason"] = "Overall project technical evaluation"
-    
-    return project_eval_data
 
 def generate_custom_fields():
     """Generate sample custom fields data"""
@@ -213,14 +179,7 @@ def generate_sample_report():
         # Enhancements (will auto-calculate total)
         **enhancements_counts,
         
-        # Evaluation Data (will auto-calculate total score)
-        "evaluationData": generate_evaluation_data(),
-        
-        # Project Evaluation Data (will auto-calculate total score)
-        "projectEvaluationData": generate_project_evaluation_data(),
-        
         # Other metrics
-        "evaluationMetric": "Sprint evaluation completed successfully",
         "qaNotesMetric": random.randint(1, 10),
         "qaNotesData": [
             {"note": f"Sprint {sprint} testing activities completed successfully for {project}."},

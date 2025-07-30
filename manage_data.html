@@ -1220,7 +1220,21 @@
             
             // Get selected portfolio from tag pills
             const selectedPortfolioPill = document.querySelector('#projectPortfoliosContainer .portfolio-pill.selected');
-            const portfolio_id = selectedPortfolioPill ? selectedPortfolioPill.getAttribute('data-portfolio-id') || null : null;
+            
+            let portfolio_id = null;
+            if (selectedPortfolioPill) {
+                const portfolioIdAttr = selectedPortfolioPill.getAttribute('data-portfolio-id');
+                // If it's empty string (standalone), keep it as null, otherwise use the ID
+                portfolio_id = portfolioIdAttr && portfolioIdAttr !== '' ? parseInt(portfolioIdAttr) : null;
+            }
+            
+            console.log('Saving project with data:', {
+                name,
+                portfolio_id,
+                description,
+                selectedPill: selectedPortfolioPill,
+                portfolioIdAttr: selectedPortfolioPill ? selectedPortfolioPill.getAttribute('data-portfolio-id') : 'no pill selected'
+            });
 
             if (!name) {
                 showToast('Project name is required', 'warning');
@@ -1391,9 +1405,15 @@
             pill.classList.add('selecting');
             setTimeout(() => pill.classList.remove('selecting'), 300);
             
-            // Get the container to find all role pills
+            // Get the container to find all pills
             const container = pill.closest('.tag-pill-container');
-            const allPills = container.querySelectorAll('.role-pill');
+            
+            // Check if this is a portfolio pill or role pill container
+            const isPortfolioContainer = container.id === 'projectPortfoliosContainer';
+            const pillSelector = isPortfolioContainer ? '.portfolio-pill' : '.role-pill';
+            const allPills = container.querySelectorAll(pillSelector);
+            
+            console.log('Toggling pill:', pill, 'Container:', container.id, 'Selector:', pillSelector);
             
             // Remove selected state from all pills
             allPills.forEach(p => {
@@ -1404,6 +1424,12 @@
             // Add selected state to clicked pill
             pill.classList.add('selected');
             pill.setAttribute('aria-pressed', 'true');
+            
+            // Log the selected portfolio ID for debugging
+            if (isPortfolioContainer) {
+                const portfolioId = pill.getAttribute('data-portfolio-id');
+                console.log('Selected portfolio ID:', portfolioId);
+            }
         }
         
         function toggleProjectTagPill(pill) {

@@ -403,30 +403,13 @@ function renderQualityMetrics(overallStats) {
         return;
     }
 
-    const avgEvaluationScore = overallStats.avgEvaluationScore || 0;
-    const avgProjectEvaluationScore = overallStats.avgProjectEvaluationScore || 0;
+    // Evaluation scores have been removed as per user request
     const passedUserStories = overallStats.passedUserStories || 0;
     const passedTestCases = overallStats.passedTestCases || 0;
     const fixedIssues = overallStats.fixedIssues || 0;
     const implementedEnhancements = overallStats.implementedEnhancements || 0;
 
     container.innerHTML = `
-        <div class="quality-metric-card">
-            <div class="metric-header">
-                <div class="metric-icon"><i class="fas fa-star"></i></div>
-                <div class="metric-title">Average Evaluation Score</div>
-            </div>
-            <div class="metric-value">${avgEvaluationScore}</div>
-            <div class="metric-description">Overall quality assessment across all reports</div>
-        </div>
-        <div class="quality-metric-card">
-            <div class="metric-header">
-                <div class="metric-icon"><i class="fas fa-project-diagram"></i></div>
-                <div class="metric-title">Project Evaluation Score</div>
-            </div>
-            <div class="metric-value">${avgProjectEvaluationScore}</div>
-            <div class="metric-description">Average project-level evaluation score</div>
-        </div>
         <div class="quality-metric-card">
             <div class="metric-header">
                 <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
@@ -477,6 +460,12 @@ function renderProjectCharts(chartData) {
                 return;
             }
 
+            // Destroy existing chart if it exists
+            if (projectCharts[config.id]) {
+                projectCharts[config.id].destroy();
+            }
+
+            // Create new chart instance
             projectCharts[config.id] = new Chart(canvas.getContext('2d'), {
                 type: 'doughnut',
                 data: config.data,
@@ -498,6 +487,21 @@ function renderAdditionalCharts(overallStats) {
         console.error('Overall stats data is missing');
         return;
     }
+    
+    // Clear any existing charts to prevent memory leaks
+    const additionalChartIds = [
+        'projectSuccessRatesChart',
+        'projectQualityTrendsChart',
+        'projectAutomationTestCasesChart',
+        'projectAutomationStabilityChart'
+    ];
+    
+    additionalChartIds.forEach(chartId => {
+        if (projectCharts[chartId]) {
+            projectCharts[chartId].destroy();
+            delete projectCharts[chartId];
+        }
+    });
 
     // Success Rates Overview Chart
     try {
@@ -611,14 +615,13 @@ function renderAdditionalCharts(overallStats) {
         projectCharts['qualityTrends'] = new Chart(qualityTrendsCanvas.getContext('2d'), {
         type: 'radar',
         data: {
-            labels: ['Evaluation Score', 'Project Score', 'Success Rate', 'Completion Rate'],
+            labels: ['Success Rate', 'Test Coverage', 'Issue Resolution'],
             datasets: [{
                 label: 'Quality Metrics',
                 data: [
-                    (overallStats.avgEvaluationScore || 0) * 10, // Scale to 0-100
-                    (overallStats.avgProjectEvaluationScore || 0) * 10, // Scale to 0-100
                     ((overallStats.userStorySuccessRate || 0) + (overallStats.testCaseSuccessRate || 0)) / 2,
-                    ((overallStats.issueFixRate || 0) + (overallStats.enhancementCompletionRate || 0)) / 2
+                    (overallStats.testCaseSuccessRate || 0), // Using test case success rate as a proxy for test coverage
+                    (overallStats.issueFixRate || 0) // Issue resolution rate
                 ],
                 backgroundColor: 'rgba(139, 92, 246, 0.2)',
                 borderColor: '#8b5cf6',
