@@ -234,7 +234,7 @@
                 </button>
                 <button type="button" class="btn btn-primary" onclick="savePortfolio()">
                     <i class="fas fa-save"></i>
-                    Save Portfolio
+                    Save
                 </button>
             </div>
         </div>
@@ -291,7 +291,7 @@
                 </button>
                 <button type="button" class="btn btn-primary" onclick="saveProject()">
                     <i class="fas fa-save"></i>
-                    Save Project
+                    Save
                 </button>
             </div>
         </div>
@@ -397,7 +397,7 @@
                 </button>
                 <button type="button" class="btn btn-primary" onclick="saveTester()">
                     <i class="fas fa-save"></i>
-                    Save Tester
+                    Save
                 </button>
             </div>
         </div>
@@ -437,14 +437,73 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="teamMemberRole">
+                    <label>
                         <i class="fas fa-id-badge"></i>
                         Role
                     </label>
-                    <select id="teamMemberRole" required>
-                        <option value="">Select Role</option>
-                    </select>
-                    <div class="input-hint">Choose the team member's primary role and responsibility</div>
+                    <div class="input-hint" style="margin-bottom: 1rem;">Select the team member's primary role and responsibility</div>
+                    <div class="tag-pill-container" id="teamMemberRolesContainer">
+                        <div class="tag-pill role-pill" data-role="Project Owner" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-crown"></i>
+                            <span>Project Owner</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Project Analyst" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Project Analyst</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Project Manager" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-tasks"></i>
+                            <span>Project Manager</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Business Analyst" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-briefcase"></i>
+                            <span>Business Analyst</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Technical Lead" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-code"></i>
+                            <span>Technical Lead</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Scrum Master" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-users-cog"></i>
+                            <span>Scrum Master</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Product Owner" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-box"></i>
+                            <span>Product Owner</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Quality Assurance Lead" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Quality Assurance Lead</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="DevOps Engineer" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-server"></i>
+                            <span>DevOps Engineer</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="UI/UX Designer" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-paint-brush"></i>
+                            <span>UI/UX Designer</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Database Administrator" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-database"></i>
+                            <span>Database Administrator</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Security Analyst" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Security Analyst</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="System Administrator" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-cogs"></i>
+                            <span>System Administrator</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Stakeholder" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-handshake"></i>
+                            <span>Stakeholder</span>
+                        </div>
+                        <div class="tag-pill role-pill" data-role="Client Representative" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Client Representative</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-buttons">
@@ -454,7 +513,7 @@
                 </button>
                 <button type="button" class="btn btn-primary" onclick="saveTeamMember()">
                     <i class="fas fa-save"></i>
-                    Save Team Member
+                    Save
                 </button>
             </div>
         </div>
@@ -504,7 +563,7 @@
                 </button>
                 <button type="button" class="btn btn-primary" onclick="saveTesterProjects()">
                     <i class="fas fa-save"></i>
-                    Save Assignments
+                    Save
                 </button>
             </div>
         </div>
@@ -853,7 +912,19 @@
             populateProjectAssignmentList();
             showModal('addTesterModal');
         }
-        function showAddTeamMemberModal() { editingId = null; document.getElementById('teamMemberName').value = ''; document.getElementById('teamMemberEmail').value = ''; document.getElementById('teamMemberRole').value = ''; showModal('addTeamMemberModal'); }
+        function showAddTeamMemberModal() { 
+            editingId = null; 
+            document.getElementById('teamMemberName').value = ''; 
+            document.getElementById('teamMemberEmail').value = ''; 
+            
+            // Reset all role tag pills
+            document.querySelectorAll('#teamMemberRolesContainer .role-pill').forEach(pill => {
+                pill.classList.remove('selected');
+                pill.setAttribute('aria-pressed', 'false');
+            });
+            
+            showModal('addTeamMemberModal'); 
+        }
 
         // Show Modals for Editing
         function editPortfolio(id) { const p = portfolios.find(i => i.id === id); if (!p) return; editingId = id; document.getElementById('portfolioName').value = p.name; document.getElementById('portfolioDescription').value = p.description; showModal('addPortfolioModal'); }
@@ -901,7 +972,31 @@
             
             showModal('addTesterModal');
         }
-        function editTeamMember(id) { const m = teamMembers.find(i => i.id === id); if (!m) return; editingId = id; document.getElementById('teamMemberName').value = m.name; document.getElementById('teamMemberEmail').value = m.email; document.getElementById('teamMemberRole').value = m.role; showModal('addTeamMemberModal'); }
+        function editTeamMember(id) { 
+            const m = teamMembers.find(i => i.id === id); 
+            if (!m) return; 
+            
+            editingId = id; 
+            document.getElementById('teamMemberName').value = m.name; 
+            document.getElementById('teamMemberEmail').value = m.email; 
+            
+            // Reset all role tag pills first
+            document.querySelectorAll('#teamMemberRolesContainer .role-pill').forEach(pill => {
+                pill.classList.remove('selected');
+                pill.setAttribute('aria-pressed', 'false');
+            });
+            
+            // Select the member's current role
+            if (m.role) {
+                const rolePill = document.querySelector(`#teamMemberRolesContainer .role-pill[data-role="${m.role}"]`);
+                if (rolePill) {
+                    rolePill.classList.add('selected');
+                    rolePill.setAttribute('aria-pressed', 'true');
+                }
+            }
+            
+            showModal('addTeamMemberModal'); 
+        }
 
         // Save Data (Create/Update)
         async function saveData(type, body, modalId) {
@@ -993,7 +1088,26 @@
             
             await saveData('testers', testerData, 'addTesterModal');
         }
-        function saveTeamMember() { const name = document.getElementById('teamMemberName').value, email = document.getElementById('teamMemberEmail').value, role = document.getElementById('teamMemberRole').value; if (name && email && role) saveData('team-members', { name, email, role }, 'addTeamMemberModal'); }
+        async function saveTeamMember() {
+            const name = document.getElementById('teamMemberName').value.trim();
+            const email = document.getElementById('teamMemberEmail').value.trim();
+            
+            // Get selected role from tag pills
+            const selectedRolePill = document.querySelector('#teamMemberRolesContainer .role-pill.selected');
+            const role = selectedRolePill ? selectedRolePill.getAttribute('data-role') : null;
+            
+            if (!name || !email) {
+                alert('Please enter both name and email');
+                return;
+            }
+            
+            if (!role) {
+                alert('Please select a role');
+                return;
+            }
+            
+            await saveData('team-members', { name, email, role }, 'addTeamMemberModal');
+        }
 
         // Tester-Project Assignment Functions
         let currentTesterId = null;
@@ -1098,6 +1212,27 @@
             // Update ARIA attributes
             const isSelected = pill.classList.contains('selected');
             pill.setAttribute('aria-pressed', isSelected.toString());
+        }
+        
+        // Single Selection Tag/Pill Function (for Team Member Roles)
+        function toggleSingleTagPill(pill) {
+            // Add selecting animation
+            pill.classList.add('selecting');
+            setTimeout(() => pill.classList.remove('selecting'), 300);
+            
+            // Get the container to find all role pills
+            const container = pill.closest('.tag-pill-container');
+            const allPills = container.querySelectorAll('.role-pill');
+            
+            // Remove selected state from all pills
+            allPills.forEach(p => {
+                p.classList.remove('selected');
+                p.setAttribute('aria-pressed', 'false');
+            });
+            
+            // Add selected state to clicked pill
+            pill.classList.add('selected');
+            pill.setAttribute('aria-pressed', 'true');
         }
         
         function toggleProjectTagPill(pill) {

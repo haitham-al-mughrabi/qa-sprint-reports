@@ -737,7 +737,8 @@ nced Modal Styles */
 
 .modal.manage-modal .modal-buttons {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
+    align-items: center;
     gap: 1.5rem;
     margin-top: 3rem;
     padding: 2rem;
@@ -869,23 +870,28 @@ nced Modal Styles */
     line-height: 1.4;
 }
 
-/* Enhanced Button Styles */
+/* Enhanced Button Styles - Consistent across all modals */
 .modal.manage-modal .modal-buttons .btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.75rem;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: var(--border-radius-large);
+    padding: 1rem 1.5rem !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    border-radius: var(--border-radius-large) !important;
     transition: var(--transition);
     box-shadow: var(--shadow-light);
-    min-width: 180px !important;
-    width: 180px !important;
-    max-width: 180px !important;
-    justify-content: center;
-    flex: 0 0 180px !important;
-    box-sizing: border-box;
+    min-width: 160px !important;
+    width: 160px !important;
+    max-width: 160px !important;
+    height: 48px !important;
+    flex: 0 0 160px !important;
+    box-sizing: border-box !important;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .modal.manage-modal .modal-buttons .btn i {
@@ -1276,10 +1282,15 @@ nced Modal Styles */
     .modal.manage-modal .modal-buttons {
         flex-direction: column;
         gap: 1rem;
+        align-items: center;
+        justify-content: center;
     }
     
     .modal.manage-modal .modal-buttons .btn {
-        width: 100%;
+        width: 200px !important;
+        min-width: 200px !important;
+        max-width: 200px !important;
+        flex: 0 0 200px !important;
     }
     
     /* Adjust input field widths for mobile */
@@ -1871,6 +1882,55 @@ nced Modal Styles */
 
 [data-theme="light"] .selected-tester-info p {
     color: rgb(59, 130, 246);
+}
+
+/* Role Pills Specific Styles (Single Selection) */
+.role-pill {
+    background: linear-gradient(135deg, var(--surface), rgba(139, 92, 246, 0.05));
+    border-color: rgba(139, 92, 246, 0.2);
+    color: var(--text-primary);
+}
+
+.role-pill:hover {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.1), rgba(var(--accent-rgb), 0.05));
+    color: var(--accent);
+    box-shadow: 0 6px 12px rgba(var(--accent-rgb), 0.2);
+}
+
+.role-pill.selected {
+    background: linear-gradient(135deg, var(--accent), #a78bfa);
+    border-color: var(--accent);
+    color: white;
+    box-shadow: 0 8px 16px rgba(var(--accent-rgb), 0.3);
+}
+
+.role-pill.selected:hover {
+    background: linear-gradient(135deg, #a78bfa, var(--accent));
+    box-shadow: 0 10px 20px rgba(var(--accent-rgb), 0.4);
+}
+
+/* Light Theme Support for Role Pills */
+[data-theme="light"] .role-pill {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(139, 92, 246, 0.02));
+    border-color: rgba(139, 92, 246, 0.2);
+    color: rgba(51, 65, 85, 0.9);
+}
+
+[data-theme="light"] .role-pill:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.03));
+    color: rgb(139, 92, 246);
+}
+
+[data-theme="light"] .role-pill.selected {
+    background: linear-gradient(135deg, rgb(139, 92, 246), rgba(139, 92, 246, 0.9));
+    border-color: rgb(139, 92, 246);
+    color: white;
+}
+
+[data-theme="light"] .role-pill.selected:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgb(139, 92, 246));
 }
 
 /* Animation for tag pill selection */
