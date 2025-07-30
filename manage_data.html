@@ -254,83 +254,53 @@
                 </div>
                 <div class="form-group">
                     <label>Tester Roles:</label>
-                    <div class="checkbox-list" style="max-height: 200px; padding: 1rem; overflow-y: auto;">
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="isAutomationEngineer">
-                            <span class="checkbox-text">
-                                <strong>Automation Engineer</strong>
-                                <small>Handles automated testing tasks</small>
-                            </span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="isManualEngineer">
-                            <span class="checkbox-text">
-                                <strong>Manual Engineer</strong>
-                                <small>Handles manual testing tasks</small>
-                            </span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="isPerformanceTester">
-                            <span class="checkbox-text">
-                                <strong>Performance Tester</strong>
-                                <small>Specializes in performance and load testing</small>
-                            </span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="isSecurityTester">
-                            <span class="checkbox-text">
-                                <strong>Security Tester</strong>
-                                <small>Focuses on security and vulnerability testing</small>
-                            </span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="isApiTester">
-                            <span class="checkbox-text">
-                                <strong>API Tester</strong>
-                                <small>Specializes in API and backend testing</small>
-                            </span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="isMobileTester">
-                            <span class="checkbox-text">
-                                <strong>Mobile Tester</strong>
-                                <small>Focuses on mobile application testing</small>
-                            </span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="isWebTester">
-                            <span class="checkbox-text">
-                                <strong>Web Tester</strong>
-                                <small>Specializes in web application testing</small>
-                            </span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="isAccessibilityTester">
-                            <span class="checkbox-text">
-                                <strong>Accessibility Tester</strong>
-                                <small>Ensures accessibility compliance (WCAG, ADA)</small>
-                            </span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="isUsabilityTester">
-                            <span class="checkbox-text">
-                                <strong>Usability Tester</strong>
-                                <small>Focuses on user experience and usability</small>
-                            </span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="isTestLead">
-                            <span class="checkbox-text">
-                                <strong>Test Lead</strong>
-                                <small>Leads testing teams and coordinates testing activities</small>
-                            </span>
-                        </label>
+                    <div class="tag-pill-container" id="testerRolesContainer">
+                        <div class="tag-pill" data-role="isAutomationEngineer" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
+                            <i class="fas fa-robot"></i>
+                            <span>Automation Engineer</span>
+                        </div>
+                        <div class="tag-pill" data-role="isManualEngineer" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
+                            <i class="fas fa-hand-paper"></i>
+                            <span>Manual Engineer</span>
+                        </div>
+                        <div class="tag-pill" data-role="isPerformanceTester" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Performance Tester</span>
+                        </div>
+                        <div class="tag-pill" data-role="isSecurityTester" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Security Tester</span>
+                        </div>
+                        <div class="tag-pill" data-role="isApiTester" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
+                            <i class="fas fa-code"></i>
+                            <span>API Tester</span>
+                        </div>
+                        <div class="tag-pill" data-role="isMobileTester" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Mobile Tester</span>
+                        </div>
+                        <div class="tag-pill" data-role="isWebTester" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
+                            <i class="fas fa-globe"></i>
+                            <span>Web Tester</span>
+                        </div>
+                        <div class="tag-pill" data-role="isAccessibilityTester" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
+                            <i class="fas fa-universal-access"></i>
+                            <span>Accessibility Tester</span>
+                        </div>
+                        <div class="tag-pill" data-role="isUsabilityTester" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
+                            <i class="fas fa-user-check"></i>
+                            <span>Usability Tester</span>
+                        </div>
+                        <div class="tag-pill test-lead" data-role="isTestLead" onclick="toggleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTagPill(this)}">
+                            <i class="fas fa-crown"></i>
+                            <span>Test Lead</span>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Assign to Projects (Optional):</label>
-                    <div id="projectAssignmentList" class="checkbox-list" style="max-height: 150px; padding: 1rem; overflow-y: auto;">
-                        <!-- Project checkboxes will be populated here -->
+                    <label>Assign to Projects:</label>
+                    <div id="projectAssignmentList" class="tag-pill-container project-pills" style="max-height: 200px; overflow-y: auto; padding: 1rem; border: 2px solid var(--border); border-radius: var(--border-radius-large); background: var(--surface);">
+                        <!-- Project tag pills will be populated here -->
                     </div>
                 </div>
             </div>
@@ -670,21 +640,32 @@
             if (projects && Array.isArray(projects) && projects.length > 0) {
                 projects.forEach(project => {
                     const portfolioName = project.portfolio_name || 'No Portfolio';
-                    const isChecked = selectedProjectIds.includes(project.id);
+                    const isSelected = selectedProjectIds.includes(project.id);
                     
-                    const checkboxItem = document.createElement('label');
-                    checkboxItem.className = 'checkbox-item';
-                    checkboxItem.innerHTML = `
-                        <input type="checkbox" id="project_${project.id}" value="${project.id}" ${isChecked ? 'checked' : ''}>
-                        <span class="checkbox-text">
+                    const tagPill = document.createElement('div');
+                    tagPill.className = `tag-pill ${isSelected ? 'selected' : ''}`;
+                    tagPill.setAttribute('data-project-id', project.id);
+                    tagPill.setAttribute('tabindex', '0');
+                    tagPill.setAttribute('role', 'button');
+                    tagPill.setAttribute('aria-pressed', isSelected.toString());
+                    tagPill.onclick = () => toggleProjectTagPill(tagPill);
+                    tagPill.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleProjectTagPill(tagPill);
+                        }
+                    };
+                    tagPill.innerHTML = `
+                        <i class="fas fa-project-diagram"></i>
+                        <span>
                             <strong>${project.name}</strong>
-                            <small>${portfolioName}</small>
+                            <small style="display: block; font-size: 0.8em; opacity: 0.8;">${portfolioName}</small>
                         </span>
                     `;
-                    container.appendChild(checkboxItem);
+                    container.appendChild(tagPill);
                 });
             } else {
-                container.innerHTML = '<p style="color: #666; font-style: italic;">No projects available</p>';
+                container.innerHTML = '<p style="color: var(--text-secondary); font-style: italic; text-align: center; padding: 2rem;">No projects available</p>';
             }
         }
 
@@ -709,17 +690,10 @@
             document.getElementById('testerName').value = '';
             document.getElementById('testerEmail').value = '';
             
-            // Reset all role checkboxes
-            document.getElementById('isAutomationEngineer').checked = false;
-            document.getElementById('isManualEngineer').checked = false;
-            document.getElementById('isPerformanceTester').checked = false;
-            document.getElementById('isSecurityTester').checked = false;
-            document.getElementById('isApiTester').checked = false;
-            document.getElementById('isMobileTester').checked = false;
-            document.getElementById('isWebTester').checked = false;
-            document.getElementById('isAccessibilityTester').checked = false;
-            document.getElementById('isUsabilityTester').checked = false;
-            document.getElementById('isTestLead').checked = false;
+            // Reset all role tag pills
+            document.querySelectorAll('#testerRolesContainer .tag-pill').forEach(pill => {
+                pill.classList.remove('selected');
+            });
             
             // Ensure projects are loaded before populating project list
             if (!projects || projects.length === 0) {
@@ -742,17 +716,30 @@
             document.getElementById('testerName').value = t.name;
             document.getElementById('testerEmail').value = t.email;
             
-            // Set all role checkboxes
-            document.getElementById('isAutomationEngineer').checked = t.is_automation_engineer || false;
-            document.getElementById('isManualEngineer').checked = t.is_manual_engineer || false;
-            document.getElementById('isPerformanceTester').checked = t.is_performance_tester || false;
-            document.getElementById('isSecurityTester').checked = t.is_security_tester || false;
-            document.getElementById('isApiTester').checked = t.is_api_tester || false;
-            document.getElementById('isMobileTester').checked = t.is_mobile_tester || false;
-            document.getElementById('isWebTester').checked = t.is_web_tester || false;
-            document.getElementById('isAccessibilityTester').checked = t.is_accessibility_tester || false;
-            document.getElementById('isUsabilityTester').checked = t.is_usability_tester || false;
-            document.getElementById('isTestLead').checked = t.is_test_lead || false;
+            // Set all role tag pills
+            const roleMapping = {
+                'isAutomationEngineer': t.is_automation_engineer,
+                'isManualEngineer': t.is_manual_engineer,
+                'isPerformanceTester': t.is_performance_tester,
+                'isSecurityTester': t.is_security_tester,
+                'isApiTester': t.is_api_tester,
+                'isMobileTester': t.is_mobile_tester,
+                'isWebTester': t.is_web_tester,
+                'isAccessibilityTester': t.is_accessibility_tester,
+                'isUsabilityTester': t.is_usability_tester,
+                'isTestLead': t.is_test_lead
+            };
+            
+            document.querySelectorAll('#testerRolesContainer .tag-pill').forEach(pill => {
+                const role = pill.getAttribute('data-role');
+                if (roleMapping[role]) {
+                    pill.classList.add('selected');
+                    pill.setAttribute('aria-pressed', 'true');
+                } else {
+                    pill.classList.remove('selected');
+                    pill.setAttribute('aria-pressed', 'false');
+                }
+            });
             
             // Ensure projects are loaded before populating project list
             if (!projects || projects.length === 0) {
@@ -835,25 +822,23 @@
                 return;
             }
             
-            // Get all role checkboxes
+            // Get all selected role tag pills
+            const selectedRoles = {};
+            document.querySelectorAll('#testerRolesContainer .tag-pill').forEach(pill => {
+                const role = pill.getAttribute('data-role');
+                const roleKey = role.replace(/([A-Z])/g, '_$1').toLowerCase();
+                selectedRoles[roleKey] = pill.classList.contains('selected');
+            });
+            
             const testerData = {
                 name,
                 email,
-                is_automation_engineer: document.getElementById('isAutomationEngineer').checked,
-                is_manual_engineer: document.getElementById('isManualEngineer').checked,
-                is_performance_tester: document.getElementById('isPerformanceTester').checked,
-                is_security_tester: document.getElementById('isSecurityTester').checked,
-                is_api_tester: document.getElementById('isApiTester').checked,
-                is_mobile_tester: document.getElementById('isMobileTester').checked,
-                is_web_tester: document.getElementById('isWebTester').checked,
-                is_accessibility_tester: document.getElementById('isAccessibilityTester').checked,
-                is_usability_tester: document.getElementById('isUsabilityTester').checked,
-                is_test_lead: document.getElementById('isTestLead').checked
+                ...selectedRoles
             };
             
-            // Get selected project IDs
-            const projectCheckboxes = document.querySelectorAll('#projectAssignmentList input[type="checkbox"]:checked');
-            const selectedProjectIds = Array.from(projectCheckboxes).map(cb => parseInt(cb.value));
+            // Get selected project IDs from tag pills
+            const selectedProjectPills = document.querySelectorAll('#projectAssignmentList .tag-pill.selected');
+            const selectedProjectIds = Array.from(selectedProjectPills).map(pill => parseInt(pill.getAttribute('data-project-id')));
             testerData.project_ids = selectedProjectIds;
             
             await saveData('testers', testerData, 'addTesterModal');
@@ -949,6 +934,49 @@
                 console.error(`Error deleting ${type}:`, error);
                 alert(`An error occurred while deleting ${type}.`);
             }
+        }
+
+        // Tag/Pill Selection Functions
+        function toggleTagPill(pill) {
+            // Add selecting animation
+            pill.classList.add('selecting');
+            setTimeout(() => pill.classList.remove('selecting'), 300);
+            
+            // Toggle selected state
+            pill.classList.toggle('selected');
+            
+            // Update ARIA attributes
+            const isSelected = pill.classList.contains('selected');
+            pill.setAttribute('aria-pressed', isSelected.toString());
+        }
+        
+        function toggleProjectTagPill(pill) {
+            // Add selecting animation
+            pill.classList.add('selecting');
+            setTimeout(() => pill.classList.remove('selecting'), 300);
+            
+            // Toggle selected state
+            pill.classList.toggle('selected');
+            
+            // Update ARIA attributes
+            const isSelected = pill.classList.contains('selected');
+            pill.setAttribute('aria-pressed', isSelected.toString());
+        }
+        
+        // Function to get selected role pills data
+        function getSelectedRoles() {
+            const selectedRoles = {};
+            document.querySelectorAll('#testerRolesContainer .tag-pill').forEach(pill => {
+                const role = pill.getAttribute('data-role');
+                selectedRoles[role] = pill.classList.contains('selected');
+            });
+            return selectedRoles;
+        }
+        
+        // Function to get selected project pills data
+        function getSelectedProjectIds() {
+            const selectedPills = document.querySelectorAll('#projectAssignmentList .tag-pill.selected');
+            return Array.from(selectedPills).map(pill => parseInt(pill.getAttribute('data-project-id')));
         }
 
         // Theme functions are now handled by theme-manager.js
