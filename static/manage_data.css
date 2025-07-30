@@ -428,10 +428,10 @@ html { scrollbar-width: none; }
     }
 }
 
-/* Enhanced Modal Form Rows */
+/* Enhanced Modal Form Rows - Now single column to standardize widths */
 .modal.manage-modal .form-row { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
+    display: flex;
+    flex-direction: column;
     gap: 2rem; 
 }
 
@@ -685,6 +685,19 @@ nced Modal Styles */
 
 .modal.manage-modal .form-group {
     margin-bottom: 2rem;
+    width: 100%;
+}
+
+/* Ensure form rows don't override field widths */
+.modal.manage-modal .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.modal.manage-modal .form-row .form-group {
+    width: 100%;
+    margin-bottom: 0;
 }
 
 .modal.manage-modal .form-group label {
@@ -698,8 +711,9 @@ nced Modal Styles */
 .modal.manage-modal .form-group input,
 .modal.manage-modal .form-group select,
 .modal.manage-modal .form-group textarea {
-    width: 100%;
-    max-width: 400px;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
     padding: 1rem 1.25rem;
     border: 2px solid var(--border);
     border-radius: var(--border-radius-large);
@@ -708,22 +722,12 @@ nced Modal Styles */
     font-size: 1rem;
     transition: var(--transition);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Specific width adjustments for different input types */
-.modal.manage-modal .form-group input[type="text"],
-.modal.manage-modal .form-group input[type="email"] {
-    max-width: 350px;
-}
-
-.modal.manage-modal .form-group select {
-    max-width: 300px;
+    box-sizing: border-box;
 }
 
 .modal.manage-modal .form-group textarea {
-    max-width: 100%;
-    min-width: 300px;
     resize: vertical;
+    min-height: 120px;
 }
 
 .modal.manage-modal .form-group input:focus,
@@ -910,6 +914,9 @@ nced Modal Styles */
     border-radius: var(--border-radius-large);
     padding: 1rem 1.5rem;
     margin-bottom: 0.5rem;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
 }
 
 .selected-tester-info p {
@@ -1293,12 +1300,13 @@ nced Modal Styles */
         flex: 0 0 200px !important;
     }
     
-    /* Adjust input field widths for mobile */
+    /* Maintain consistent input field widths on mobile */
     .modal.manage-modal .form-group input,
     .modal.manage-modal .form-group select,
     .modal.manage-modal .form-group textarea {
-        max-width: 100%;
-        min-width: auto;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
     }
 }
 
@@ -1578,6 +1586,9 @@ nced Modal Styles */
     min-height: 80px;
     align-content: flex-start;
     transition: all 0.3s ease;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
 }
 
 /* Dark Theme Enhancements */

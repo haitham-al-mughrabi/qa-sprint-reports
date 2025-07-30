@@ -255,28 +255,26 @@
                 </button>
             </div>
             <div class="modal-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="projectName">
+                <div class="form-group">
+                    <label for="projectName">
+                        <i class="fas fa-project-diagram"></i>
+                        Project Name
+                    </label>
+                    <input type="text" id="projectName" placeholder="Enter project name..." required>
+                    <div class="input-hint">Choose a unique and descriptive project name</div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-briefcase"></i>
+                        Portfolio
+                    </label>
+                    <div class="input-hint" style="margin-bottom: 1rem;">Optional: Assign to an existing portfolio or leave standalone</div>
+                    <div class="tag-pill-container" id="projectPortfoliosContainer">
+                        <div class="tag-pill portfolio-pill standalone-pill" data-portfolio-id="" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
                             <i class="fas fa-project-diagram"></i>
-                            Project Name
-                        </label>
-                        <input type="text" id="projectName" placeholder="Enter project name..." required>
-                        <div class="input-hint">Choose a unique and descriptive project name</div>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-briefcase"></i>
-                            Portfolio
-                        </label>
-                        <div class="input-hint" style="margin-bottom: 1rem;">Optional: Assign to an existing portfolio or leave standalone</div>
-                        <div class="tag-pill-container" id="projectPortfoliosContainer">
-                            <div class="tag-pill portfolio-pill standalone-pill" data-portfolio-id="" onclick="toggleSingleTagPill(this)" tabindex="0" role="button" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSingleTagPill(this)}">
-                                <i class="fas fa-project-diagram"></i>
-                                <span>Standalone Project</span>
-                            </div>
-                            <!-- Portfolio pills will be populated here -->
+                            <span>Standalone Project</span>
                         </div>
+                        <!-- Portfolio pills will be populated here -->
                     </div>
                 </div>
                 <div class="form-group">
@@ -620,30 +618,30 @@
             try {
                 console.log('Loading all data...');
                 
-                const responses = await Promise.all([
-                    fetch('/api/portfolios'),
-                    fetch('/api/projects'), 
-                    fetch('/api/testers'),
-                    fetch('/api/team-members')
-                ]);
+                // Load data sequentially to avoid overwhelming the server
+                const portfolioResponse = await fetch('/api/portfolios');
+                const projectResponse = await fetch('/api/projects');  
+                const testerResponse = await fetch('/api/testers');
+                const teamResponse = await fetch('/api/team-members');
                 
-                // Check if all responses are ok
-                const results = await Promise.all(
-                    responses.map(async (response, index) => {
-                        const endpoints = ['portfolios', 'projects', 'testers', 'team-members'];
-                        if (response.ok) {
-                            const data = await response.json();
-                            console.log(`Loaded ${endpoints[index]}:`, data);
-                            return data;
-                        } else {
-                            console.warn(`Failed to load ${endpoints[index]}: ${response.status} ${response.statusText}`);
-                            return [];
-                        }
-                    })
-                );
+                // Process each response
+                portfolios = portfolioResponse.ok ? await portfolioResponse.json() : [];
+                projects = projectResponse.ok ? await projectResponse.json() : [];
+                testers = testerResponse.ok ? await testerResponse.json() : [];
+                teamMembers = teamResponse.ok ? await teamResponse.json() : [];
                 
-                [portfolios, projects, testers, teamMembers] = results;
-                console.log('All data loaded successfully');
+                console.log('Data loaded:', {
+                    portfolios: portfolios.length,
+                    projects: projects.length,
+                    testers: testers.length,
+                    teamMembers: teamMembers.length
+                });
+                
+                // Ensure arrays are properly initialized
+                portfolios = Array.isArray(portfolios) ? portfolios : [];
+                projects = Array.isArray(projects) ? projects : [];
+                testers = Array.isArray(testers) ? testers : [];
+                teamMembers = Array.isArray(teamMembers) ? teamMembers : [];
                 
             } catch (error) {
                 console.error("Failed to load data:", error);
