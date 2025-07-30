@@ -1197,8 +1197,8 @@ def get_form_data():
     team_members = TeamMember.query.all()
     
     return jsonify({
-        'portfolios': [{'id': p.id, 'name': p.name} for p in portfolios],
-        'projects': [{'id': p.id, 'name': p.name, 'portfolio_id': p.portfolio_id} for p in projects],
+        'portfolios': [{'id': p.id, 'name': p.name, 'description': p.description} for p in portfolios],
+        'projects': [{'id': p.id, 'name': p.name, 'description': p.description, 'portfolio_id': p.portfolio_id} for p in projects],
         'testers': [{'id': t.id, 'name': t.name, 'email': t.email, 'is_automation_engineer': t.is_automation_engineer, 'is_manual_engineer': t.is_manual_engineer, 'role_types': t.role_types, 'role_display': t.role_display} for t in testers],
         'team_members': [{'id': tm.id, 'name': tm.name, 'email': tm.email, 'role': tm.role} for tm in team_members]
     })

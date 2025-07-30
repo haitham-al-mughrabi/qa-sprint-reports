@@ -31,10 +31,16 @@ function showTab(tabName) {
 
 // Data Loading
 async function loadAllData() {
+    console.log('loadAllData called');
     try {
+        console.log('Fetching data from /api/form-data');
         const response = await fetch('/api/form-data');
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('Raw data received:', data);
+            
             portfolios = data.portfolios || [];
             projects = data.projects || [];
             testers = data.testers || [];
@@ -46,8 +52,11 @@ async function loadAllData() {
                 testers: testers.length,
                 teamMembers: teamMembers.length
             });
+            console.log('Portfolios data:', portfolios);
         } else {
             console.error('Failed to load data:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
         }
     } catch (error) {
         console.error('Error loading data:', error);
@@ -69,18 +78,77 @@ function updateStats() {
 
 // Render Functions
 function renderAllLists() {
-    renderPortfolios();
-    renderProjects();
-    renderTesters();
-    renderTeamMembers();
+    displayPortfolios();
+    displayProjects();
+    displayTesters();
+    displayTeamMembers();
 }
 
-function renderPortfolios() {
+// Display functions with search functionality
+function displayPortfolios() {
+    const searchTerm = document.getElementById('portfolioSearch')?.value.toLowerCase() || '';
+    const filteredPortfolios = portfolios.filter(portfolio => 
+        portfolio.name.toLowerCase().includes(searchTerm) ||
+        (portfolio.description && portfolio.description.toLowerCase().includes(searchTerm))
+    );
+    renderPortfolios(filteredPortfolios);
+}
+
+function displayProjects() {
+    const searchTerm = document.getElementById('projectSearch')?.value.toLowerCase() || '';
+    const portfolioFilter = document.getElementById('portfolioFilter')?.value || '';
+    
+    let filteredProjects = projects.filter(project => 
+        project.name.toLowerCase().includes(searchTerm) ||
+        (project.description && project.description.toLowerCase().includes(searchTerm))
+    );
+    
+    if (portfolioFilter) {
+        filteredProjects = filteredProjects.filter(project => 
+            project.portfolio_id == portfolioFilter
+        );
+    }
+    
+    renderProjects(filteredProjects);
+}
+
+function displayTesters() {
+    const searchTerm = document.getElementById('testerSearch')?.value.toLowerCase() || '';
+    const filteredTesters = testers.filter(tester => 
+        tester.name.toLowerCase().includes(searchTerm) ||
+        tester.email.toLowerCase().includes(searchTerm)
+    );
+    renderTesters(filteredTesters);
+}
+
+function displayTeamMembers() {
+    const searchTerm = document.getElementById('teamSearch')?.value.toLowerCase() || '';
+    const roleFilter = document.getElementById('roleFilter')?.value || '';
+    
+    let filteredMembers = teamMembers.filter(member => 
+        member.name.toLowerCase().includes(searchTerm) ||
+        member.email.toLowerCase().includes(searchTerm)
+    );
+    
+    if (roleFilter) {
+        filteredMembers = filteredMembers.filter(member => 
+            member.role === roleFilter
+        );
+    }
+    
+    renderTeamMembers(filteredMembers);
+}
+
+function renderPortfolios(portfoliosToRender = portfolios) {
     const container = document.getElementById('portfoliosList');
-    if (portfolios.length === 0) {
+    if (!container) return;
+    
+    if (portfoliosToRender.length === 0) {
         container.innerHTML = `
             <div class="empty-data-state">
-                <div class="icon">📁</div>
+                <div class="icon-bg">
+                    <i class="fas fa-briefcase"></i>
+                </div>
                 <h3>No Portfolios Found</h3>
                 <p>Create your first portfolio to get started.</p>
                 <button class="action-btn" onclick="showAddPortfolioModal()">+ Add Portfolio</button>
@@ -89,18 +157,23 @@ function renderPortfolios() {
         return;
     }
 
-    container.innerHTML = portfolios.map(portfolio => `
+    container.innerHTML = portfoliosToRender.map(portfolio => `
         <div class="data-item portfolio">
             <div class="data-item-header">
                 <h3 class="data-item-title">${portfolio.name}</h3>
                 <div class="data-item-actions">
-                    <button class="btn-edit" onclick="editPortfolio(${portfolio.id})">Edit</button>
-                    <button class="btn-delete" onclick="deletePortfolio(${portfolio.id})">Delete</button>
+                    <button class="btn-edit" onclick="editPortfolio(${portfolio.id})" title="Edit Portfolio">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-delete" onclick="deletePortfolio(${portfolio.id})" title="Delete Portfolio">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
             <div class="data-item-content">
                 <p>${portfolio.description || 'No description provided'}</p>
                 <div class="project-count">
+                    <i class="fas fa-project-diagram"></i>
                     ${projects.filter(p => p.portfolio_id === portfolio.id).length} Projects
                 </div>
             </div>
@@ -108,12 +181,16 @@ function renderPortfolios() {
     `).join('');
 }
 
-function renderProjects() {
+function renderProjects(projectsToRender = projects) {
     const container = document.getElementById('projectsList');
-    if (projects.length === 0) {
+    if (!container) return;
+    
+    if (projectsToRender.length === 0) {
         container.innerHTML = `
             <div class="empty-data-state">
-                <div class="icon"><i class="fas fa-rocket"></i></div>
+                <div class="icon-bg">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
                 <h3>No Projects Found</h3>
                 <p>Create your first project to get started.</p>
                 <button class="action-btn" onclick="showAddProjectModal()">+ Add Project</button>
@@ -122,19 +199,23 @@ function renderProjects() {
         return;
     }
 
-    container.innerHTML = projects.map(project => {
+    container.innerHTML = projectsToRender.map(project => {
         const portfolio = portfolios.find(p => p.id === project.portfolio_id);
         return `
             <div class="data-item project">
                 <div class="data-item-header">
                     <h3 class="data-item-title">${project.name}</h3>
                     <div class="data-item-actions">
-                        <button class="btn-edit" onclick="editProject(${project.id})">Edit</button>
-                        <button class="btn-delete" onclick="deleteProject(${project.id})">Delete</button>
+                        <button class="btn-edit" onclick="editProject(${project.id})" title="Edit Project">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-delete" onclick="deleteProject(${project.id})" title="Delete Project">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="data-item-content">
-                    <p><strong>Portfolio:</strong> ${portfolio ? portfolio.name : 'Unknown'}</p>
+                    <p><strong>Portfolio:</strong> ${portfolio ? portfolio.name : 'Standalone Project'}</p>
                     <p>${project.description || 'No description provided'}</p>
                 </div>
             </div>
@@ -142,12 +223,16 @@ function renderProjects() {
     }).join('');
 }
 
-function renderTesters() {
+function renderTesters(testersToRender = testers) {
     const container = document.getElementById('testersList');
-    if (testers.length === 0) {
+    if (!container) return;
+    
+    if (testersToRender.length === 0) {
         container.innerHTML = `
             <div class="empty-data-state">
-                <div class="icon">🧪</div>
+                <div class="icon-bg">
+                    <i class="fas fa-user-cog"></i>
+                </div>
                 <h3>No Testers Found</h3>
                 <p>Add testers to your system.</p>
                 <button class="action-btn" onclick="showAddTesterModal()">+ Add Tester</button>
@@ -156,13 +241,17 @@ function renderTesters() {
         return;
     }
 
-    container.innerHTML = testers.map(tester => `
+    container.innerHTML = testersToRender.map(tester => `
         <div class="data-item tester">
             <div class="data-item-header">
                 <h3 class="data-item-title">${tester.name}</h3>
                 <div class="data-item-actions">
-                    <button class="btn-edit" onclick="editTester(${tester.id})">Edit</button>
-                    <button class="btn-delete" onclick="deleteTester(${tester.id})">Delete</button>
+                    <button class="btn-edit" onclick="editTester(${tester.id})" title="Edit Tester">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-delete" onclick="deleteTester(${tester.id})" title="Delete Tester">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
             <div class="data-item-content">
@@ -172,12 +261,16 @@ function renderTesters() {
     `).join('');
 }
 
-function renderTeamMembers() {
+function renderTeamMembers(membersToRender = teamMembers) {
     const container = document.getElementById('teamMembersList');
-    if (teamMembers.length === 0) {
+    if (!container) return;
+    
+    if (membersToRender.length === 0) {
         container.innerHTML = `
             <div class="empty-data-state">
-                <div class="icon">👥</div>
+                <div class="icon-bg">
+                    <i class="fas fa-users"></i>
+                </div>
                 <h3>No Team Members Found</h3>
                 <p>Add team members to your system.</p>
                 <button class="action-btn" onclick="showAddTeamMemberModal()">+ Add Team Member</button>
@@ -186,13 +279,17 @@ function renderTeamMembers() {
         return;
     }
 
-    container.innerHTML = teamMembers.map(member => `
+    container.innerHTML = membersToRender.map(member => `
         <div class="data-item team-member">
             <div class="data-item-header">
                 <h3 class="data-item-title">${member.name}</h3>
                 <div class="data-item-actions">
-                    <button class="btn-edit" onclick="editTeamMember(${member.id})">Edit</button>
-                    <button class="btn-delete" onclick="deleteTeamMember(${member.id})">Delete</button>
+                    <button class="btn-edit" onclick="editTeamMember(${member.id})" title="Edit Team Member">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-delete" onclick="deleteTeamMember(${member.id})" title="Delete Team Member">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
             <div class="data-item-content">
@@ -218,17 +315,9 @@ function showAddProjectModal() {
     editingType = 'project';
     document.getElementById('projectName').value = '';
     document.getElementById('projectDescription').value = '';
-    document.getElementById('projectPortfolio').value = '';
 
-    // Ensure portfolios are loaded before populating dropdown
-    if (portfolios && portfolios.length > 0) {
-        populatePortfolioDropdown();
-    } else {
-        // If portfolios aren't loaded yet, load them first
-        loadAllData().then(() => {
-            populatePortfolioDropdown();
-        });
-    }
+    // Populate portfolio pills
+    populatePortfolioPills();
 
     document.querySelector('#addProjectModal .modal-title').textContent = 'Add New Project';
     showModal('addProjectModal');
@@ -262,22 +351,83 @@ function closeModal(modalId) {
 }
 
 // Helper Functions
-function populatePortfolioDropdown() {
-    const select = document.getElementById('projectPortfolio');
-    if (!select) return;
-
-    select.innerHTML = '<option value="">No Portfolio (Standalone Project)</option>';
-
-    if (portfolios && portfolios.length > 0) {
-        portfolios.forEach(portfolio => {
-            const option = document.createElement('option');
-            option.value = portfolio.id;
-            option.textContent = portfolio.name;
-            select.appendChild(option);
-        });
-    } else {
-        console.log('No portfolios available to populate dropdown');
+function populatePortfolioPills() {
+    console.log('populatePortfolioPills called');
+    console.log('Portfolios available:', portfolios);
+    
+    const container = document.getElementById('projectPortfoliosContainer');
+    if (!container) {
+        console.error('projectPortfoliosContainer not found');
+        return;
     }
+
+    // Clear existing portfolio pills (keep the standalone pill)
+    const existingPills = container.querySelectorAll('.tag-pill:not(.standalone-pill)');
+    console.log('Removing existing pills:', existingPills.length);
+    existingPills.forEach(pill => pill.remove());
+
+    // Reset standalone pill selection
+    const standalonePill = container.querySelector('.standalone-pill');
+    if (standalonePill) {
+        standalonePill.classList.add('active');
+        standalonePill.setAttribute('aria-pressed', 'true');
+        console.log('Standalone pill activated');
+    } else {
+        console.error('Standalone pill not found');
+    }
+
+    // Add portfolio pills
+    if (portfolios && portfolios.length > 0) {
+        console.log('Adding portfolio pills for', portfolios.length, 'portfolios');
+        portfolios.forEach(portfolio => {
+            console.log('Creating pill for portfolio:', portfolio);
+            const pill = document.createElement('div');
+            pill.className = 'tag-pill portfolio-pill';
+            pill.setAttribute('data-portfolio-id', portfolio.id);
+            pill.setAttribute('tabindex', '0');
+            pill.setAttribute('role', 'button');
+            pill.setAttribute('aria-pressed', 'false');
+            pill.onclick = function() { toggleSingleTagPill(this); };
+            pill.onkeydown = function(event) {
+                if(event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    toggleSingleTagPill(this);
+                }
+            };
+            pill.innerHTML = `
+                <i class="fas fa-briefcase"></i>
+                <span>${portfolio.name}</span>
+            `;
+            container.appendChild(pill);
+        });
+        console.log('Portfolio pills added successfully');
+    } else {
+        console.log('No portfolios available or portfolios array is empty');
+    }
+}
+
+// Tag pill toggle functions
+function toggleSingleTagPill(pill) {
+    // For single selection (like portfolio or role selection)
+    const container = pill.parentElement;
+    const allPills = container.querySelectorAll('.tag-pill');
+    
+    // Remove active class from all pills
+    allPills.forEach(p => {
+        p.classList.remove('active');
+        p.setAttribute('aria-pressed', 'false');
+    });
+    
+    // Add active class to clicked pill
+    pill.classList.add('active');
+    pill.setAttribute('aria-pressed', 'true');
+}
+
+function toggleTagPill(pill) {
+    // For multiple selection (like tester roles)
+    pill.classList.toggle('active');
+    const isActive = pill.classList.contains('active');
+    pill.setAttribute('aria-pressed', isActive.toString());
 }
 
 // QA Notes custom fields management
@@ -425,10 +575,14 @@ function removeQANoteField(fieldId) {
 
 function populatePortfolioFilter() {
     const select = document.getElementById('portfolioFilter');
+    if (!select) return;
+    
     select.innerHTML = '<option value="">All Portfolios</option>';
-    portfolios.forEach(portfolio => {
-        select.innerHTML += `<option value="${portfolio.id}">${portfolio.name}</option>`;
-    });
+    if (portfolios && portfolios.length > 0) {
+        portfolios.forEach(portfolio => {
+            select.innerHTML += `<option value="${portfolio.id}">${portfolio.name}</option>`;
+        });
+    }
 }
 
 function populateProjectDropdown(projects) {
@@ -499,13 +653,17 @@ async function savePortfolio() {
 
 async function saveProject() {
     const name = document.getElementById('projectName').value.trim();
-    const portfolioId = document.getElementById('projectPortfolio').value;
     const description = document.getElementById('projectDescription').value.trim();
 
-    if (!name || !portfolioId) {
-        showToast('Please enter project name and select a portfolio', 'warning');
+    if (!name) {
+        showToast('Please enter project name', 'warning');
         return;
     }
+
+    // Get selected portfolio from tag pills
+    const container = document.getElementById('projectPortfoliosContainer');
+    const activePill = container.querySelector('.tag-pill.active');
+    const portfolioId = activePill ? activePill.getAttribute('data-portfolio-id') : '';
 
     try {
         const method = editingId ? 'PUT' : 'POST';
@@ -514,7 +672,11 @@ async function saveProject() {
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, portfolio_id: portfolioId, description })
+            body: JSON.stringify({ 
+                name, 
+                portfolio_id: portfolioId || null, 
+                description 
+            })
         });
 
         if (response.ok) {
@@ -675,8 +837,32 @@ function editProject(id) {
     document.getElementById('projectName').value = project.name || '';
     document.getElementById('projectDescription').value = project.description || '';
 
-    populatePortfolioDropdown();
-    document.getElementById('projectPortfolio').value = project.portfolio_id || '';
+    // Populate portfolio pills and select the correct one
+    populatePortfolioPills();
+    
+    // Select the appropriate portfolio pill
+    const container = document.getElementById('projectPortfoliosContainer');
+    const allPills = container.querySelectorAll('.tag-pill');
+    
+    allPills.forEach(pill => {
+        pill.classList.remove('active');
+        pill.setAttribute('aria-pressed', 'false');
+    });
+    
+    if (project.portfolio_id) {
+        const targetPill = container.querySelector(`[data-portfolio-id="${project.portfolio_id}"]`);
+        if (targetPill) {
+            targetPill.classList.add('active');
+            targetPill.setAttribute('aria-pressed', 'true');
+        }
+    } else {
+        // Select standalone pill if no portfolio
+        const standalonePill = container.querySelector('.standalone-pill');
+        if (standalonePill) {
+            standalonePill.classList.add('active');
+            standalonePill.setAttribute('aria-pressed', 'true');
+        }
+    }
 
     showModal('addProjectModal');
 }
