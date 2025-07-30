@@ -99,7 +99,7 @@
                 <div class="section-header">
                     <h2 class="section-title"><i class="fas fa-project-diagram"></i> Project
                             Management</h2>
-                    <button class="btn btn-primary" onclick="showAddProjectModal()"><i class="fas fa-plus-circle"></i>
+                    <button class="btn btn-primary" onclick="showAddProjectModalWithPortfolios()"><i class="fas fa-plus-circle"></i>
                         Add Project</button>
                 </div>
                 <div class="search-filter-container">
@@ -873,11 +873,21 @@
         
         function populatePortfolioPills(selectedId = '') {
             const container = document.getElementById('projectPortfoliosContainer');
-            if (!container) return;
+            if (!container) {
+                console.error('Portfolio container not found!');
+                return;
+            }
+            
+            console.log('Populating portfolio pills with data:', portfolios);
             
             // Find standalone pill and existing portfolio pills
             const standalonePill = container.querySelector('.standalone-pill');
             const existingPortfolioPills = container.querySelectorAll('.portfolio-pill:not(.standalone-pill)');
+            
+            if (!standalonePill) {
+                console.error('Standalone pill not found in container!');
+                return;
+            }
             
             // Remove existing portfolio pills (keep standalone)
             existingPortfolioPills.forEach(pill => pill.remove());
@@ -889,8 +899,14 @@
             });
             
             // Add portfolio pills
-            if (portfolios && Array.isArray(portfolios)) {
-                portfolios.forEach(p => {
+            if (portfolios && Array.isArray(portfolios) && portfolios.length > 0) {
+                console.log(`Adding ${portfolios.length} portfolio pills`);
+                portfolios.forEach((p, index) => {
+                    if (!p || !p.name) {
+                        console.warn(`Portfolio at index ${index} is invalid:`, p);
+                        return;
+                    }
+                    
                     const pill = document.createElement('div');
                     pill.className = 'tag-pill portfolio-pill';
                     pill.setAttribute('data-portfolio-id', p.id);
@@ -915,14 +931,21 @@
                         pill.classList.add('selected');
                         pill.setAttribute('aria-pressed', 'true');
                     }
+                    
+                    console.log(`Added portfolio pill: ${p.name} (ID: ${p.id})`);
                 });
+            } else {
+                console.warn('No portfolios available or portfolios is not an array:', portfolios);
             }
             
             // Select standalone if no portfolio selected or if selectedId is empty
             if (!selectedId || selectedId === '') {
                 standalonePill.classList.add('selected');
                 standalonePill.setAttribute('aria-pressed', 'true');
+                console.log('Selected standalone pill as default');
             }
+            
+            console.log('Portfolio pills population completed');
         }
         function populatePortfolioFilter() {
             const select = document.getElementById('portfolioFilter');
@@ -979,17 +1002,29 @@
         // --- CRUD OPERATIONS ---
         // Show Modals for Adding
         function showAddPortfolioModal() { editingId = null; document.getElementById('portfolioName').value = ''; document.getElementById('portfolioDescription').value = ''; showModal('addPortfolioModal'); }
-        async function showAddProjectModal() {
+        async function showAddProjectModalWithPortfolios() {
             editingId = null;
             document.getElementById('projectName').value = '';
             document.getElementById('projectDescription').value = '';
 
-            // Ensure data is loaded before populating pills
-            if (!portfolios || portfolios.length === 0) {
+            try {
+                // Always ensure fresh data is loaded
                 await loadAllData();
+                
+                // Wait a moment to ensure data is fully processed
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // Populate portfolio pills after data is confirmed loaded
+                populatePortfolioPills(); // Default to standalone
+                
+                console.log('Portfolio pills populated with', portfolios.length, 'portfolios');
+            } catch (error) {
+                console.error('Error loading portfolios for Add Project modal:', error);
+                showToast('Failed to load portfolios. Please try again.', 'error');
+                // Still show modal with empty portfolios
+                populatePortfolioPills();
             }
-
-            populatePortfolioPills(); // Default to standalone
+            
             showModal('addProjectModal');
         }
         async function showAddTesterModal() {
