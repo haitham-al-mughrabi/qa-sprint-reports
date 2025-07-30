@@ -1,16 +1,95 @@
 let dashboardCharts = {};
 
-// Self-contained fetch function for dashboard stats
+// Self-contained fetch function for dashboard stats with enhanced error handling
 async function fetchDashboardStatsLocal() {
+    let response;
     try {
-        const response = await fetch('/api/dashboard/stats');
+        // Add cache-busting parameter to prevent stale data
+        const timestamp = new Date().getTime();
+        const url = `/api/dashboard/stats?t=${timestamp}`;
+        
+        console.log('Fetching dashboard stats from:', url);
+        response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        });
+        
+        console.log('Dashboard stats response status:', response.status);
+        
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            let errorMessage = `HTTP error! status: ${response.status}`;
+            
+            // Try to get more details from the response
+            try {
+                const errorData = await response.json().catch(() => ({}));
+                if (errorData && errorData.error) {
+                    errorMessage += ` - ${errorData.error}`;
+                } else if (response.status === 401) {
+                    errorMessage = 'Authentication required. Please log in again.';
+                } else if (response.status === 403) {
+                    errorMessage = 'You do not have permission to view this data.';
+                } else if (response.status === 404) {
+                    errorMessage = 'Dashboard data not found. The endpoint may be incorrect.';
+                } else if (response.status >= 500) {
+                    errorMessage = 'Server error. Please try again later.';
+                }
+            } catch (e) {
+                console.warn('Could not parse error response:', e);
+            }
+            
+            throw new Error(errorMessage);
         }
-        return await response.json();
+        
+        // Parse and validate the response
+        const data = await response.json();
+        
+        if (!data) {
+            throw new Error('Empty response received from server');
+        }
+        
+        // Ensure we have the expected structure
+        if (!data.overall) {
+            console.warn('Unexpected response format - missing "overall" property');
+            data.overall = {};
+        }
+        
+        if (!data.projects) {
+            console.warn('Unexpected response format - missing "projects" array');
+            data.projects = [];
+        }
+        
+        console.log('Successfully fetched dashboard stats:', {
+            overall: data.overall ? '...' : 'no data',
+            projectsCount: data.projects ? data.projects.length : 0
+        });
+        
+        return data;
+        
     } catch (error) {
-        console.error("Failed to fetch dashboard stats:", error);
-        return null;
+        console.error('Failed to fetch dashboard stats:', error);
+        
+        // Return a minimal valid response structure even on error
+        return {
+            overall: {
+                totalReports: 0,
+                completedReports: 0,
+                inProgressReports: 0,
+                pendingReports: 0,
+                totalUserStories: 0,
+                totalTestCases: 0,
+                totalIssues: 0,
+                totalEnhancements: 0,
+                automationTotalTestCases: 0,
+                automationPassedTestCases: 0
+            },
+            projects: [],
+            error: error.message || 'Failed to load dashboard data'
+        };
     }
 }
 

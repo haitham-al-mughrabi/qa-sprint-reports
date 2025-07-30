@@ -226,16 +226,21 @@ function removeToast(toast) {
 
 // --- Dashboard Functions ---
 function updateDashboardStats(stats) {
-    if (!stats) return;
+    console.log('Dashboard stats received:', stats); // Debug log
+    if (!stats) {
+        console.error('No stats data received');
+        return;
+    }
 
     // Check if we are on the dashboard page by looking for a key element
     const totalReportsEl = document.getElementById('totalReports');
     if (!totalReportsEl) {
+        console.error('Not on dashboard page or totalReports element not found');
         return; // Exit if not on the dashboard page
     }
 
     // Update overall statistics
-    const overall = stats.overall;
+    const overall = stats.overall || {};
     totalReportsEl.textContent = overall.totalReports || 0;
     document.getElementById('completedReports').textContent = overall.completedReports || 0;
     document.getElementById('inProgressReports').textContent = overall.inProgressReports || 0;
@@ -254,18 +259,29 @@ function updateDashboardStats(stats) {
     const automationPassRate = automationTotal > 0 ? Math.round((automationPassed / automationTotal) * 100) : 0;
     document.getElementById('automationPassRate').textContent = `${automationPassRate}%`;
     
+    // Debug log projects data
+    console.log('Projects data in updateDashboardStats:', stats.projects);
+    
     // Update project-specific metrics
-    renderProjectMetrics(stats.projects);
+    renderProjectMetrics(stats.projects || []);
 }
 
 function renderProjectMetrics(projects) {
     const container = document.getElementById('projectMetrics');
+    if (!container) {
+        console.error('Project metrics container not found');
+        return;
+    }
+
+    // Debug log the projects data being rendered
+    console.log('Rendering projects:', projects);
+    
     if (!projects || projects.length === 0) {
         container.innerHTML = `
-            <div class="empty-state" style="text-align: center; color: #6c757d; padding: 40px 0;">
+            <div class="empty-state" style="text-align: center; color: #6c757d; padding: 40px 0; grid-column: 1 / -1;">
                 <div style="font-size: 3em; margin-bottom: 20px;"><i class="fas fa-chart-bar"></i></div>
-                <h3>No Projects Found</h3>
-                <p>Create your first report to see project metrics here.</p>
+                <h3>No Project Data Available</h3>
+                <p>No project metrics data was found. Create some reports to see metrics here.</p>
             </div>
         `;
         return;
