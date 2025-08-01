@@ -1223,11 +1223,21 @@ def get_form_data():
 def get_latest_project_data(portfolio_name, project_name):
     """Get latest report data for a specific project to auto-populate new reports"""
     try:
+        print(f"DEBUG: Looking for reports with portfolio='{portfolio_name}', project='{project_name}'")
+        
         # Get all reports for this project to find the highest values
         all_reports = Report.query.filter_by(
             portfolioName=portfolio_name,
             projectName=project_name
         ).all()
+        
+        print(f"DEBUG: Found {len(all_reports)} reports")
+        
+        # Also check what reports exist in the database
+        all_existing_reports = Report.query.all()
+        print(f"DEBUG: Total reports in database: {len(all_existing_reports)}")
+        for report in all_existing_reports[:5]:  # Show first 5 reports
+            print(f"DEBUG: Report - Portfolio: '{report.portfolioName}', Project: '{report.projectName}'")
         
         if not all_reports:
             # No previous reports - return default values

@@ -44,18 +44,18 @@ async function fetchReports(page = 1, search = '', limit = reportsPerPage) {
             page: page.toString(),
             limit: limit.toString()
         });
-        
+
         if (search) {
             params.append('search', search);
         }
-        
+
         const response = await fetch(`${API_URL}?${params}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         // Ensure consistent data structure
         if (Array.isArray(data)) {
             // If API returns array directly, wrap it in expected structure
@@ -66,7 +66,7 @@ async function fetchReports(page = 1, search = '', limit = reportsPerPage) {
                 totalPages: Math.ceil(data.length / limit)
             };
         }
-        
+
         // If API returns structured data, use it as is
         return data;
     } catch (error) {
@@ -83,17 +83,17 @@ async function fetchReports(page = 1, search = '', limit = reportsPerPage) {
 async function fetchDashboardStats() {
     try {
         // Use existing cache if available and still valid
-        if (dashboardStatsCache && dashboardStatsCache.cacheTime && 
+        if (dashboardStatsCache && dashboardStatsCache.cacheTime &&
             (Date.now() - dashboardStatsCache.cacheTime) < CACHE_DURATION) {
             return dashboardStatsCache.data;
         }
 
         console.log('Fetching dashboard stats from API...');
-        
+
         // Try cached endpoint first (has detailed breakdown data), fallback to regular endpoint
         let response;
         let data;
-        
+
         try {
             console.log('Attempting to fetch from cached endpoint...');
             response = await fetch('/api/dashboard/stats/cached', {
@@ -103,13 +103,13 @@ async function fetchDashboardStats() {
                     'Cache-Control': 'no-cache'
                 }
             });
-            
+
             console.log('Cached endpoint response status:', response.status);
-            
+
             if (response.ok) {
                 data = await response.json();
                 console.log('Successfully fetched from cached endpoint, projects:', data.projects?.length || 0);
-                
+
                 // Validate that we have the detailed breakdown data
                 if (data.projects && data.projects.length > 0) {
                     const firstProject = data.projects[0];
@@ -125,7 +125,7 @@ async function fetchDashboardStats() {
             }
         } catch (cachedError) {
             console.log('Cached endpoint failed, trying regular endpoint:', cachedError.message);
-            
+
             // Fallback to regular endpoint (but it has limited data)
             try {
                 console.log('Attempting to fetch from regular endpoint...');
@@ -136,9 +136,9 @@ async function fetchDashboardStats() {
                         'Cache-Control': 'no-cache'
                     }
                 });
-                
+
                 console.log('Regular endpoint response status:', response.status);
-                
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Regular endpoint failed: ${response.status} - ${errorText}`);
@@ -151,27 +151,27 @@ async function fetchDashboardStats() {
                 throw regularError;
             }
         }
-        
+
         // Ensure we have the expected data structure
         if (!data || !data.overall) {
             throw new Error('Invalid data structure received from API');
         }
-        
+
         // Cache the dashboard stats
         dashboardStatsCache = {
             data: data,
             cacheTime: Date.now()
         };
-        
+
         console.log('Dashboard stats cached successfully:', {
             overall: data.overall ? 'present' : 'missing',
             projects: data.projects ? data.projects.length : 0
         });
-        
+
         return data;
     } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
-        
+
         // Return empty structure to prevent crashes
         return {
             overall: {
@@ -321,17 +321,17 @@ function updateDashboardStats(stats) {
     document.getElementById('totalTestCases').textContent = overall.totalTestCases || 0;
     document.getElementById('totalIssues').textContent = overall.totalIssues || 0;
     document.getElementById('totalEnhancements').textContent = overall.totalEnhancements || 0;
-    
+
     // Update automation regression metrics
     document.getElementById('totalAutomationTests').textContent = overall.automationTotalTestCases || 0;
     const automationTotal = overall.automationTotalTestCases || 0;
     const automationPassed = overall.automationPassedTestCases || 0;
     const automationPassRate = automationTotal > 0 ? Math.round((automationPassed / automationTotal) * 100) : 0;
     document.getElementById('automationPassRate').textContent = `${automationPassRate}%`;
-    
+
     // Debug log projects data
     console.log('Projects data in updateDashboardStats:', stats.projects);
-    
+
     // Update project-specific metrics
     renderProjectMetrics(stats.projects || []);
 }
@@ -345,7 +345,7 @@ function renderProjectMetrics(projects) {
 
     // Debug log the projects data being rendered
     console.log('Rendering projects:', projects);
-    
+
     if (!projects || projects.length === 0) {
         container.innerHTML = `
             <div class="empty-state" style="text-align: center; color: #6c757d; padding: 40px 0; grid-column: 1 / -1;">
@@ -358,11 +358,11 @@ function renderProjectMetrics(projects) {
     }
 
     // Check if we have detailed breakdown data
-    const hasDetailedData = projects.length > 0 && 
-        (projects[0].passedUserStories !== undefined || 
-         projects[0].passedTestCases !== undefined ||
-         projects[0].criticalIssues !== undefined);
-    
+    const hasDetailedData = projects.length > 0 &&
+        (projects[0].passedUserStories !== undefined ||
+            projects[0].passedTestCases !== undefined ||
+            projects[0].criticalIssues !== undefined);
+
     console.log('Has detailed breakdown data:', hasDetailedData);
 
     if (hasDetailedData) {
@@ -830,22 +830,22 @@ function initializeCharts() {
 function getChartOptions() {
     // Get theme-appropriate colors using robust detection
     const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
-    
+
     const textColor = isLightTheme ? '#1e293b' : '#f1f5f9';
     const tooltipBg = isLightTheme ? '#ffffff' : '#334155';
     const gridColor = isLightTheme ? '#e2e8f0' : '#334155';
-    
+
     console.log('Enhanced script chart options - isLightTheme:', isLightTheme, 'textColor:', textColor);
-    
+
     return {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'bottom',
-                labels: { 
-                    padding: 15, 
-                    usePointStyle: true, 
+                labels: {
+                    padding: 15,
+                    usePointStyle: true,
                     font: { size: 11 },
                     color: textColor
                 }
@@ -857,7 +857,7 @@ function getChartOptions() {
                 borderColor: gridColor,
                 borderWidth: 1,
                 callbacks: {
-                    label: function(context) {
+                    label: function (context) {
                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
                         const value = context.parsed || 0;
                         const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
@@ -894,56 +894,56 @@ function initializeDoughnutChart(canvasId, labels, backgroundColors) {
 function initializeUserStoriesChart() {
     const labels = ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'];
     const colors = ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'];
-    if(userStoriesChart) userStoriesChart.destroy();
+    if (userStoriesChart) userStoriesChart.destroy();
     userStoriesChart = initializeDoughnutChart('userStoriesChart', labels, colors);
 }
 
 function initializeTestCasesChart() {
     const labels = ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'];
     const colors = ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'];
-    if(testCasesChart) testCasesChart.destroy();
+    if (testCasesChart) testCasesChart.destroy();
     testCasesChart = initializeDoughnutChart('testCasesChart', labels, colors);
 }
 
 function initializeIssuesPriorityChart() {
     const labels = ['Critical', 'High', 'Medium', 'Low'];
     const colors = ['#dc3545', '#fd7e14', '#ffc107', '#28a745'];
-    if(issuesPriorityChart) issuesPriorityChart.destroy();
+    if (issuesPriorityChart) issuesPriorityChart.destroy();
     issuesPriorityChart = initializeDoughnutChart('issuesPriorityChart', labels, colors);
 }
 
 function initializeIssuesStatusChart() {
     const labels = ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'];
     const colors = ['#17a2b8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1'];
-    if(issuesStatusChart) issuesStatusChart.destroy();
+    if (issuesStatusChart) issuesStatusChart.destroy();
     issuesStatusChart = initializeDoughnutChart('issuesStatusChart', labels, colors);
 }
 
 function initializeEnhancementsChart() {
     const labels = ['New', 'Implemented', 'Exists'];
     const colors = ['#17a2b8', '#28a745', '#6c757d'];
-    if(enhancementsChart) enhancementsChart.destroy();
+    if (enhancementsChart) enhancementsChart.destroy();
     enhancementsChart = initializeDoughnutChart('enhancementsChart', labels, colors);
 }
 
 function initializeAutomationTestCasesChart() {
     const labels = ['Passed', 'Failed', 'Skipped'];
     const colors = ['#28a745', '#dc3545', '#ffc107'];
-    if(automationTestCasesChart) automationTestCasesChart.destroy();
+    if (automationTestCasesChart) automationTestCasesChart.destroy();
     automationTestCasesChart = initializeDoughnutChart('automationTestCasesChart', labels, colors);
 }
 
 function initializeAutomationPercentageChart() {
     const labels = ['Passed', 'Failed', 'Skipped'];
     const colors = ['#28a745', '#dc3545', '#ffc107'];
-    if(automationPercentageChart) automationPercentageChart.destroy();
+    if (automationPercentageChart) automationPercentageChart.destroy();
     automationPercentageChart = initializeDoughnutChart('automationPercentageChart', labels, colors);
 }
 
 function initializeAutomationStabilityChart() {
     const labels = ['Stable', 'Flaky'];
     const colors = ['#28a745', '#fd7e14'];
-    if(automationStabilityChart) automationStabilityChart.destroy();
+    if (automationStabilityChart) automationStabilityChart.destroy();
     automationStabilityChart = initializeDoughnutChart('automationStabilityChart', labels, colors);
 }
 
@@ -1198,9 +1198,9 @@ function calculateAutomationStabilityPercentages() {
 // --- Dynamic Form Sections (Request, Build, Tester) ---
 function showRequestModal() { showModal('requestModal'); }
 function showBuildModal() { showModal('buildModal'); }
-function showTesterModal() { 
+function showTesterModal() {
     loadExistingTesters(); // Load testers when modal opens
-    showModal('testerModal'); 
+    showModal('testerModal');
 }
 
 function addRequest() {
@@ -1247,8 +1247,8 @@ function renderDynamicList(containerId, data, renderItemFn, removeFn) {
         console.error(`Container with id '${containerId}' not found`);
         return;
     }
-    
-    
+
+
     if (data.length === 0) {
         // Check if the container is for team members, as it has a slightly different empty state message
         if (containerId === 'teamMemberList') {
@@ -1285,7 +1285,7 @@ function renderTesterList() {
         if (item.is_automation_engineer) roles.push('Automation Engineer');
         if (item.is_manual_engineer) roles.push('Manual Engineer');
         const roleText = roles.length > 0 ? `<br><strong>Roles:</strong> ${roles.join(', ')}` : '<br><em style="color: #6c757d;">No roles assigned</em>';
-        
+
         return `
         <div class="dynamic-item">
             <div><strong>Name:</strong> ${item.name}<br><strong>Email:</strong> ${item.email}${roleText}</div>
@@ -1387,24 +1387,24 @@ function updateProgressBar() {
         'QA Notes',
         'Automation Regression'
     ];
-    
+
     // Calculate progress - show completion based on current section
     const completedSections = currentSection; // Sections completed (0-based)
     const currentStepNumber = currentSection + 1; // Current step being worked on (1-based)
     const percentage = (completedSections / totalSections) * 100;
-    
+
     // Update progress percentage and fill
     document.getElementById('progressPercent').textContent = `${Math.round(percentage)}%`;
     document.getElementById('progressFill').style.width = `${percentage}%`;
-    
+
     // Update step and title text
     document.getElementById('progressStep').textContent = `Step ${currentStepNumber} of ${totalSections}`;
     document.getElementById('progressTitle').textContent = sectionTitles[currentSection] || 'Unknown Section';
-    
+
     // Update step indicators
     document.querySelectorAll('.step').forEach((step, index) => {
         step.classList.remove('active', 'completed');
-        
+
         if (index === currentSection) {
             step.classList.add('active');
         } else if (index < currentSection) {
@@ -1446,14 +1446,14 @@ function initializeProgressSteps() {
 
 // backToDashboard now redirects to the dashboard page
 function backToDashboard() { window.location.href = '/dashboard'; }
-function toggleSidebar() { 
+function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const formContainer = document.querySelector('.form-container');
     const toggleBtn = document.querySelector('.sidebar-toggle-btn i');
-    
+
     sidebar.classList.toggle('collapsed');
     formContainer.classList.toggle('sidebar-collapsed');
-    
+
     // Update toggle button icon
     if (sidebar.classList.contains('collapsed')) {
         toggleBtn.classList.remove('fa-bars');
@@ -1487,12 +1487,12 @@ let allReports = []; // Cache for client-side filtering
 async function searchReports() {
     const searchQuery = document.getElementById('searchInput')?.value || '';
     currentFilters.search = searchQuery;
-    
+
     // Clear existing timeout
     if (searchTimeout) {
         clearTimeout(searchTimeout);
     }
-    
+
     // Set new timeout for debounced search
     searchTimeout = setTimeout(() => {
         applyFilters();
@@ -1502,12 +1502,12 @@ async function searchReports() {
 // Enhanced filter functions
 async function applyFilters() {
     showReportsLoading();
-    
+
     // Update filter state from form inputs
     updateFilterState();
-    
+
     console.log('Applying filters:', currentFilters);
-    
+
     try {
         // Fetch all reports if not cached or if we need fresh data
         if (allReports.length === 0) {
@@ -1516,21 +1516,21 @@ async function applyFilters() {
             allReports = result.reports || [];
             console.log('Fetched', allReports.length, 'reports for filtering');
         }
-        
+
         // Apply client-side filtering
         let filteredReports = filterReports(allReports);
         console.log('After filtering:', filteredReports.length, 'reports');
-        
+
         // Apply sorting
         filteredReports = sortReports(filteredReports);
         console.log('After sorting:', filteredReports.length, 'reports');
-        
+
         // Update results count and active filters display
         updateFilterResultsDisplay(filteredReports.length);
-        
+
         // Render filtered results
         renderReportsTable(filteredReports);
-        
+
         // Update pagination for filtered results (disable pagination for filtered results)
         renderPagination({
             reports: filteredReports,
@@ -1538,11 +1538,11 @@ async function applyFilters() {
             page: 1,
             totalPages: 1 // Show all filtered results on one page
         });
-        
+
     } catch (error) {
         console.error('Error applying filters:', error);
         showToast('Error applying filters', 'error');
-        
+
         // Fallback: try to show all reports without filtering
         try {
             const result = await fetchReports(1, '', 100);
@@ -1551,7 +1551,7 @@ async function applyFilters() {
             console.error('Fallback also failed:', fallbackError);
         }
     }
-    
+
     hideReportsLoading();
 }
 
@@ -1572,10 +1572,10 @@ function filterReports(reports) {
         console.warn('filterReports: reports is not an array', reports);
         return [];
     }
-    
+
     return reports.filter(report => {
         if (!report) return false;
-        
+
         // Search filter - make it more robust
         if (currentFilters.search) {
             const searchTerm = currentFilters.search.toLowerCase();
@@ -1592,7 +1592,7 @@ function filterReports(reports) {
                 return false;
             }
         }
-        
+
         // Project filter - handle different field names
         if (currentFilters.project) {
             const projectName = report.project || report.projectName || '';
@@ -1600,7 +1600,7 @@ function filterReports(reports) {
                 return false;
             }
         }
-        
+
         // Portfolio filter - handle different field names
         if (currentFilters.portfolio) {
             const portfolioName = report.portfolio || report.portfolioName || '';
@@ -1608,14 +1608,14 @@ function filterReports(reports) {
                 return false;
             }
         }
-        
+
         // Tester filter - handle different data structures
         if (currentFilters.tester) {
             let hasMatchingTester = false;
-            
+
             // Get all possible tester values from the report
             const allTesterValues = [];
-            
+
             // Check testers array
             if (Array.isArray(report.testers)) {
                 report.testers.forEach(tester => {
@@ -1658,7 +1658,7 @@ function filterReports(reports) {
                     allTesterValues.push(...testerList);
                 }
             }
-            
+
             // Check single tester fields
             const singleTesterFields = ['tester', 'testerName', 'assignedTester'];
             singleTesterFields.forEach(field => {
@@ -1666,19 +1666,19 @@ function filterReports(reports) {
                     allTesterValues.push(report[field].trim());
                 }
             });
-            
+
             // Check if any tester value matches
-            hasMatchingTester = allTesterValues.some(testerValue => 
+            hasMatchingTester = allTesterValues.some(testerValue =>
                 testerValue === currentFilters.tester
             );
-            
+
             if (!hasMatchingTester) {
                 // Only log for debugging if needed
                 // console.log('Tester filter failed for report:', report.id || report.title, 'Looking for:', currentFilters.tester, 'Found values:', allTesterValues);
                 return false;
             }
         }
-        
+
         // Status filter - handle different field names
         if (currentFilters.status) {
             const status = report.status || report.testingStatus || '';
@@ -1686,12 +1686,12 @@ function filterReports(reports) {
                 return false;
             }
         }
-        
+
         // Date range filter - handle different date formats
         if (currentFilters.dateFrom || currentFilters.dateTo) {
             // Try multiple date field names
             const reportDateStr = report.date || report.reportDate || report.createdAt || report.created_at || report.dateCreated || '';
-            
+
             // If no date found, skip date filtering for this report (don't exclude it)
             if (!reportDateStr) {
                 // Only log for debugging if needed
@@ -1700,10 +1700,10 @@ function filterReports(reports) {
             } else {
                 // Handle different date formats
                 let reportDate;
-                
+
                 // Try parsing as-is first
                 reportDate = new Date(reportDateStr);
-                
+
                 // If invalid, try parsing DD-MM-YYYY format
                 if (isNaN(reportDate.getTime()) && typeof reportDateStr === 'string') {
                     const parts = reportDateStr.split('-');
@@ -1718,7 +1718,7 @@ function filterReports(reports) {
                         }
                     }
                 }
-                
+
                 // Only apply date filtering if we have a valid date
                 if (!isNaN(reportDate.getTime())) {
                     if (currentFilters.dateFrom) {
@@ -1728,7 +1728,7 @@ function filterReports(reports) {
                             return false;
                         }
                     }
-                    
+
                     if (currentFilters.dateTo) {
                         const toDate = new Date(currentFilters.dateTo);
                         toDate.setHours(23, 59, 59, 999); // End of day
@@ -1742,18 +1742,18 @@ function filterReports(reports) {
                 }
             }
         }
-        
+
         // Sprint filter - handle different field names and types
         if (currentFilters.sprint) {
             const sprintNumber = report.sprint || report.sprintNumber || '';
             const filterSprint = currentFilters.sprint.toString();
             const reportSprint = sprintNumber.toString();
-            
+
             if (reportSprint !== filterSprint) {
                 return false;
             }
         }
-        
+
         return true;
     });
 }
@@ -1763,12 +1763,12 @@ function sortReports(reports) {
         console.warn('sortReports: reports is not an array', reports);
         return [];
     }
-    
+
     const [field, direction] = currentFilters.sort.split('-');
-    
+
     return [...reports].sort((a, b) => {
         let aValue, bValue;
-        
+
         switch (field) {
             case 'date':
                 aValue = new Date(a.date || a.reportDate || a.createdAt || 0);
@@ -1792,12 +1792,12 @@ function sortReports(reports) {
             default:
                 return 0;
         }
-        
+
         // Handle null/undefined values
         if (aValue == null && bValue == null) return 0;
         if (aValue == null) return direction === 'asc' ? -1 : 1;
         if (bValue == null) return direction === 'asc' ? 1 : -1;
-        
+
         if (direction === 'asc') {
             return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
         } else {
@@ -1811,7 +1811,7 @@ function updateFilterResultsDisplay(count) {
     if (resultsCountElement) {
         resultsCountElement.textContent = count;
     }
-    
+
     // Update active filters display
     updateActiveFiltersDisplay();
 }
@@ -1819,9 +1819,9 @@ function updateFilterResultsDisplay(count) {
 function updateActiveFiltersDisplay() {
     const activeFiltersContainer = document.getElementById('activeFilters');
     if (!activeFiltersContainer) return;
-    
+
     activeFiltersContainer.innerHTML = '';
-    
+
     const filterLabels = {
         search: 'Search',
         project: 'Project',
@@ -1832,7 +1832,7 @@ function updateActiveFiltersDisplay() {
         dateTo: 'To Date',
         sprint: 'Sprint'
     };
-    
+
     Object.entries(currentFilters).forEach(([key, value]) => {
         if (value && key !== 'sort') {
             const tag = document.createElement('div');
@@ -1849,13 +1849,13 @@ function updateActiveFiltersDisplay() {
 function removeFilter(filterKey) {
     // Clear the filter
     currentFilters[filterKey] = '';
-    
+
     // Update the corresponding form input
     const inputElement = document.getElementById(filterKey + 'Filter') || document.getElementById('searchInput');
     if (inputElement) {
         inputElement.value = '';
     }
-    
+
     // Reapply filters
     applyFilters();
 }
@@ -1867,42 +1867,42 @@ function clearAllFilters() {
             currentFilters[key] = '';
         }
     });
-    
+
     // Reset sort to default
     currentFilters.sort = 'date-desc';
-    
+
     // Clear all form inputs safely
     const inputs = [
         'searchInput',
         'projectFilter',
-        'portfolioFilter', 
+        'portfolioFilter',
         'testerFilter',
         'statusFilter',
         'dateFromFilter',
         'dateToFilter',
         'sprintFilter'
     ];
-    
+
     inputs.forEach(inputId => {
         const element = document.getElementById(inputId);
         if (element) {
             element.value = '';
         }
     });
-    
+
     // Reset sort filter
     const sortFilter = document.getElementById('sortFilter');
     if (sortFilter) {
         sortFilter.value = 'date-desc';
     }
-    
+
     // Remove active quick filter buttons
     document.querySelectorAll('.quick-filter-btn.active').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     console.log('All filters cleared');
-    
+
     // Reapply filters (which will show all reports)
     applyFilters();
 }
@@ -1911,9 +1911,9 @@ function toggleFiltersVisibility() {
     const filtersContainer = document.getElementById('filtersContainer');
     const toggleText = document.getElementById('toggleText');
     const toggleIcon = document.querySelector('.toggle-filters i');
-    
+
     filtersVisible = !filtersVisible;
-    
+
     if (filtersVisible) {
         filtersContainer.classList.remove('hidden');
         toggleText.textContent = 'Hide Filters';
@@ -1930,21 +1930,21 @@ function applyQuickFilter(type) {
     document.querySelectorAll('.quick-filter-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     // Add active class to clicked button
     if (event && event.target) {
         event.target.classList.add('active');
     }
-    
+
     // Clear existing filters first (except search)
     const searchValue = document.getElementById('searchInput').value;
     clearAllFilters();
     document.getElementById('searchInput').value = searchValue;
     currentFilters.search = searchValue;
-    
+
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
-    
+
     switch (type) {
         case 'today':
             document.getElementById('dateFromFilter').value = todayStr;
@@ -1952,53 +1952,53 @@ function applyQuickFilter(type) {
             currentFilters.dateFrom = todayStr;
             currentFilters.dateTo = todayStr;
             break;
-            
+
         case 'week':
             const weekStart = new Date(today);
             weekStart.setDate(today.getDate() - today.getDay());
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 6);
-            
+
             const weekStartStr = weekStart.toISOString().split('T')[0];
             const weekEndStr = weekEnd.toISOString().split('T')[0];
-            
+
             document.getElementById('dateFromFilter').value = weekStartStr;
             document.getElementById('dateToFilter').value = weekEndStr;
             currentFilters.dateFrom = weekStartStr;
             currentFilters.dateTo = weekEndStr;
             break;
-            
+
         case 'month':
             const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
             const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            
+
             const monthStartStr = monthStart.toISOString().split('T')[0];
             const monthEndStr = monthEnd.toISOString().split('T')[0];
-            
+
             document.getElementById('dateFromFilter').value = monthStartStr;
             document.getElementById('dateToFilter').value = monthEndStr;
             currentFilters.dateFrom = monthStartStr;
             currentFilters.dateTo = monthEndStr;
             break;
-            
+
         case 'failed':
             document.getElementById('statusFilter').value = 'failed';
             currentFilters.status = 'failed';
             break;
-            
+
         case 'recent':
             const recentStart = new Date(today);
             recentStart.setDate(today.getDate() - 7);
-            
+
             const recentStartStr = recentStart.toISOString().split('T')[0];
-            
+
             document.getElementById('dateFromFilter').value = recentStartStr;
             document.getElementById('dateToFilter').value = todayStr;
             currentFilters.dateFrom = recentStartStr;
             currentFilters.dateTo = todayStr;
             break;
     }
-    
+
     applyFilters();
 }
 
@@ -2014,36 +2014,36 @@ async function refreshFilterData() {
 async function showAllReports() {
     console.log('📋 Showing all reports without filtering...');
     showReportsLoading();
-    
+
     try {
         // Fetch all reports
         const result = await fetchReports(1, '', 1000);
         const reports = result.reports || [];
-        
+
         console.log('Total reports fetched:', reports.length);
-        
+
         // Show all reports without any filtering
         renderReportsTable(reports);
-        
+
         // Update results count
         const resultsCountElement = document.getElementById('resultsCount');
         if (resultsCountElement) {
             resultsCountElement.textContent = reports.length;
         }
-        
+
         // Clear active filters display
         const activeFiltersContainer = document.getElementById('activeFilters');
         if (activeFiltersContainer) {
             activeFiltersContainer.innerHTML = '';
         }
-        
+
         console.log('All reports displayed successfully');
-        
+
     } catch (error) {
         console.error('Error showing all reports:', error);
         showToast('Error loading reports', 'error');
     }
-    
+
     hideReportsLoading();
 }
 
@@ -2054,12 +2054,12 @@ async function testAPI() {
         const response = await fetch('/api/reports');
         console.log('API Response status:', response.status);
         console.log('API Response headers:', [...response.headers.entries()]);
-        
+
         const data = await response.json();
         console.log('Raw API data:', data);
         console.log('Data type:', typeof data);
         console.log('Is array:', Array.isArray(data));
-        
+
         if (Array.isArray(data)) {
             console.log('Array length:', data.length);
             if (data.length > 0) {
@@ -2086,11 +2086,11 @@ async function testTestersAPI() {
     try {
         const response = await fetch('/api/testers');
         console.log('Testers API Response status:', response.status);
-        
+
         const data = await response.json();
         console.log('Raw testers data:', data);
         console.log('Testers count:', data.length);
-        
+
         if (data.length > 0) {
             console.log('First tester:', data[0]);
             console.log('Tester keys:', Object.keys(data[0]));
@@ -2103,23 +2103,23 @@ async function testTestersAPI() {
 // Test individual filters function
 function testIndividualFilters() {
     console.log('🧪 Testing individual filters...');
-    
+
     if (allReports.length === 0) {
         console.log('No reports loaded. Run refreshFilterData() first.');
         return;
     }
-    
+
     console.log('Total reports:', allReports.length);
-    
+
     // Test each filter individually
     const originalFilters = { ...currentFilters };
-    
+
     // Test search filter
     currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
     currentFilters.search = 'test';
     let filtered = filterReports(allReports);
     console.log('Search "test" results:', filtered.length);
-    
+
     // Test project filter (use first available project)
     const projects = [...new Set(allReports.map(r => r.project || r.projectName).filter(Boolean))];
     if (projects.length > 0) {
@@ -2128,7 +2128,7 @@ function testIndividualFilters() {
         filtered = filterReports(allReports);
         console.log(`Project "${projects[0]}" results:`, filtered.length);
     }
-    
+
     // Test tester filter (use first available tester)
     const testers = new Set();
     allReports.forEach(report => {
@@ -2144,14 +2144,14 @@ function testIndividualFilters() {
             });
         }
     });
-    
+
     const testersList = [...testers];
     if (testersList.length > 0) {
         currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.tester = testersList[0];
         filtered = filterReports(allReports);
         console.log(`Tester "${testersList[0]}" results:`, filtered.length);
-        
+
         // Debug first few reports for tester data
         console.log('First 3 reports tester data:');
         allReports.slice(0, 3).forEach((report, i) => {
@@ -2163,7 +2163,7 @@ function testIndividualFilters() {
             });
         });
     }
-    
+
     // Test status filter
     const statuses = [...new Set(allReports.map(r => r.status || r.testingStatus).filter(Boolean))];
     if (statuses.length > 0) {
@@ -2172,15 +2172,15 @@ function testIndividualFilters() {
         filtered = filterReports(allReports);
         console.log(`Status "${statuses[0]}" results:`, filtered.length);
     }
-    
+
     // Test no filters (should return all)
     currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
     filtered = filterReports(allReports);
     console.log('No filters results (should be all):', filtered.length);
-    
+
     // Restore original filters
     currentFilters = originalFilters;
-    
+
     console.log('Individual filter testing complete!');
 }
 
@@ -2188,12 +2188,12 @@ function testIndividualFilters() {
 function debugReportData() {
     console.log('🔍 Debugging report data structure...');
     console.log('Total reports:', allReports.length);
-    
+
     if (allReports.length > 0) {
         const sampleReport = allReports[0];
         console.log('Sample report structure:', sampleReport);
         console.log('Available fields:', Object.keys(sampleReport));
-        
+
         // Analyze tester data
         console.log('\n👤 Tester data analysis:');
         allReports.slice(0, 5).forEach((report, index) => {
@@ -2206,7 +2206,7 @@ function debugReportData() {
                 assignedTester: report.assignedTester
             });
         });
-        
+
         // Analyze date data
         console.log('\n📅 Date data analysis:');
         allReports.slice(0, 5).forEach((report, index) => {
@@ -2220,7 +2220,7 @@ function debugReportData() {
                 dateCreated: report.dateCreated
             });
         });
-        
+
         // Count unique testers
         const allTesters = new Set();
         allReports.forEach(report => {
@@ -2234,7 +2234,7 @@ function debugReportData() {
                 allTesters.add(report.tester);
             }
         });
-        
+
         console.log('\n📊 Summary:');
         console.log('Unique testers found:', [...allTesters]);
         console.log('Total unique testers:', allTesters.size);
@@ -2247,27 +2247,27 @@ async function initializeFilterDropdowns() {
         // Fetch all reports to populate filter options
         const result = await fetchReports(1, '', 1000);
         allReports = result.reports || [];
-        
+
         console.log('Initializing filters with', allReports.length, 'reports');
         console.log('Raw API result:', result);
-        
+
         // If no reports, try to understand why
         if (allReports.length === 0) {
             console.warn('No reports found. API result structure:', result);
             console.warn('Possible issues: 1) No data in database, 2) API endpoint issue, 3) Data structure mismatch');
             return;
         }
-        
+
         // Extract unique values for dropdowns with robust field handling
         const projects = new Set();
         const portfolios = new Set();
         const testers = new Set();
-        
+
         // Debug: Log first few reports to understand data structure
         if (allReports.length > 0) {
             console.log('Sample report data structure:', allReports[0]);
             console.log('All report keys:', Object.keys(allReports[0]));
-            
+
             // Specifically check tester-related fields
             const sampleReport = allReports[0];
             console.log('Tester-related fields in sample report:', {
@@ -2279,7 +2279,7 @@ async function initializeFilterDropdowns() {
                 testTeam: sampleReport.testTeam
             });
         }
-        
+
         allReports.forEach((report, index) => {
             // Debug first few reports
             if (index < 3) {
@@ -2295,31 +2295,31 @@ async function initializeFilterDropdowns() {
                     createdAt: report.createdAt
                 });
             }
-            
+
             // Extract project names
             const projectName = report.project || report.projectName;
             if (projectName) projects.add(projectName);
-            
+
             // Extract portfolio names
             const portfolioName = report.portfolio || report.portfolioName;
             if (portfolioName) portfolios.add(portfolioName);
-            
+
             // Extract tester names - handle different data structures
             const possibleTesterFields = [
-                'testers', 'tester', 'testerData', 'tester_data', 
+                'testers', 'tester', 'testerData', 'tester_data',
                 'assignedTesters', 'testTeam', 'testerName', 'assignedTester'
             ];
-            
+
             // Log tester fields for debugging (only for first few reports)
             if (index < 3) {
-                console.log(`Report ${index} tester fields:`, 
+                console.log(`Report ${index} tester fields:`,
                     possibleTesterFields.reduce((acc, field) => {
                         acc[field] = report[field];
                         return acc;
                     }, {})
                 );
             }
-            
+
             // Check for testers array
             if (Array.isArray(report.testers)) {
                 report.testers.forEach(tester => {
@@ -2331,7 +2331,7 @@ async function initializeFilterDropdowns() {
                         if (name) testers.add(name.toString().trim());
                     }
                 });
-            } 
+            }
             // Check for testerData array (from form)
             else if (Array.isArray(report.testerData)) {
                 report.testerData.forEach(tester => {
@@ -2364,7 +2364,7 @@ async function initializeFilterDropdowns() {
                     const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
                     testerList.forEach(tester => testers.add(tester));
                 }
-            } 
+            }
             // Check for single tester field
             else if (report.tester && typeof report.tester === 'string') {
                 testers.add(report.tester.trim());
@@ -2377,24 +2377,24 @@ async function initializeFilterDropdowns() {
                 testers.add(report.assignedTester.toString().trim());
             }
         });
-        
+
         // Convert sets to sorted arrays
         const sortedProjects = [...projects].sort();
         const sortedPortfolios = [...portfolios].sort();
         const sortedTesters = [...testers].sort();
-        
+
         console.log('Filter options extracted:', {
             projects: sortedProjects,
             portfolios: sortedPortfolios,
             testers: sortedTesters
         });
-        
+
         console.log('Filter counts:', {
             projects: sortedProjects.length,
             portfolios: sortedPortfolios.length,
             testers: sortedTesters.length
         });
-        
+
         // If no testers found in reports, try to load from testers API
         if (sortedTesters.length === 0) {
             console.log('No testers found in reports, trying to load from testers API...');
@@ -2410,7 +2410,7 @@ async function initializeFilterDropdowns() {
                     });
                     const updatedSortedTesters = [...testers].sort();
                     console.log('Updated testers list:', updatedSortedTesters);
-                    
+
                     // Update the tester dropdown with API data
                     const testerFilter = document.getElementById('testerFilter');
                     if (testerFilter) {
@@ -2418,7 +2418,7 @@ async function initializeFilterDropdowns() {
                         while (testerFilter.children.length > 1) {
                             testerFilter.removeChild(testerFilter.lastChild);
                         }
-                        
+
                         updatedSortedTesters.forEach(tester => {
                             const option = document.createElement('option');
                             option.value = tester;
@@ -2431,7 +2431,7 @@ async function initializeFilterDropdowns() {
                 console.error('Error loading testers from API:', error);
             }
         }
-        
+
         // Populate project dropdown
         const projectFilter = document.getElementById('projectFilter');
         if (projectFilter) {
@@ -2439,7 +2439,7 @@ async function initializeFilterDropdowns() {
             while (projectFilter.children.length > 1) {
                 projectFilter.removeChild(projectFilter.lastChild);
             }
-            
+
             sortedProjects.forEach(project => {
                 const option = document.createElement('option');
                 option.value = project;
@@ -2447,7 +2447,7 @@ async function initializeFilterDropdowns() {
                 projectFilter.appendChild(option);
             });
         }
-        
+
         // Populate portfolio dropdown
         const portfolioFilter = document.getElementById('portfolioFilter');
         if (portfolioFilter) {
@@ -2455,7 +2455,7 @@ async function initializeFilterDropdowns() {
             while (portfolioFilter.children.length > 1) {
                 portfolioFilter.removeChild(portfolioFilter.lastChild);
             }
-            
+
             sortedPortfolios.forEach(portfolio => {
                 const option = document.createElement('option');
                 option.value = portfolio;
@@ -2463,7 +2463,7 @@ async function initializeFilterDropdowns() {
                 portfolioFilter.appendChild(option);
             });
         }
-        
+
         // Populate tester dropdown
         const testerFilter = document.getElementById('testerFilter');
         if (testerFilter) {
@@ -2471,7 +2471,7 @@ async function initializeFilterDropdowns() {
             while (testerFilter.children.length > 1) {
                 testerFilter.removeChild(testerFilter.lastChild);
             }
-            
+
             sortedTesters.forEach(tester => {
                 const option = document.createElement('option');
                 option.value = tester;
@@ -2479,7 +2479,7 @@ async function initializeFilterDropdowns() {
                 testerFilter.appendChild(option);
             });
         }
-        
+
     } catch (error) {
         console.error('Error initializing filter dropdowns:', error);
         showToast('Error loading filter options', 'error');
@@ -2729,7 +2729,7 @@ function loadReportForEditing(report) {
 document.addEventListener('DOMContentLoaded', () => {
     const qaReportForm = document.getElementById('qaReportForm');
     if (qaReportForm) {
-        qaReportForm.addEventListener('submit', async function(e) {
+        qaReportForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const formData = new FormData(this);
@@ -2761,10 +2761,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const savedReport = await saveReport(reportData);
             if (savedReport) {
                 showToast('Report saved successfully!', 'success');
-                
+
                 // Clear form data from localStorage and reset form
                 clearFormDataOnSubmit();
-                
+
                 // Redirect to reports list after saving
                 window.location.href = '/reports';
             } else {
@@ -3129,7 +3129,15 @@ async function exportReportAsExcel(id) {
 
 // --- Modal & Utility Functions ---
 function showModal(modalId) {
-    document.getElementById(modalId).style.display = 'block';
+    console.log('showModal called with modalId:', modalId);
+    const modal = document.getElementById(modalId);
+    console.log('Modal element found:', modal);
+    if (modal) {
+        modal.style.display = 'flex';
+        console.log('Modal display set to flex');
+    } else {
+        console.error('Modal element not found:', modalId);
+    }
 }
 
 function closeModal(modalId) {
@@ -3169,30 +3177,30 @@ async function addPortfolio() {
                 const newPortfolio = await response.json();
                 showToast('Portfolio added successfully! Now please add a project to this portfolio.', 'success');
                 invalidateAllCaches(); // Clear caches since data changed
-                
+
                 // Reload portfolios and select the new one
                 await loadPortfoliosOnly();
-                
+
                 // Select the newly created portfolio
                 const portfolioSelect = document.getElementById('portfolioName');
                 if (portfolioSelect) {
                     // Find and select the new portfolio option
                     const portfolioValue = name.toLowerCase().replace(/\s+/g, '-');
                     portfolioSelect.value = portfolioValue;
-                    
+
                     // Trigger the change event to load projects for this portfolio
                     const changeEvent = new Event('change', { bubbles: true });
                     portfolioSelect.dispatchEvent(changeEvent);
                 }
-                
+
                 closeModal('addPortfolioModal');
-                
+
                 // Force user to add a project by showing the project modal
                 setTimeout(() => {
                     showToast('Please add a project to the new portfolio before proceeding.', 'info');
                     showAddProjectModal();
                 }, 500);
-                
+
             } else {
                 const error = await response.json();
                 showToast('Error adding portfolio: ' + (error.error || 'Unknown error'), 'error');
@@ -3209,7 +3217,7 @@ async function addPortfolio() {
 async function addProject() {
     const name = document.getElementById('newProjectName').value.trim();
     const portfolioSelect = document.getElementById('portfolioName');
-    
+
     if (!portfolioSelect.value) {
         showToast('Please select a portfolio first.', 'warning');
         return;
@@ -3229,21 +3237,21 @@ async function addProject() {
                 const newProject = await response.json();
                 showToast('Project added successfully!', 'success');
                 invalidateAllCaches(); // Clear caches since data changed
-                
+
                 // Reload projects for the current portfolio
                 await loadProjectsForPortfolio(actualPortfolioId);
-                
+
                 // Select the newly created project
                 const projectSelect = document.getElementById('projectName');
                 if (projectSelect) {
                     const projectValue = name.toLowerCase().replace(/\s+/g, '-');
                     projectSelect.value = projectValue;
-                    
+
                     // Trigger the change event to enable remaining fields
                     const changeEvent = new Event('change', { bubbles: true });
                     projectSelect.dispatchEvent(changeEvent);
                 }
-                
+
                 closeModal('addProjectModal');
             } else {
                 const error = await response.json();
@@ -3299,7 +3307,7 @@ function getStatusText(status) {
 
 // --- Event Listeners and Window Functions ---
 // Close modal when clicking outside
-window.onclick = function(event) {
+window.onclick = function (event) {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         if (event.target === modal) {
@@ -3314,10 +3322,10 @@ window.updateQAFieldOptions = updateQAFieldOptions;
 window.addQANoteField = addQANoteField;
 
 // Date format validation
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const reportDateField = document.getElementById('reportDate');
     if (reportDateField) {
-        reportDateField.addEventListener('input', function(e) {
+        reportDateField.addEventListener('input', function (e) {
             const datePattern = /^\d{2}-\d{2}-\d{4}$/;
             if (this.value && !datePattern.test(this.value)) {
                 this.setCustomValidity('Please enter date in dd-mm-yyyy format');
@@ -3396,7 +3404,7 @@ function handleTeamMemberSelection() {
         console.error('Team member select element not found');
         return;
     }
-    
+
     // The function is called but doesn't need to do anything since we only have select functionality
 }
 
@@ -3509,19 +3517,19 @@ async function loadExistingTesters() {
 
 function handleTesterSelection() {
     const select = document.getElementById('existingTesterSelect');
-    
+
     // Since we simplified the modal to select-only, we don't need to handle add fields
     if (!select) {
         console.error('Tester select element not found');
         return;
     }
-    
+
     // The function is called but doesn't need to do anything since we only have select functionality
 }
 
 function clearTesterForm() {
     const existingTesterSelect = document.getElementById('existingTesterSelect');
-    
+
     // Only clear the select dropdown since we simplified to select-only
     if (existingTesterSelect) {
         existingTesterSelect.value = '';
@@ -3530,7 +3538,7 @@ function clearTesterForm() {
 
 async function addSelectedTester() {
     const existingTesterSelect = document.getElementById('existingTesterSelect');
-    
+
     if (!existingTesterSelect) {
         console.error('Tester select element not found');
         return;
@@ -3574,8 +3582,8 @@ async function addSelectedTester() {
 
 // QA Notes Custom Fields (if implemented in the HTML)
 
-    // This is a placeholder function for removing custom QA fields
-    
+// This is a placeholder function for removing custom QA fields
+
 
 let qaNotesData = [];
 
@@ -3779,7 +3787,7 @@ async function populatePortfolioDropdownForCreateReport(portfolios) {
         console.error('Portfolio select element not found!');
         return;
     }
-    
+
     // Clear loading state and add basic options
     select.innerHTML = '<option value="">Select Portfolio</option>';
     select.innerHTML += '<option value="no-portfolio">No Portfolio (Standalone Project)</option>';
@@ -3798,20 +3806,20 @@ async function populatePortfolioDropdownForCreateReport(portfolios) {
 async function onPortfolioSelection() {
     const portfolioSelect = document.getElementById('portfolioName');
     const projectSelect = document.getElementById('projectName');
-    
+
     if (!portfolioSelect.value) {
         // Clear projects and disable
         projectSelect.innerHTML = '<option value="">Select Project</option>';
         projectSelect.disabled = true;
         return;
     }
-    
+
     projectSelect.disabled = false;
     projectSelect.innerHTML = '<option value="">Loading projects...</option>';
-    
+
     try {
         let projects = [];
-        
+
         if (portfolioSelect.value === 'no-portfolio') {
             // Load projects without portfolio
             const response = await fetch('/api/projects/without-portfolio');
@@ -3822,7 +3830,7 @@ async function onPortfolioSelection() {
             // Get portfolio ID from data attribute
             const selectedOption = portfolioSelect.options[portfolioSelect.selectedIndex];
             const portfolioId = selectedOption.getAttribute('data-id');
-            
+
             if (portfolioId) {
                 const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
                 if (response.ok) {
@@ -3830,17 +3838,17 @@ async function onPortfolioSelection() {
                 }
             }
         }
-        
+
         // Populate project dropdown
         projectSelect.innerHTML = '<option value="">Select Project</option>';
         projects.forEach(project => {
             projectSelect.innerHTML += `<option value="${project.name.toLowerCase().replace(/\s+/g, '-')}" data-id="${project.id}">${project.name}</option>`;
         });
-        
+
         if (projects.length === 0) {
             projectSelect.innerHTML = '<option value="">No projects available</option>';
         }
-        
+
     } catch (error) {
         console.error('Error loading projects:', error);
         projectSelect.innerHTML = '<option value="">Error loading projects</option>';
@@ -3881,32 +3889,42 @@ let latestProjectData = null;
 
 // Function called when project is selected
 async function onProjectSelection() {
+    console.log('onProjectSelection called');
     const portfolioSelect = document.getElementById('portfolioName');
     const projectSelect = document.getElementById('projectName');
-    
+
+    console.log('Portfolio value:', portfolioSelect?.value);
+    console.log('Project value:', projectSelect?.value);
+
     if (!portfolioSelect.value || !projectSelect.value) {
+        console.log('Missing portfolio or project value, returning');
         return;
     }
-    
+
     let portfolioName, projectName;
-    
+
     // Handle "no-portfolio" case
     if (portfolioSelect.value === 'no-portfolio') {
         portfolioName = 'No Portfolio';
     } else {
         portfolioName = portfolioSelect.options[portfolioSelect.selectedIndex].text;
     }
-    
+
     projectName = projectSelect.options[projectSelect.selectedIndex].text;
-    
+    console.log('Fetching data for:', portfolioName, '/', projectName);
+
     try {
         const response = await fetch(`/api/projects/${encodeURIComponent(portfolioName)}/${encodeURIComponent(projectName)}/latest-data`);
+        console.log('API response status:', response.status);
+
         if (response.ok) {
             const data = await response.json();
-            
+            console.log('API response data:', data);
+
             if (data.hasData) {
+                console.log('Has data, showing modal');
                 latestProjectData = data;
-                
+
                 // Automatically load testers when project is selected
                 const latestData = data.latestData;
                 if (latestData.testerData && latestData.testerData.length > 0) {
@@ -3914,9 +3932,29 @@ async function onProjectSelection() {
                     testerData = [...latestData.testerData];
                     renderTesterList();
                 }
-                
+
                 showAutoLoadModal(data);
             } else {
+                console.log('No previous data, but showing modal anyway for testing');
+                // TEMPORARY: Force show modal even without data for testing
+                const testData = {
+                    hasData: true,
+                    latestData: {
+                        sprintNumber: 1,
+                        cycleNumber: 1,
+                        releaseNumber: '1.0',
+                        reportVersion: '1.0',
+                        testerData: [],
+                        teamMembers: []
+                    },
+                    suggestedValues: {
+                        sprintNumber: 2,
+                        cycleNumber: 1,
+                        releaseNumber: '1.0'
+                    }
+                };
+                latestProjectData = testData;
+                showAutoLoadModal(testData);
                 // No previous data, set defaults
                 setDefaultValues(data.defaultValues);
             }
@@ -3929,13 +3967,17 @@ async function onProjectSelection() {
 
 // Function to show the auto-load modal with data preview
 function showAutoLoadModal(data) {
+    console.log('showAutoLoadModal called with data:', data);
     const modal = document.getElementById('autoLoadDataModal');
     const preview = document.getElementById('dataPreview');
-    
+
+    console.log('Modal element:', modal);
+    console.log('Preview element:', preview);
+
     // Build data preview
     const latestData = data.latestData;
     const suggestedValues = data.suggestedValues;
-    
+
     let previewHTML = `
         <h4>Latest Report Data:</h4>
         <div class="data-preview-item">
@@ -3963,7 +4005,7 @@ function showAutoLoadModal(data) {
             <span class="data-preview-value">${latestData.teamMembers.length} member(s)</span>
         </div>
     `;
-    
+
     preview.innerHTML = previewHTML;
     showModal('autoLoadDataModal');
 }
@@ -3971,23 +4013,23 @@ function showAutoLoadModal(data) {
 // Function to load selected data
 function loadSelectedData() {
     if (!latestProjectData) return;
-    
+
     const latestData = latestProjectData.latestData;
     const suggestedValues = latestProjectData.suggestedValues;
-    
+
     // Check which data types to load
     const loadSprintData = document.getElementById('loadSprintData').checked;
     const loadReportData = document.getElementById('loadReportData').checked;
     const loadTesters = document.getElementById('loadTesters').checked;
     const loadTeamMembers = document.getElementById('loadTeamMembers').checked;
-    
+
     // Load Sprint & Release Information
     if (loadSprintData) {
         document.getElementById('sprintNumber').value = suggestedValues.sprintNumber;
         document.getElementById('cycleNumber').value = suggestedValues.cycleNumber;
         document.getElementById('releaseNumber').value = suggestedValues.releaseNumber;
     }
-    
+
     // Load Report Information
     if (loadReportData) {
         document.getElementById('reportVersion').value = latestData.reportVersion;
@@ -3996,7 +4038,7 @@ function loadSelectedData() {
         const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
         document.getElementById('reportDate').value = formattedDate;
     }
-    
+
     // Load Testers
     if (loadTesters && latestData.testerData.length > 0) {
         // Clear existing testers
@@ -4006,13 +4048,13 @@ function loadSelectedData() {
         });
         renderTesterList();
     }
-    
+
     // Load Team Members  
     if (loadTeamMembers && latestData.teamMembers.length > 0) {
         teamMemberData = [...latestData.teamMembers];
         renderTeamMemberList();
     }
-    
+
     closeModal('autoLoadDataModal');
     showToast('Data loaded successfully!', 'success');
 }
@@ -4021,7 +4063,7 @@ function loadSelectedData() {
 function setDefaultValues(defaults) {
     const today = new Date();
     const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
-    
+
     if (defaults) {
         document.getElementById('sprintNumber').value = defaults.sprintNumber;
         document.getElementById('cycleNumber').value = defaults.cycleNumber;
@@ -4092,7 +4134,7 @@ function disableFormFieldsExceptPortfolio() {
         'projectName', 'sprintNumber', 'cycleNumber', 'releaseNumber',
         'reportName', 'reportVersion', 'reportDate'
     ];
-    
+
     fieldsToDisable.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) {
@@ -4101,7 +4143,7 @@ function disableFormFieldsExceptPortfolio() {
             field.style.cursor = 'not-allowed';
         }
     });
-    
+
     // Also disable the project dropdown initially
     const projectSelect = document.getElementById('projectName');
     if (projectSelect) {
@@ -4128,7 +4170,7 @@ function enableAllRemainingFields() {
         'sprintNumber', 'cycleNumber', 'releaseNumber',
         'reportName', 'reportVersion', 'reportDate'
     ];
-    
+
     fieldsToEnable.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) {
@@ -4143,13 +4185,13 @@ function enableAllRemainingFields() {
 function setupProgressiveFormHandlers() {
     const portfolioSelect = document.getElementById('portfolioName');
     const projectSelect = document.getElementById('projectName');
-    
+
     if (portfolioSelect) {
         // Remove existing event listeners
         portfolioSelect.removeEventListener('change', onPortfolioChange);
         portfolioSelect.addEventListener('change', onPortfolioChange);
     }
-    
+
     if (projectSelect) {
         // Remove existing event listeners
         projectSelect.removeEventListener('change', onProjectChangeProgressive);
@@ -4163,13 +4205,13 @@ async function onPortfolioChange(event) {
     if (selectedOption && selectedOption.value && selectedOption.dataset.id) {
         const portfolioId = selectedOption.dataset.id;
         await loadProjectsForPortfolio(portfolioId);
-        
+
         // Clear project selection when portfolio changes
         const projectSelect = document.getElementById('projectName');
         if (projectSelect) {
             projectSelect.value = '';
         }
-        
+
         // Keep other fields disabled until project is selected
         disableFieldsAfterPortfolio();
     } else {
@@ -4182,7 +4224,7 @@ async function onPortfolioChange(event) {
 async function onProjectChangeProgressive(event) {
     if (event.target.value) {
         enableAllRemainingFields();
-        
+
         // Call existing project selection logic for auto-population
         if (typeof onProjectSelection === 'function') {
             await onProjectSelection();
@@ -4198,7 +4240,7 @@ function disableFieldsAfterPortfolio() {
         'sprintNumber', 'cycleNumber', 'releaseNumber',
         'reportName', 'reportVersion', 'reportDate'
     ];
-    
+
     fieldsToDisable.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) {
@@ -4215,7 +4257,7 @@ function populateProjectDropdownFiltered(projects) {
     if (!select) return;
 
     select.innerHTML = '<option value="">Select Project</option>';
-    
+
     projects.forEach(project => {
         const value = project.name.toLowerCase().replace(/\s+/g, '-');
         select.innerHTML += `<option value="${value}" data-id="${project.id}">${project.name}</option>`;
@@ -4298,17 +4340,17 @@ window.initializeCharts = initializeCharts; // Make it globally accessible
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
+
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
-    
+
     updateThemeButton(newTheme);
 }
 
 function updateThemeButton(theme) {
     const themeIcon = document.getElementById('theme-icon');
     const themeText = document.getElementById('theme-text');
-    
+
     if (theme === 'light') {
         themeIcon.className = 'fas fa-moon';
         themeText.textContent = 'Dark';
@@ -4327,10 +4369,10 @@ function initializeTheme() {
 // Initialize theme on page load
 document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
-    
+
     // Setup MutationObserver to watch for theme attribute changes (fallback)
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
+    const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
                 console.log('Create report: Theme attribute changed, recreating charts...');
                 // Trigger chart recreation with same logic as themeChanged event
@@ -4343,7 +4385,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         { chart: issuesStatusChart, id: 'issuesStatusChart', labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'], colors: ['#17a2b8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1'] },
                         { chart: enhancementsChart, id: 'enhancementsChart', labels: ['New', 'Implemented', 'Exists'], colors: ['#17a2b8', '#28a745', '#6c757d'] }
                     ];
-                    
+
                     // Store data and destroy existing charts
                     const chartData = {};
                     chartConfigs.forEach(config => {
@@ -4354,14 +4396,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             config.chart.destroy();
                         }
                     });
-                    
+
                     // Recreate charts with new theme colors
                     recreateFormCharts(chartConfigs, chartData);
                 }, 100);
             }
         });
     });
-    
+
     observer.observe(document.documentElement, {
         attributes: true,
         attributeFilter: ['data-theme']
@@ -4371,7 +4413,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Listen for theme changes and update chart colors
 window.addEventListener('themeChanged', (event) => {
     console.log('Theme changed, recreating form charts...');
-    
+
     // Store current chart data before destroying charts
     const chartConfigs = [
         { chart: userStoriesChart, id: 'userStoriesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
@@ -4380,7 +4422,7 @@ window.addEventListener('themeChanged', (event) => {
         { chart: issuesStatusChart, id: 'issuesStatusChart', labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'], colors: ['#17a2b8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1'] },
         { chart: enhancementsChart, id: 'enhancementsChart', labels: ['New', 'Implemented', 'Exists'], colors: ['#17a2b8', '#28a745', '#6c757d'] }
     ];
-    
+
     // Store data and destroy existing charts
     const chartData = {};
     chartConfigs.forEach(config => {
@@ -4391,7 +4433,7 @@ window.addEventListener('themeChanged', (event) => {
             config.chart.destroy();
         }
     });
-    
+
     // Recreate charts with new theme colors
     setTimeout(() => {
         recreateFormCharts(chartConfigs, chartData);
@@ -4408,7 +4450,7 @@ function recreateFormCharts(chartConfigs, chartData) {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             const data = chartData[config.id] || new Array(config.labels.length).fill(0);
-            
+
             const newChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -4422,7 +4464,7 @@ function recreateFormCharts(chartConfigs, chartData) {
                 },
                 options: getChartOptions()
             });
-            
+
             // Reassign to global variables
             switch (config.id) {
                 case 'userStoriesChart':
@@ -4625,7 +4667,7 @@ function clearFormDataOnSubmit() {
     try {
         // Clear form data from localStorage
         clearFormDataFromLocalStorage();
-        
+
         // Reset form arrays
         requestData = [];
         buildData = [];
@@ -4633,20 +4675,20 @@ function clearFormDataOnSubmit() {
         teamMemberData = [];
         qaNoteFieldsData = [];
         qaNotesData = [];
-        
+
         // Reset form fields
         const form = document.getElementById('qaReportForm');
         if (form) {
             form.reset();
         }
-        
+
         // Reset charts if they exist
         resetAllCharts();
-        
+
         // Reset current section to the first one
         currentSection = 0;
         updateNavigationButtons();
-        
+
         console.log('Form data cleared after successful submission');
     } catch (error) {
         console.error('Error clearing form data after submission:', error);
@@ -4660,7 +4702,7 @@ const originalAddSelectedTester = window.addSelectedTester;
 const originalAddSelectedTeamMember = window.addSelectedTeamMember;
 
 if (typeof originalAddRequest === 'function') {
-    window.addRequest = function(...args) {
+    window.addRequest = function (...args) {
         const result = originalAddRequest.apply(this, args);
         autoSaveFormData();
         return result;
@@ -4668,7 +4710,7 @@ if (typeof originalAddRequest === 'function') {
 }
 
 if (typeof originalAddBuild === 'function') {
-    window.addBuild = function(...args) {
+    window.addBuild = function (...args) {
         const result = originalAddBuild.apply(this, args);
         autoSaveFormData();
         return result;
@@ -4676,7 +4718,7 @@ if (typeof originalAddBuild === 'function') {
 }
 
 if (typeof originalAddSelectedTester === 'function') {
-    window.addSelectedTester = function(...args) {
+    window.addSelectedTester = function (...args) {
         const result = originalAddSelectedTester.apply(this, args);
         autoSaveFormData();
         return result;
@@ -4684,7 +4726,7 @@ if (typeof originalAddSelectedTester === 'function') {
 }
 
 if (typeof originalAddSelectedTeamMember === 'function') {
-    window.addSelectedTeamMember = function(...args) {
+    window.addSelectedTeamMember = function (...args) {
         const result = originalAddSelectedTeamMember.apply(this, args);
         autoSaveFormData();
         return result;
