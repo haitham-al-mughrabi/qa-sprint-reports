@@ -36,11 +36,11 @@ async function loadAllData() {
         console.log('Fetching data from /api/form-data');
         const response = await fetch('/api/form-data');
         console.log('Response status:', response.status);
-        
+
         if (response.ok) {
             const data = await response.json();
             console.log('Raw data received:', data);
-            
+
             portfolios = data.portfolios || [];
             projects = data.projects || [];
             testers = data.testers || [];
@@ -87,7 +87,7 @@ function renderAllLists() {
 // Display functions with search functionality
 function displayPortfolios() {
     const searchTerm = document.getElementById('portfolioSearch')?.value.toLowerCase() || '';
-    const filteredPortfolios = portfolios.filter(portfolio => 
+    const filteredPortfolios = portfolios.filter(portfolio =>
         portfolio.name.toLowerCase().includes(searchTerm) ||
         (portfolio.description && portfolio.description.toLowerCase().includes(searchTerm))
     );
@@ -97,24 +97,24 @@ function displayPortfolios() {
 function displayProjects() {
     const searchTerm = document.getElementById('projectSearch')?.value.toLowerCase() || '';
     const portfolioFilter = document.getElementById('portfolioFilter')?.value || '';
-    
-    let filteredProjects = projects.filter(project => 
+
+    let filteredProjects = projects.filter(project =>
         project.name.toLowerCase().includes(searchTerm) ||
         (project.description && project.description.toLowerCase().includes(searchTerm))
     );
-    
+
     if (portfolioFilter) {
-        filteredProjects = filteredProjects.filter(project => 
+        filteredProjects = filteredProjects.filter(project =>
             project.portfolio_id == portfolioFilter
         );
     }
-    
+
     renderProjects(filteredProjects);
 }
 
 function displayTesters() {
     const searchTerm = document.getElementById('testerSearch')?.value.toLowerCase() || '';
-    const filteredTesters = testers.filter(tester => 
+    const filteredTesters = testers.filter(tester =>
         tester.name.toLowerCase().includes(searchTerm) ||
         tester.email.toLowerCase().includes(searchTerm)
     );
@@ -124,25 +124,25 @@ function displayTesters() {
 function displayTeamMembers() {
     const searchTerm = document.getElementById('teamSearch')?.value.toLowerCase() || '';
     const roleFilter = document.getElementById('roleFilter')?.value || '';
-    
-    let filteredMembers = teamMembers.filter(member => 
+
+    let filteredMembers = teamMembers.filter(member =>
         member.name.toLowerCase().includes(searchTerm) ||
         member.email.toLowerCase().includes(searchTerm)
     );
-    
+
     if (roleFilter) {
-        filteredMembers = filteredMembers.filter(member => 
+        filteredMembers = filteredMembers.filter(member =>
             member.role === roleFilter
         );
     }
-    
+
     renderTeamMembers(filteredMembers);
 }
 
 function renderPortfolios(portfoliosToRender = portfolios) {
     const container = document.getElementById('portfoliosList');
     if (!container) return;
-    
+
     if (portfoliosToRender.length === 0) {
         container.innerHTML = `
             <div class="empty-data-state">
@@ -184,7 +184,7 @@ function renderPortfolios(portfoliosToRender = portfolios) {
 function renderProjects(projectsToRender = projects) {
     const container = document.getElementById('projectsList');
     if (!container) return;
-    
+
     if (projectsToRender.length === 0) {
         container.innerHTML = `
             <div class="empty-data-state">
@@ -226,7 +226,7 @@ function renderProjects(projectsToRender = projects) {
 function renderTesters(testersToRender = testers) {
     const container = document.getElementById('testersList');
     if (!container) return;
-    
+
     if (testersToRender.length === 0) {
         container.innerHTML = `
             <div class="empty-data-state">
@@ -264,7 +264,7 @@ function renderTesters(testersToRender = testers) {
 function renderTeamMembers(membersToRender = teamMembers) {
     const container = document.getElementById('teamMembersList');
     if (!container) return;
-    
+
     if (membersToRender.length === 0) {
         container.innerHTML = `
             <div class="empty-data-state">
@@ -354,7 +354,7 @@ function closeModal(modalId) {
 function populatePortfolioPills() {
     console.log('populatePortfolioPills called');
     console.log('Portfolios available:', portfolios);
-    
+
     const container = document.getElementById('projectPortfoliosContainer');
     if (!container) {
         console.error('projectPortfoliosContainer not found');
@@ -387,9 +387,9 @@ function populatePortfolioPills() {
             pill.setAttribute('tabindex', '0');
             pill.setAttribute('role', 'button');
             pill.setAttribute('aria-pressed', 'false');
-            pill.onclick = function() { toggleSingleTagPill(this); };
-            pill.onkeydown = function(event) {
-                if(event.key === 'Enter' || event.key === ' ') {
+            pill.onclick = function () { toggleSingleTagPill(this); };
+            pill.onkeydown = function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
                     toggleSingleTagPill(this);
                 }
@@ -411,13 +411,13 @@ function toggleSingleTagPill(pill) {
     // For single selection (like portfolio or role selection)
     const container = pill.parentElement;
     const allPills = container.querySelectorAll('.tag-pill');
-    
+
     // Remove active class from all pills
     allPills.forEach(p => {
         p.classList.remove('active');
         p.setAttribute('aria-pressed', 'false');
     });
-    
+
     // Add active class to clicked pill
     pill.classList.add('active');
     pill.setAttribute('aria-pressed', 'true');
@@ -576,7 +576,7 @@ function removeQANoteField(fieldId) {
 function populatePortfolioFilter() {
     const select = document.getElementById('portfolioFilter');
     if (!select) return;
-    
+
     select.innerHTML = '<option value="">All Portfolios</option>';
     if (portfolios && portfolios.length > 0) {
         portfolios.forEach(portfolio => {
@@ -672,10 +672,10 @@ async function saveProject() {
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                name, 
-                portfolio_id: portfolioId || null, 
-                description 
+            body: JSON.stringify({
+                name,
+                portfolio_id: portfolioId || null,
+                description
             })
         });
 
@@ -839,16 +839,16 @@ function editProject(id) {
 
     // Populate portfolio pills and select the correct one
     populatePortfolioPills();
-    
+
     // Select the appropriate portfolio pill
     const container = document.getElementById('projectPortfoliosContainer');
     const allPills = container.querySelectorAll('.tag-pill');
-    
+
     allPills.forEach(pill => {
         pill.classList.remove('active');
         pill.setAttribute('aria-pressed', 'false');
     });
-    
+
     if (project.portfolio_id) {
         const targetPill = container.querySelector(`[data-portfolio-id="${project.portfolio_id}"]`);
         if (targetPill) {

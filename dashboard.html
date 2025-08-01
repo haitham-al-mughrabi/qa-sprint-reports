@@ -241,6 +241,7 @@
                     <button class="action-btn" onclick="window.location.href='/create-report'"><i class="fas fa-plus-circle"></i> Create New Report</button>
                     <button class="action-btn secondary" onclick="window.location.href='/reports'"><i class="fas fa-chart-bar"></i> View All Reports</button>
                     <button class="action-btn secondary" onclick="exportDashboardReport()"><i class="fas fa-file-export"></i> Export Dashboard Report</button>
+                    <button class="action-btn secondary" onclick="loadDashboardData()" style="background: #ff6b35;"><i class="fas fa-sync-alt"></i> Refresh Dashboard</button>
                 </div>
             </div>
         </div>
@@ -291,6 +292,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Dashboard: Initializing...');
             
+            // Debug: Check if required functions are available
+            console.log('Dashboard: fetchDashboardStats available:', typeof fetchDashboardStats);
+            console.log('Dashboard: updateDashboardStats available:', typeof updateDashboardStats);
+            console.log('Dashboard: renderProjectMetrics available:', typeof renderProjectMetrics);
+            
             // Initialize theme first
             if (window.themeManager) {
                 window.themeManager.init();
@@ -326,6 +332,9 @@
                 metricsContainer.innerHTML = '';
             }
             
+            // Add debug info
+            console.log('Dashboard: fetchDashboardStats function available:', typeof fetchDashboardStats);
+            
             // Fetch and update dashboard stats
             fetchDashboardStats()
                 .then(stats => {
@@ -334,8 +343,17 @@
                         throw new Error('No data returned from server');
                     }
                     
-                    // Make stats globally available
-                    window.dashboardStatsCache = stats;
+                    // Debug log the structure
+                    console.log('Dashboard: Stats structure:', {
+                        overall: stats.overall ? 'present' : 'missing',
+                        projects: stats.projects ? `${stats.projects.length} projects` : 'missing'
+                    });
+                    
+                    // Make stats globally available (consistent with enhanced_script.js structure)
+                    window.dashboardStatsCache = {
+                        data: stats,
+                        cacheTime: Date.now()
+                    };
                     
                     // Update the UI with the new data
                     updateDashboardStats(stats);
@@ -349,7 +367,7 @@
                 })
                 .catch(error => {
                     console.error('Dashboard: Error loading data:', error);
-                    showToast('Error loading dashboard data. Please try again.', 'error');
+                    showToast(`Error loading dashboard data: ${error.message}`, 'error');
                     
                     // Show empty state if there's an error
                     const container = document.getElementById('projectMetrics');
@@ -358,7 +376,7 @@
                             <div class="empty-state" style="text-align: center; color: #6c757d; padding: 40px 0; grid-column: 1 / -1;">
                                 <div style="font-size: 3em; margin-bottom: 20px;"><i class="fas fa-exclamation-triangle"></i></div>
                                 <h3>Error Loading Data</h3>
-                                <p>Could not load project metrics. Please try refreshing the page.</p>
+                                <p>Could not load project metrics: ${error.message}</p>
                                 <button class="btn btn-primary" onclick="loadDashboardData()">
                                     <i class="fas fa-sync-alt"></i> Try Again
                                 </button>

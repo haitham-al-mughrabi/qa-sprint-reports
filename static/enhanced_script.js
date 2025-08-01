@@ -88,36 +88,106 @@ async function fetchDashboardStats() {
             return dashboardStatsCache.data;
         }
 
-        // Fetch both regular and cached data to get complete information
-        const [regularResponse, cachedResponse] = await Promise.all([
-            fetch('/api/dashboard/stats'),
-            fetch('/api/dashboard/stats/cached')
-        ]);
+        console.log('Fetching dashboard stats from API...');
         
-        if (!regularResponse.ok || !cachedResponse.ok) {
-            throw new Error(`HTTP error! regular: ${regularResponse.status}, cached: ${cachedResponse.status}`);
+        // Try cached endpoint first (has detailed breakdown data), fallback to regular endpoint
+        let response;
+        let data;
+        
+        try {
+            console.log('Attempting to fetch from cached endpoint...');
+            response = await fetch('/api/dashboard/stats/cached', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache'
+                }
+            });
+            
+            console.log('Cached endpoint response status:', response.status);
+            
+            if (response.ok) {
+                data = await response.json();
+                console.log('Successfully fetched from cached endpoint, projects:', data.projects?.length || 0);
+                
+                // Validate that we have the detailed breakdown data
+                if (data.projects && data.projects.length > 0) {
+                    const firstProject = data.projects[0];
+                    if (firstProject.passedUserStories !== undefined || firstProject.passedTestCases !== undefined) {
+                        console.log('Cached endpoint has detailed breakdown data - using it');
+                    } else {
+                        console.log('Cached endpoint missing detailed breakdown data');
+                    }
+                }
+            } else {
+                const errorText = await response.text();
+                throw new Error(`Cached endpoint failed: ${response.status} - ${errorText}`);
+            }
+        } catch (cachedError) {
+            console.log('Cached endpoint failed, trying regular endpoint:', cachedError.message);
+            
+            // Fallback to regular endpoint (but it has limited data)
+            try {
+                console.log('Attempting to fetch from regular endpoint...');
+                response = await fetch('/api/dashboard/stats', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                console.log('Regular endpoint response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Regular endpoint failed: ${response.status} - ${errorText}`);
+                }
+                data = await response.json();
+                console.log('Successfully fetched from regular endpoint, projects:', data.projects?.length || 0);
+                console.log('Warning: Regular endpoint has limited project data - some metrics may not display');
+            } catch (regularError) {
+                console.error('Both endpoints failed:', regularError.message);
+                throw regularError;
+            }
         }
         
-        const regularData = await regularResponse.json();
-        const cachedData = await cachedResponse.json();
+        // Ensure we have the expected data structure
+        if (!data || !data.overall) {
+            throw new Error('Invalid data structure received from API');
+        }
         
-        // Combine the data: use detailed overall stats from regular endpoint
-        // and detailed project stats from cached endpoint
-        const combinedData = {
-            overall: regularData.overall, // Detailed breakdown for charts
-            projects: cachedData.projects // Detailed breakdown for project metrics
-        };
-        
-        // Cache the combined dashboard stats
+        // Cache the dashboard stats
         dashboardStatsCache = {
-            data: combinedData,
+            data: data,
             cacheTime: Date.now()
         };
         
-        return combinedData;
+        console.log('Dashboard stats cached successfully:', {
+            overall: data.overall ? 'present' : 'missing',
+            projects: data.projects ? data.projects.length : 0
+        });
+        
+        return data;
     } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
-        return null;
+        
+        // Return empty structure to prevent crashes
+        return {
+            overall: {
+                totalReports: 0,
+                completedReports: 0,
+                inProgressReports: 0,
+                pendingReports: 0,
+                totalUserStories: 0,
+                totalTestCases: 0,
+                totalIssues: 0,
+                totalEnhancements: 0,
+                automationTotalTestCases: 0,
+                automationPassedTestCases: 0
+            },
+            projects: []
+        };
     }
 }
 
@@ -287,23 +357,33 @@ function renderProjectMetrics(projects) {
         return;
     }
 
-    container.innerHTML = projects.map(project => `
-        <div class="project-metric-card">
-            <div class="project-header">
-                <div class="project-title-section">
-                    <div class="project-icon">
-                        <i class="fas fa-rocket"></i>
+    // Check if we have detailed breakdown data
+    const hasDetailedData = projects.length > 0 && 
+        (projects[0].passedUserStories !== undefined || 
+         projects[0].passedTestCases !== undefined ||
+         projects[0].criticalIssues !== undefined);
+    
+    console.log('Has detailed breakdown data:', hasDetailedData);
+
+    if (hasDetailedData) {
+        // Render full detailed project cards
+        container.innerHTML = projects.map(project => `
+            <div class="project-metric-card">
+                <div class="project-header">
+                    <div class="project-title-section">
+                        <div class="project-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <div class="project-info">
+                            <h3>${project.projectName}</h3>
+                            <p class="portfolio-name">${project.portfolioName}</p>
+                        </div>
                     </div>
-                    <div class="project-info">
-                        <h3>${project.projectName}</h3>
-                        <p class="portfolio-name">${project.portfolioName}</p>
+                    <div class="status-badges">
+                        <span class="status-badge status-${getStatusClass(project.testingStatus)}">${getStatusText(project.testingStatus)}</span>
+                        <span class="risk-badge risk-${project.riskLevel?.toLowerCase() || 'low'}">${project.riskLevel || 'Low'} Risk</span>
                     </div>
                 </div>
-                <div class="status-badges">
-                    <span class="status-badge status-${getStatusClass(project.testingStatus)}">${getStatusText(project.testingStatus)}</span>
-                    <span class="risk-badge risk-${project.riskLevel?.toLowerCase() || 'low'}">${project.riskLevel || 'Low'} Risk</span>
-                </div>
-            </div>
 
             <!-- Project Summary Stats -->
             <div class="project-summary">
@@ -559,7 +639,99 @@ function renderProjectMetrics(projects) {
                 <!-- Evaluation Scores have been removed as per user request -->
             </div>
         </div>
-    `).join('');
+        `).join('');
+    } else {
+        // Render simplified project cards when detailed data is not available
+        console.log('Rendering simplified project cards due to missing detailed data');
+        container.innerHTML = projects.map(project => `
+            <div class="project-metric-card">
+                <div class="project-header">
+                    <div class="project-title-section">
+                        <div class="project-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <div class="project-info">
+                            <h3>${project.projectName}</h3>
+                            <p class="portfolio-name">${project.portfolioName}</p>
+                        </div>
+                    </div>
+                    <div class="status-badges">
+                        <span class="status-badge status-${getStatusClass(project.testingStatus)}">${getStatusText(project.testingStatus)}</span>
+                        <span class="risk-badge risk-low">Low Risk</span>
+                    </div>
+                </div>
+
+                <!-- Project Summary Stats -->
+                <div class="project-summary">
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="summary-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="summary-content">
+                                <span class="summary-value">${project.totalReports || 0}</span>
+                                <span class="summary-label">Reports</span>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="summary-content">
+                                <span class="summary-value">${formatDate(project.lastReportDate)}</span>
+                                <span class="summary-label">Last Report</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simplified Project Metrics -->
+                <div class="project-metrics">
+                    <div class="metrics-section">
+                        <h4 class="metrics-title">
+                            <i class="fas fa-chart-bar"></i> Summary Metrics
+                        </h4>
+                        <div class="metrics-content">
+                            <div class="simple-metrics-grid">
+                                <div class="simple-metric">
+                                    <div class="metric-icon"><i class="fas fa-user-check"></i></div>
+                                    <div class="metric-content">
+                                        <span class="metric-value">${project.totalUserStories || 0}</span>
+                                        <span class="metric-label">User Stories</span>
+                                    </div>
+                                </div>
+                                <div class="simple-metric">
+                                    <div class="metric-icon"><i class="fas fa-flask"></i></div>
+                                    <div class="metric-content">
+                                        <span class="metric-value">${project.totalTestCases || 0}</span>
+                                        <span class="metric-label">Test Cases</span>
+                                    </div>
+                                </div>
+                                <div class="simple-metric">
+                                    <div class="metric-icon"><i class="fas fa-bug"></i></div>
+                                    <div class="metric-content">
+                                        <span class="metric-value">${project.totalIssues || 0}</span>
+                                        <span class="metric-label">Issues</span>
+                                    </div>
+                                </div>
+                                <div class="simple-metric">
+                                    <div class="metric-icon"><i class="fas fa-magic"></i></div>
+                                    <div class="metric-content">
+                                        <span class="metric-value">${project.totalEnhancements || 0}</span>
+                                        <span class="metric-label">Enhancements</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="data-notice">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Detailed breakdown data is being loaded. Refresh the page to see complete metrics.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
 }
 
 // Helper function for progress bar colors

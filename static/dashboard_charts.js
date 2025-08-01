@@ -98,8 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Check if stats are already cached by the main dashboard script
     const checkForCachedStats = () => {
-        if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
+        if (window.dashboardStatsCache && window.dashboardStatsCache.data && window.dashboardStatsCache.data.overall) {
             console.log('Using cached dashboard stats for charts');
+            createDashboardCharts(window.dashboardStatsCache.data.overall);
+        } else if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
+            console.log('Using direct cached dashboard stats for charts');
             createDashboardCharts(window.dashboardStatsCache.overall);
         } else if (typeof fetchDashboardStats === 'function') {
             console.log('No cached stats, fetching from main function...');
@@ -142,8 +145,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Dashboard charts: Theme attribute changed, recreating charts...');
                 // Trigger chart recreation with same logic as themeChanged event
                 setTimeout(() => {
-                    if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
+                    if (window.dashboardStatsCache && window.dashboardStatsCache.data && window.dashboardStatsCache.data.overall) {
                         console.log('Using cached dashboard stats for theme attribute update');
+                        // Destroy existing charts first
+                        Object.values(dashboardCharts).forEach(chart => {
+                            if (chart && chart.destroy) {
+                                chart.destroy();
+                            }
+                        });
+                        dashboardCharts = {};
+                        createDashboardCharts(window.dashboardStatsCache.data.overall);
+                    } else if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
+                        console.log('Using direct cached dashboard stats for theme attribute update');
                         // Destroy existing charts first
                         Object.values(dashboardCharts).forEach(chart => {
                             if (chart && chart.destroy) {
@@ -181,8 +194,11 @@ window.addEventListener('themeChanged', (event) => {
 
     // Recreate charts with fresh data from cache or refetch
     setTimeout(() => {
-        if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
+        if (window.dashboardStatsCache && window.dashboardStatsCache.data && window.dashboardStatsCache.data.overall) {
             console.log('Using cached dashboard stats for theme update');
+            createDashboardCharts(window.dashboardStatsCache.data.overall);
+        } else if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
+            console.log('Using direct cached dashboard stats for theme update');
             createDashboardCharts(window.dashboardStatsCache.overall);
         } else if (typeof fetchDashboardStats === 'function') {
             console.log('Fetching fresh dashboard stats for theme update');

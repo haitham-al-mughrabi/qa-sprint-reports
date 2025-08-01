@@ -4142,4 +4142,97 @@ ew Report Section Styles */
     .feature-card {
         padding: 1rem;
     }
+}/
+* Simplified Project Metrics Styles */
+.simple-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.simple-metric {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: var(--surface);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.simple-metric:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+}
+
+.simple-metric .metric-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    margin-right: 15px;
+    font-size: 16px;
+}
+
+.simple-metric .metric-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.simple-metric .metric-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.simple-metric .metric-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.data-notice {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--border-radius);
+    color: var(--primary);
+    font-size: 14px;
+    margin-top: 15px;
+}
+
+.data-notice i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+/* Responsive adjustments for simplified metrics */
+@media (max-width: 768px) {
+    .simple-metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .simple-metric {
+        padding: 12px;
+    }
+    
+    .simple-metric .metric-icon {
+        width: 35px;
+        height: 35px;
+        margin-right: 12px;
+        font-size: 14px;
+    }
+    
+    .simple-metric .metric-value {
+        font-size: 20px;
+    }
 }
