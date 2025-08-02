@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme System Test - Sprint Reports</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/unified-nav.css">
+    <script src="/static/theme-manager-simple.js"></script>
+    <style>
+        .test-container {
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        .test-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .theme-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .test-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .test-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .test-btn.secondary {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .test-btn.danger {
+            background: var(--danger);
+        }
+        
+        .test-btn.success {
+            background: var(--success);
+        }
+        
+        .theme-info {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+        }
+        
+        .color-swatch {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            margin-right: 10px;
+            vertical-align: middle;
+            border: 1px solid var(--border);
+        }
+        
+        .test-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .test-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            background: var(--background);
+            color: var(--text-primary);
+            margin: 0.5rem 0;
+        }
+        
+        .test-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin: 0.25rem;
+        }
+        
+        .status-success {
+            background: rgba(var(--success-rgb), 0.1);
+            color: var(--success);
+            border: 1px solid rgba(var(--success-rgb), 0.2);
+        }
+        
+        .status-warning {
+            background: rgba(234, 179, 8, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+        }
+        
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports - Theme Test</div>
+            <div style="display: flex; align-items: center;">
+                <div class="nav-links">
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="/reports" class="nav-link"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="/theme-test" class="nav-link active"><i class="fas fa-palette"></i> Theme Test</a>
+                </div>
+                <div class="nav-controls">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-sun" id="theme-icon"></i>
+                        <span id="theme-text">Light</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="test-container">
+        <h1><i class="fas fa-palette"></i> Theme System Test</h1>
+        <p>This page tests the theme system functionality across all components.</p>
+        
+        <div class="test-section">
+            <h2>Current Theme Information</h2>
+            <div class="theme-info">
+                <p><strong>Active Theme:</strong> <span id="current-theme">Loading...</span></p>
+                <p><strong>Background:</strong> <span class="color-swatch" id="bg-swatch"></span> <span id="bg-color">Loading...</span></p>
+                <p><strong>Surface:</strong> <span class="color-swatch" id="surface-swatch"></span> <span id="surface-color">Loading...</span></p>
+                <p><strong>Text Primary:</strong> <span class="color-swatch" id="text-swatch"></span> <span id="text-color">Loading...</span></p>
+                <p><strong>Primary:</strong> <span class="color-swatch" id="primary-swatch"></span> <span id="primary-color">Loading...</span></p>
+                <p><strong>Border:</strong> <span class="color-swatch" id="border-swatch"></span> <span id="border-color">Loading...</span></p>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Theme Controls</h2>
+            <div class="theme-controls">
+                <button class="test-btn" onclick="setTheme('light')">
+                    <i class="fas fa-sun"></i> Light Theme
+                </button>
+                <button class="test-btn" onclick="setTheme('dark')">
+                    <i class="fas fa-moon"></i> Dark Theme
+                </button>
+                <button class="test-btn secondary" onclick="toggleTheme()">
+                    <i class="fas fa-exchange-alt"></i> Toggle Theme
+                </button>
+                <button class="test-btn secondary" onclick="updateThemeInfo()">
+                    <i class="fas fa-sync"></i> Refresh Info
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Visual Components Test</h2>
+            
+            <div class="test-card">
+                <h3>Buttons</h3>
+                <button class="test-btn">Primary Button</button>
+                <button class="test-btn secondary">Secondary Button</button>
+                <button class="test-btn success">Success Button</button>
+                <button class="test-btn danger">Danger Button</button>
+            </div>
+            
+            <div class="test-card">
+                <h3>Form Elements</h3>
+                <input type="text" class="test-input" placeholder="Text input field" value="Sample text">
+                <textarea class="test-input" rows="3" placeholder="Textarea field">Sample textarea content</textarea>
+                <select class="test-input">
+                    <option>Select option 1</option>
+                    <option>Select option 2</option>
+                </select>
+            </div>
+            
+            <div class="test-card">
+                <h3>Status Indicators</h3>
+                <span class="status-indicator status-success"><i class="fas fa-check"></i> Success</span>
+                <span class="status-indicator status-warning"><i class="fas fa-exclamation-triangle"></i> Warning</span>
+                <span class="status-indicator status-error"><i class="fas fa-times"></i> Error</span>
+            </div>
+            
+            <div class="test-card">
+                <h3>Text Content</h3>
+                <p>This is primary text content that should be clearly readable in both light and dark themes.</p>
+                <p style="color: var(--text-secondary);">This is secondary text content with reduced opacity for hierarchy.</p>
+                <p style="color: var(--primary);">This is primary colored text for emphasis and links.</p>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Theme Persistence Test</h2>
+            <p>Change the theme and reload the page to test persistence.</p>
+            <button class="test-btn secondary" onclick="location.reload()">
+                <i class="fas fa-redo"></i> Reload Page
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function updateThemeInfo() {
+            const computedStyle = getComputedStyle(document.documentElement);
+            const currentTheme = getCurrentTheme();
+            
+            // Update theme info
+            document.getElementById('current-theme').textContent = currentTheme;
+            
+            // Get colors
+            const bgColor = computedStyle.getPropertyValue('--background').trim();
+            const surfaceColor = computedStyle.getPropertyValue('--surface').trim();
+            const textColor = computedStyle.getPropertyValue('--text-primary').trim();
+            const primaryColor = computedStyle.getPropertyValue('--primary').trim();
+            const borderColor = computedStyle.getPropertyValue('--border').trim();
+            
+            // Update color info
+            document.getElementById('bg-color').textContent = bgColor;
+            document.getElementById('surface-color').textContent = surfaceColor;
+            document.getElementById('text-color').textContent = textColor;
+            document.getElementById('primary-color').textContent = primaryColor;
+            document.getElementById('border-color').textContent = borderColor;
+            
+            // Update color swatches
+            document.getElementById('bg-swatch').style.backgroundColor = bgColor;
+            document.getElementById('surface-swatch').style.backgroundColor = surfaceColor;
+            document.getElementById('text-swatch').style.backgroundColor = textColor;
+            document.getElementById('primary-swatch').style.backgroundColor = primaryColor;
+            document.getElementById('border-swatch').style.backgroundColor = borderColor;
+        }
+        
+        // Initialize and update info when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(updateThemeInfo, 300);
+            
+            // Update info when theme changes
+            window.addEventListener('themeChanged', function() {
+                setTimeout(updateThemeInfo, 100);
+            });
+        });
+    </script>
+</body>
+</html>

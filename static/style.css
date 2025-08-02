@@ -1,30 +1,23 @@
 /* Hide scrollbar for Firefox */
-html { scrollbar-width: none; }
-
-:root {
-    --primary: #3b82f6;
-    --secondary: #60a5fa;
-    --accent: #8b5cf6;
-    --success: #22c55e;
-    --warning: #eab308;
-    --danger: #ef4444;
-    --background: #0f172a;
-    --surface: #1e293b;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --border: #334155;
-    --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-heavy: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --border-radius: 8px;
-    --border-radius-large: 12px;
-    --transition: all 0.3s ease;
-    --primary-rgb: 59, 130, 246;
-    --accent-rgb: 139, 92, 246;
-    --success-rgb: 34, 197, 94;
+html { 
+    scrollbar-width: none; 
 }
 
-/* Light Theme Variables */
-[data-theme="light"] {
+/* Base styling with theme support */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+html, body {
+    background-color: var(--background);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Light Theme Variables (Default) */
+:root {
     --primary: #3b82f6;
     --secondary: #60a5fa;
     --accent: #8b5cf6;
@@ -46,23 +39,157 @@ html { scrollbar-width: none; }
     --success-rgb: 34, 197, 94;
 }
 
-/* Light theme specific adjustments */
+/* Dark Theme Variables */
+[data-theme="dark"] {
+    --primary: #60a5fa;
+    --secondary: #3b82f6;
+    --accent: #a78bfa;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-heavy: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    --border-radius: 8px;
+    --border-radius-large: 12px;
+    --transition: all 0.3s ease;
+    --primary-rgb: 96, 165, 250;
+    --accent-rgb: 167, 139, 250;
+    --success-rgb: 52, 211, 153;
+}
+    --transition: all 0.3s ease;
+    --primary-rgb: 59, 130, 246;
+    --accent-rgb: 139, 92, 246;
+    --success-rgb: 34, 197, 94;
+}
+
+/* Light Theme Specific Styles */
 [data-theme="light"] .stat-card {
-    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
     color: var(--text-primary);
+    border: 1px solid var(--border);
 }
 
 [data-theme="light"] .metric-card {
-    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
     color: var(--text-primary);
+    border: 1px solid var(--border);
 }
 
 [data-theme="light"] .project-metric-card {
     background: linear-gradient(145deg, var(--surface), #f1f5f9);
+    border: 1px solid var(--border);
 }
 
 [data-theme="light"] .project-metric-card:hover {
     background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+}
+
+/* Dark Theme Specific Styles */
+[data-theme="dark"] .stat-card {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .metric-card {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .project-metric-card {
+    background: linear-gradient(145deg, var(--surface), #334155);
+    border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .project-metric-card:hover {
+    background: linear-gradient(145deg, #334155, #475569);
+}
+
+/* Navigation Theme Styles */
+[data-theme="dark"] .main-nav {
+    background: var(--surface);
+    border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .nav-brand {
+    color: var(--primary);
+}
+
+[data-theme="dark"] .nav-link {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .nav-link:hover,
+[data-theme="dark"] .nav-link.active {
+    color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.1);
+}
+
+/* Form Elements Theme Styles */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background: var(--background);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+/* Button Theme Styles */
+[data-theme="dark"] .btn {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+[data-theme="dark"] .btn-secondary {
+    background: var(--surface);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+/* Card Theme Styles */
+[data-theme="dark"] .card {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .card-header {
+    background: var(--background);
+    border-bottom-color: var(--border);
+    color: var(--text-primary);
+}
+
+/* Table Theme Styles */
+[data-theme="dark"] .table {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .table th {
+    background: var(--background);
+    color: var(--text-primary);
+    border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .table td {
+    color: var(--text-secondary);
+    border-bottom-color: var(--border);
 }
 
 /* Tabs Container */

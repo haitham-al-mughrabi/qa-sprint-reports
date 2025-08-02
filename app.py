@@ -1,10 +1,16 @@
 # app.py
 # Import necessary libraries
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SelectField, BooleanField
+from wtforms.validators import DataRequired, Email, EqualTo, Length
+import bcrypt
 import json
 import os
 from datetime import datetime
+from functools import wraps
 
 # --- App & Database Configuration ---
 app = Flask(__name__, template_folder='.', static_folder='static')
@@ -12,8 +18,97 @@ app = Flask(__name__, template_folder='.', static_folder='static')
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'reports.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'  # Change this in production
 
 db = SQLAlchemy(app)
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Please log in to access this page.'
+login_manager.login_message_category = 'info'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# --- User Model and Authentication ---
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='user')  # 'user' or 'admin'
+    is_approved = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def set_password(self, password):
+        """Hash and set the password"""
+        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    def check_password(self, password):
+        """Check if the provided password matches the hash"""
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+
+    def get_full_name(self):
+        """Get the user's full name"""
+        return f"{self.first_name} {self.last_name}"
+
+    def to_dict(self):
+        """Convert user to dictionary for JSON serialization"""
+        return {
+            'id': self.id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email,
+            'role': self.role,
+            'is_approved': self.is_approved,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+# --- Forms ---
+class LoginForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+
+class RegistrationForm(FlaskForm):
+    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=50)])
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=50)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Confirm Password', 
+                                   validators=[DataRequired(), EqualTo('password')])
+
+class UserManagementForm(FlaskForm):
+    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=50)])
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=50)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    role = SelectField('Role', choices=[('user', 'User'), ('admin', 'Admin')], validators=[DataRequired()])
+    is_approved = BooleanField('Approved')
+
+# --- Authorization Decorators ---
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            flash('You need admin privileges to access this page.', 'error')
+            return redirect(url_for('dashboard'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def approved_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_approved:
+            flash('Your account is pending approval. Please contact an administrator.', 'warning')
+            logout_user()
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # --- Database Model Definition ---
 class Report(db.Model):
@@ -270,15 +365,132 @@ class Report(db.Model):
             'updatedAt': self.updatedAt.isoformat() if self.updatedAt else None,
         }
 
+# --- Authentication Routes ---
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Handle user login"""
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and user.check_password(form.password.data):
+            if not user.is_approved:
+                flash('Your account is pending approval. Please contact an administrator.', 'warning')
+                return render_template('login.html', form=form)
+            login_user(user)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('dashboard'))
+        flash('Invalid email or password.', 'error')
+    return render_template('login.html', form=form)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Handle user registration"""
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        # Check if user already exists
+        if User.query.filter_by(email=form.email.data).first():
+            flash('Email already registered.', 'error')
+            return render_template('register.html', form=form)
+        
+        # Create new user
+        user = User(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            role='user'  # Default role
+        )
+        user.set_password(form.password.data)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        flash('Registration successful! Your account is pending approval.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('register.html', form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    """Handle user logout"""
+    logout_user()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+@app.route('/user-management')
+@login_required
+@admin_required
+@approved_required
+def user_management():
+    """User management page for admins"""
+    users = User.query.all()
+    return render_template('user_management.html', users=users)
+
+@app.route('/user-details/<int:user_id>')
+@login_required
+@admin_required
+@approved_required
+def user_details(user_id):
+    """User details page for admins"""
+    user = User.query.get_or_404(user_id)
+    return render_template('user_details.html', user=user)
+
+@app.route('/api/users/<int:user_id>/approve', methods=['POST'])
+@login_required
+@admin_required
+@approved_required
+def approve_user(user_id):
+    """Approve a user account"""
+    user = User.query.get_or_404(user_id)
+    user.is_approved = True
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'User approved successfully'})
+
+@app.route('/api/users/<int:user_id>/toggle-role', methods=['POST'])
+@login_required
+@admin_required
+@approved_required
+def toggle_user_role(user_id):
+    """Toggle user role between user and admin"""
+    user = User.query.get_or_404(user_id)
+    user.role = 'admin' if user.role == 'user' else 'user'
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'User role updated successfully'})
+
+@app.route('/api/users/<int:user_id>', methods=['DELETE'])
+@login_required
+@admin_required
+@approved_required
+def delete_user(user_id):
+    """Delete a user account"""
+    if user_id == current_user.id:
+        return jsonify({'success': False, 'message': 'Cannot delete your own account'}), 400
+    
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'User deleted successfully'})
+
 # --- API Routes ---
 
 @app.route('/')
 def index():
     """Serves the main HTML landing page."""
-    return render_template('dashboard.html')
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    return redirect(url_for('dashboard'))
 
 @app.route('/dashboard')
-def dashboard_page():
+@login_required
+@approved_required
+def dashboard():
     """Serves the dashboard HTML page."""
     return render_template('dashboard.html')
 
@@ -312,6 +524,11 @@ def debug_theme_page():
     """Serves the theme debug test page."""
     return render_template('debug_theme.html')
 
+@app.route('/theme-test')
+def theme_test_page():
+    """Serves the theme test page."""
+    return render_template('theme_test.html')
+
 @app.route('/test-dashboard')
 def test_dashboard_page():
     """Serves the dashboard test page."""
@@ -323,21 +540,29 @@ def test_dashboard_fix_page():
     return render_template('test_dashboard_fix.html')
 
 @app.route('/reports')
-def reports_page():
+@login_required
+@approved_required
+def reports():
     """Serves the reports management HTML page."""
     return render_template('reports.html')
 
 @app.route('/create-report')
+@login_required
+@approved_required
 def create_report_page():
     """Serves the create/edit report HTML page."""
     return render_template('create_report.html')
 
 @app.route('/report/<int:report_id>')
+@login_required
+@approved_required
 def view_report(report_id):
     """Serves the report view page."""
     return render_template('view_report.html', report_id=report_id)
 
 @app.route('/api/reports', methods=['GET'])
+@login_required
+@approved_required
 def get_reports():
     """Fetches reports from the database with pagination and search."""
     page = request.args.get('page', 1, type=int)
@@ -370,12 +595,16 @@ def get_reports():
     })
 
 @app.route('/api/reports/<int:report_id>', methods=['GET'])
+@login_required
+@approved_required
 def get_report(report_id):
     """Fetches a specific report by ID."""
     report = Report.query.get_or_404(report_id)
     return jsonify(report.to_dict())
 
 @app.route('/api/dashboard/stats', methods=['GET'])
+@login_required
+@approved_required
 def get_dashboard_stats():
     """Get dashboard statistics for all projects and individual projects."""
     # Use optimized database queries instead of loading all data into memory
@@ -525,6 +754,8 @@ def get_dashboard_stats():
     })
 
 @app.route('/api/reports', methods=['POST'])
+@login_required
+@approved_required
 def create_report():
     """Creates a new report and saves it to the database."""
     try:
@@ -1813,7 +2044,9 @@ def get_cached_dashboard_stats():
         return get_dashboard_stats()
 
 @app.route('/project-statistics')
-def project_statistics_page():
+@login_required
+@approved_required
+def project_statistics():
     """Serves the project statistics HTML page."""
     return render_template('project_statistics.html')
 
@@ -2151,5 +2384,20 @@ if __name__ == '__main__':
         db.create_all()
         # Handle migration for existing databases
         migrate_database()
+        
+        # Create default admin user if no users exist
+        if User.query.count() == 0:
+            admin_user = User(
+                first_name='Admin',
+                last_name='User',
+                email='admin@example.com',
+                role='admin',
+                is_approved=True
+            )
+            admin_user.set_password('admin123')  # Change this password!
+            db.session.add(admin_user)
+            db.session.commit()
+            print("Default admin user created: admin@example.com / admin123")
+    
     app.run(debug=True, port=5001)
 
