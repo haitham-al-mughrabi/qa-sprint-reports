@@ -8,127 +8,120 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/auth.css">
+    <link rel="stylesheet" href="/static/auth_style.css">
     <script src="/static/theme-manager-simple.js"></script>
 </head>
-<body>
-    <!-- Theme Toggle -->
-    <button class="theme-toggle" onclick="toggleTheme()">
-        <i class="fas fa-sun" id="theme-icon"></i>
-        <span id="theme-text">Light</span>
-    </button>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-left">
+            <div class="brand-logo">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <h1>Join Our Team</h1>
+            <p>Get started by creating your account and start managing your QA reports efficiently.</p>
+        </div>
+        <div class="auth-right">
+            <div class="auth-header">
+                <h1>Create Account</h1>
+                <p>Fill in the details below to register.</p>
+            </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="container">
-            <div class="card">
-                <div class="card-header">
-                    <div class="brand-logo">
-                        <i class="fas fa-rocket"></i>
-                    </div>
-                    <h1>Sprint Reports</h1>
-                    <p>Create your account</p>
-                </div>
-                <div class="card-body">
-                    <div class="info-box">
-                        <i class="fas fa-info-circle"></i>
-                        Your account will require admin approval before you can access the system.
-                    </div>
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                Your account will require admin approval before you can access the system.
+            </div>
 
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }}">
-                                    <i class="fas fa-{{ 'check' if category == 'success' else 'exclamation-triangle' if category == 'warning' else 'times' if category == 'error' else 'info' }}"></i>
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <i class="fas fa-{{ 'check' if category == 'success' else 'exclamation-triangle' if category == 'warning' else 'times' if category == 'error' else 'info' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.first_name.label(class="form-label") }}
+                        {{ form.first_name(class="form-control", placeholder="First name") }}
+                        {% if form.first_name.errors %}
+                            <div class="alert alert-error">
+                                {% for error in form.first_name.errors %}
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
                         {% endif %}
-                    {% endwith %}
+                    </div>
 
-                    <form method="POST">
-                        {{ form.hidden_tag() }}
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                {{ form.first_name.label(class="form-label") }}
-                                {{ form.first_name(class="form-control", placeholder="First name") }}
-                                {% if form.first_name.errors %}
-                                    <div class="alert alert-error">
-                                        {% for error in form.first_name.errors %}
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
+                    <div class="form-group">
+                        {{ form.last_name.label(class="form-label") }}
+                        {{ form.last_name(class="form-control", placeholder="Last name") }}
+                        {% if form.last_name.errors %}
+                            <div class="alert alert-error">
+                                {% for error in form.last_name.errors %}
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    {{ error }}
+                                {% endfor %}
                             </div>
-
-                            <div class="form-group">
-                                {{ form.last_name.label(class="form-label") }}
-                                {{ form.last_name(class="form-control", placeholder="Last name") }}
-                                {% if form.last_name.errors %}
-                                    <div class="alert alert-error">
-                                        {% for error in form.last_name.errors %}
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            {{ form.email.label(class="form-label") }}
-                            {{ form.email(class="form-control", placeholder="Enter your email") }}
-                            {% if form.email.errors %}
-                                <div class="alert alert-error">
-                                    {% for error in form.email.errors %}
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="form-group">
-                            {{ form.password.label(class="form-label") }}
-                            {{ form.password(class="form-control", placeholder="Enter your password") }}
-                            {% if form.password.errors %}
-                                <div class="alert alert-error" style="margin-top: 0.5rem;">
-                                    {% for error in form.password.errors %}
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="form-group">
-                            {{ form.confirm_password.label(class="form-label") }}
-                            {{ form.confirm_password(class="form-control", placeholder="Confirm your password") }}
-                            {% if form.confirm_password.errors %}
-                                <div class="alert alert-error" style="margin-top: 0.5rem;">
-                                    {% for error in form.confirm_password.errors %}
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-full">
-                            <i class="fas fa-user-plus"></i>
-                            <span>Create Account</span>
-                        </button>
-                    </form>
-
-                    <div class="auth-footer">
-                        <p>
-                            Already have an account? <a href="{{ url_for('login') }}">Sign in here</a>
-                        </p>
+                        {% endif %}
                     </div>
                 </div>
+
+                <div class="form-group">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control", placeholder="Enter your email") }}
+                    {% if form.email.errors %}
+                        <div class="alert alert-error">
+                            {% for error in form.email.errors %}
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control", placeholder="Enter your password") }}
+                    {% if form.password.errors %}
+                        <div class="alert alert-error" style="margin-top: 0.5rem;">
+                            {% for error in form.password.errors %}
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.confirm_password.label(class="form-label") }}
+                    {{ form.confirm_password(class="form-control", placeholder="Confirm your password") }}
+                    {% if form.confirm_password.errors %}
+                        <div class="alert alert-error" style="margin-top: 0.5rem;">
+                            {% for error in form.confirm_password.errors %}
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Create Account</span>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>
+                    Already have an account? <a href="{{ url_for('login') }}">Sign in here</a>
+                </p>
             </div>
         </div>
     </div>
