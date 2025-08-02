@@ -7,8 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/auth_style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=1.1">
+    <link rel="stylesheet" href="/static/style.css?v=1.1">
+    <link rel="stylesheet" href="/static/auth_style.css?v=1.1">
     <script src="/static/theme-manager-simple.js"></script>
 </head>
 <body class="auth-page">
@@ -21,6 +22,11 @@
             <p>Get started by creating your account and start managing your QA reports efficiently.</p>
         </div>
         <div class="auth-right">
+            <div class="theme-switcher-container">
+                <button id="theme-switcher" class="theme-switcher-btn">
+                    <i id="theme-icon" class="fas fa-sun"></i>
+                </button>
+            </div>
             <div class="auth-header">
                 <h1>Create Account</h1>
                 <p>Fill in the details below to register.</p>
@@ -139,5 +145,6 @@
     <script>
         // Theme is automatically initialized by theme-manager-simple.js
     </script>
+    <script src="{{ url_for('static', filename='theme-manager-simple.js') }}"></script>
 </body>
 </html>

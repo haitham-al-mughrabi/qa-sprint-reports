@@ -1,21 +1,39 @@
 /* static/auth_style.css */
 
 :root {
-    --auth-bg: #f0f4f8;
-    --auth-card-bg: #ffffff;
-    --auth-primary-color: #3b82f6;
-    --auth-text-primary: #1e293b;
-    --auth-text-secondary: #64748b;
-    --auth-border-color: #e2e8f0;
+    --auth-bg: var(--background-color, #f0f4f8);
+    --auth-card-bg: var(--card-bg-color, #ffffff);
+    --auth-text-color: var(--text-color, #333);
+    --auth-header-color: var(--header-color, #1e2a38);
+    --auth-primary-color: var(--primary-color, #3498db);
+    --auth-primary-hover-color: var(--primary-hover-color, #2980b9);
+    --auth-border-color: var(--border-color, #e0e0e0);
+    --auth-input-bg: var(--input-bg-color, #fdfdfd);
+    --auth-input-border: var(--input-border-color, #ccc);
+    --auth-input-focus-border: var(--primary-color, #3498db);
+    --auth-link-color: var(--link-color, #3498db);
+    --auth-link-hover-color: var(--link-hover-color, #217dbb);
+    --auth-error-color: var(--error-color, #e74c3c);
+    --auth-success-color: var(--success-color, #2ecc71);
+    --auth-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 [data-theme="dark"] {
-    --auth-bg: #0f172a;
-    --auth-card-bg: #1e293b;
-    --auth-primary-color: #60a5fa;
-    --auth-text-primary: #f1f5f9;
-    --auth-text-secondary: #94a3b8;
-    --auth-border-color: #334155;
+    --auth-bg: var(--background-color, #0f172a);
+    --auth-card-bg: var(--card-bg-color, #1e293b);
+    --auth-text-color: var(--text-color, #f1f5f9);
+    --auth-header-color: var(--header-color, #f1f5f9);
+    --auth-primary-color: var(--primary-color, #60a5fa);
+    --auth-primary-hover-color: var(--primary-hover-color, #4c80f5);
+    --auth-border-color: var(--border-color, #334155);
+    --auth-input-bg: var(--input-bg-color, #1e293b);
+    --auth-input-border: var(--input-border-color, #334155);
+    --auth-input-focus-border: var(--primary-color, #60a5fa);
+    --auth-link-color: var(--link-color, #60a5fa);
+    --auth-link-hover-color: var(--link-hover-color, #4c80f5);
+    --auth-error-color: var(--error-color, #e74c3c);
+    --auth-success-color: var(--success-color, #2ecc71);
+    --auth-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 body.auth-page {
@@ -175,6 +193,32 @@ body.auth-page {
 
 .form-row .form-group {
     flex: 1;
+}
+
+.theme-switcher-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.theme-switcher-btn {
+    background-color: var(--auth-card-bg);
+    border: 1px solid var(--auth-border-color);
+    color: var(--auth-text-secondary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+.theme-switcher-btn:hover {
+    background-color: var(--auth-bg);
+    color: var(--auth-text-primary);
 }
 
 @media (max-width: 992px) {

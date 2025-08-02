@@ -7,9 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/unified-nav.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=1.1">
+    <link rel="stylesheet" href="/static/style.css?v=1.1">
+    <link rel="stylesheet" href="/static/unified-nav.css?v=1.1">
     <script src="/static/theme-manager-simple.js"></script>
 </head>
 <body>
@@ -88,47 +88,30 @@
                             <tbody>
                                 {% for user in users %}
                                 <tr>
-                                    <td>
-                                        <div class="user-info">
-                                            <strong>{{ user.get_full_name() }}</strong>
-                                        </div>
-                                    </td>
+                                    <td>{{ user.get_full_name() }}</td>
                                     <td>{{ user.email }}</td>
+                                    <td><span class="status-badge status-{{ user.role.lower() }}">{{ user.role }}</span></td>
                                     <td>
-                                        <span class="badge badge-{{ 'primary' if user.role == 'admin' else 'secondary' }}">
-                                            <i class="fas fa-{{ 'crown' if user.role == 'admin' else 'user' }}"></i>
-                                            {{ user.role.title() }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-{{ 'success' if user.is_approved else 'warning' }}">
-                                            <i class="fas fa-{{ 'check' if user.is_approved else 'clock' }}"></i>
+                                        <span class="status-badge status-{{ 'approved' if user.is_approved else 'pending' }}">
                                             {{ 'Approved' if user.is_approved else 'Pending' }}
                                         </span>
                                     </td>
                                     <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else 'N/A' }}</td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="{{ url_for('user_details', user_id=user.id) }}" 
-                                               class="btn btn-sm btn-info" title="View Details">
+                                            <a href="{{ url_for('user_details', user_id=user.id) }}" class="btn btn-sm btn-info" title="View Details">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            
                                             {% if not user.is_approved %}
-                                            <button onclick="approveUser({{ user.id }})"
-                                                    class="btn btn-sm btn-success" title="Approve User">
+                                            <button data-action="approve" data-user-id="{{ user.id }}" class="btn btn-sm btn-success" title="Approve User">
                                                 <i class="fas fa-check"></i>
                                             </button>
                                             {% endif %}
-                                            
                                             {% if user.id != current_user.id %}
-                                            <button onclick="toggleRole({{ user.id }}, '{{ user.role }}')" 
-                                                    class="btn btn-sm btn-warning" title="Toggle Role">
+                                            <button data-action="toggle-role" data-user-id="{{ user.id }}" data-role="{{ user.role }}" class="btn btn-sm btn-warning" title="Toggle Role">
                                                 <i class="fas fa-exchange-alt"></i>
                                             </button>
-                                            
-                                            <button onclick="deleteUser({{ user.id }}, '{{ user.get_full_name() }}')" 
-                                                    class="btn btn-sm btn-danger" title="Delete User">
+                                            <button data-action="delete" data-user-id="{{ user.id }}" data-name="{{ user.get_full_name() }}" class="btn btn-sm btn-danger" title="Delete User">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                             {% endif %}
@@ -517,5 +500,6 @@
             }
         }
     </script>
+    <script src="/static/user-management.js?v=1.1"></script>
 </body>
 </html>

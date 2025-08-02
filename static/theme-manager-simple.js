@@ -91,15 +91,13 @@ function forceUpdateThemeElements(theme) {
 function updateThemeButton(theme) {
     const themeIcon = document.getElementById('theme-icon');
     const themeText = document.getElementById('theme-text');
-    
-    if (themeIcon && themeText) {
-        if (theme === 'light') {
-            themeIcon.className = 'fas fa-moon';
-            themeText.textContent = 'Dark';
-        } else {
-            themeIcon.className = 'fas fa-sun';
-            themeText.textContent = 'Light';
-        }
+
+    if (themeIcon) {
+        themeIcon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+    }
+
+    if (themeText) {
+        themeText.textContent = theme === 'light' ? 'Dark' : 'Light';
     }
 }
 
@@ -135,6 +133,12 @@ function initializeTheme() {
     // Apply the theme
     applyTheme(savedTheme);
     
+    // Attach event listener to theme switcher button
+    const themeSwitcher = document.getElementById('theme-switcher');
+    if (themeSwitcher) {
+        themeSwitcher.addEventListener('click', toggleTheme);
+    }
+    
     console.log('Theme system initialized');
 }
 
@@ -148,22 +152,16 @@ function applyThemeEarly() {
     currentTheme = savedTheme;
 }
 
-// Apply theme immediately to prevent flash
+// Apply theme immediately to prevent flash of unstyled content
 applyThemeEarly();
 
-// Initialize when DOM is ready
+// Initialize the full theme system once the DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeTheme);
 } else {
+    // DOM is already ready, initialize immediately
     initializeTheme();
 }
-
-// Make functions globally available
-window.toggleTheme = toggleTheme;
-window.setTheme = setTheme;
-window.getCurrentTheme = getCurrentTheme;
-window.initializeTheme = initializeTheme;
-window.applyTheme = applyTheme;
 
 // Listen for storage changes (theme changes in other tabs)
 window.addEventListener('storage', function(event) {
