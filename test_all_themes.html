@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Theme Test - Sprint Reports</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/unified-nav.css">
+    <script src="/static/theme-manager-simple.js"></script>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand"><i class="fas fa-rocket"></i> Sprint Reports - Complete Theme Test</div>
+            <div style="display: flex; align-items: center;">
+                <div class="nav-links">
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="/test-all-themes" class="nav-link active"><i class="fas fa-palette"></i> Theme Test</a>
+                </div>
+                <div class="nav-controls">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-sun" id="theme-icon"></i>
+                        <span id="theme-text">Light</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-palette"></i> Complete Theme System Test</h1>
+                <p>Testing all components with light and dark themes</p>
+            </div>
+
+            <div id="alerts"></div>
+
+            <!-- Theme Controls -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Theme Controls</h3>
+                </div>
+                <div class="card-body">
+                    <div class="theme-controls">
+                        <button class="btn btn-primary" onclick="setTheme('light')">
+                            <i class="fas fa-sun"></i> Light Theme
+                        </button>
+                        <button class="btn btn-primary" onclick="setTheme('dark')">
+                            <i class="fas fa-moon"></i> Dark Theme
+                        </button>
+                        <button class="btn btn-secondary" onclick="toggleTheme()">
+                            <i class="fas fa-exchange-alt"></i> Toggle
+                        </button>
+                        <button class="btn btn-secondary" onclick="testThemeInfo()">
+                            <i class="fas fa-info"></i> Show Info
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard-style Cards -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Reports</h3>
+                        <p class="stat-number">42</p>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h4>Test Cases</h4>
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="metric-value">1,234</div>
+                    <div class="metric-change positive">+12%</div>
+                </div>
+
+                <div class="project-metric-card">
+                    <h4>Project Alpha</h4>
+                    <div class="project-stats">
+                        <span>Status: Active</span>
+                        <span>Progress: 85%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forms Test -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Form Elements</h3>
+                </div>
+                <div class="card-body">
+                    <form class="test-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Text Input</label>
+                                <input type="text" class="form-control" placeholder="Enter text" value="Sample text">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Input</label>
+                                <input type="email" class="form-control" placeholder="Enter email" value="test@example.com">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Select Dropdown</label>
+                            <select class="form-control">
+                                <option>Option 1</option>
+                                <option selected>Option 2</option>
+                                <option>Option 3</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Textarea</label>
+                            <textarea class="form-control" rows="3" placeholder="Enter description">Sample textarea content that should adapt to the current theme.</textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary">Primary Button</button>
+                            <button type="button" class="btn btn-secondary">Secondary Button</button>
+                            <button type="button" class="btn btn-warning">Warning Button</button>
+                            <button type="button" class="btn btn-danger">Danger Button</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Table Test -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Table Elements</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>Progress</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Project Alpha</td>
+                                    <td><span class="badge badge-success">Active</span></td>
+                                    <td>85%</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">Edit</button>
+                                        <button class="btn btn-sm btn-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Project Beta</td>
+                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>42%</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">Edit</button>
+                                        <button class="btn btn-sm btn-danger">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Project Gamma</td>
+                                    <td><span class="badge badge-error">Failed</span></td>
+                                    <td>12%</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary">Edit</button>
+                                        <button class="btn btn-sm btn-danger">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Test -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Tabs and Navigation</h3>
+                </div>
+                <div class="card-body">
+                    <div class="tabs-container">
+                        <div class="tabs">
+                            <button class="btn active" onclick="showTab('tab1')">Tab 1</button>
+                            <button class="btn" onclick="showTab('tab2')">Tab 2</button>
+                            <button class="btn" onclick="showTab('tab3')">Tab 3</button>
+                        </div>
+                        
+                        <div class="tab-content" id="tab1" style="display: block;">
+                            <h4>Tab 1 Content</h4>
+                            <p>This is the content for tab 1. It should properly inherit theme colors and styling.</p>
+                        </div>
+                        
+                        <div class="tab-content" id="tab2">
+                            <h4>Tab 2 Content</h4>
+                            <p>This is the content for tab 2. All text should be readable in both light and dark themes.</p>
+                        </div>
+                        
+                        <div class="tab-content" id="tab3">
+                            <h4>Tab 3 Content</h4>
+                            <p>This is the content for tab 3. Background and text colors should adapt automatically.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts and Badges -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Alerts and Badges</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check"></i>
+                        This is a success alert that should be visible in both themes.
+                    </div>
+                    
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        This is an error alert that should maintain proper contrast.
+                    </div>
+                    
+                    <div class="badges-test">
+                        <span class="badge badge-primary">Primary</span>
+                        <span class="badge badge-secondary">Secondary</span>
+                        <span class="badge badge-success">Success</span>
+                        <span class="badge badge-warning">Warning</span>
+                        <span class="badge badge-error">Error</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .main-content {
+            margin-top: var(--nav-height);
+            padding: 2rem;
+            min-height: calc(100vh - var(--nav-height));
+            background: var(--background);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .theme-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .stat-content h3 {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .stat-number {
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .metric-header h4 {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .metric-header i {
+            color: var(--primary);
+        }
+
+        .metric-value {
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-change {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .metric-change.positive {
+            color: var(--success);
+        }
+
+        .project-metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+        }
+
+        .project-metric-card h4 {
+            color: var(--text-primary);
+            margin: 0 0 1rem 0;
+        }
+
+        .project-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .project-stats span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .badges-test {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .badge-primary {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+        }
+
+        .badge-secondary {
+            background: rgba(var(--text-secondary), 0.1);
+            color: var(--text-secondary);
+        }
+
+        .badge-success {
+            background: rgba(var(--success-rgb), 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(234, 179, 8, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-success {
+            background: rgba(var(--success-rgb), 0.1);
+            color: var(--success);
+            border: 1px solid rgba(var(--success-rgb), 0.2);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+    </style>
+
+    <script>
+        function showAlert(message, type = 'success') {
+            const alertsContainer = document.getElementById('alerts');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : 'info'}"></i>
+                ${message}
+            `;
+            
+            alertsContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+
+        function testThemeInfo() {
+            const currentTheme = getCurrentTheme();
+            const computedStyle = getComputedStyle(document.documentElement);
+            const bgColor = computedStyle.getPropertyValue('--background').trim();
+            const textColor = computedStyle.getPropertyValue('--text-primary').trim();
+            
+            showAlert(`Current theme: ${currentTheme} | Background: ${bgColor} | Text: ${textColor}`, 'success');
+        }
+
+        function showTab(tabId) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.style.display = 'none');
+            
+            // Remove active class from all buttons
+            const tabButtons = document.querySelectorAll('.tabs .btn');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab and mark button as active
+            document.getElementById(tabId).style.display = 'block';
+            event.target.classList.add('active');
+        }
+
+        // Test theme switching on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            showAlert('Theme test page loaded. Try switching between light and dark themes!', 'success');
+        });
+    </script>
+</body>
+</html>

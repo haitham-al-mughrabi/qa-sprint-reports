@@ -54,16 +54,24 @@
                     {% endif %}
                 </div>
                 <div class="nav-controls">
-                    <span class="user-info">
-                        <i class="fas fa-user"></i> {{ current_user.get_full_name() }}
-                    </span>
+                    <div class="user-dropdown">
+                        <button class="user-info" onclick="toggleUserDropdown()">
+                            <i class="fas fa-user"></i> {{ current_user.get_full_name() }}
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown-menu" id="userDropdown">
+                            <a href="/profile" class="dropdown-item">
+                                <i class="fas fa-user-circle"></i> Profile
+                            </a>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
                     <button class="theme-toggle" onclick="toggleTheme()">
                         <i class="fas fa-sun" id="theme-icon"></i>
                         <span id="theme-text">Light</span>
                     </button>
-                    <a href="{{ url_for('logout') }}" class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </a>
                 </div>
             </div>
         </div>
@@ -76,28 +84,65 @@
             gap: 1rem;
         }
 
+        .user-dropdown {
+            position: relative;
+        }
+
         .user-info {
+            background: none;
+            border: none;
             color: var(--text-secondary);
             font-size: 0.9rem;
             font-weight: 500;
-        }
-
-        .logout-btn {
-            background: var(--danger);
-            color: white;
-            padding: 0.5rem 1rem;
+            cursor: pointer;
+            padding: 0.5rem;
             border-radius: var(--border-radius);
-            text-decoration: none;
-            font-weight: 500;
             transition: var(--transition);
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .logout-btn:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
+        .user-info:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+        }
+
+        .user-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-heavy);
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .user-dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
         }
     </style>
 
@@ -1372,6 +1417,21 @@
         }
 
         // Theme is automatically initialized by theme-manager-simple.js
+
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userInfo = document.querySelector('.user-info');
+            
+            if (!userInfo.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
     </script>
 
 </body>

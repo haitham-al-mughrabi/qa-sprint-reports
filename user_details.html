@@ -26,16 +26,24 @@
                     <a href="/user-management" class="nav-link"><i class="fas fa-users"></i> User Management</a>
                 </div>
                 <div class="nav-controls">
-                    <span class="user-info">
-                        <i class="fas fa-user"></i> {{ current_user.get_full_name() }}
-                    </span>
+                    <div class="user-dropdown">
+                        <button class="user-info" onclick="toggleUserDropdown()">
+                            <i class="fas fa-user"></i> {{ current_user.get_full_name() }}
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown-menu" id="userDropdown">
+                            <a href="/profile" class="dropdown-item">
+                                <i class="fas fa-user-circle"></i> Profile
+                            </a>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
                     <button class="theme-toggle" onclick="toggleTheme()">
                         <i class="fas fa-sun" id="theme-icon"></i>
                         <span id="theme-text">Light</span>
                     </button>
-                    <a href="{{ url_for('logout') }}" class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </a>
                 </div>
             </div>
         </div>
@@ -124,20 +132,107 @@
                     </div>
                 </div>
 
-                <!-- Actions Card -->
+                <!-- Edit User Card -->
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-cogs"></i> Actions</h3>
+                        <h3><i class="fas fa-edit"></i> Edit User Information</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if user.id != current_user.id %}
+                        <form id="editUserForm" class="edit-user-form">
+                            <div class="form-group">
+                                <label for="editFirstName">First Name</label>
+                                <input type="text" id="editFirstName" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editLastName">Last Name</label>
+                                <input type="text" id="editLastName" name="last_name" class="form-control" value="{{ user.last_name }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editEmail">Email Address</label>
+                                <input type="email" id="editEmail" name="email" class="form-control" value="{{ user.email }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editRole">Role</label>
+                                <select id="editRole" name="role" class="form-control">
+                                    <option value="user" {{ 'selected' if user.role == 'user' else '' }}>User</option>
+                                    <option value="admin" {{ 'selected' if user.role == 'admin' else '' }}>Admin</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="editApproved" name="is_approved" {{ 'checked' if user.is_approved else '' }}>
+                                    Account Approved
+                                </label>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Update User
+                                </button>
+                            </div>
+                        </form>
+                        {% else %}
+                        <div class="info-box">
+                            <i class="fas fa-info-circle"></i>
+                            You cannot edit your own account from this page. Use the Profile page instead.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Password Reset Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-key"></i> Reset Password</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if user.id != current_user.id %}
+                        <form id="resetPasswordForm" class="reset-password-form">
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" name="new_password" class="form-control" required minlength="6">
+                                <small class="form-text">Password must be at least 6 characters long</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" id="confirmPassword" name="confirm_password" class="form-control" required>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-key"></i> Reset Password
+                                </button>
+                            </div>
+                        </form>
+                        {% else %}
+                        <div class="info-box">
+                            <i class="fas fa-info-circle"></i>
+                            You cannot reset your own password from this page. Use the Profile page instead.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Actions Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-cogs"></i> Quick Actions</h3>
                     </div>
                     <div class="card-body">
                         <div class="action-buttons-vertical">
+                            {% if user.id != current_user.id %}
                             {% if not user.is_approved %}
                             <button onclick="approveUser({{ user.id }})" class="btn btn-success">
                                 <i class="fas fa-check"></i> Approve User
                             </button>
                             {% endif %}
                             
-                            {% if user.id != current_user.id %}
                             <button onclick="toggleRole({{ user.id }}, '{{ user.role }}')" class="btn btn-warning">
                                 <i class="fas fa-exchange-alt"></i> 
                                 Change to {{ 'User' if user.role == 'admin' else 'Admin' }}
@@ -149,7 +244,7 @@
                             {% else %}
                             <div class="info-box">
                                 <i class="fas fa-info-circle"></i>
-                                You cannot modify your own account from this page.
+                                You cannot perform quick actions on your own account.
                             </div>
                             {% endif %}
                         </div>
@@ -196,7 +291,7 @@
 
         .user-details-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1fr;
             gap: 2rem;
         }
 
@@ -383,28 +478,65 @@
             gap: 1rem;
         }
 
+        .user-dropdown {
+            position: relative;
+        }
+
         .user-info {
+            background: none;
+            border: none;
             color: var(--text-secondary);
             font-size: 0.9rem;
             font-weight: 500;
-        }
-
-        .logout-btn {
-            background: var(--danger);
-            color: white;
-            padding: 0.5rem 1rem;
+            cursor: pointer;
+            padding: 0.5rem;
             border-radius: var(--border-radius);
-            text-decoration: none;
-            font-weight: 500;
             transition: var(--transition);
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .logout-btn:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
+        .user-info:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+        }
+
+        .user-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-heavy);
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .user-dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
         }
 
         .alert {
@@ -470,11 +602,82 @@
             color: var(--text-secondary);
         }
 
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            background: var(--background);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        }
+
+        .form-text {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-success {
+            background: rgba(var(--success-rgb), 0.1);
+            color: var(--success);
+            border: 1px solid rgba(var(--success-rgb), 0.2);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
         @media (max-width: 768px) {
-            .user-details-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .user-avatar {
                 flex-direction: column;
                 text-align: center;
@@ -484,11 +687,118 @@
                 grid-template-columns: 1fr;
                 gap: 0.5rem;
             }
+            
+            .form-actions {
+                flex-direction: column;
+            }
         }
     </style>
 
     <script>
         // Theme is automatically initialized by theme-manager-simple.js
+
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userInfo = document.querySelector('.user-info');
+            
+            if (!userInfo.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        function showAlert(message, type = 'success') {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'}"></i>
+                ${message}
+            `;
+            
+            // Insert at the top of the main content
+            const mainContent = document.querySelector('.main-content .container');
+            mainContent.insertBefore(alert, mainContent.firstChild);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Edit user form submission
+        document.getElementById('editUserForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            data.is_approved = document.getElementById('editApproved').checked;
+            
+            try {
+                const response = await fetch('/api/users/{{ user.id }}/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showAlert(result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error updating user: ' + error.message, 'error');
+            }
+        });
+
+        // Reset password form submission
+        document.getElementById('resetPasswordForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Check if passwords match
+            if (data.new_password !== data.confirm_password) {
+                showAlert('Passwords do not match', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/users/{{ user.id }}/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        new_password: data.new_password
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    this.reset();
+                } else {
+                    showAlert(result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error resetting password: ' + error.message, 'error');
+            }
+        });
 
         async function approveUser(userId) {
             if (!confirm('Are you sure you want to approve this user?')) return;

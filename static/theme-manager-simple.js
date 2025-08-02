@@ -23,12 +23,23 @@ function applyTheme(theme) {
         theme = THEME_CONFIG.DEFAULT_THEME;
     }
     
-    // Apply theme attribute
+    // Apply theme attribute to html and body
     document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
     
     // Apply theme class to body
     document.body.classList.remove('theme-light', 'theme-dark');
     document.body.classList.add(`theme-${theme}`);
+    
+    // Force apply theme colors to body
+    const computedStyle = getComputedStyle(document.documentElement);
+    const bgColor = computedStyle.getPropertyValue('--background').trim();
+    const textColor = computedStyle.getPropertyValue('--text-primary').trim();
+    
+    if (bgColor) {
+        document.body.style.backgroundColor = bgColor;
+        document.body.style.color = textColor;
+    }
     
     // Update global state
     currentTheme = theme;
@@ -39,6 +50,9 @@ function applyTheme(theme) {
     // Update theme button
     updateThemeButton(theme);
     
+    // Force update all elements with theme classes
+    forceUpdateThemeElements(theme);
+    
     // Log for debugging
     console.log(`Theme applied: ${theme}`);
     
@@ -46,6 +60,29 @@ function applyTheme(theme) {
     window.dispatchEvent(new CustomEvent('themeChanged', { 
         detail: { theme: theme } 
     }));
+}
+
+/**
+ * Force update theme on all elements
+ */
+function forceUpdateThemeElements(theme) {
+    // Update main containers
+    const containers = document.querySelectorAll('.page, .container, .main-content, .dashboard-container, .main-wrapper');
+    containers.forEach(el => {
+        el.setAttribute('data-theme', theme);
+    });
+    
+    // Update cards
+    const cards = document.querySelectorAll('.card, .stat-card, .metric-card, .project-metric-card');
+    cards.forEach(el => {
+        el.setAttribute('data-theme', theme);
+    });
+    
+    // Update navigation
+    const navs = document.querySelectorAll('.main-nav, .nav-container');
+    navs.forEach(el => {
+        el.setAttribute('data-theme', theme);
+    });
 }
 
 /**

@@ -442,6 +442,13 @@ def user_details(user_id):
     user = User.query.get_or_404(user_id)
     return render_template('user_details.html', user=user)
 
+@app.route('/profile')
+@login_required
+@approved_required
+def profile():
+    """User profile page"""
+    return render_template('profile.html', user=current_user)
+
 @app.route('/api/users/<int:user_id>/approve', methods=['POST'])
 @login_required
 @admin_required
@@ -477,6 +484,128 @@ def delete_user(user_id):
     db.session.delete(user)
     db.session.commit()
     return jsonify({'success': True, 'message': 'User deleted successfully'})
+
+@app.route('/api/profile/update', methods=['POST'])
+@login_required
+@approved_required
+def update_profile():
+    """Update user profile"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    
+    try:
+        current_user.first_name = data.get('first_name', current_user.first_name)
+        current_user.last_name = data.get('last_name', current_user.last_name)
+        current_user.email = data.get('email', current_user.email)
+        
+        # Check if email is already taken by another user
+        if data.get('email') and data.get('email') != current_user.email:
+            existing_user = User.query.filter_by(email=data.get('email')).first()
+            if existing_user:
+                return jsonify({'success': False, 'message': 'Email already taken'}), 400
+        
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Profile updated successfully'})
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/profile/change-password', methods=['POST'])
+@login_required
+@approved_required
+def change_password():
+    """Change user password"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+    
+    if not current_password or not new_password:
+        return jsonify({'success': False, 'message': 'Current and new passwords are required'}), 400
+    
+    if not current_user.check_password(current_password):
+        return jsonify({'success': False, 'message': 'Current password is incorrect'}), 400
+    
+    if len(new_password) < 6:
+        return jsonify({'success': False, 'message': 'New password must be at least 6 characters'}), 400
+    
+    try:
+        current_user.set_password(new_password)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Password changed successfully'})
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/users/<int:user_id>/update', methods=['POST'])
+@login_required
+@admin_required
+@approved_required
+def admin_update_user(user_id):
+    """Admin update user information"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    
+    user = User.query.get_or_404(user_id)
+    
+    try:
+        user.first_name = data.get('first_name', user.first_name)
+        user.last_name = data.get('last_name', user.last_name)
+        user.email = data.get('email', user.email)
+        user.role = data.get('role', user.role)
+        user.is_approved = data.get('is_approved', user.is_approved)
+        
+        # Check if email is already taken by another user
+        if data.get('email') and data.get('email') != user.email:
+            existing_user = User.query.filter_by(email=data.get('email')).first()
+            if existing_user and existing_user.id != user.id:
+                return jsonify({'success': False, 'message': 'Email already taken'}), 400
+        
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'User updated successfully'})
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/users/<int:user_id>/reset-password', methods=['POST'])
+@login_required
+@admin_required
+@approved_required
+def admin_reset_password(user_id):
+    """Admin reset user password"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    
+    new_password = data.get('new_password')
+    
+    if not new_password:
+        return jsonify({'success': False, 'message': 'New password is required'}), 400
+    
+    if len(new_password) < 6:
+        return jsonify({'success': False, 'message': 'Password must be at least 6 characters'}), 400
+    
+    user = User.query.get_or_404(user_id)
+    
+    try:
+        user.set_password(new_password)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Password reset successfully'})
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 # --- API Routes ---
 
@@ -528,6 +657,11 @@ def debug_theme_page():
 def theme_test_page():
     """Serves the theme test page."""
     return render_template('theme_test.html')
+
+@app.route('/test-all-themes')
+def test_all_themes_page():
+    """Test page to verify themes work on all components."""
+    return render_template('test_all_themes.html')
 
 @app.route('/test-dashboard')
 def test_dashboard_page():
