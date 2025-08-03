@@ -2151,5 +2151,5 @@ if __name__ == '__main__':
         db.create_all()
         # Handle migration for existing databases
         migrate_database()
-    app.run(debug=True, port=5001)
+    app.run(debug=True)
 
