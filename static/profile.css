@@ -253,6 +253,13 @@
     font-weight: 500;
 }
 
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end; /* Moved buttons to the right */
+    margin-top: 30px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 992px) {
     .profile-grid {
