@@ -415,25 +415,6 @@
             padding: 20px;
         }
 
-        .code-block {
-            background: var(--code-bg, #f8f9fa);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            margin: 15px 0;
-        }
-
-        .code-block pre {
-            margin: 0;
-            padding: 15px;
-            overflow-x: auto;
-        }
-
-        .code-block code {
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            color: var(--text-primary);
-        }
-
         .alert {
             padding: 15px;
             border-radius: 4px;
@@ -720,7 +701,7 @@
     </nav>
 
     <div class="main-wrapper">
-        <div class="management-container">
+        <div class="reports-container">
             <div class="page-header">
                 <h1><i class="fas fa-users-cog"></i> User Management</h1>
                 <p>Manage user accounts, permissions, and password reset requests</p>
@@ -740,96 +721,102 @@
 
             <!-- Users Tab -->
             <div id="users-tab" class="tab-content active">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-users"></i> User Accounts
-                    </h2>
-                </div>
-
-                <div id="usersContainer">
-                    <div class="loading-spinner-container">
-                        <div class="loading-spinner"></div>
-                        <p>Loading users...</p>
+                <div class="dashboard-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-users"></i> User Accounts
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div id="usersContainer">
+                                <div class="loading-spinner-container">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading users...</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Password Reset Requests Tab -->
             <div id="reset-requests-tab" class="tab-content">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-key"></i> Password Reset Requests
-                    </h2>
-                </div>
-
-                <div id="resetRequestsContainer">
-                    <div class="loading-spinner-container">
-                        <div class="loading-spinner"></div>
-                        <p>Loading reset requests...</p>
+                <div class="dashboard-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-key"></i> Password Reset Requests
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div id="resetRequestsContainer">
+                                <div class="loading-spinner-container">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading reset requests...</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Email Settings Tab -->
             <div id="email-settings-tab" class="tab-content">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-envelope"></i> Email Settings
-                    </h2>
-                </div>
-
-                <div class="email-settings-container">
-                    <!-- Email Configuration Status -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-cog"></i> Configuration Status</h3>
-                        </div>
-                        <div class="card-body">
-                            <div id="emailConfigStatus">
-                                <div class="loading-spinner-container">
-                                    <div class="loading-spinner"></div>
-                                    <p>Checking email configuration...</p>
+                <div class="dashboard-section">
+                    <div class="email-settings-container">
+                        <!-- Email Configuration Status -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-cog"></i> Configuration Status</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="emailConfigStatus">
+                                    <div class="loading-spinner-container">
+                                        <div class="loading-spinner"></div>
+                                        <p>Checking email configuration...</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Test Email -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-paper-plane"></i> Send Test Email</h3>
-                        </div>
-                        <div class="card-body">
-                            <p>Send a test email to verify your email configuration is working correctly.</p>
-                            <div class="form-group">
-                                <label for="testEmailAddress">Test Email Address:</label>
-                                <input type="email" id="testEmailAddress" class="form-control" placeholder="Enter email address">
+                        <!-- Test Email -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-paper-plane"></i> Send Test Email</h3>
                             </div>
-                            <button class="btn btn-primary" onclick="sendTestEmail()">
-                                <i class="fas fa-paper-plane"></i> Send Test Email
-                            </button>
+                            <div class="card-body">
+                                <p>Send a test email to verify your email configuration is working correctly.</p>
+                                <div class="form-group">
+                                    <label for="testEmailAddress">Test Email Address:</label>
+                                    <input type="email" id="testEmailAddress" class="form-control" placeholder="Enter email address">
+                                </div>
+                                <button class="btn btn-primary" onclick="sendTestEmail()">
+                                    <i class="fas fa-paper-plane"></i> Send Test Email
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Email Configuration Guide -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-info-circle"></i> Configuration Guide</h3>
-                        </div>
-                        <div class="card-body">
-                            <p>To enable email notifications, set the following environment variables:</p>
-                            <div class="code-block">
-                                <pre><code># Gmail Configuration
+                        <!-- Email Configuration Guide -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-info-circle"></i> Configuration Guide</h3>
+                            </div>
+                            <div class="card-body">
+                                <p>To enable email notifications, set the following environment variables:</p>
+                                <div class="code-block">
+                                    <pre><code># Gmail Configuration
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
 MAIL_USERNAME=your-email@gmail.com
 MAIL_PASSWORD=your-app-password
 MAIL_DEFAULT_SENDER=your-email@gmail.com</code></pre>
-                            </div>
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i>
-                                <strong>Gmail Setup:</strong> Enable 2-factor authentication and generate an "App Password" for MAIL_PASSWORD.
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Gmail Setup:</strong> Enable 2-factor authentication and generate an "App Password" for MAIL_PASSWORD.
+                                </div>
                             </div>
                         </div>
                     </div>
