@@ -2802,6 +2802,147 @@ def toggle_active(user_id):
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Failed to update user status'}), 500
 
+@app.route('/api/users/<int:user_id>', methods=['GET'])
+@admin_required
+def get_user_details(user_id):
+    """Get detailed user information"""
+    try:
+        user = User.query.get_or_404(user_id)
+        return jsonify({
+            'success': True,
+            'user': user.to_dict()
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Failed to fetch user details'}), 500
+
+@app.route('/api/users/<int:user_id>', methods=['PUT'])
+@admin_required
+def update_user(user_id):
+    """Update user information"""
+    try:
+        user = User.query.get_or_404(user_id)
+        data = request.get_json()
+        
+        # Update basic information
+        if 'first_name' in data:
+            user.first_name = data['first_name'].strip()
+        if 'last_name' in data:
+            user.last_name = data['last_name'].strip()
+        if 'email' in data:
+            email = data['email'].strip().lower()
+            # Check if email is already taken by another user
+            existing_user = User.query.filter(User.email == email, User.id != user_id).first()
+            if existing_user:
+                return jsonify({'success': False, 'message': 'Email address is already in use'}), 400
+            user.email = email
+        if 'username' in data:
+            username = data['username'].strip() if data['username'] else None
+            if username:
+                # Check if username is already taken by another user
+                existing_user = User.query.filter(User.username == username, User.id != user_id).first()
+                if existing_user:
+                    return jsonify({'success': False, 'message': 'Username is already in use'}), 400
+            user.username = username
+        if 'phone_number' in data:
+            phone = data['phone_number'].strip() if data['phone_number'] else None
+            if phone:
+                # Validate phone number format
+                if not user.validate_phone_number(phone):
+                    return jsonify({'success': False, 'message': 'Invalid phone number format'}), 400
+                # Check if phone is already taken by another user
+                existing_user = User.query.filter(User.phone_number == phone, User.id != user_id).first()
+                if existing_user:
+                    return jsonify({'success': False, 'message': 'Phone number is already in use'}), 400
+            user.phone_number = phone
+        
+        # Update permissions
+        if 'is_admin' in data:
+            user.is_admin = bool(data['is_admin'])
+        if 'is_approved' in data:
+            user.is_approved = bool(data['is_approved'])
+        if 'is_active' in data:
+            user.is_active = bool(data['is_active'])
+        
+        user.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'User {user.get_full_name()} updated successfully',
+            'user': user.to_dict()
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to update user: {str(e)}'}), 500
+
+@app.route('/api/users/<int:user_id>/password', methods=['PUT'])
+@admin_required
+def update_user_password(user_id):
+    """Update user password (admin only)"""
+    try:
+        user = User.query.get_or_404(user_id)
+        data = request.get_json()
+        
+        new_password = data.get('password', '').strip()
+        if not new_password:
+            return jsonify({'success': False, 'message': 'Password is required'}), 400
+        
+        # Validate password strength
+        is_valid, message = user.validate_password_strength(new_password)
+        if not is_valid:
+            return jsonify({'success': False, 'message': message}), 400
+        
+        # Update password
+        user.set_password(new_password)
+        user.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Password updated successfully for {user.get_full_name()}'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to update password: {str(e)}'}), 500
+
+@app.route('/api/users/<int:user_id>/delete', methods=['DELETE'])
+@admin_required
+def delete_user(user_id):
+    """Delete a user account (admin only)"""
+    try:
+        user = User.query.get_or_404(user_id)
+        
+        # Prevent deleting the current admin user
+        current_user = User.query.get(session['user_id'])
+        if user.id == current_user.id:
+            return jsonify({'success': False, 'message': 'Cannot delete your own account'}), 400
+        
+        # Prevent deleting the last admin user
+        if user.is_admin:
+            admin_count = User.query.filter_by(is_admin=True, is_active=True).count()
+            if admin_count <= 1:
+                return jsonify({'success': False, 'message': 'Cannot delete the last admin user'}), 400
+        
+        user_name = user.get_full_name()
+        
+        # Delete related password reset requests first
+        PasswordResetRequest.query.filter_by(user_id=user_id).delete()
+        
+        # Delete the user
+        db.session.delete(user)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'User {user_name} has been deleted successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to delete user: {str(e)}'}), 500
+
 @app.route('/api/password-reset-requests', methods=['GET'])
 @admin_required
 def get_password_reset_requests():

@@ -493,6 +493,161 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--border-radius-large);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+        }
+
+        .form-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .user-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .detail-item {
+            background: rgba(var(--primary-rgb), 0.05);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border-left: 3px solid var(--primary);
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: 1px solid var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            border-color: #2980b9;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 
@@ -686,6 +841,111 @@ MAIL_DEFAULT_SENDER=your-email@gmail.com</code></pre>
     <!-- Toast container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- User Details Modal -->
+    <div id="userDetailsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user"></i> User Details</h3>
+                <button class="modal-close" onclick="closeModal('userDetailsModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="userDetailsContent">
+                <!-- User details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Edit User</h3>
+                <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editFirstName">First Name *</label>
+                            <input type="text" id="editFirstName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editLastName">Last Name *</label>
+                            <input type="text" id="editLastName" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editEmail">Email *</label>
+                        <input type="email" id="editEmail" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editUsername">Username</label>
+                        <input type="text" id="editUsername" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editPhoneNumber">Phone Number</label>
+                        <input type="tel" id="editPhoneNumber" class="form-control" placeholder="05xxxxxxxx">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Permissions</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="editIsAdmin"> Administrator
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="editIsApproved"> Approved
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="editIsActive"> Active
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('editUserModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Change Password</h3>
+                <button class="modal-close" onclick="closeModal('changePasswordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm">
+                    <input type="hidden" id="passwordUserId">
+                    
+                    <div class="form-group">
+                        <label for="newPassword">New Password *</label>
+                        <input type="password" id="newPassword" class="form-control" required>
+                        <small class="form-text">Password must be at least 8 characters with uppercase, lowercase, number, and special character.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password *</label>
+                        <input type="password" id="confirmPassword" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('changePasswordModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         let users = [];
         let resetRequests = [];
@@ -824,6 +1084,15 @@ MAIL_DEFAULT_SENDER=your-email@gmail.com</code></pre>
                             <i class="fas fa-check"></i> Approve
                         </button>
                         ` : ''}
+                        <button class="btn btn-secondary" onclick="viewUser(${user.id})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-secondary" onclick="editUser(${user.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-warning" onclick="changePassword(${user.id})">
+                            <i class="fas fa-key"></i> Password
+                        </button>
                         <button class="btn btn-warning" onclick="toggleAdmin(${user.id})">
                             <i class="fas fa-user-shield"></i> 
                             ${user.is_admin ? 'Revoke Admin' : 'Make Admin'}
@@ -831,6 +1100,9 @@ MAIL_DEFAULT_SENDER=your-email@gmail.com</code></pre>
                         <button class="btn ${user.is_active ? 'btn-danger' : 'btn-success'}" onclick="toggleActive(${user.id})">
                             <i class="fas fa-${user.is_active ? 'ban' : 'check'}"></i> 
                             ${user.is_active ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteUser(${user.id})" style="margin-left: 8px;">
+                            <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
                 </div>
@@ -1099,7 +1371,229 @@ MAIL_DEFAULT_SENDER=your-email@gmail.com</code></pre>
                 showToast('Network error while sending test email', 'error');
             }
         }
+
+    // View user details
+        async function viewUser(userId) {
+            try {
+                const response = await fetch(`/api/users/${userId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const user = result.user;
+                    const content = `
+                        <div class="user-detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Full Name</div>
+                                <div class="detail-value">${user.full_name}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Email</div>
+                                <div class="detail-value">${user.email}</div>
+                            </div>
+                            ${user.username ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Username</div>
+                                <div class="detail-value">${user.username}</div>
+                            </div>
+                            ` : ''}
+                            ${user.phone_number ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Phone Number</div>
+                                <div class="detail-value">${user.phone_number}</div>
+                            </div>
+                            ` : ''}
+                            <div class="detail-item">
+                                <div class="detail-label">Role</div>
+                                <div class="detail-value">${user.is_admin ? 'Administrator' : 'User'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Status</div>
+                                <div class="detail-value">${user.is_approved ? 'Approved' : 'Pending'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Active</div>
+                                <div class="detail-value">${user.is_active ? 'Yes' : 'No'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Created</div>
+                                <div class="detail-value">${new Date(user.created_at).toLocaleString()}</div>
+                            </div>
+                            ${user.last_login ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Last Login</div>
+                                <div class="detail-value">${new Date(user.last_login).toLocaleString()}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="editUser(${user.id}); closeModal('userDetailsModal');">
+                                <i class="fas fa-edit"></i> Edit User
+                            </button>
+                            <button class="btn btn-warning" onclick="changePassword(${user.id}); closeModal('userDetailsModal');">
+                                <i class="fas fa-key"></i> Change Password
+                            </button>
+                        </div>
+                    `;
+                    
+                    document.getElementById('userDetailsContent').innerHTML = content;
+                    document.getElementById('userDetailsModal').style.display = 'flex';
+                } else {
+                    showToast('Failed to load user details', 'error');
+                }
+            } catch (error) {
+                showToast('Network error loading user details', 'error');
+            }
+        }
+
+        // Edit user
+        async function editUser(userId) {
+            try {
+                const response = await fetch(`/api/users/${userId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const user = result.user;
+                    
+                    // Populate form
+                    document.getElementById('editUserId').value = user.id;
+                    document.getElementById('editFirstName').value = user.first_name;
+                    document.getElementById('editLastName').value = user.last_name;
+                    document.getElementById('editEmail').value = user.email;
+                    document.getElementById('editUsername').value = user.username || '';
+                    document.getElementById('editPhoneNumber').value = user.phone_number || '';
+                    document.getElementById('editIsAdmin').checked = user.is_admin;
+                    document.getElementById('editIsApproved').checked = user.is_approved;
+                    document.getElementById('editIsActive').checked = user.is_active;
+                    
+                    document.getElementById('editUserModal').style.display = 'flex';
+                } else {
+                    showToast('Failed to load user details', 'error');
+                }
+            } catch (error) {
+                showToast('Network error loading user details', 'error');
+            }
+        }
+
+        // Change password
+        function changePassword(userId) {
+            document.getElementById('passwordUserId').value = userId;
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('changePasswordModal').style.display = 'flex';
+        }
+
+        // Delete user
+        async function deleteUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            if (!confirm(`Are you sure you want to delete user "${user.full_name}"? This action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/users/${userId}/delete`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    loadUsers(); // Reload users list
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('Network error deleting user', 'error');
+            }
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Handle edit user form submission
+        document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('editUserId').value;
+            const formData = {
+                first_name: document.getElementById('editFirstName').value.trim(),
+                last_name: document.getElementById('editLastName').value.trim(),
+                email: document.getElementById('editEmail').value.trim(),
+                username: document.getElementById('editUsername').value.trim() || null,
+                phone_number: document.getElementById('editPhoneNumber').value.trim() || null,
+                is_admin: document.getElementById('editIsAdmin').checked,
+                is_approved: document.getElementById('editIsApproved').checked,
+                is_active: document.getElementById('editIsActive').checked
+            };
+            
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    closeModal('editUserModal');
+                    loadUsers(); // Reload users list
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('Network error updating user', 'error');
+            }
+        });
+
+        // Handle change password form submission
+        document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('passwordUserId').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/users/${userId}/password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: newPassword })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    closeModal('changePasswordModal');
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('Network error updating password', 'error');
+            }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
     </script>
 </body>
-
 </html>
