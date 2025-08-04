@@ -1,10 +1,14 @@
 # app.py
 # Import necessary libraries
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 import json
 import os
-from datetime import datetime
+import re
+import secrets
+from datetime import datetime, timedelta
 
 # --- App & Database Configuration ---
 app = Flask(__name__, template_folder='.', static_folder='static')
@@ -12,6 +16,7 @@ app = Flask(__name__, template_folder='.', static_folder='static')
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'reports.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
 
 db = SQLAlchemy(app)
 
@@ -270,14 +275,179 @@ class Report(db.Model):
             'updatedAt': self.updatedAt.isoformat() if self.updatedAt else None,
         }
 
+# --- User Authentication Models ---
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    phone_number = db.Column(db.String(20), unique=True, nullable=True)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+    is_approved = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_login = db.Column(db.DateTime)
+    
+    # Note: password reset requests relationship is defined in PasswordResetRequest model
+    
+    def set_password(self, password):
+        """Hash and set password"""
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """Check if provided password matches hash"""
+        return check_password_hash(self.password_hash, password)
+    
+    def get_full_name(self):
+        """Get user's full name"""
+        return f"{self.first_name} {self.last_name}"
+    
+    def validate_phone_number(self, phone):
+        """Validate Saudi phone number format"""
+        if not phone:
+            return True  # Phone is optional
+        
+        # Remove spaces and special characters
+        clean_phone = re.sub(r'[^\d+]', '', phone)
+        
+        # Check Saudi phone number patterns
+        patterns = [
+            r'^05\d{8}$',  # 05xxxxxxxx
+            r'^\+9665\d{8}$',  # +9665xxxxxxxx
+            r'^009665\d{8}$'  # 009665xxxxxxxx
+        ]
+        
+        return any(re.match(pattern, clean_phone) for pattern in patterns)
+    
+    def validate_password_strength(self, password):
+        """Validate password meets security requirements"""
+        if len(password) < 8:
+            return False, "Password must be at least 8 characters long"
+        
+        if not re.search(r'[A-Z]', password):
+            return False, "Password must contain at least one uppercase letter"
+        
+        if not re.search(r'[a-z]', password):
+            return False, "Password must contain at least one lowercase letter"
+        
+        if not re.search(r'\d', password):
+            return False, "Password must contain at least one number"
+        
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            return False, "Password must contain at least one special character"
+        
+        return True, "Password is valid"
+    
+    def to_dict(self):
+        """Convert user to dictionary for JSON serialization"""
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'phone_number': self.phone_number,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'full_name': self.get_full_name(),
+            'is_admin': self.is_admin,
+            'is_approved': self.is_approved,
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'last_login': self.last_login.isoformat() if self.last_login else None
+        }
+
+class PasswordResetRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    token = db.Column(db.String(100), unique=True, nullable=False)
+    is_approved = db.Column(db.Boolean, default=False)
+    is_used = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    approved_at = db.Column(db.DateTime)
+    approved_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
+    # Define relationships with explicit foreign keys
+    user = db.relationship('User', foreign_keys=[user_id], backref='reset_requests')
+    approver = db.relationship('User', foreign_keys=[approved_by])
+    
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.token = secrets.token_urlsafe(32)
+        self.expires_at = datetime.utcnow() + timedelta(hours=24)
+    
+    def is_expired(self):
+        """Check if reset request has expired"""
+        return datetime.utcnow() > self.expires_at
+    
+    def to_dict(self):
+        """Convert to dictionary for JSON serialization"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'user_name': self.user.get_full_name() if self.user else None,
+            'user_email': self.user.email if self.user else None,
+            'is_approved': self.is_approved,
+            'is_used': self.is_used,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'expires_at': self.expires_at.isoformat() if self.expires_at else None,
+            'approved_at': self.approved_at.isoformat() if self.approved_at else None,
+            'is_expired': self.is_expired()
+        }
+
+# --- Authentication Decorators ---
+def login_required(f):
+    """Decorator to require login for routes"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    """Decorator to require admin privileges"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        
+        user = User.query.get(session['user_id'])
+        if not user or not user.is_admin or not user.is_approved:
+            flash('Admin privileges required', 'error')
+            return redirect(url_for('dashboard'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def approved_user_required(f):
+    """Decorator to require approved user"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        
+        user = User.query.get(session['user_id'])
+        if not user or not user.is_approved:
+            flash('Your account is pending approval', 'warning')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 # --- API Routes ---
 
 @app.route('/')
 def index():
-    """Serves the main HTML landing page."""
-    return render_template('dashboard.html')
+    """Redirect to login if not authenticated, otherwise to dashboard."""
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return redirect(url_for('dashboard_page'))
 
 @app.route('/dashboard')
+@login_required
+@approved_user_required
 def dashboard_page():
     """Serves the dashboard HTML page."""
     return render_template('dashboard.html')
@@ -323,21 +493,29 @@ def test_dashboard_fix_page():
     return render_template('test_dashboard_fix.html')
 
 @app.route('/reports')
+@login_required
+@approved_user_required
 def reports_page():
     """Serves the reports management HTML page."""
     return render_template('reports.html')
 
 @app.route('/create-report')
+@login_required
+@approved_user_required
 def create_report_page():
     """Serves the create/edit report HTML page."""
     return render_template('create_report.html')
 
 @app.route('/report/<int:report_id>')
+@login_required
+@approved_user_required
 def view_report(report_id):
     """Serves the report view page."""
     return render_template('view_report.html', report_id=report_id)
 
 @app.route('/api/reports', methods=['GET'])
+@login_required
+@approved_user_required
 def get_reports():
     """Fetches reports from the database with pagination and search."""
     page = request.args.get('page', 1, type=int)
@@ -370,12 +548,16 @@ def get_reports():
     })
 
 @app.route('/api/reports/<int:report_id>', methods=['GET'])
+@login_required
+@approved_user_required
 def get_report(report_id):
     """Fetches a specific report by ID."""
     report = Report.query.get_or_404(report_id)
     return jsonify(report.to_dict())
 
 @app.route('/api/dashboard/stats', methods=['GET'])
+@login_required
+@approved_user_required
 def get_dashboard_stats():
     """Get dashboard statistics for all projects and individual projects."""
     # Use optimized database queries instead of loading all data into memory
@@ -525,6 +707,8 @@ def get_dashboard_stats():
     })
 
 @app.route('/api/reports', methods=['POST'])
+@login_required
+@approved_user_required
 def create_report():
     """Creates a new report and saves it to the database."""
     try:
@@ -2145,11 +2329,463 @@ def migrate_database():
         
         conn.close()
 
+# --- Authentication Routes ---
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Login page and authentication"""
+    if request.method == 'GET':
+        return render_template('login.html')
+    
+    try:
+        data = request.get_json()
+        identifier = data.get('identifier', '').strip()
+        password = data.get('password', '')
+        
+        if not identifier or not password:
+            return jsonify({'success': False, 'message': 'Please provide login credentials'}), 400
+        
+        # Find user by username, email, or phone number
+        user = None
+        
+        # Check if identifier is email
+        if '@' in identifier:
+            user = User.query.filter_by(email=identifier).first()
+        # Check if identifier is phone number
+        elif identifier.startswith('05') or identifier.startswith('+966') or identifier.startswith('00966'):
+            clean_phone = re.sub(r'[^\d+]', '', identifier)
+            user = User.query.filter_by(phone_number=clean_phone).first()
+        # Otherwise, treat as username
+        else:
+            user = User.query.filter_by(username=identifier).first()
+        
+        if not user or not user.check_password(password):
+            return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+        
+        if not user.is_active:
+            return jsonify({'success': False, 'message': 'Account is deactivated'}), 401
+        
+        if not user.is_approved:
+            return jsonify({'success': False, 'message': 'Account is pending approval'}), 401
+        
+        # Check for pending password reset
+        pending_reset = PasswordResetRequest.query.filter_by(
+            user_id=user.id, 
+            is_approved=True, 
+            is_used=False
+        ).first()
+        
+        if pending_reset and not pending_reset.is_expired():
+            session['reset_user_id'] = user.id
+            return jsonify({
+                'success': True, 
+                'redirect': '/reset-password-form',
+                'message': 'Please set your new password'
+            })
+        
+        # Successful login
+        session['user_id'] = user.id
+        user.last_login = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'success': True, 
+            'redirect': '/dashboard',
+            'user': user.to_dict()
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Login failed'}), 500
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Registration page and user creation"""
+    if request.method == 'GET':
+        return render_template('register.html')
+    
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['first_name', 'last_name', 'email', 'password']
+        for field in required_fields:
+            if not data.get(field, '').strip():
+                return jsonify({'success': False, 'message': f'{field.replace("_", " ").title()} is required'}), 400
+        
+        first_name = data.get('first_name').strip()
+        last_name = data.get('last_name').strip()
+        email = data.get('email').strip().lower()
+        phone_number = data.get('phone_number', '').strip()
+        username = data.get('username', '').strip()
+        password = data.get('password')
+        
+        # Validate email format
+        if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+            return jsonify({'success': False, 'message': 'Invalid email format'}), 400
+        
+        # Check if email already exists
+        if User.query.filter_by(email=email).first():
+            return jsonify({'success': False, 'message': 'Email already registered'}), 400
+        
+        # Validate phone number if provided
+        if phone_number:
+            clean_phone = re.sub(r'[^\d+]', '', phone_number)
+            if not User().validate_phone_number(clean_phone):
+                return jsonify({'success': False, 'message': 'Invalid phone number format. Use 05xxxxxxxx, +9665xxxxxxxx, or 009665xxxxxxxx'}), 400
+            
+            # Check if phone already exists
+            if User.query.filter_by(phone_number=clean_phone).first():
+                return jsonify({'success': False, 'message': 'Phone number already registered'}), 400
+        else:
+            clean_phone = None
+        
+        # Validate username if provided
+        if username:
+            if User.query.filter_by(username=username).first():
+                return jsonify({'success': False, 'message': 'Username already taken'}), 400
+        
+        # Validate password strength
+        is_valid, message = User().validate_password_strength(password)
+        if not is_valid:
+            return jsonify({'success': False, 'message': message}), 400
+        
+        # Create new user
+        user = User(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone_number=clean_phone,
+            username=username if username else None,
+            is_approved=False  # Requires admin approval
+        )
+        user.set_password(password)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Registration successful! Your account is pending admin approval.',
+            'redirect': '/login'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Registration failed'}), 500
+
+@app.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    """Password reset request page"""
+    if request.method == 'GET':
+        return render_template('reset_password.html')
+    
+    try:
+        data = request.get_json()
+        identifier = data.get('identifier', '').strip()
+        
+        if not identifier:
+            return jsonify({'success': False, 'message': 'Please provide username, email, or phone number'}), 400
+        
+        # Find user by username, email, or phone number
+        user = None
+        
+        if '@' in identifier:
+            user = User.query.filter_by(email=identifier).first()
+        elif identifier.startswith('05') or identifier.startswith('+966') or identifier.startswith('00966'):
+            clean_phone = re.sub(r'[^\d+]', '', identifier)
+            user = User.query.filter_by(phone_number=clean_phone).first()
+        else:
+            user = User.query.filter_by(username=identifier).first()
+        
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        # Check for existing pending request
+        existing_request = PasswordResetRequest.query.filter_by(
+            user_id=user.id,
+            is_used=False
+        ).first()
+        
+        if existing_request and not existing_request.is_expired():
+            return jsonify({
+                'success': True, 
+                'message': 'Password reset request already submitted and pending admin approval'
+            })
+        
+        # Create new reset request
+        reset_request = PasswordResetRequest(user_id=user.id)
+        db.session.add(reset_request)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Password reset request submitted. An admin will review your request.',
+            'redirect': '/login'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Request failed'}), 500
+
+@app.route('/reset-password-form', methods=['GET', 'POST'])
+def reset_password_form():
+    """Form to set new password after admin approval"""
+    if request.method == 'GET':
+        if 'reset_user_id' not in session:
+            return redirect(url_for('login'))
+        return render_template('reset_password_form.html')
+    
+    try:
+        if 'reset_user_id' not in session:
+            return jsonify({'success': False, 'message': 'Invalid session'}), 401
+        
+        data = request.get_json()
+        new_password = data.get('new_password')
+        confirm_password = data.get('confirm_password')
+        
+        if not new_password or not confirm_password:
+            return jsonify({'success': False, 'message': 'Please provide both password fields'}), 400
+        
+        if new_password != confirm_password:
+            return jsonify({'success': False, 'message': 'Passwords do not match'}), 400
+        
+        user = User.query.get(session['reset_user_id'])
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        # Validate password strength
+        is_valid, message = user.validate_password_strength(new_password)
+        if not is_valid:
+            return jsonify({'success': False, 'message': message}), 400
+        
+        # Find and mark reset request as used
+        reset_request = PasswordResetRequest.query.filter_by(
+            user_id=user.id,
+            is_approved=True,
+            is_used=False
+        ).first()
+        
+        if not reset_request or reset_request.is_expired():
+            return jsonify({'success': False, 'message': 'Invalid or expired reset request'}), 400
+        
+        # Update password and mark request as used
+        user.set_password(new_password)
+        reset_request.is_used = True
+        
+        db.session.commit()
+        
+        # Clear session
+        session.pop('reset_user_id', None)
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Password updated successfully! Please login with your new password.',
+            'redirect': '/login'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Password update failed'}), 500
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+@approved_user_required
+def profile():
+    """User profile page"""
+    user = User.query.get(session['user_id'])
+    
+    if request.method == 'GET':
+        return render_template('profile.html', user=user)
+    
+    try:
+        data = request.get_json()
+        action = data.get('action')
+        
+        if action == 'update_info':
+            # Update user information
+            user.first_name = data.get('first_name', user.first_name).strip()
+            user.last_name = data.get('last_name', user.last_name).strip()
+            user.username = data.get('username', '').strip() or None
+            
+            phone_number = data.get('phone_number', '').strip()
+            if phone_number:
+                clean_phone = re.sub(r'[^\d+]', '', phone_number)
+                if not user.validate_phone_number(clean_phone):
+                    return jsonify({'success': False, 'message': 'Invalid phone number format'}), 400
+                
+                # Check if phone already exists for another user
+                existing_user = User.query.filter(User.phone_number == clean_phone, User.id != user.id).first()
+                if existing_user:
+                    return jsonify({'success': False, 'message': 'Phone number already in use'}), 400
+                
+                user.phone_number = clean_phone
+            else:
+                user.phone_number = None
+            
+            # Check username uniqueness
+            if user.username:
+                existing_user = User.query.filter(User.username == user.username, User.id != user.id).first()
+                if existing_user:
+                    return jsonify({'success': False, 'message': 'Username already taken'}), 400
+            
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Profile updated successfully'})
+        
+        elif action == 'change_password':
+            # Change password
+            old_password = data.get('old_password')
+            new_password = data.get('new_password')
+            confirm_password = data.get('confirm_password')
+            
+            if not old_password or not new_password or not confirm_password:
+                return jsonify({'success': False, 'message': 'All password fields are required'}), 400
+            
+            if not user.check_password(old_password):
+                return jsonify({'success': False, 'message': 'Current password is incorrect'}), 400
+            
+            if new_password != confirm_password:
+                return jsonify({'success': False, 'message': 'New passwords do not match'}), 400
+            
+            # Validate password strength
+            is_valid, message = user.validate_password_strength(new_password)
+            if not is_valid:
+                return jsonify({'success': False, 'message': message}), 400
+            
+            user.set_password(new_password)
+            db.session.commit()
+            
+            return jsonify({'success': True, 'message': 'Password changed successfully'})
+        
+        else:
+            return jsonify({'success': False, 'message': 'Invalid action'}), 400
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Update failed'}), 500
+
+@app.route('/user-management')
+@admin_required
+def user_management():
+    """User management page for admins"""
+    return render_template('user_management.html')
+
+@app.route('/api/users', methods=['GET'])
+@admin_required
+def get_users():
+    """Get all users for admin management"""
+    try:
+        users = User.query.all()
+        return jsonify({
+            'success': True,
+            'users': [user.to_dict() for user in users]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Failed to fetch users'}), 500
+
+@app.route('/api/users/<int:user_id>/approve', methods=['POST'])
+@admin_required
+def approve_user(user_id):
+    """Approve a user account"""
+    try:
+        user = User.query.get_or_404(user_id)
+        user.is_approved = True
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': f'User {user.get_full_name()} approved successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Failed to approve user'}), 500
+
+@app.route('/api/users/<int:user_id>/toggle-admin', methods=['POST'])
+@admin_required
+def toggle_admin(user_id):
+    """Toggle admin status for a user"""
+    try:
+        user = User.query.get_or_404(user_id)
+        user.is_admin = not user.is_admin
+        db.session.commit()
+        
+        status = 'granted' if user.is_admin else 'revoked'
+        return jsonify({'success': True, 'message': f'Admin privileges {status} for {user.get_full_name()}'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Failed to update admin status'}), 500
+
+@app.route('/api/users/<int:user_id>/toggle-active', methods=['POST'])
+@admin_required
+def toggle_active(user_id):
+    """Toggle active status for a user"""
+    try:
+        user = User.query.get_or_404(user_id)
+        user.is_active = not user.is_active
+        db.session.commit()
+        
+        status = 'activated' if user.is_active else 'deactivated'
+        return jsonify({'success': True, 'message': f'User {user.get_full_name()} {status} successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Failed to update user status'}), 500
+
+@app.route('/api/password-reset-requests', methods=['GET'])
+@admin_required
+def get_password_reset_requests():
+    """Get all password reset requests for admin review"""
+    try:
+        requests = PasswordResetRequest.query.filter_by(is_used=False).order_by(PasswordResetRequest.created_at.desc()).all()
+        return jsonify({
+            'success': True,
+            'requests': [req.to_dict() for req in requests]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Failed to fetch reset requests'}), 500
+
+@app.route('/api/password-reset-requests/<int:request_id>/approve', methods=['POST'])
+@admin_required
+def approve_password_reset(request_id):
+    """Approve a password reset request"""
+    try:
+        reset_request = PasswordResetRequest.query.get_or_404(request_id)
+        
+        if reset_request.is_expired():
+            return jsonify({'success': False, 'message': 'Reset request has expired'}), 400
+        
+        reset_request.is_approved = True
+        reset_request.approved_at = datetime.utcnow()
+        reset_request.approved_by = session['user_id']
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Password reset request approved'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Failed to approve reset request'}), 500
+
+@app.route('/logout')
+def logout():
+    """Logout user"""
+    session.clear()
+    return redirect(url_for('login'))
+
 if __name__ == '__main__':
     with app.app_context():
-        # This will create the database file and the 'report' table if they don't exist.
+        # This will create the database file and all tables if they don't exist.
         db.create_all()
         # Handle migration for existing databases
         migrate_database()
+        
+        # Create default admin user if no users exist
+        if User.query.count() == 0:
+            admin_user = User(
+                first_name='Admin',
+                last_name='User',
+                email='admin@example.com',
+                username='admin',
+                is_admin=True,
+                is_approved=True
+            )
+            admin_user.set_password('Admin123!')
+            db.session.add(admin_user)
+            db.session.commit()
+            print("Default admin user created: admin@example.com / Admin123!")
     app.run(debug=True)
 

@@ -1,0 +1,107 @@
+/* Authentication specific styles */
+.auth-body {
+    padding-top: 0 !important;
+}
+
+.auth-container {
+    position: relative;
+    z-index: 10;
+}
+
+/* Ensure toast container works on auth pages */
+.auth-body .toast-container {
+    top: 20px;
+    right: 20px;
+    left: auto;
+}
+
+/* Mobile responsive adjustments for auth pages */
+@media (max-width: 480px) {
+    .auth-body .toast-container {
+        top: 20px;
+        right: 10px;
+        left: 10px;
+    }
+    
+    .theme-toggle {
+        top: 10px;
+        right: 10px;
+        padding: 8px;
+    }
+}
+
+/* Loading states for auth forms */
+.auth-form .loading-spinner {
+    margin-left: 8px;
+}
+
+/* Password strength indicators */
+.password-requirements li.valid::before {
+    content: '✓ ';
+    color: var(--success);
+    font-weight: bold;
+}
+
+.password-requirements li:not(.valid)::before {
+    content: '✗ ';
+    color: var(--danger);
+    font-weight: bold;
+}
+
+/* Form validation states */
+.form-group input.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-group input.success {
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Auth page specific animations */
+.auth-container {
+    animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus states for better accessibility */
+.auth-form input:focus,
+.auth-form button:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .auth-container {
+        border: 2px solid var(--text-primary);
+    }
+    
+    .form-group input {
+        border-width: 2px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .auth-container {
+        animation: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+        border: 2px solid var(--primary);
+        border-radius: 50%;
+    }
+}
