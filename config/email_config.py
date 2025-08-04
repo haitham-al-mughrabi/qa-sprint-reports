@@ -28,4 +28,5 @@ class EmailConfig:
     @classmethod
     def is_configured(cls):
         """Check if email is properly configured"""
-        return bool(cls.MAIL_USERNAME and cls.MAIL_PASSWORD)
+        # For testing servers like Mailsac capture, we only need server and sender
+        return bool(cls.MAIL_SERVER and cls.MAIL_DEFAULT_SENDER)
