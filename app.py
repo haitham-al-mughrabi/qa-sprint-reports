@@ -9,6 +9,11 @@ import os
 import re
 import secrets
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+from services.email_service import email_service
+
+# Load environment variables from .env file
+load_dotenv()
 
 # --- App & Database Configuration ---
 app = Flask(__name__, template_folder='.', static_folder='static')
@@ -19,6 +24,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
 
 db = SQLAlchemy(app)
+
+# Initialize email service
+email_service.init_app(app)
 
 # --- Database Model Definition ---
 class Report(db.Model):
@@ -807,6 +815,31 @@ def create_report():
         
         db.session.add(new_report)
         db.session.commit()
+        
+        # Send email notification about new report (optional - can be configured)
+        try:
+            # Get stakeholder emails (you can customize this logic)
+            stakeholder_emails = []
+            
+            # Add admin emails
+            admin_users = User.query.filter_by(is_admin=True, is_approved=True).all()
+            stakeholder_emails.extend([admin.email for admin in admin_users])
+            
+            # Add project team members if available
+            team_members = json.loads(new_report.teamMemberData or '[]')
+            for member in team_members:
+                if member.get('email'):
+                    stakeholder_emails.append(member['email'])
+            
+            # Remove duplicates
+            stakeholder_emails = list(set(stakeholder_emails))
+            
+            if stakeholder_emails:
+                report_url = f"{request.host_url}report/{new_report.id}"
+                email_service.send_report_notification(new_report, stakeholder_emails, report_url)
+        except Exception as e:
+            # Log error but don't fail report creation
+            print(f"Failed to send report notification email: {e}")
         
         return jsonify(new_report.to_dict()), 201
         
@@ -2477,6 +2510,17 @@ def register():
         db.session.add(user)
         db.session.commit()
         
+        # Send email notification to admins about new registration
+        try:
+            admin_users = User.query.filter_by(is_admin=True, is_approved=True).all()
+            admin_emails = [admin.email for admin in admin_users]
+            
+            if admin_emails:
+                email_service.send_user_registration_notification(user, admin_emails)
+        except Exception as e:
+            # Log error but don't fail registration
+            print(f"Failed to send registration notification email: {e}")
+        
         return jsonify({
             'success': True, 
             'message': 'Registration successful! Your account is pending admin approval.',
@@ -2530,6 +2574,17 @@ def reset_password():
         reset_request = PasswordResetRequest(user_id=user.id)
         db.session.add(reset_request)
         db.session.commit()
+        
+        # Send email notification to admins about password reset request
+        try:
+            admin_users = User.query.filter_by(is_admin=True, is_approved=True).all()
+            admin_emails = [admin.email for admin in admin_users]
+            
+            if admin_emails:
+                email_service.send_password_reset_request_notification(reset_request, admin_emails)
+        except Exception as e:
+            # Log error but don't fail request
+            print(f"Failed to send password reset notification email: {e}")
         
         return jsonify({
             'success': True, 
@@ -2705,6 +2760,13 @@ def approve_user(user_id):
         user.is_approved = True
         db.session.commit()
         
+        # Send approval notification email to user
+        try:
+            email_service.send_user_approval_notification(user)
+        except Exception as e:
+            # Log error but don't fail approval
+            print(f"Failed to send approval notification email: {e}")
+        
         return jsonify({'success': True, 'message': f'User {user.get_full_name()} approved successfully'})
     except Exception as e:
         db.session.rollback()
@@ -2769,10 +2831,108 @@ def approve_password_reset(request_id):
         
         db.session.commit()
         
+        # Send approval notification email to user with reset link
+        try:
+            reset_url = f"{request.host_url}reset-password-form?token={reset_request.token}"
+            email_service.send_password_reset_approved_notification(reset_request, reset_url)
+        except Exception as e:
+            # Log error but don't fail approval
+            print(f"Failed to send password reset approval email: {e}")
+        
         return jsonify({'success': True, 'message': 'Password reset request approved'})
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Failed to approve reset request'}), 500
+
+@app.route('/api/email/test', methods=['POST'])
+@admin_required
+def test_email():
+    """Send a test email to verify email configuration"""
+    try:
+        data = request.get_json()
+        test_email_address = data.get('email')
+        
+        if not test_email_address:
+            return jsonify({'success': False, 'message': 'Email address required'}), 400
+        
+        # Send test email
+        subject = "Test Email - Configuration Verification"
+        template = """
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #27ae60;">Email Configuration Test</h2>
+                
+                <p>Congratulations! Your email configuration is working correctly.</p>
+                
+                <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #27ae60;">
+                    <strong>Test Details:</strong><br>
+                    Sent at: """ + datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC') + """<br>
+                    From: Test Reports System
+                </div>
+                
+                <p>You can now use email notifications for:</p>
+                <ul>
+                    <li>User registration approvals</li>
+                    <li>Password reset requests</li>
+                    <li>Report notifications</li>
+                    <li>Project status updates</li>
+                </ul>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                    This is a test message from the Test Reports System.
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        success = email_service.send_email(test_email_address, subject, template)
+        
+        if success:
+            return jsonify({'success': True, 'message': 'Test email sent successfully!'})
+        else:
+            return jsonify({'success': False, 'message': 'Failed to send test email. Check your email configuration.'}), 500
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error sending test email: {str(e)}'}), 500
+
+@app.route('/api/email/config/status', methods=['GET'])
+@admin_required
+def email_config_status():
+    """Check if email is properly configured"""
+    from config.email_config import EmailConfig
+    
+    return jsonify({
+        'configured': EmailConfig.is_configured(),
+        'server': EmailConfig.MAIL_SERVER,
+        'port': EmailConfig.MAIL_PORT,
+        'use_tls': EmailConfig.MAIL_USE_TLS,
+        'username': EmailConfig.MAIL_USERNAME,
+        'has_password': bool(EmailConfig.MAIL_PASSWORD)
+    })
+
+@app.route('/api/reports/<int:report_id>/send-email', methods=['POST'])
+@login_required
+@approved_user_required
+def send_report_email(report_id):
+    """Send a specific report via email"""
+    try:
+        data = request.get_json()
+        recipients = data.get('recipients', [])
+        
+        if not recipients:
+            return jsonify({'success': False, 'message': 'No recipients specified'}), 400
+        
+        report = Report.query.get_or_404(report_id)
+        report_url = f"{request.host_url}report/{report_id}"
+        
+        email_service.send_report_notification(report, recipients, report_url)
+        
+        return jsonify({'success': True, 'message': f'Report sent to {len(recipients)} recipients'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to send report: {str(e)}'}), 500
 
 @app.route('/logout')
 def logout():

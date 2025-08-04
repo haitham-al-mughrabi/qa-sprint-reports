@@ -381,6 +381,118 @@
                 padding: 10px;
             }
         }
+
+        /* Email Settings Styles */
+        .email-settings-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--header-bg);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .code-block {
+            background: var(--code-bg, #f8f9fa);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 15px;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
     </style>
 </head>
 
@@ -466,6 +578,9 @@
                 <button class="management-tab" onclick="showTab('reset-requests')">
                     <i class="fas fa-key"></i> Password Reset Requests
                 </button>
+                <button class="management-tab" onclick="showTab('email-settings')">
+                    <i class="fas fa-envelope"></i> Email Settings
+                </button>
             </div>
 
             <!-- Users Tab -->
@@ -496,6 +611,72 @@
                     <div class="loading-spinner-container">
                         <div class="loading-spinner"></div>
                         <p>Loading reset requests...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Settings Tab -->
+            <div id="email-settings-tab" class="tab-content">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-envelope"></i> Email Settings
+                    </h2>
+                </div>
+
+                <div class="email-settings-container">
+                    <!-- Email Configuration Status -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-cog"></i> Configuration Status</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="emailConfigStatus">
+                                <div class="loading-spinner-container">
+                                    <div class="loading-spinner"></div>
+                                    <p>Checking email configuration...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Email -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-paper-plane"></i> Send Test Email</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>Send a test email to verify your email configuration is working correctly.</p>
+                            <div class="form-group">
+                                <label for="testEmailAddress">Test Email Address:</label>
+                                <input type="email" id="testEmailAddress" class="form-control" placeholder="Enter email address">
+                            </div>
+                            <button class="btn btn-primary" onclick="sendTestEmail()">
+                                <i class="fas fa-paper-plane"></i> Send Test Email
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Email Configuration Guide -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-info-circle"></i> Configuration Guide</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>To enable email notifications, set the following environment variables:</p>
+                            <div class="code-block">
+                                <pre><code># Gmail Configuration
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_DEFAULT_SENDER=your-email@gmail.com</code></pre>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Gmail Setup:</strong> Enable 2-factor authentication and generate an "App Password" for MAIL_PASSWORD.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -532,6 +713,8 @@
                 loadUsers();
             } else if (tabName === 'reset-requests') {
                 loadResetRequests();
+            } else if (tabName === 'email-settings') {
+                loadEmailSettings();
             }
         }
 
@@ -842,6 +1025,80 @@
             // Load initial data
             loadUsers();
         });
+
+        // Email Settings Functions
+        async function loadEmailSettings() {
+            try {
+                const response = await fetch('/api/email/config/status');
+                const data = await response.json();
+                
+                const statusContainer = document.getElementById('emailConfigStatus');
+                
+                if (data.configured) {
+                    statusContainer.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Email is configured and ready!</strong>
+                            <div style="margin-top: 10px; font-size: 14px;">
+                                <strong>Server:</strong> ${data.server}:${data.port}<br>
+                                <strong>Username:</strong> ${data.username}<br>
+                                <strong>TLS:</strong> ${data.use_tls ? 'Enabled' : 'Disabled'}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    statusContainer.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Email is not configured</strong>
+                            <p>Please set up your email configuration using environment variables to enable email notifications.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('emailConfigStatus').innerHTML = `
+                    <div class="alert alert-error">
+                        <i class="fas fa-times-circle"></i>
+                        <strong>Error checking email configuration</strong>
+                    </div>
+                `;
+            }
+        }
+
+        async function sendTestEmail() {
+            const emailAddress = document.getElementById('testEmailAddress').value.trim();
+            
+            if (!emailAddress) {
+                showToast('Please enter an email address', 'error');
+                return;
+            }
+            
+            if (!emailAddress.includes('@')) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/email/test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: emailAddress })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('Test email sent successfully!', 'success');
+                    document.getElementById('testEmailAddress').value = '';
+                } else {
+                    showToast(data.message || 'Failed to send test email', 'error');
+                }
+            } catch (error) {
+                showToast('Network error while sending test email', 'error');
+            }
+        }
     </script>
 </body>
 
