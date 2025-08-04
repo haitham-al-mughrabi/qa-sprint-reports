@@ -180,7 +180,7 @@
 .form-group label .optional {
     font-weight: 400;
     font-size: 0.8rem;
-    color: var(--text-secondary-light);
+    color: var(--text-secondary-light, var(--text-secondary)); /* Fallback added */
 }
 
 .input-wrapper {
@@ -199,6 +199,31 @@
 
 .input-wrapper .input-icon:hover {
     color: var(--primary);
+}
+
+/* Input field styling */
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    background: var(--input-bg, var(--background)); /* Use input-bg if available, else background */
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="tel"]:focus,
+.form-group input[type="password"]:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 /* Password requirements styling */
