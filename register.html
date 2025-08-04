@@ -53,18 +53,15 @@
         }
 
         .auth-container {
-            background: rgba(var(--surface-rgb, 30, 41, 59), 0.95);
+            background: var(--surface);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: var(--border-radius-large);
-            box-shadow: 
-                0 20px 25px -5px rgba(0, 0, 0, 0.1),
-                0 10px 10px -5px rgba(0, 0, 0, 0.04),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-heavy);
             padding: 50px;
             width: 100%;
             max-width: 600px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
             margin: 20px;
             position: relative;
             animation: slideInUp 0.6s ease-out;
@@ -327,6 +324,35 @@
             .auth-container {
                 padding: 30px 20px;
             }
+        }
+
+        /* Light theme specific fixes */
+        [data-theme="light"] .auth-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        [data-theme="light"] .form-group input {
+            background: var(--background);
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        [data-theme="light"] .form-group input:focus {
+            background: var(--background);
+            border-color: var(--primary);
+        }
+
+        [data-theme="light"] .theme-toggle {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        [data-theme="light"] .password-requirements {
+            background: rgba(var(--primary-rgb), 0.1);
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
         }
     </style>
 </head>
