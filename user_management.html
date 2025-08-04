@@ -1032,83 +1032,72 @@ MAIL_DEFAULT_SENDER=your-email@gmail.com</code></pre>
             }
 
             const usersHtml = users.map(user => `
-                <div class="user-card">
-                    <div class="user-header">
-                        <div class="user-avatar">
-                            ${user.first_name.charAt(0)}${user.last_name.charAt(0)}
+                <tr>
+                    <td>
+                        <div class="user-header">
+                            <div class="user-avatar">
+                                ${user.first_name.charAt(0)}${user.last_name.charAt(0)}
+                            </div>
+                            <div class="user-info">
+                                <h3>${user.full_name}</h3>
+                                <p>${user.email}</p>
+                            </div>
                         </div>
-                        <div class="user-info">
-                            <h3>${user.full_name}</h3>
-                            <p>${user.email}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="user-badges">
+                    </td>
+                    <td>
                         <span class="badge ${user.is_admin ? 'admin' : 'user'}">
                             ${user.is_admin ? 'Administrator' : 'User'}
                         </span>
+                    </td>
+                    <td>
                         <span class="badge ${user.is_approved ? 'approved' : 'pending'}">
                             ${user.is_approved ? 'Approved' : 'Pending'}
                         </span>
                         ${!user.is_active ? '<span class="badge inactive">Inactive</span>' : ''}
-                    </div>
-                    
-                    <div class="user-details">
-                        ${user.username ? `
-                        <div class="user-detail">
-                            <span class="label">Username:</span>
-                            <span class="value">${user.username}</span>
+                    </td>
+                    <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <div class="user-actions">
+                            ${!user.is_approved ? `
+                            <button class="btn btn-success" onclick="approveUser(${user.id})" title="Approve User">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            ` : ''}
+                            <button class="btn btn-secondary" onclick="viewUser(${user.id})" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-secondary" onclick="editUser(${user.id})" title="Edit User">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-warning" onclick="changePassword(${user.id})" title="Change Password">
+                                <i class="fas fa-key"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteUser(${user.id})" title="Delete User">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
-                        ` : ''}
-                        ${user.phone_number ? `
-                        <div class="user-detail">
-                            <span class="label">Phone:</span>
-                            <span class="value">${user.phone_number}</span>
-                        </div>
-                        ` : ''}
-                        <div class="user-detail">
-                            <span class="label">Joined:</span>
-                            <span class="value">${new Date(user.created_at).toLocaleDateString()}</span>
-                        </div>
-                        ${user.last_login ? `
-                        <div class="user-detail">
-                            <span class="label">Last Login:</span>
-                            <span class="value">${new Date(user.last_login).toLocaleDateString()}</span>
-                        </div>
-                        ` : ''}
-                    </div>
-                    
-                    <div class="user-actions">
-                        ${!user.is_approved ? `
-                        <button class="btn btn-success" onclick="approveUser(${user.id})">
-                            <i class="fas fa-check"></i> Approve
-                        </button>
-                        ` : ''}
-                        <button class="btn btn-secondary" onclick="viewUser(${user.id})">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                        <button class="btn btn-secondary" onclick="editUser(${user.id})">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="btn btn-warning" onclick="changePassword(${user.id})">
-                            <i class="fas fa-key"></i> Password
-                        </button>
-                        <button class="btn btn-warning" onclick="toggleAdmin(${user.id})">
-                            <i class="fas fa-user-shield"></i> 
-                            ${user.is_admin ? 'Revoke Admin' : 'Make Admin'}
-                        </button>
-                        <button class="btn ${user.is_active ? 'btn-danger' : 'btn-success'}" onclick="toggleActive(${user.id})">
-                            <i class="fas fa-${user.is_active ? 'ban' : 'check'}"></i> 
-                            ${user.is_active ? 'Deactivate' : 'Activate'}
-                        </button>
-                        <button class="btn btn-danger" onclick="deleteUser(${user.id})" style="margin-left: 8px;">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
-                </div>
+                    </td>
+                </tr>
             `).join('');
 
-            container.innerHTML = `<div class="users-grid">${usersHtml}</div>`;
+            container.innerHTML = `
+                <div class="reset-requests-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${usersHtml}
+                        </tbody>
+                    </table>
+                </div>
+            `;
         }
 
         // Load password reset requests
