@@ -31,7 +31,7 @@ email_service.init_app(app)
 # --- Database Model Definition ---
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    
+
     # Cover Information
     portfolioName = db.Column(db.String(100), nullable=False)
     projectName = db.Column(db.String(100), nullable=False)
@@ -41,17 +41,17 @@ class Report(db.Model):
     cycleNumber = db.Column(db.Integer)
     releaseNumber = db.Column(db.String(50)) # Add missing releaseNumber field
     reportDate = db.Column(db.String(50))
-    
+
     # Test Summary
     testSummary = db.Column(db.Text)
     testingStatus = db.Column(db.String(50))
-    
+
     # Dynamic data stored as JSON strings
     requestData = db.Column(db.Text, default='[]')
     buildData = db.Column(db.Text, default='[]')
     testerData = db.Column(db.Text, default='[]')
     teamMemberData = db.Column(db.Text, default='[]') # New field for team member data
-    
+
     # User Stories Data (detailed breakdown)
     totalUserStories = db.Column(db.Integer, default=0)
     passedUserStories = db.Column(db.Integer, default=0)
@@ -61,7 +61,7 @@ class Report(db.Model):
     cancelledUserStories = db.Column(db.Integer, default=0)
     deferredUserStories = db.Column(db.Integer, default=0)
     notTestableUserStories = db.Column(db.Integer, default=0)
-    
+
     # Test Cases Data (detailed breakdown)
     totalTestCases = db.Column(db.Integer, default=0)
     passedTestCases = db.Column(db.Integer, default=0)
@@ -71,7 +71,7 @@ class Report(db.Model):
     cancelledTestCases = db.Column(db.Integer, default=0)
     deferredTestCases = db.Column(db.Integer, default=0)
     notTestableTestCases = db.Column(db.Integer, default=0)
-    
+
     # Issues Data (detailed breakdown)
     totalIssues = db.Column(db.Integer, default=0)
     criticalIssues = db.Column(db.Integer, default=0)
@@ -83,43 +83,43 @@ class Report(db.Model):
     notFixedIssues = db.Column(db.Integer, default=0)
     reopenedIssues = db.Column(db.Integer, default=0)
     deferredIssues = db.Column(db.Integer, default=0)
-    
+
     # Enhancements Data (detailed breakdown)
     totalEnhancements = db.Column(db.Integer, default=0)
     newEnhancements = db.Column(db.Integer, default=0)
     implementedEnhancements = db.Column(db.Integer, default=0)
     existsEnhancements = db.Column(db.Integer, default=0)
-    
-    
+
+
     # Testing Metrics (calculated fields)
     userStoriesMetric = db.Column(db.Integer, default=0)  # Auto-calculated from user stories
     testCasesMetric = db.Column(db.Integer, default=0)   # Auto-calculated from test cases
     issuesMetric = db.Column(db.Integer, default=0)      # Auto-calculated from issues
     enhancementsMetric = db.Column(db.Integer, default=0) # Auto-calculated from enhancements
-    
+
     # QA Notes
     qaNotesData = db.Column(db.Text, default='[]')  # Store multiple QA notes as JSON array
     qaNoteFieldsData = db.Column(db.Text, default='[]')  # Store custom QA note fields as JSON array
-    
+
     # Automation Regression Data
     # Section 1: Test Cases (auto-calculated from existing test cases)
     automationPassedTestCases = db.Column(db.Integer, default=0)
     automationFailedTestCases = db.Column(db.Integer, default=0)
     automationSkippedTestCases = db.Column(db.Integer, default=0)
     automationTotalTestCases = db.Column(db.Integer, default=0)  # Auto-calculated
-    
+
     # Section 2: Percentages (auto-calculated from section 1)
     automationPassedPercentage = db.Column(db.Float, default=0.0)
     automationFailedPercentage = db.Column(db.Float, default=0.0)
     automationSkippedPercentage = db.Column(db.Float, default=0.0)
-    
+
     # Section 3: Test Stability
     automationStableTests = db.Column(db.Integer, default=0)
     automationFlakyTests = db.Column(db.Integer, default=0)
     automationStabilityTotal = db.Column(db.Integer, default=0)  # Auto-calculated
     automationStablePercentage = db.Column(db.Float, default=0.0)
     automationFlakyPercentage = db.Column(db.Float, default=0.0)
-    
+
     # Metadata
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
     updatedAt = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -137,7 +137,7 @@ class Report(db.Model):
             (self.notTestableUserStories or 0)
         )
         self.userStoriesMetric = self.totalUserStories
-        
+
         # Calculate Test Cases total
         self.totalTestCases = (
             (self.passedTestCases or 0) +
@@ -149,7 +149,7 @@ class Report(db.Model):
             (self.notTestableTestCases or 0)
         )
         self.testCasesMetric = self.totalTestCases
-        
+
         # Calculate Issues total (by priority)
         self.totalIssues = (
             (self.criticalIssues or 0) +
@@ -158,7 +158,7 @@ class Report(db.Model):
             (self.lowIssues or 0)
         )
         self.issuesMetric = self.totalIssues
-        
+
         # Calculate Enhancements total
         self.totalEnhancements = (
             (self.newEnhancements or 0) +
@@ -166,14 +166,14 @@ class Report(db.Model):
             (self.existsEnhancements or 0)
         )
         self.enhancementsMetric = self.totalEnhancements
-        
+
         # Calculate Automation Regression totals and percentages
         self.automationTotalTestCases = (
             (self.automationPassedTestCases or 0) +
             (self.automationFailedTestCases or 0) +
             (self.automationSkippedTestCases or 0)
         )
-        
+
         # Calculate automation test percentages
         if self.automationTotalTestCases > 0:
             self.automationPassedPercentage = round(((self.automationPassedTestCases or 0) / self.automationTotalTestCases) * 100, 2)
@@ -183,13 +183,13 @@ class Report(db.Model):
             self.automationPassedPercentage = 0.0
             self.automationFailedPercentage = 0.0
             self.automationSkippedPercentage = 0.0
-        
+
         # Calculate automation stability totals and percentages
         self.automationStabilityTotal = (
             (self.automationStableTests or 0) +
             (self.automationFlakyTests or 0)
         )
-        
+
         if self.automationStabilityTotal > 0:
             self.automationStablePercentage = round(((self.automationStableTests or 0) / self.automationStabilityTotal) * 100, 2)
             self.automationFlakyPercentage = round(((self.automationFlakyTests or 0) / self.automationStabilityTotal) * 100, 2)
@@ -211,13 +211,13 @@ class Report(db.Model):
             'reportDate': self.reportDate,
             'testSummary': self.testSummary,
             'testingStatus': self.testingStatus,
-            
+
             # Dynamic data
             'requestData': json.loads(self.requestData or '[]'),
             'buildData': json.loads(self.buildData or '[]'),
             'testerData': json.loads(self.testerData or '[]'),
             'teamMemberData': json.loads(self.teamMemberData or '[]'),
-            
+
             # User Stories
             'totalUserStories': self.totalUserStories,
             'passedUserStories': self.passedUserStories,
@@ -227,7 +227,7 @@ class Report(db.Model):
             'cancelledUserStories': self.cancelledUserStories,
             'deferredUserStories': self.deferredUserStories,
             'notTestableUserStories': self.notTestableUserStories,
-            
+
             # Test Cases
             'totalTestCases': self.totalTestCases,
             'passedTestCases': self.passedTestCases,
@@ -237,7 +237,7 @@ class Report(db.Model):
             'cancelledTestCases': self.cancelledTestCases,
             'deferredTestCases': self.deferredTestCases,
             'notTestableTestCases': self.notTestableTestCases,
-            
+
             # Issues
             'totalIssues': self.totalIssues,
             'criticalIssues': self.criticalIssues,
@@ -249,13 +249,13 @@ class Report(db.Model):
             'notFixedIssues': self.notFixedIssues,
             'reopenedIssues': self.reopenedIssues,
             'deferredIssues': self.deferredIssues,
-            
+
             # Enhancements
             'totalEnhancements': self.totalEnhancements,
             'newEnhancements': self.newEnhancements,
             'implementedEnhancements': self.implementedEnhancements,
             'existsEnhancements': self.existsEnhancements,
-            
+
             # Metrics
             'userStoriesMetric': self.userStoriesMetric,
             'testCasesMetric': self.testCasesMetric,
@@ -263,7 +263,7 @@ class Report(db.Model):
             'enhancementsMetric': self.enhancementsMetric,
             'qaNotesData': json.loads(self.qaNotesData or '[]'),
             'qaNoteFieldsData': json.loads(self.qaNoteFieldsData or '[]'),
-            
+
             # Automation Regression Data
             'automationPassedTestCases': self.automationPassedTestCases,
             'automationFailedTestCases': self.automationFailedTestCases,
@@ -277,7 +277,7 @@ class Report(db.Model):
             'automationStabilityTotal': self.automationStabilityTotal,
             'automationStablePercentage': self.automationStablePercentage,
             'automationFlakyPercentage': self.automationFlakyPercentage,
-            
+
             # Metadata
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
             'updatedAt': self.updatedAt.isoformat() if self.updatedAt else None,
@@ -298,57 +298,57 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_login = db.Column(db.DateTime)
-    
+
     # Note: password reset requests relationship is defined in PasswordResetRequest model
-    
+
     def set_password(self, password):
         """Hash and set password"""
         self.password_hash = generate_password_hash(password)
-    
+
     def check_password(self, password):
         """Check if provided password matches hash"""
         return check_password_hash(self.password_hash, password)
-    
+
     def get_full_name(self):
         """Get user's full name"""
         return f"{self.first_name} {self.last_name}"
-    
+
     def validate_phone_number(self, phone):
         """Validate Saudi phone number format"""
         if not phone:
             return True  # Phone is optional
-        
+
         # Remove spaces and special characters
         clean_phone = re.sub(r'[^\d+]', '', phone)
-        
+
         # Check Saudi phone number patterns
         patterns = [
             r'^05\d{8}$',  # 05xxxxxxxx
             r'^\+9665\d{8}$',  # +9665xxxxxxxx
             r'^009665\d{8}$'  # 009665xxxxxxxx
         ]
-        
+
         return any(re.match(pattern, clean_phone) for pattern in patterns)
-    
+
     def validate_password_strength(self, password):
         """Validate password meets security requirements"""
         if len(password) < 8:
             return False, "Password must be at least 8 characters long"
-        
+
         if not re.search(r'[A-Z]', password):
             return False, "Password must contain at least one uppercase letter"
-        
+
         if not re.search(r'[a-z]', password):
             return False, "Password must contain at least one lowercase letter"
-        
+
         if not re.search(r'\d', password):
             return False, "Password must contain at least one number"
-        
+
         if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
             return False, "Password must contain at least one special character"
-        
+
         return True, "Password is valid"
-    
+
     def to_dict(self):
         """Convert user to dictionary for JSON serialization"""
         return {
@@ -377,20 +377,20 @@ class PasswordResetRequest(db.Model):
     expires_at = db.Column(db.DateTime, nullable=False)
     approved_at = db.Column(db.DateTime)
     approved_by = db.Column(db.Integer, db.ForeignKey('user.id'))
-    
+
     # Define relationships with explicit foreign keys
     user = db.relationship('User', foreign_keys=[user_id], backref='reset_requests')
     approver = db.relationship('User', foreign_keys=[approved_by])
-    
+
     def __init__(self, user_id):
         self.user_id = user_id
         self.token = secrets.token_urlsafe(32)
         self.expires_at = datetime.utcnow() + timedelta(hours=24)
-    
+
     def is_expired(self):
         """Check if reset request has expired"""
         return datetime.utcnow() > self.expires_at
-    
+
     def to_dict(self):
         """Convert to dictionary for JSON serialization"""
         return {
@@ -422,7 +422,7 @@ def admin_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             return redirect(url_for('login'))
-        
+
         user = User.query.get(session['user_id'])
         if not user or not user.is_admin or not user.is_approved:
             flash('Admin privileges required', 'error')
@@ -436,7 +436,7 @@ def approved_user_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             return redirect(url_for('login'))
-        
+
         user = User.query.get(session['user_id'])
         if not user or not user.is_approved:
             flash('Your account is pending approval', 'warning')
@@ -454,7 +454,7 @@ def get_current_user():
     user = User.query.get(session['user_id'])
     if not user:
         return jsonify({'success': False, 'message': 'User not found'}), 404
-    
+
     return jsonify({
         'success': True,
         'user': user.to_dict()
@@ -559,7 +559,7 @@ def get_reports():
 
     pagination = query.order_by(Report.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
     reports = pagination.items
-    
+
     return jsonify({
         'reports': [report.to_dict() for report in reports],
         'total': pagination.total,
@@ -584,13 +584,13 @@ def get_dashboard_stats():
     """Get dashboard statistics for all projects and individual projects."""
     # Use optimized database queries instead of loading all data into memory
     from sqlalchemy import func
-    
+
     # Get overall stats with single queries
     total_reports = db.session.query(func.count(Report.id)).scalar()
     completed_reports = db.session.query(func.count(Report.id)).filter(Report.testingStatus == 'passed').scalar()
     in_progress_reports = db.session.query(func.count(Report.id)).filter(Report.testingStatus == 'passed-with-issues').scalar()
     pending_reports = total_reports - completed_reports - in_progress_reports
-    
+
     # Get aggregate metrics with database aggregation
     aggregate_result = db.session.query(
         func.sum(Report.totalUserStories).label('total_user_stories'),
@@ -630,7 +630,7 @@ def get_dashboard_stats():
         func.sum(Report.automationStableTests).label('automation_stable_tests'),
         func.sum(Report.automationFlakyTests).label('automation_flaky_tests'),
     ).first()
-    
+
     # Project-specific metrics using optimized query
     project_stats = db.session.query(
         Report.portfolioName,
@@ -642,7 +642,7 @@ def get_dashboard_stats():
         func.sum(Report.totalEnhancements).label('totalEnhancements'),
         func.max(Report.reportDate).label('lastReportDate')
     ).group_by(Report.portfolioName, Report.projectName).all()
-    
+
     # Get latest testing status for each project
     latest_reports_subquery = db.session.query(
         Report.portfolioName,
@@ -653,13 +653,13 @@ def get_dashboard_stats():
             order_by=Report.reportDate.desc()
         ).label('rn')
     ).subquery()
-    
+
     latest_statuses = db.session.query(
         latest_reports_subquery.c.portfolioName,
         latest_reports_subquery.c.projectName,
         latest_reports_subquery.c.testingStatus
     ).filter(latest_reports_subquery.c.rn == 1).all()
-    
+
     # Create projects dictionary with optimized data
     projects = {}
     for stat in project_stats:
@@ -675,13 +675,13 @@ def get_dashboard_stats():
             'lastReportDate': stat.lastReportDate,
             'testingStatus': 'pending'  # Will be updated below
         }
-    
+
     # Update with latest testing statuses
     for status in latest_statuses:
         project_key = f"{status.portfolioName}_{status.projectName}"
         if project_key in projects:
             projects[project_key]['testingStatus'] = status.testingStatus
-    
+
     return jsonify({
         'overall': {
             'totalReports': total_reports,
@@ -735,16 +735,16 @@ def create_report():
     """Creates a new report and saves it to the database."""
     try:
         data = request.get_json()
-        
+
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-        
+
         # Validate required fields
         required_fields = ['portfolioName', 'projectName', 'sprintNumber']
         for field in required_fields:
             if not data.get(field):
                 return jsonify({'error': f'Missing required field: {field}'}), 400
-        
+
         new_report = Report(
             portfolioName=data.get('portfolioName'),
             projectName=data.get('projectName'),
@@ -756,13 +756,13 @@ def create_report():
             reportDate=data.get('reportDate'),
             testSummary=data.get('testSummary'),
             testingStatus=data.get('testingStatus'),
-            
+
             # Dynamic data
             requestData=json.dumps(data.get('requestData', [])),
             buildData=json.dumps(data.get('buildData', [])),
             testerData=json.dumps(data.get('testerData', [])),
             teamMemberData=json.dumps(data.get('teamMemberData', [])), # New field
-            
+
             # User Stories
             passedUserStories=int(data.get('passedUserStories') or 0),
             passedWithIssuesUserStories=int(data.get('passedWithIssuesUserStories') or 0),
@@ -771,7 +771,7 @@ def create_report():
             cancelledUserStories=int(data.get('cancelledUserStories') or 0),
             deferredUserStories=int(data.get('deferredUserStories') or 0),
             notTestableUserStories=int(data.get('notTestableUserStories') or 0),
-            
+
             # Test Cases
             passedTestCases=int(data.get('passedTestCases') or 0),
             passedWithIssuesTestCases=int(data.get('passedWithIssuesTestCases') or 0),
@@ -780,7 +780,7 @@ def create_report():
             cancelledTestCases=int(data.get('cancelledTestCases') or 0),
             deferredTestCases=int(data.get('deferredTestCases') or 0),
             notTestableTestCases=int(data.get('notTestableTestCases') or 0),
-            
+
             # Issues
             criticalIssues=int(data.get('criticalIssues') or 0),
             highIssues=int(data.get('highIssues') or 0),
@@ -791,58 +791,58 @@ def create_report():
             notFixedIssues=int(data.get('notFixedIssues') or 0),
             reopenedIssues=int(data.get('reopenedIssues') or 0),
             deferredIssues=int(data.get('deferredIssues') or 0),
-            
+
             # Enhancements
             newEnhancements=int(data.get('newEnhancements') or 0),
             implementedEnhancements=int(data.get('implementedEnhancements') or 0),
             existsEnhancements=int(data.get('existsEnhancements') or 0),
-            
+
             # Other metrics
             qaNotesData=json.dumps(data.get('qaNotesData', [])),
             qaNoteFieldsData=json.dumps(data.get('qaNoteFieldsData', [])),
-            
+
             # Automation Regression Data
             automationPassedTestCases=int(data.get('automationPassedTestCases') or 0),
             automationFailedTestCases=int(data.get('automationFailedTestCases') or 0),
             automationSkippedTestCases=int(data.get('automationSkippedTestCases') or 0),
             automationStableTests=int(data.get('automationStableTests') or 0),
             automationFlakyTests=int(data.get('automationFlakyTests') or 0),
-            
+
         )
-        
+
         # Calculate totals and scores
         new_report.calculate_totals()
-        
+
         db.session.add(new_report)
         db.session.commit()
-        
+
         # Send email notification about new report (optional - can be configured)
         try:
             # Get stakeholder emails (you can customize this logic)
             stakeholder_emails = []
-            
+
             # Add admin emails
             admin_users = User.query.filter_by(is_admin=True, is_approved=True).all()
             stakeholder_emails.extend([admin.email for admin in admin_users])
-            
+
             # Add project team members if available
             team_members = json.loads(new_report.teamMemberData or '[]')
             for member in team_members:
                 if member.get('email'):
                     stakeholder_emails.append(member['email'])
-            
+
             # Remove duplicates
             stakeholder_emails = list(set(stakeholder_emails))
-            
+
             if stakeholder_emails:
                 report_url = f"{request.host_url}report/{new_report.id}"
                 email_service.send_report_notification(new_report, stakeholder_emails, report_url)
         except Exception as e:
             # Log error but don't fail report creation
             print(f"Failed to send report notification email: {e}")
-        
+
         return jsonify(new_report.to_dict()), 201
-        
+
     except Exception as e:
         db.session.rollback()
         print(f"Error creating report: {str(e)}")
@@ -853,7 +853,7 @@ class Portfolio(db.Model):
     name = db.Column(db.String(100), nullable=False, unique=True)
     description = db.Column(db.Text)
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     # Relationship
     projects = db.relationship('Project', backref='portfolio', lazy=True)
 
@@ -869,7 +869,7 @@ class Project(db.Model):
     description = db.Column(db.Text)
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'), nullable=True)  # Allow projects without portfolio
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     # Many-to-many relationship with testers
     testers = db.relationship('Tester', secondary=tester_project_association, back_populates='projects')
 
@@ -877,7 +877,7 @@ class Tester(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
-    
+
     # Expanded tester roles
     is_automation_engineer = db.Column(db.Boolean, default=False)
     is_manual_engineer = db.Column(db.Boolean, default=False)
@@ -889,12 +889,12 @@ class Tester(db.Model):
     is_accessibility_tester = db.Column(db.Boolean, default=False)
     is_usability_tester = db.Column(db.Boolean, default=False)
     is_test_lead = db.Column(db.Boolean, default=False)
-    
+
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     # Many-to-many relationship with projects
     projects = db.relationship('Project', secondary=tester_project_association, back_populates='testers')
-    
+
     @property
     def role_types(self):
         """Return list of role types for this tester"""
@@ -920,7 +920,7 @@ class Tester(db.Model):
         if self.is_test_lead:
             roles.append('Test Lead')
         return roles
-    
+
     @property
     def role_display(self):
         """Return formatted role display string"""
@@ -935,7 +935,7 @@ class TeamMember(db.Model):
     email = db.Column(db.String(120), nullable=False, unique=True)
     role = db.Column(db.String(50), nullable=False)  # Updated to allow longer role names
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     # Add validation for roles
     VALID_ROLES = [
         'Project Owner', 'Project Analyst', 'Project Manager', 'Business Analyst',
@@ -943,7 +943,7 @@ class TeamMember(db.Model):
         'DevOps Engineer', 'UI/UX Designer', 'Database Administrator', 'Security Analyst',
         'System Administrator', 'Stakeholder', 'Client Representative'
     ]
-    
+
     def __init__(self, **kwargs):
         super(TeamMember, self).__init__(**kwargs)
         if self.role not in self.VALID_ROLES:
@@ -999,13 +999,13 @@ def manage_portfolios():
     if request.method == 'GET':
         portfolios = Portfolio.query.all()
         return jsonify([{'id': p.id, 'name': p.name, 'description': p.description} for p in portfolios])
-    
+
     elif request.method == 'POST':
         try:
             data = request.get_json()
             if not data or not data.get('name'):
                 return jsonify({'error': 'Portfolio name is required'}), 400
-            
+
             portfolio = Portfolio(name=data['name'], description=data.get('description', ''))
             db.session.add(portfolio)
             db.session.commit()
@@ -1020,28 +1020,28 @@ def manage_projects():
     if request.method == 'GET':
         projects = Project.query.all()
         return jsonify([{
-            'id': p.id, 
-            'name': p.name, 
+            'id': p.id,
+            'name': p.name,
             'description': p.description,
             'portfolio_id': p.portfolio_id,
             'portfolio_name': p.portfolio.name if p.portfolio else None
         } for p in projects])
-    
+
     elif request.method == 'POST':
         try:
             data = request.get_json()
             if not data or not data.get('name'):
                 return jsonify({'error': 'Project name is required'}), 400
-            
+
             project = Project(
-                name=data['name'], 
+                name=data['name'],
                 description=data.get('description', ''),
                 portfolio_id=data.get('portfolio_id') if data.get('portfolio_id') else None
             )
             db.session.add(project)
             db.session.commit()
             return jsonify({
-                'id': project.id, 
+                'id': project.id,
                 'name': project.name,
                 'description': project.description,
                 'portfolio_id': project.portfolio_id,
@@ -1054,7 +1054,7 @@ def manage_projects():
 @app.route('/api/projects/<int:project_id>', methods=['GET', 'PUT', 'DELETE'])
 def manage_project(project_id):
     project = Project.query.get_or_404(project_id)
-    
+
     if request.method == 'GET':
         return jsonify({
             'id': project.id,
@@ -1063,7 +1063,7 @@ def manage_project(project_id):
             'portfolio_id': project.portfolio_id,
             'portfolio_name': project.portfolio.name if project.portfolio else None
         })
-    
+
     elif request.method == 'PUT':
         data = request.get_json()
         project.name = data.get('name', project.name)
@@ -1071,7 +1071,7 @@ def manage_project(project_id):
         project.portfolio_id = data.get('portfolio_id', project.portfolio_id)
         db.session.commit()
         return jsonify({'id': project.id, 'name': project.name})
-    
+
     elif request.method == 'DELETE':
         db.session.delete(project)
         db.session.commit()
@@ -1121,18 +1121,18 @@ def manage_testers():
             'project_ids': [p.id for p in t.projects],
             'createdAt': t.createdAt.isoformat() if t.createdAt else None
         } for t in testers])
-    
+
     elif request.method == 'POST':
         data = request.get_json()
-        
+
         if not data or not data.get('name') or not data.get('email'):
             return jsonify({'error': 'Name and email are required'}), 400
-        
+
         # Check if email already exists
         existing_tester = Tester.query.filter_by(email=data['email']).first()
         if existing_tester:
             return jsonify({'error': 'Tester with this email already exists'}), 400
-        
+
         tester = Tester(
             name=data['name'],
             email=data['email'],
@@ -1147,16 +1147,16 @@ def manage_testers():
             is_usability_tester=data.get('is_usability_tester', False),
             is_test_lead=data.get('is_test_lead', False)
         )
-        
+
         # Handle project assignments
         project_ids = data.get('project_ids', [])
         if project_ids:
             projects = Project.query.filter(Project.id.in_(project_ids)).all()
             tester.projects = projects
-        
+
         db.session.add(tester)
         db.session.commit()
-        
+
         return jsonify({
             'id': tester.id,
             'name': tester.name,
@@ -1179,7 +1179,7 @@ def manage_testers():
 @app.route('/api/testers/<int:tester_id>', methods=['GET', 'PUT', 'DELETE'])
 def manage_tester(tester_id):
     tester = Tester.query.get_or_404(tester_id)
-    
+
     if request.method == 'GET':
         return jsonify({
             'id': tester.id,
@@ -1200,21 +1200,21 @@ def manage_tester(tester_id):
             'project_ids': [p.id for p in tester.projects],
             'createdAt': tester.createdAt.isoformat() if tester.createdAt else None
         })
-    
+
     elif request.method == 'PUT':
         try:
             data = request.get_json()
-            
+
             # Check if email is being changed and if new email already exists
             if data.get('email') != tester.email:
                 existing_tester = Tester.query.filter_by(email=data['email']).first()
                 if existing_tester:
                     return jsonify({'error': 'Tester with this email already exists'}), 400
-            
+
             # Update basic fields
             tester.name = data.get('name', tester.name)
             tester.email = data.get('email', tester.email)
-            
+
             # Update all role fields
             tester.is_automation_engineer = data.get('is_automation_engineer', tester.is_automation_engineer)
             tester.is_manual_engineer = data.get('is_manual_engineer', tester.is_manual_engineer)
@@ -1226,15 +1226,15 @@ def manage_tester(tester_id):
             tester.is_accessibility_tester = data.get('is_accessibility_tester', tester.is_accessibility_tester)
             tester.is_usability_tester = data.get('is_usability_tester', tester.is_usability_tester)
             tester.is_test_lead = data.get('is_test_lead', tester.is_test_lead)
-            
+
             # Update project assignments
             project_ids = data.get('project_ids', [])
             if project_ids is not None:
                 projects = Project.query.filter(Project.id.in_(project_ids)).all()
                 tester.projects = projects
-            
+
             db.session.commit()
-            
+
             return jsonify({
                 'id': tester.id,
                 'name': tester.name,
@@ -1256,7 +1256,7 @@ def manage_tester(tester_id):
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
-    
+
     elif request.method == 'DELETE':
         db.session.delete(tester)
         db.session.commit()
@@ -1266,7 +1266,7 @@ def manage_tester(tester_id):
 @app.route('/api/testers/<int:tester_id>/projects', methods=['GET', 'POST'])
 def manage_tester_projects(tester_id):
     tester = Tester.query.get_or_404(tester_id)
-    
+
     if request.method == 'GET':
         return jsonify([{
             'id': p.id,
@@ -1274,20 +1274,20 @@ def manage_tester_projects(tester_id):
             'portfolio_id': p.portfolio_id,
             'portfolio_name': p.portfolio.name if p.portfolio else None
         } for p in tester.projects])
-    
+
     elif request.method == 'POST':
         data = request.get_json()
         project_ids = data.get('project_ids', [])
-        
+
         # Clear existing relationships
         tester.projects.clear()
-        
+
         # Add new relationships
         for project_id in project_ids:
             project = Project.query.get(project_id)
             if project:
                 tester.projects.append(project)
-        
+
         db.session.commit()
         return jsonify({'message': 'Tester projects updated successfully'}), 200
 
@@ -1317,19 +1317,19 @@ def manage_team_members():
             'role': tm.role,
             'createdAt': tm.createdAt.isoformat() if tm.createdAt else None
         } for tm in team_members])
-    
+
     elif request.method == 'POST':
         data = request.get_json()
-        
+
         # Validate role
         if data['role'] not in TeamMember.VALID_ROLES:
             return jsonify({'error': f'Invalid role: {data["role"]}'}), 400
-        
+
         # Check if email already exists
         existing_member = TeamMember.query.filter_by(email=data['email']).first()
         if existing_member:
             return jsonify({'error': 'Team member with this email already exists'}), 400
-        
+
         team_member = TeamMember(
             name=data['name'],
             email=data['email'],
@@ -1343,11 +1343,11 @@ def manage_team_members():
             'email': team_member.email,
             'role': team_member.role
         }), 201
-        
+
 @app.route('/api/team-members/<int:member_id>', methods=['GET', 'PUT', 'DELETE'])
 def manage_team_member(member_id):
     team_member = TeamMember.query.get_or_404(member_id)
-    
+
     if request.method == 'GET':
         return jsonify({
             'id': team_member.id,
@@ -1356,16 +1356,16 @@ def manage_team_member(member_id):
             'role': team_member.role,
             'createdAt': team_member.createdAt.isoformat() if team_member.createdAt else None
         })
-    
+
     elif request.method == 'PUT':
         data = request.get_json()
-        
+
         # Check if email is being changed and if new email already exists
         if data.get('email') != team_member.email:
             existing_member = TeamMember.query.filter_by(email=data['email']).first()
             if existing_member:
                 return jsonify({'error': 'Team member with this email already exists'}), 400
-        
+
         team_member.name = data.get('name', team_member.name)
         team_member.email = data.get('email', team_member.email)
         team_member.role = data.get('role', team_member.role)
@@ -1376,7 +1376,7 @@ def manage_team_member(member_id):
             'email': team_member.email,
             'role': team_member.role
         })
-    
+
     elif request.method == 'DELETE':
         db.session.delete(team_member)
         db.session.commit()
@@ -1397,7 +1397,7 @@ def get_team_members_by_role(role):
 @app.route('/api/portfolios/<int:portfolio_id>', methods=['GET', 'PUT', 'DELETE'])
 def manage_portfolio(portfolio_id):
     portfolio = Portfolio.query.get_or_404(portfolio_id)
-    
+
     if request.method == 'GET':
         return jsonify({
             'id': portfolio.id,
@@ -1406,16 +1406,16 @@ def manage_portfolio(portfolio_id):
             'createdAt': portfolio.createdAt.isoformat() if portfolio.createdAt else None,
             'projects_count': len(portfolio.projects)
         })
-    
+
     elif request.method == 'PUT':
         data = request.get_json()
-        
+
         # Check if name is being changed and if new name already exists
         if data.get('name') != portfolio.name:
             existing_portfolio = Portfolio.query.filter_by(name=data['name']).first()
             if existing_portfolio:
                 return jsonify({'error': 'Portfolio with this name already exists'}), 400
-        
+
         portfolio.name = data.get('name', portfolio.name)
         portfolio.description = data.get('description', portfolio.description)
         db.session.commit()
@@ -1424,12 +1424,12 @@ def manage_portfolio(portfolio_id):
             'name': portfolio.name,
             'description': portfolio.description
         })
-    
+
     elif request.method == 'DELETE':
         # Check if portfolio has projects
         if portfolio.projects:
             return jsonify({'error': 'Cannot delete portfolio with existing projects'}), 400
-        
+
         db.session.delete(portfolio)
         db.session.commit()
         return jsonify({'message': 'Portfolio deleted successfully'}), 200
@@ -1442,7 +1442,7 @@ def get_form_data():
     projects = Project.query.all()
     testers = Tester.query.all()
     team_members = TeamMember.query.all()
-    
+
     return jsonify({
         'portfolios': [{'id': p.id, 'name': p.name, 'description': p.description} for p in portfolios],
         'projects': [{'id': p.id, 'name': p.name, 'description': p.description, 'portfolio_id': p.portfolio_id} for p in projects],
@@ -1455,71 +1455,71 @@ def get_latest_project_data(portfolio_name, project_name):
     """Get latest report data for a specific project to auto-populate new reports"""
     try:
         print(f"DEBUG: Looking for reports with portfolio='{portfolio_name}', project='{project_name}'")
-        
+
         # Get all reports for this project to find the highest values
         all_reports = Report.query.filter_by(
             portfolioName=portfolio_name,
             projectName=project_name
         ).all()
-        
+
         print(f"DEBUG: Found {len(all_reports)} reports")
-        
+
         # Also check what reports exist in the database
         all_existing_reports = Report.query.all()
         print(f"DEBUG: Total reports in database: {len(all_existing_reports)}")
         for report in all_existing_reports[:5]:  # Show first 5 reports
             print(f"DEBUG: Report - Portfolio: '{report.portfolioName}', Project: '{report.projectName}'")
-        
+
         if not all_reports:
             # No previous reports - return default values
             from datetime import datetime
             today = datetime.now().strftime('%d-%m-%Y')
-            
+
             # Get project to find assigned testers
             project = Project.query.filter_by(name=project_name).first()
             project_testers = []
             if project:
                 project_testers = [{'id': t.id, 'name': t.name, 'email': t.email, 'is_automation_engineer': t.is_automation_engineer, 'is_manual_engineer': t.is_manual_engineer, 'role_types': t.role_types, 'role_display': t.role_display} for t in project.testers]
-            
+
             return jsonify({
                 'hasData': False,
                 'defaultValues': {
                     'sprintNumber': 1,
                     'cycleNumber': 1,
                     'releaseNumber': '1.0',
-                    'reportVersion': '1.0', 
+                    'reportVersion': '1.0',
                     'reportDate': today,
                     'testerData': project_testers,
                     'teamMembers': []
                 }
             })
-        
+
         # Get the latest report first (most recent by ID)
         latest_report = max(all_reports, key=lambda r: r.id)
-        
+
         # Find the highest sprint number across all reports
         max_sprint = max((r.sprintNumber or 0) for r in all_reports)
-        
+
         # Get the last cycle number and release number from the most recent report
         last_cycle = latest_report.cycleNumber or 1
         last_release = latest_report.releaseNumber or '1.0'
-        
+
         # Parse existing data
         tester_data = json.loads(latest_report.testerData or '[]')
         team_member_data = json.loads(latest_report.teamMemberData or '[]')
-        
+
         # Get project to find assigned testers (merge with existing tester data)
         project = Project.query.filter_by(name=project_name).first()
         if project:
             # Get assigned testers that might not be in the latest report
             assigned_testers = [{'id': t.id, 'name': t.name, 'email': t.email, 'is_automation_engineer': t.is_automation_engineer, 'is_manual_engineer': t.is_manual_engineer} for t in project.testers]
-            
+
             # Merge with existing tester data (avoid duplicates)
             existing_emails = {t.get('email') for t in tester_data}
             for assigned_tester in assigned_testers:
                 if assigned_tester['email'] not in existing_emails:
                     tester_data.append(assigned_tester)
-        
+
         return jsonify({
             'hasData': True,
             'latestData': {
@@ -1538,7 +1538,7 @@ def get_latest_project_data(portfolio_name, project_name):
                 'reportVersion': latest_report.reportVersion or '1.0'
             }
         })
-        
+
     except Exception as e:
         print(f"Error getting latest project data: {e}")
         from datetime import datetime
@@ -1571,12 +1571,12 @@ def update_report(id):
     data = request.get_json()
 
     # Update fields
-    for field in ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion', 
+    for field in ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion',
                   'reportName', 'cycleNumber', 'releaseNumber', 'reportDate', 'testSummary', 'testingStatus',
                   'passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories',
-                  'blockedUserStories', 'cancelledUserStories', 'deferredUserStories', 
+                  'blockedUserStories', 'cancelledUserStories', 'deferredUserStories',
                   'notTestableUserStories', 'passedTestCases', 'passedWithIssuesTestCases',
-                  'failedTestCases', 'blockedTestCases', 'cancelledTestCases', 
+                  'failedTestCases', 'blockedTestCases', 'cancelledTestCases',
                   'deferredTestCases', 'notTestableTestCases', 'criticalIssues',
                   'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues',
                   'notFixedIssues', 'reopenedIssues', 'deferredIssues', 'newEnhancements',
@@ -1585,7 +1585,7 @@ def update_report(id):
                   'automationFlakyTests']:
         if field in data:
             setattr(report, field, data[field])
-    
+
     # Update JSON fields
     if 'requestData' in data:
         report.requestData = json.dumps(data['requestData'])
@@ -1603,7 +1603,7 @@ def update_report(id):
 
     # Recalculate totals and scores
     report.calculate_totals()
-    
+
     db.session.commit()
     return jsonify(report.to_dict())
 
@@ -1625,19 +1625,19 @@ def update_stats_cache():
         if not dashboard_stats:
             dashboard_stats = DashboardStats()
             db.session.add(dashboard_stats)
-        
+
         # Calculate overall stats
         total_reports = db.session.query(func.count(Report.id)).scalar()
         completed_reports = db.session.query(func.count(Report.id)).filter(Report.testingStatus == 'passed').scalar()
         in_progress_reports = db.session.query(func.count(Report.id)).filter(Report.testingStatus == 'passed-with-issues').scalar()
-        
+
         aggregate_result = db.session.query(
             func.sum(Report.totalUserStories).label('total_user_stories'),
             func.sum(Report.totalTestCases).label('total_test_cases'),
             func.sum(Report.totalIssues).label('total_issues'),
             func.sum(Report.totalEnhancements).label('total_enhancements')
         ).first()
-        
+
         dashboard_stats.total_reports = total_reports
         dashboard_stats.completed_reports = completed_reports or 0
         dashboard_stats.in_progress_reports = in_progress_reports or 0
@@ -1647,7 +1647,7 @@ def update_stats_cache():
         dashboard_stats.total_issues = aggregate_result.total_issues or 0
         dashboard_stats.total_enhancements = aggregate_result.total_enhancements or 0
         dashboard_stats.last_updated = datetime.utcnow()
-        
+
         # Update Portfolio Stats
         portfolios = Portfolio.query.all()
         for portfolio in portfolios:
@@ -1655,7 +1655,7 @@ def update_stats_cache():
             if not portfolio_stats:
                 portfolio_stats = PortfolioStats(portfolio_id=portfolio.id, portfolio_name=portfolio.name)
                 db.session.add(portfolio_stats)
-            
+
             # Get stats for this portfolio
             portfolio_aggregate = db.session.query(
                 func.count(Report.id).label('total_reports'),
@@ -1665,9 +1665,9 @@ def update_stats_cache():
                 func.sum(Report.totalEnhancements).label('total_enhancements'),
                 func.max(Report.reportDate).label('last_report_date')
             ).filter(Report.portfolioName == portfolio.name).first()
-            
+
             project_count = Project.query.filter_by(portfolio_id=portfolio.id).count()
-            
+
             portfolio_stats.portfolio_name = portfolio.name
             portfolio_stats.total_reports = portfolio_aggregate.total_reports or 0
             portfolio_stats.total_projects = project_count
@@ -1677,37 +1677,37 @@ def update_stats_cache():
             portfolio_stats.total_enhancements = portfolio_aggregate.total_enhancements or 0
             portfolio_stats.last_report_date = portfolio_aggregate.last_report_date
             portfolio_stats.last_updated = datetime.utcnow()
-        
+
         # Update Project Stats
         projects = Project.query.all()
         for project in projects:
             project_name = project.name.strip()
             # Try exact match first
             reports = Report.query.filter(Report.projectName == project_name).all()
-            
+
             # If no matches, try case-insensitive search
             if not reports:
                 reports = Report.query.filter(Report.projectName.ilike(f'%{project_name}%')).all()
-                
+
             # If still no matches, try in-memory filtering
             if not reports:
                 all_reports = Report.query.all()
                 reports = [r for r in all_reports if r.projectName and r.projectName.strip().lower() == project_name.lower()]
-                
+
             if not reports:
                 print(f"No reports found for project: {project_name}")
                 continue
-                
+
             project_stats = ProjectStats.query.filter_by(project_id=project.id).first()
             if not project_stats:
                 project_stats = ProjectStats(
-                    project_id=project.id, 
+                    project_id=project.id,
                     portfolio_id=project.portfolio_id,
                     portfolio_name=project.portfolio.name,
                     project_name=project.name
                 )
                 db.session.add(project_stats)
-            
+
             # Get stats for this project
             project_aggregate = db.session.query(
                 func.count(Report.id).label('total_reports'),
@@ -1717,13 +1717,13 @@ def update_stats_cache():
                 func.sum(Report.totalEnhancements).label('total_enhancements'),
                 func.max(Report.reportDate).label('last_report_date')
             ).filter(Report.portfolioName == project.portfolio.name, Report.projectName == project.name).first()
-            
+
             # Get latest testing status
             latest_report = Report.query.filter_by(
-                portfolioName=project.portfolio.name, 
+                portfolioName=project.portfolio.name,
                 projectName=project.name
             ).order_by(Report.reportDate.desc()).first()
-            
+
             project_stats.portfolio_name = project.portfolio.name
             project_stats.project_name = project.name
             project_stats.total_reports = project_aggregate.total_reports or 0
@@ -1734,10 +1734,10 @@ def update_stats_cache():
             project_stats.last_report_date = project_aggregate.last_report_date
             project_stats.latest_testing_status = latest_report.testingStatus if latest_report else 'pending'
             project_stats.last_updated = datetime.utcnow()
-        
+
         db.session.commit()
         print("Statistics cache updated successfully")
-        
+
     except Exception as e:
         db.session.rollback()
         print(f"Error updating stats cache: {e}")
@@ -1779,7 +1779,7 @@ def get_cached_dashboard_stats():
         completed_reports = db.session.query(func.count(Report.id)).filter(Report.testingStatus == 'passed').scalar()
         in_progress_reports = db.session.query(func.count(Report.id)).filter(Report.testingStatus == 'passed-with-issues').scalar()
         pending_reports = total_reports - completed_reports - in_progress_reports
-        
+
         # Get aggregate metrics with database aggregation
         aggregate_result = db.session.query(
             func.sum(Report.totalUserStories).label('total_user_stories'),
@@ -1819,7 +1819,7 @@ def get_cached_dashboard_stats():
             func.sum(Report.automationStableTests).label('automation_stable_tests'),
             func.sum(Report.automationFlakyTests).label('automation_flaky_tests'),
         ).first()
-        
+
         overall_stats = {
             'totalReports': total_reports,
             'completedReports': completed_reports,
@@ -1862,7 +1862,7 @@ def get_cached_dashboard_stats():
             'automationStableTests': aggregate_result.automation_stable_tests or 0,
             'automationFlakyTests': aggregate_result.automation_flaky_tests or 0,
         }
-        
+
         # Get project-specific metrics directly from reports
         project_stats = db.session.query(
             Report.portfolioName,
@@ -1911,7 +1911,7 @@ def get_cached_dashboard_stats():
             func.sum(Report.automationStableTests).label('automationStableTests'),
             func.sum(Report.automationFlakyTests).label('automationFlakyTests'),
         ).group_by(Report.portfolioName, Report.projectName).all()
-        
+
         # Get latest testing status for each project
         latest_reports_subquery = db.session.query(
             Report.portfolioName,
@@ -1922,13 +1922,13 @@ def get_cached_dashboard_stats():
                 order_by=Report.reportDate.desc()
             ).label('rn')
         ).subquery()
-        
+
         latest_statuses = db.session.query(
             latest_reports_subquery.c.portfolioName,
             latest_reports_subquery.c.projectName,
             latest_reports_subquery.c.testingStatus
         ).filter(latest_reports_subquery.c.rn == 1).all()
-        
+
         # Create projects dictionary with detailed data
         projects_data = []
         for stat in project_stats:
@@ -1937,39 +1937,39 @@ def get_cached_dashboard_stats():
             total_test_cases = stat.totalTestCases or 0
             total_issues = stat.totalIssues or 0
             automation_total = stat.automationTotalTests or 0
-            
+
             user_stories_success_rate = 0
             if total_user_stories > 0:
                 successful_user_stories = (stat.passedUserStories or 0) + (stat.passedWithIssuesUserStories or 0)
                 user_stories_success_rate = round((successful_user_stories / total_user_stories) * 100, 1)
-            
+
             test_cases_success_rate = 0
             if total_test_cases > 0:
                 successful_test_cases = (stat.passedTestCases or 0) + (stat.passedWithIssuesTestCases or 0)
                 test_cases_success_rate = round((successful_test_cases / total_test_cases) * 100, 1)
-            
+
             issues_resolution_rate = 0
             if total_issues > 0:
                 issues_resolution_rate = round(((stat.fixedIssues or 0) / total_issues) * 100, 1)
-            
+
             automation_pass_rate = 0
             if automation_total > 0:
                 automation_pass_rate = round(((stat.automationPassedTests or 0) / automation_total) * 100, 1)
-            
+
             # Determine risk level
             risk_level = 'Low'
             if (stat.criticalIssues or 0) > 0:
                 risk_level = 'High'
             elif (stat.highIssues or 0) > 0:
                 risk_level = 'Medium'
-            
+
             # Get testing status
             testing_status = 'pending'
             for status in latest_statuses:
                 if status.portfolioName == stat.portfolioName and status.projectName == stat.projectName:
                     testing_status = status.testingStatus
                     break
-            
+
             projects_data.append({
                 'portfolioName': stat.portfolioName,
                 'projectName': stat.projectName,
@@ -1977,13 +1977,13 @@ def get_cached_dashboard_stats():
                 'lastReportDate': stat.lastReportDate,
                 'testingStatus': testing_status,
                 'riskLevel': risk_level,
-                
+
                 # TOTALS - Main counts
                 'totalUserStories': total_user_stories,
                 'totalTestCases': total_test_cases,
                 'totalIssues': total_issues,
                 'totalEnhancements': stat.totalEnhancements or 0,
-                
+
                 # USER STORIES - Complete breakdown
                 'passedUserStories': stat.passedUserStories or 0,
                 'passedWithIssuesUserStories': stat.passedWithIssuesUserStories or 0,
@@ -1993,7 +1993,7 @@ def get_cached_dashboard_stats():
                 'deferredUserStories': stat.deferredUserStories or 0,
                 'notTestableUserStories': stat.notTestableUserStories or 0,
                 'userStoriesSuccessRate': user_stories_success_rate,
-                
+
                 # TEST CASES - Complete breakdown
                 'passedTestCases': stat.passedTestCases or 0,
                 'passedWithIssuesTestCases': stat.passedWithIssuesTestCases or 0,
@@ -2003,13 +2003,13 @@ def get_cached_dashboard_stats():
                 'deferredTestCases': stat.deferredTestCases or 0,
                 'notTestableTestCases': stat.notTestableTestCases or 0,
                 'testCasesSuccessRate': test_cases_success_rate,
-                
+
                 # ISSUES - By Priority
                 'criticalIssues': stat.criticalIssues or 0,
                 'highIssues': stat.highIssues or 0,
                 'mediumIssues': stat.mediumIssues or 0,
                 'lowIssues': stat.lowIssues or 0,
-                
+
                 # ISSUES - By Status
                 'newIssues': stat.newIssues or 0,
                 'fixedIssues': stat.fixedIssues or 0,
@@ -2017,12 +2017,12 @@ def get_cached_dashboard_stats():
                 'reopenedIssues': stat.reopenedIssues or 0,
                 'deferredIssues': stat.deferredIssues or 0,
                 'issuesResolutionRate': issues_resolution_rate,
-                
+
                 # ENHANCEMENTS - Complete breakdown
                 'newEnhancements': stat.newEnhancements or 0,
                 'implementedEnhancements': stat.implementedEnhancements or 0,
                 'existsEnhancements': stat.existsEnhancements or 0,
-                
+
                 # AUTOMATION - Complete breakdown
                 'automationTotalTests': automation_total,
                 'automationPassedTests': stat.automationPassedTests or 0,
@@ -2032,12 +2032,12 @@ def get_cached_dashboard_stats():
                 'automationFlakyTests': stat.automationFlakyTests or 0,
                 'automationPassRate': automation_pass_rate
             })
-        
+
         return jsonify({
             'overall': overall_stats,
             'projects': projects_data
         })
-        
+
     except Exception as e:
         # Fallback to original method if this fails
         print(f"Cached endpoint failed, falling back to original method: {e}")
@@ -2054,30 +2054,30 @@ def get_project_stats(project_id):
     print(f"Requesting stats for project ID: {project_id}")
     project = Project.query.get_or_404(project_id)
     print(f"Fetching stats for project: {project.name}")
-    
+
     # Debug: check all reports and their project names
     all_reports = Report.query.all()
     print(f"Total reports in database: {len(all_reports)}")
     for r in all_reports:
         print(f"Report ID: {r.id}, Project Name: '{r.projectName}' (type: {type(r.projectName)})")
-    
+
     # Make the query case-insensitive and trim whitespace
     project_name = project.name.strip()
     print(f"Looking for reports with project name: '{project_name}' (type: {type(project_name)})")
-    
+
     # First try exact match
     reports = Report.query.filter(Report.projectName == project_name).all()
-    
+
     # If no matches, try case-insensitive search
     if not reports:
         print("No reports found with exact match, trying case-insensitive search")
         reports = Report.query.filter(Report.projectName.ilike(f'%{project_name}%')).all()
-    
+
     # If still no matches, try trimming and normalizing whitespace
     if not reports:
         print("No reports found with case-insensitive match, trying trimmed search")
         reports = [r for r in all_reports if r.projectName and r.projectName.strip().lower() == project_name.lower()]
-    
+
     print(f"Found {len(reports)} reports for project name: '{project_name}'")
 
     if not reports:
@@ -2130,18 +2130,18 @@ def get_project_stats(project_id):
     total_enhancements = sum(r.totalEnhancements for r in reports)
     last_release = reports[-1].reportVersion if reports else 'N/A'
     latest_release_number = reports[-1].releaseNumber if reports else 'N/A'
-    
+
     # Calculate success rates
     passed_user_stories = sum(r.passedUserStories for r in reports)
     passed_test_cases = sum(r.passedTestCases for r in reports)
     fixed_issues = sum(r.fixedIssues for r in reports)
     implemented_enhancements = sum(r.implementedEnhancements for r in reports)
-    
+
     user_story_success_rate = (passed_user_stories / total_user_stories * 100) if total_user_stories > 0 else 0
     test_case_success_rate = (passed_test_cases / total_test_cases * 100) if total_test_cases > 0 else 0
     issue_fix_rate = (fixed_issues / total_issues * 100) if total_issues > 0 else 0
     enhancement_completion_rate = (implemented_enhancements / total_enhancements * 100) if total_enhancements > 0 else 0
-    
+
     # Calculate automation regression stats
     total_automation_test_cases = sum(r.automationTotalTestCases or 0 for r in reports)
     automation_passed_test_cases = sum(r.automationPassedTestCases or 0 for r in reports)
@@ -2149,11 +2149,11 @@ def get_project_stats(project_id):
     automation_skipped_test_cases = sum(r.automationSkippedTestCases or 0 for r in reports)
     automation_stable_tests = sum(r.automationStableTests or 0 for r in reports)
     automation_flaky_tests = sum(r.automationFlakyTests or 0 for r in reports)
-    
+
     # Calculate automation rates
     automation_pass_rate = (automation_passed_test_cases / total_automation_test_cases * 100) if total_automation_test_cases > 0 else 0
     automation_stability_rate = (automation_stable_tests / (automation_stable_tests + automation_flaky_tests) * 100) if (automation_stable_tests + automation_flaky_tests) > 0 else 0
-    
+
     # Get unique testers
     testers = []
     tester_emails = set()
@@ -2309,17 +2309,17 @@ def migrate_database():
     """Handle database migration for new fields"""
     import sqlite3
     import os
-    
+
     db_path = os.path.join(basedir, 'reports.db')
-    
+
     if os.path.exists(db_path):
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        
+
         # Check existing columns in report table
         cursor.execute("PRAGMA table_info(report)")
         columns = [column[1] for column in cursor.fetchall()]
-        
+
         # Add missing columns to report table
         migrations = [
             ('releaseNumber', 'VARCHAR(50)'),
@@ -2338,7 +2338,7 @@ def migrate_database():
             ('automationStablePercentage', 'REAL DEFAULT 0.0'),
             ('automationFlakyPercentage', 'REAL DEFAULT 0.0')
         ]
-        
+
         for column_name, column_type in migrations:
             if column_name not in columns:
                 try:
@@ -2347,11 +2347,11 @@ def migrate_database():
                     print(f"Added {column_name} column to existing database")
                 except sqlite3.Error as e:
                     print(f"Error adding {column_name} column: {e}")
-        
+
         # Check existing columns in tester table and add role fields
         cursor.execute("PRAGMA table_info(tester)")
         tester_columns = [column[1] for column in cursor.fetchall()]
-        
+
         tester_migrations = [
             ('is_automation_engineer', 'BOOLEAN DEFAULT 0'),
             ('is_manual_engineer', 'BOOLEAN DEFAULT 0'),
@@ -2364,7 +2364,7 @@ def migrate_database():
             ('is_usability_tester', 'BOOLEAN DEFAULT 0'),
             ('is_test_lead', 'BOOLEAN DEFAULT 0')
         ]
-        
+
         for column_name, column_type in tester_migrations:
             if column_name not in tester_columns:
                 try:
@@ -2373,7 +2373,7 @@ def migrate_database():
                     print(f"Added {column_name} column to tester table")
                 except sqlite3.Error as e:
                     print(f"Error adding {column_name} column to tester table: {e}")
-        
+
         conn.close()
 
 # --- Authentication Routes ---
@@ -2383,18 +2383,18 @@ def login():
     """Login page and authentication"""
     if request.method == 'GET':
         return render_template('login.html')
-    
+
     try:
         data = request.get_json()
         identifier = data.get('identifier', '').strip()
         password = data.get('password', '')
-        
+
         if not identifier or not password:
             return jsonify({'success': False, 'message': 'Please provide login credentials'}), 400
-        
+
         # Find user by username, email, or phone number
         user = None
-        
+
         # Check if identifier is email
         if '@' in identifier:
             user = User.query.filter_by(email=identifier).first()
@@ -2405,42 +2405,42 @@ def login():
         # Otherwise, treat as username
         else:
             user = User.query.filter_by(username=identifier).first()
-        
+
         if not user or not user.check_password(password):
             return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
-        
+
         if not user.is_active:
             return jsonify({'success': False, 'message': 'Account is deactivated'}), 401
-        
+
         if not user.is_approved:
             return jsonify({'success': False, 'message': 'Account is pending approval'}), 401
-        
+
         # Check for pending password reset
         pending_reset = PasswordResetRequest.query.filter_by(
-            user_id=user.id, 
-            is_approved=True, 
+            user_id=user.id,
+            is_approved=True,
             is_used=False
         ).first()
-        
+
         if pending_reset and not pending_reset.is_expired():
             session['reset_user_id'] = user.id
             return jsonify({
-                'success': True, 
+                'success': True,
                 'redirect': '/reset-password-form',
                 'message': 'Please set your new password'
             })
-        
+
         # Successful login
         session['user_id'] = user.id
         user.last_login = datetime.utcnow()
         db.session.commit()
-        
+
         return jsonify({
-            'success': True, 
+            'success': True,
             'redirect': '/dashboard',
             'user': user.to_dict()
         })
-        
+
     except Exception as e:
         return jsonify({'success': False, 'message': 'Login failed'}), 500
 
@@ -2449,53 +2449,53 @@ def register():
     """Registration page and user creation"""
     if request.method == 'GET':
         return render_template('register.html')
-    
+
     try:
         data = request.get_json()
-        
+
         # Validate required fields
         required_fields = ['first_name', 'last_name', 'email', 'password']
         for field in required_fields:
             if not data.get(field, '').strip():
                 return jsonify({'success': False, 'message': f'{field.replace("_", " ").title()} is required'}), 400
-        
+
         first_name = data.get('first_name').strip()
         last_name = data.get('last_name').strip()
         email = data.get('email').strip().lower()
         phone_number = data.get('phone_number', '').strip()
         username = data.get('username', '').strip()
         password = data.get('password')
-        
+
         # Validate email format
         if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
             return jsonify({'success': False, 'message': 'Invalid email format'}), 400
-        
+
         # Check if email already exists
         if User.query.filter_by(email=email).first():
             return jsonify({'success': False, 'message': 'Email already registered'}), 400
-        
+
         # Validate phone number if provided
         if phone_number:
             clean_phone = re.sub(r'[^\d+]', '', phone_number)
             if not User().validate_phone_number(clean_phone):
                 return jsonify({'success': False, 'message': 'Invalid phone number format. Use 05xxxxxxxx, +9665xxxxxxxx, or 009665xxxxxxxx'}), 400
-            
+
             # Check if phone already exists
             if User.query.filter_by(phone_number=clean_phone).first():
                 return jsonify({'success': False, 'message': 'Phone number already registered'}), 400
         else:
             clean_phone = None
-        
+
         # Validate username if provided
         if username:
             if User.query.filter_by(username=username).first():
                 return jsonify({'success': False, 'message': 'Username already taken'}), 400
-        
+
         # Validate password strength
         is_valid, message = User().validate_password_strength(password)
         if not is_valid:
             return jsonify({'success': False, 'message': message}), 400
-        
+
         # Create new user
         user = User(
             first_name=first_name,
@@ -2506,27 +2506,27 @@ def register():
             is_approved=False  # Requires admin approval
         )
         user.set_password(password)
-        
+
         db.session.add(user)
         db.session.commit()
-        
+
         # Send email notification to admins about new registration
         try:
             admin_users = User.query.filter_by(is_admin=True, is_approved=True).all()
             admin_emails = [admin.email for admin in admin_users]
-            
+
             if admin_emails:
                 email_service.send_user_registration_notification(user, admin_emails)
         except Exception as e:
             # Log error but don't fail registration
             print(f"Failed to send registration notification email: {e}")
-        
+
         return jsonify({
-            'success': True, 
+            'success': True,
             'message': 'Registration successful! Your account is pending admin approval.',
             'redirect': '/login'
         })
-        
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Registration failed'}), 500
@@ -2536,17 +2536,17 @@ def reset_password():
     """Password reset request page"""
     if request.method == 'GET':
         return render_template('reset_password.html')
-    
+
     try:
         data = request.get_json()
         identifier = data.get('identifier', '').strip()
-        
+
         if not identifier:
             return jsonify({'success': False, 'message': 'Please provide username, email, or phone number'}), 400
-        
+
         # Find user by username, email, or phone number
         user = None
-        
+
         if '@' in identifier:
             user = User.query.filter_by(email=identifier).first()
         elif identifier.startswith('05') or identifier.startswith('+966') or identifier.startswith('00966'):
@@ -2554,44 +2554,44 @@ def reset_password():
             user = User.query.filter_by(phone_number=clean_phone).first()
         else:
             user = User.query.filter_by(username=identifier).first()
-        
+
         if not user:
             return jsonify({'success': False, 'message': 'User not found'}), 404
-        
+
         # Check for existing pending request
         existing_request = PasswordResetRequest.query.filter_by(
             user_id=user.id,
             is_used=False
         ).first()
-        
+
         if existing_request and not existing_request.is_expired():
             return jsonify({
-                'success': True, 
+                'success': True,
                 'message': 'Password reset request already submitted and pending admin approval'
             })
-        
+
         # Create new reset request
         reset_request = PasswordResetRequest(user_id=user.id)
         db.session.add(reset_request)
         db.session.commit()
-        
+
         # Send email notification to admins about password reset request
         try:
             admin_users = User.query.filter_by(is_admin=True, is_approved=True).all()
             admin_emails = [admin.email for admin in admin_users]
-            
+
             if admin_emails:
                 email_service.send_password_reset_request_notification(reset_request, admin_emails)
         except Exception as e:
             # Log error but don't fail request
             print(f"Failed to send password reset notification email: {e}")
-        
+
         return jsonify({
-            'success': True, 
+            'success': True,
             'message': 'Password reset request submitted. An admin will review your request.',
             'redirect': '/login'
         })
-        
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Request failed'}), 500
@@ -2603,55 +2603,55 @@ def reset_password_form():
         if 'reset_user_id' not in session:
             return redirect(url_for('login'))
         return render_template('reset_password_form.html')
-    
+
     try:
         if 'reset_user_id' not in session:
             return jsonify({'success': False, 'message': 'Invalid session'}), 401
-        
+
         data = request.get_json()
         new_password = data.get('new_password')
         confirm_password = data.get('confirm_password')
-        
+
         if not new_password or not confirm_password:
             return jsonify({'success': False, 'message': 'Please provide both password fields'}), 400
-        
+
         if new_password != confirm_password:
             return jsonify({'success': False, 'message': 'Passwords do not match'}), 400
-        
+
         user = User.query.get(session['reset_user_id'])
         if not user:
             return jsonify({'success': False, 'message': 'User not found'}), 404
-        
+
         # Validate password strength
         is_valid, message = user.validate_password_strength(new_password)
         if not is_valid:
             return jsonify({'success': False, 'message': message}), 400
-        
+
         # Find and mark reset request as used
         reset_request = PasswordResetRequest.query.filter_by(
             user_id=user.id,
             is_approved=True,
             is_used=False
         ).first()
-        
+
         if not reset_request or reset_request.is_expired():
             return jsonify({'success': False, 'message': 'Invalid or expired reset request'}), 400
-        
+
         # Update password and mark request as used
         user.set_password(new_password)
         reset_request.is_used = True
-        
+
         db.session.commit()
-        
+
         # Clear session
         session.pop('reset_user_id', None)
-        
+
         return jsonify({
-            'success': True, 
+            'success': True,
             'message': 'Password updated successfully! Please login with your new password.',
             'redirect': '/login'
         })
-        
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Password update failed'}), 500
@@ -2662,72 +2662,72 @@ def reset_password_form():
 def profile():
     """User profile page"""
     user = User.query.get(session['user_id'])
-    
+
     if request.method == 'GET':
         return render_template('profile.html', user=user)
-    
+
     try:
         data = request.get_json()
         action = data.get('action')
-        
+
         if action == 'update_info':
             # Update user information
             user.first_name = data.get('first_name', user.first_name).strip()
             user.last_name = data.get('last_name', user.last_name).strip()
             user.username = data.get('username', '').strip() or None
-            
+
             phone_number = data.get('phone_number', '').strip()
             if phone_number:
                 clean_phone = re.sub(r'[^\d+]', '', phone_number)
                 if not user.validate_phone_number(clean_phone):
                     return jsonify({'success': False, 'message': 'Invalid phone number format'}), 400
-                
+
                 # Check if phone already exists for another user
                 existing_user = User.query.filter(User.phone_number == clean_phone, User.id != user.id).first()
                 if existing_user:
                     return jsonify({'success': False, 'message': 'Phone number already in use'}), 400
-                
+
                 user.phone_number = clean_phone
             else:
                 user.phone_number = None
-            
+
             # Check username uniqueness
             if user.username:
                 existing_user = User.query.filter(User.username == user.username, User.id != user.id).first()
                 if existing_user:
                     return jsonify({'success': False, 'message': 'Username already taken'}), 400
-            
+
             db.session.commit()
             return jsonify({'success': True, 'message': 'Profile updated successfully'})
-        
+
         elif action == 'change_password':
             # Change password
             old_password = data.get('old_password')
             new_password = data.get('new_password')
             confirm_password = data.get('confirm_password')
-            
+
             if not old_password or not new_password or not confirm_password:
                 return jsonify({'success': False, 'message': 'All password fields are required'}), 400
-            
+
             if not user.check_password(old_password):
                 return jsonify({'success': False, 'message': 'Current password is incorrect'}), 400
-            
+
             if new_password != confirm_password:
                 return jsonify({'success': False, 'message': 'New passwords do not match'}), 400
-            
+
             # Validate password strength
             is_valid, message = user.validate_password_strength(new_password)
             if not is_valid:
                 return jsonify({'success': False, 'message': message}), 400
-            
+
             user.set_password(new_password)
             db.session.commit()
-            
+
             return jsonify({'success': True, 'message': 'Password changed successfully'})
-        
+
         else:
             return jsonify({'success': False, 'message': 'Invalid action'}), 400
-            
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Update failed'}), 500
@@ -2737,6 +2737,12 @@ def profile():
 def user_management():
     """User management page for admins"""
     return render_template('user_management.html')
+
+@app.route('/user-details')
+@admin_required
+def user_details():
+    """User details page for admins"""
+    return render_template('user_details.html')
 
 @app.route('/api/users', methods=['GET'])
 @admin_required
@@ -2759,14 +2765,14 @@ def approve_user(user_id):
         user = User.query.get_or_404(user_id)
         user.is_approved = True
         db.session.commit()
-        
+
         # Send approval notification email to user
         try:
             email_service.send_user_approval_notification(user)
         except Exception as e:
             # Log error but don't fail approval
             print(f"Failed to send approval notification email: {e}")
-        
+
         return jsonify({'success': True, 'message': f'User {user.get_full_name()} approved successfully'})
     except Exception as e:
         db.session.rollback()
@@ -2780,7 +2786,7 @@ def toggle_admin(user_id):
         user = User.query.get_or_404(user_id)
         user.is_admin = not user.is_admin
         db.session.commit()
-        
+
         status = 'granted' if user.is_admin else 'revoked'
         return jsonify({'success': True, 'message': f'Admin privileges {status} for {user.get_full_name()}'})
     except Exception as e:
@@ -2795,7 +2801,7 @@ def toggle_active(user_id):
         user = User.query.get_or_404(user_id)
         user.is_active = not user.is_active
         db.session.commit()
-        
+
         status = 'activated' if user.is_active else 'deactivated'
         return jsonify({'success': True, 'message': f'User {user.get_full_name()} {status} successfully'})
     except Exception as e:
@@ -2822,7 +2828,7 @@ def update_user(user_id):
     try:
         user = User.query.get_or_404(user_id)
         data = request.get_json()
-        
+
         # Update basic information
         if 'first_name' in data:
             user.first_name = data['first_name'].strip()
@@ -2854,7 +2860,7 @@ def update_user(user_id):
                 if existing_user:
                     return jsonify({'success': False, 'message': 'Phone number is already in use'}), 400
             user.phone_number = phone
-        
+
         # Update permissions
         if 'is_admin' in data:
             user.is_admin = bool(data['is_admin'])
@@ -2862,16 +2868,16 @@ def update_user(user_id):
             user.is_approved = bool(data['is_approved'])
         if 'is_active' in data:
             user.is_active = bool(data['is_active'])
-        
+
         user.updated_at = datetime.utcnow()
         db.session.commit()
-        
+
         return jsonify({
             'success': True,
             'message': f'User {user.get_full_name()} updated successfully',
             'user': user.to_dict()
         })
-        
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': f'Failed to update user: {str(e)}'}), 500
@@ -2883,26 +2889,26 @@ def update_user_password(user_id):
     try:
         user = User.query.get_or_404(user_id)
         data = request.get_json()
-        
+
         new_password = data.get('password', '').strip()
         if not new_password:
             return jsonify({'success': False, 'message': 'Password is required'}), 400
-        
+
         # Validate password strength
         is_valid, message = user.validate_password_strength(new_password)
         if not is_valid:
             return jsonify({'success': False, 'message': message}), 400
-        
+
         # Update password
         user.set_password(new_password)
         user.updated_at = datetime.utcnow()
         db.session.commit()
-        
+
         return jsonify({
             'success': True,
             'message': f'Password updated successfully for {user.get_full_name()}'
         })
-        
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': f'Failed to update password: {str(e)}'}), 500
@@ -2913,32 +2919,32 @@ def delete_user(user_id):
     """Delete a user account (admin only)"""
     try:
         user = User.query.get_or_404(user_id)
-        
+
         # Prevent deleting the current admin user
         current_user = User.query.get(session['user_id'])
         if user.id == current_user.id:
             return jsonify({'success': False, 'message': 'Cannot delete your own account'}), 400
-        
+
         # Prevent deleting the last admin user
         if user.is_admin:
             admin_count = User.query.filter_by(is_admin=True, is_active=True).count()
             if admin_count <= 1:
                 return jsonify({'success': False, 'message': 'Cannot delete the last admin user'}), 400
-        
+
         user_name = user.get_full_name()
-        
+
         # Delete related password reset requests first
         PasswordResetRequest.query.filter_by(user_id=user_id).delete()
-        
+
         # Delete the user
         db.session.delete(user)
         db.session.commit()
-        
+
         return jsonify({
             'success': True,
             'message': f'User {user_name} has been deleted successfully'
         })
-        
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': f'Failed to delete user: {str(e)}'}), 500
@@ -2962,16 +2968,16 @@ def approve_password_reset(request_id):
     """Approve a password reset request"""
     try:
         reset_request = PasswordResetRequest.query.get_or_404(request_id)
-        
+
         if reset_request.is_expired():
             return jsonify({'success': False, 'message': 'Reset request has expired'}), 400
-        
+
         reset_request.is_approved = True
         reset_request.approved_at = datetime.utcnow()
         reset_request.approved_by = session['user_id']
-        
+
         db.session.commit()
-        
+
         # Send approval notification email to user with reset link
         try:
             reset_url = f"{request.host_url}reset-password-form?token={reset_request.token}"
@@ -2979,7 +2985,7 @@ def approve_password_reset(request_id):
         except Exception as e:
             # Log error but don't fail approval
             print(f"Failed to send password reset approval email: {e}")
-        
+
         return jsonify({'success': True, 'message': 'Password reset request approved'})
     except Exception as e:
         db.session.rollback()
@@ -2992,10 +2998,10 @@ def test_email():
     try:
         data = request.get_json()
         test_email_address = data.get('email')
-        
+
         if not test_email_address:
             return jsonify({'success': False, 'message': 'Email address required'}), 400
-        
+
         # Send test email
         subject = "Test Email - Configuration Verification"
         template = """
@@ -3016,15 +3022,15 @@ def test_email():
         </body>
         </html>
         """
-        
+
         rendered_template = render_template_string(template, timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         success = email_service.send_email(test_email_address, subject, rendered_template)
-        
+
         if success:
             return jsonify({'success': True, 'message': 'Test email sent successfully!'})
         else:
             return jsonify({'success': False, 'message': 'Failed to send test email. Check your email configuration.'}), 500
-            
+
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error sending test email: {str(e)}'}), 500
 
@@ -3033,7 +3039,7 @@ def test_email():
 def email_config_status():
     """Check if email is properly configured"""
     from config.email_config import EmailConfig
-    
+
     return jsonify({
         'configured': EmailConfig.is_configured(),
         'server': EmailConfig.MAIL_SERVER,
@@ -3051,17 +3057,17 @@ def send_report_email(report_id):
     try:
         data = request.get_json()
         recipients = data.get('recipients', [])
-        
+
         if not recipients:
             return jsonify({'success': False, 'message': 'No recipients specified'}), 400
-        
+
         report = Report.query.get_or_404(report_id)
         report_url = f"{request.host_url}report/{report_id}"
-        
+
         email_service.send_report_notification(report, recipients, report_url)
-        
+
         return jsonify({'success': True, 'message': f'Report sent to {len(recipients)} recipients'})
-        
+
     except Exception as e:
         return jsonify({'success': False, 'message': f'Failed to send report: {str(e)}'}), 500
 
@@ -3077,7 +3083,7 @@ if __name__ == '__main__':
         db.create_all()
         # Handle migration for existing databases
         migrate_database()
-        
+
         # Create default admin user if no users exist
         if User.query.count() == 0:
             admin_user = User(
@@ -3093,4 +3099,3 @@ if __name__ == '__main__':
             db.session.commit()
             print("Default admin user created: admin@example.com / Admin123!")
     app.run(debug=True)
-
