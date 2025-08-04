@@ -1,5 +1,5 @@
 # services/email_service.py
-from flask import current_app, render_template_string
+from flask import current_app, render_template_string, url_for
 from flask_mail import Mail, Message
 from config.email_config import EmailConfig
 import logging
@@ -54,23 +54,24 @@ class EmailService:
         
         template = """
         <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #2c3e50;">New User Registration</h2>
-                
-                <p>A new user has registered and is pending approval:</p>
-                
-                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <strong>User Details:</strong><br>
-                    Name: {{ user.get_full_name() }}<br>
-                    Email: {{ user.email }}<br>
-                    Phone: {{ user.phone_number or 'Not provided' }}<br>
-                    Registration Date: {{ user.created_at.strftime('%Y-%m-%d %H:%M') }}
+        <body style="font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #f1f5f9; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 30px; border: 1px solid #334155;">
+                <h2 style="color: #3b82f6; font-size: 24px; margin-bottom: 20px; text-align: center;">New User Registration</h2>
+                <p style="color: #94a3b8; line-height: 1.6;">A new user has registered and is pending approval:</p>
+                <div style="background-color: #0f172a; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #334155;">
+                    <strong style="color: #f1f5f9;">User Details:</strong><br>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Name:</strong> {{ user.get_full_name() }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Email:</strong> {{ user.email }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Phone:</strong> {{ user.phone_number or 'Not provided' }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Registration Date:</strong> {{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
                 </div>
-                
-                <p>Please log in to the admin panel to approve or reject this registration.</p>
-                
-                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                <p style="color: #94a3b8; line-height: 1.6;">Please log in to the admin panel to approve or reject this registration.</p>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="{{ url_for('user_management', _external=True) }}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
+                        Go to User Management
+                    </a>
+                </div>
+                <p style="color: #64748b; font-size: 12px; margin-top: 30px; text-align: center;">
                     This is an automated message from the Test Reports System.
                 </p>
             </div>
@@ -89,27 +90,25 @@ class EmailService:
         
         template = """
         <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #27ae60;">Account Approved!</h2>
-                
-                <p>Dear {{ user.get_full_name() }},</p>
-                
-                <p>Great news! Your account has been approved and you now have access to the Test Reports System.</p>
-                
-                <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #27ae60;">
-                    <strong>Account Details:</strong><br>
-                    Email: {{ user.email }}<br>
-                    Status: Active and Approved
+        <body style="font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #f1f5f9; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 30px; border: 1px solid #334155;">
+                <h2 style="color: #22c55e; font-size: 24px; margin-bottom: 20px; text-align: center;">Account Approved!</h2>
+                <p style="color: #94a3b8; line-height: 1.6;">Dear {{ user.get_full_name() }},</p>
+                <p style="color: #94a3b8; line-height: 1.6;">Great news! Your account has been approved and you now have access to the Test Reports System.</p>
+                <div style="background-color: #0f172a; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+                    <strong style="color: #f1f5f9;">Account Details:</strong><br>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Email:</strong> {{ user.email }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Status:</strong> Active and Approved</p>
                 </div>
-                
-                <p>You can now log in and start using the system to manage your test reports.</p>
-                
-                <p>If you have any questions, please don't hesitate to contact the administrator.</p>
-                
-                <p>Best regards,<br>Test Reports System Team</p>
-                
-                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                <p style="color: #94a3b8; line-height: 1.6;">You can now log in and start using the system to manage your test reports.</p>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="{{ url_for('login', _external=True) }}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
+                        Login Now
+                    </a>
+                </div>
+                <p style="color: #94a3b8; line-height: 1.6;">If you have any questions, please don't hesitate to contact the administrator.</p>
+                <p style="color: #94a3b8; line-height: 1.6;">Best regards,<br>Test Reports System Team</p>
+                <p style="color: #64748b; font-size: 12px; margin-top: 30px; text-align: center;">
                     This is an automated message from the Test Reports System.
                 </p>
             </div>
@@ -126,23 +125,24 @@ class EmailService:
         
         template = """
         <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #e74c3c;">Password Reset Request</h2>
-                
-                <p>A user has requested a password reset and is awaiting approval:</p>
-                
-                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <strong>Request Details:</strong><br>
-                    User: {{ reset_request.user.get_full_name() }}<br>
-                    Email: {{ reset_request.user.email }}<br>
-                    Request Date: {{ reset_request.created_at.strftime('%Y-%m-%d %H:%M') }}<br>
-                    Expires: {{ reset_request.expires_at.strftime('%Y-%m-%d %H:%M') }}
+        <body style="font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #f1f5f9; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 30px; border: 1px solid #334155;">
+                <h2 style="color: #ef4444; font-size: 24px; margin-bottom: 20px; text-align: center;">Password Reset Request</h2>
+                <p style="color: #94a3b8; line-height: 1.6;">A user has requested a password reset and is awaiting approval:</p>
+                <div style="background-color: #0f172a; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #334155;">
+                    <strong style="color: #f1f5f9;">Request Details:</strong><br>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>User:</strong> {{ reset_request.user.get_full_name() }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Email:</strong> {{ reset_request.user.email }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Request Date:</strong> {{ reset_request.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Expires:</strong> {{ reset_request.expires_at.strftime('%Y-%m-%d %H:%M') }}</p>
                 </div>
-                
-                <p>Please log in to the admin panel to approve or reject this password reset request.</p>
-                
-                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                <p style="color: #94a3b8; line-height: 1.6;">Please log in to the admin panel to approve or reject this password reset request.</p>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="{{ url_for('user_management', _external=True) }}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
+                        Go to User Management
+                    </a>
+                </div>
+                <p style="color: #64748b; font-size: 12px; margin-top: 30px; text-align: center;">
                     This is an automated message from the Test Reports System.
                 </p>
             </div>
@@ -161,27 +161,20 @@ class EmailService:
         
         template = """
         <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #27ae60;">Password Reset Approved</h2>
-                
-                <p>Dear {{ reset_request.user.get_full_name() }},</p>
-                
-                <p>Your password reset request has been approved. You can now reset your password using the link below:</p>
-                
+        <body style="font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #f1f5f9; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 30px; border: 1px solid #334155;">
+                <h2 style="color: #22c55e; font-size: 24px; margin-bottom: 20px; text-align: center;">Password Reset Approved</h2>
+                <p style="color: #94a3b8; line-height: 1.6;">Dear {{ reset_request.user.get_full_name() }},</p>
+                <p style="color: #94a3b8; line-height: 1.6;">Your password reset request has been approved. You can now reset your password using the link below:</p>
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="{{ reset_url }}" style="background-color: #3498db; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    <a href="{{ reset_url }}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
                         Reset Password
                     </a>
                 </div>
-                
-                <p><strong>Important:</strong> This link will expire on {{ reset_request.expires_at.strftime('%Y-%m-%d at %H:%M') }}.</p>
-                
-                <p>If you didn't request this password reset, please contact the administrator immediately.</p>
-                
-                <p>Best regards,<br>Test Reports System Team</p>
-                
-                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                <p style="color: #94a3b8; line-height: 1.6;"><strong>Important:</strong> This link will expire on {{ reset_request.expires_at.strftime('%Y-%m-%d at %H:%M') }}.</p>
+                <p style="color: #94a3b8; line-height: 1.6;">If you didn't request this password reset, please contact the administrator immediately.</p>
+                <p style="color: #94a3b8; line-height: 1.6;">Best regards,<br>Test Reports System Team</p>
+                <p style="color: #64748b; font-size: 12px; margin-top: 30px; text-align: center;">
                     This is an automated message from the Test Reports System.
                 </p>
             </div>
@@ -198,39 +191,34 @@ class EmailService:
         
         template = """
         <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #2c3e50;">Test Report Available</h2>
-                
-                <p>A test report has been created/updated and is ready for review:</p>
-                
-                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <strong>Report Details:</strong><br>
-                    Portfolio: {{ report.portfolioName }}<br>
-                    Project: {{ report.projectName }}<br>
-                    Sprint: {{ report.sprintNumber }}<br>
-                    Status: {{ report.testingStatus }}<br>
-                    Date: {{ report.reportDate }}<br>
-                    {% if report.reportName %}Report Name: {{ report.reportName }}<br>{% endif %}
+        <body style="font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #f1f5f9; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 30px; border: 1px solid #334155;">
+                <h2 style="color: #3b82f6; font-size: 24px; margin-bottom: 20px; text-align: center;">Test Report Available</h2>
+                <p style="color: #94a3b8; line-height: 1.6;">A test report has been created/updated and is ready for review:</p>
+                <div style="background-color: #0f172a; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #334155;">
+                    <strong style="color: #f1f5f9;">Report Details:</strong><br>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Portfolio:</strong> {{ report.portfolioName }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Project:</strong> {{ report.projectName }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Sprint:</strong> {{ report.sprintNumber }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Status:</strong> {{ report.testingStatus }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Date:</strong> {{ report.reportDate }}</p>
+                    {% if report.reportName %}<p style="color: #94a3b8; margin: 5px 0;"><strong>Report Name:</strong> {{ report.reportName }}</p>{% endif %}
                 </div>
-                
-                <div style="background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <strong>Summary:</strong><br>
-                    Total User Stories: {{ report.totalUserStories }}<br>
-                    Total Test Cases: {{ report.totalTestCases }}<br>
-                    Total Issues: {{ report.totalIssues }}<br>
-                    Total Enhancements: {{ report.totalEnhancements }}
+                <div style="background-color: #0f172a; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #334155;">
+                    <strong style="color: #f1f5f9;">Summary:</strong><br>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Total User Stories:</strong> {{ report.totalUserStories }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Total Test Cases:</strong> {{ report.totalTestCases }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Total Issues:</strong> {{ report.totalIssues }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Total Enhancements:</strong> {{ report.totalEnhancements }}</p>
                 </div>
-                
                 {% if report_url %}
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="{{ report_url }}" style="background-color: #3498db; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    <a href="{{ report_url }}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
                         View Report
                     </a>
                 </div>
                 {% endif %}
-                
-                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                <p style="color: #64748b; font-size: 12px; margin-top: 30px; text-align: center;">
                     This is an automated message from the Test Reports System.
                 </p>
             </div>
@@ -249,28 +237,24 @@ class EmailService:
         
         template = """
         <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #2c3e50;">Project Status Update</h2>
-                
-                <p>The status of a project has been updated:</p>
-                
-                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <strong>Project Details:</strong><br>
-                    Portfolio: {{ portfolio_name }}<br>
-                    Project: {{ project_name }}<br>
-                    New Status: <span style="color: {% if status == 'passed' %}#27ae60{% elif status == 'passed-with-issues' %}#f39c12{% else %}#e74c3c{% endif %};">{{ status.title() }}</span><br>
-                    Updated: {{ datetime.now().strftime('%Y-%m-%d %H:%M') }}
+        <body style="font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #f1f5f9; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 30px; border: 1px solid #334155;">
+                <h2 style="color: #3b82f6; font-size: 24px; margin-bottom: 20px; text-align: center;">Project Status Update</h2>
+                <p style="color: #94a3b8; line-height: 1.6;">The status of a project has been updated:</p>
+                <div style="background-color: #0f172a; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #334155;">
+                    <strong style="color: #f1f5f9;">Project Details:</strong><br>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Portfolio:</strong> {{ portfolio_name }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Project:</strong> {{ project_name }}</p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>New Status:</strong> <span style="color: {% if status == 'passed' %}#22c55e{% elif status == 'passed-with-issues' %}#eab308{% else %}#ef4444{% endif %};">{{ status.title() }}</span></p>
+                    <p style="color: #94a3b8; margin: 5px 0;"><strong>Updated:</strong> {{ datetime.now().strftime('%Y-%m-%d %H:%M') }}</p>
                 </div>
-                
                 {% if details %}
-                <div style="background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <strong>Additional Details:</strong><br>
-                    {{ details }}
+                <div style="background-color: #0f172a; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #334155;">
+                    <strong style="color: #f1f5f9;">Additional Details:</strong><br>
+                    <p style="color: #94a3b8; line-height: 1.6;">{{ details }}</p>
                 </div>
                 {% endif %}
-                
-                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                <p style="color: #64748b; font-size: 12px; margin-top: 30px; text-align: center;">
                     This is an automated message from the Test Reports System.
                 </p>
             </div>

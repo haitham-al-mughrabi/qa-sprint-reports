@@ -1,6 +1,6 @@
 # app.py
 # Import necessary libraries
-from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash, render_template_string
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -3000,35 +3000,25 @@ def test_email():
         subject = "Test Email - Configuration Verification"
         template = """
         <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #27ae60;">Email Configuration Test</h2>
-                
-                <p>Congratulations! Your email configuration is working correctly.</p>
-                
-                <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #27ae60;">
-                    <strong>Test Details:</strong><br>
-                    Sent at: """ + datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC') + """<br>
-                    From: Test Reports System
+        <body style="font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #f1f5f9; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 30px; border: 1px solid #334155;">
+                <h2 style="color: #3b82f6; font-size: 24px; margin-bottom: 20px; text-align: center;">Email Configuration Test</h2>
+                <p style="color: #94a3b8; line-height: 1.6;">This is a test email to verify that the email settings are configured correctly.</p>
+                <div style="background-color: #0f172a; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+                    <strong style="color: #f1f5f9;">Status:</strong>
+                    <p style="color: #94a3b8; margin: 5px 0;">If you are seeing this email, your configuration is working correctly.</p>
                 </div>
-                
-                <p>You can now use email notifications for:</p>
-                <ul>
-                    <li>User registration approvals</li>
-                    <li>Password reset requests</li>
-                    <li>Report notifications</li>
-                    <li>Project status updates</li>
-                </ul>
-                
-                <p style="color: #666; font-size: 12px; margin-top: 30px;">
-                    This is a test message from the Test Reports System.
+                <p style="color: #94a3b8; line-height: 1.6;"><strong>Timestamp:</strong> {{ timestamp }}</p>
+                <p style="color: #64748b; font-size: 12px; margin-top: 30px; text-align: center;">
+                    This is an automated message from the Test Reports System.
                 </p>
             </div>
         </body>
         </html>
         """
         
-        success = email_service.send_email(test_email_address, subject, template)
+        rendered_template = render_template_string(template, timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        success = email_service.send_email(test_email_address, subject, rendered_template)
         
         if success:
             return jsonify({'success': True, 'message': 'Test email sent successfully!'})
