@@ -438,6 +438,20 @@ def approved_user_required(f):
 
 # --- API Routes ---
 
+@app.route('/api/auth/profile', methods=['GET'])
+@login_required
+@approved_user_required
+def get_current_user():
+    """Get current user profile information for navigation"""
+    user = User.query.get(session['user_id'])
+    if not user:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+    
+    return jsonify({
+        'success': True,
+        'user': user.to_dict()
+    })
+
 @app.route('/')
 def index():
     """Redirect to login if not authenticated, otherwise to dashboard."""

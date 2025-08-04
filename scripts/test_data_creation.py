@@ -1,6 +1,6 @@
 # test_data_creation.py
 """
-Script to create sample test data for the Enhanced QA Reports System
+Script to create sample test data for the QA Reports System
 Run this script after setting up the database to populate with sample reports.
 """
 
@@ -246,7 +246,7 @@ def test_dashboard_api():
 
 def main():
     """Main function to run test data creation"""
-    print("🚀 Enhanced QA Reports System - Test Data Creation")
+    print("🚀 QA Reports System - Test Data Creation")
     print("=" * 50)
     
     # Test if the server is running

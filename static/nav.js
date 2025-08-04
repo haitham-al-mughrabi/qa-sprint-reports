@@ -1,5 +1,5 @@
 /**
- * Navigation functionality for Sprint Reports System
+ * Navigation functionality for QA Reports System
  */
 
 // Navigation state
@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeUserDropdown();
     initializeMobileMenu();
     updateActiveNavLink();
+    loadUserInfo();
 });
 
 /**
@@ -251,6 +252,28 @@ if (typeof toggleTheme === 'undefined') {
 }
 
 /**
+ * Load user information for navigation
+ */
+async function loadUserInfo() {
+    try {
+        const response = await fetch('/api/auth/profile');
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.user) {
+                updateUserInfo(result.user);
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load user info:', error);
+        // Fallback to default values
+        const userNameElements = document.querySelectorAll('.user-name');
+        userNameElements.forEach(el => {
+            el.textContent = 'User';
+        });
+    }
+}
+
+/**
  * Initialize theme on page load (if not already defined)
  */
 if (typeof initializeTheme === 'undefined') {
@@ -282,5 +305,6 @@ window.NavigationManager = {
     updateAdminElements,
     toggleUserDropdown,
     toggleMobileMenu,
-    updateActiveNavLink
+    updateActiveNavLink,
+    loadUserInfo
 };
