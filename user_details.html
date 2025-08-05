@@ -1684,12 +1684,16 @@
                     }
                 }, 100);
 
-                // Get user ID from URL parameters
+                // Get user ID and other parameters from URL
                 const urlParams = new URLSearchParams(window.location.search);
                 currentUserId = urlParams.get('id');
+                const targetTab = urlParams.get('tab');
+                const action = urlParams.get('action');
                 
                 console.log('URL parameters:', window.location.search);
                 console.log('Extracted user ID:', currentUserId);
+                console.log('Target tab:', targetTab);
+                console.log('Action:', action);
                 
                 if (!currentUserId) {
                     showError('No user ID provided in URL. Please access this page from the User Management page.');
@@ -1700,6 +1704,10 @@
                     showError('Invalid user ID format. Please check the URL.');
                     return;
                 }
+
+                // Store parameters for later use
+                window.targetTab = targetTab;
+                window.targetAction = action;
 
                 // Test API accessibility first, then load user data
                 testApiAccess().then(() => {
@@ -1763,12 +1771,55 @@
                         populateUserData(currentUser);
                         loadActivityLog();
                         hideLoading();
+                        
+                        // Handle URL parameters for tab and actions
+                        handleUrlParameters();
                     } else {
                         throw new Error(data.message || 'Failed to load user data');
                     }
                 } catch (error) {
                     console.error('Error loading user data:', error);
                     showError(error.message);
+                }
+            }
+
+            // Handle URL parameters for tab switching and actions
+            function handleUrlParameters() {
+                const targetTab = window.targetTab;
+                const targetAction = window.targetAction;
+
+                // Switch to the specified tab if provided
+                if (targetTab && ['view', 'profile', 'password', 'settings', 'activity'].includes(targetTab)) {
+                    switchTab(targetTab);
+                }
+
+                // Handle specific actions
+                if (targetAction) {
+                    setTimeout(() => {
+                        switch (targetAction) {
+                            case 'delete':
+                                showDeleteConfirmation();
+                                break;
+                            case 'approve':
+                                if (currentUser && !currentUser.is_approved) {
+                                    document.getElementById('isApproved').checked = true;
+                                    showMessage('settingsMessage', 'Please save the settings to approve this user.', 'info');
+                                }
+                                break;
+                            case 'toggle-admin':
+                                if (currentUser) {
+                                    document.getElementById('isAdmin').checked = !currentUser.is_admin;
+                                    showMessage('settingsMessage', 'Admin status has been toggled. Please save the settings to apply changes.', 'info');
+                                }
+                                break;
+                            case 'toggle-active':
+                                if (currentUser) {
+                                    document.getElementById('isActive').checked = !currentUser.is_active;
+                                    showMessage('settingsMessage', 'Active status has been toggled. Please save the settings to apply changes.', 'info');
+                                }
+                                break;
+                        }
+                    }, 500); // Small delay to ensure UI is ready
                 }
             }
 

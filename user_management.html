@@ -1326,67 +1326,19 @@ MAIL_DEFAULT_SENDER=your-email@gmail.com</code></pre>
             }
 
             // User management actions
-            async function approveUser(userId) {
-                try {
-                    const response = await fetch(
-                        `/api/users/${userId}/approve`,
-                        {
-                            method: "POST",
-                        },
-                    );
-                    const result = await response.json();
-
-                    if (result.success) {
-                        showToast(result.message, "success");
-                        loadUsers(); // Reload users
-                    } else {
-                        showToast(result.message, "error");
-                    }
-                } catch (error) {
-                    showToast("Network error", "error");
-                }
+            // Approve user - redirect to user information page
+            function approveUser(userId) {
+                window.location.href = `/user-details?id=${userId}&tab=settings&action=approve`;
             }
 
-            async function toggleAdmin(userId) {
-                try {
-                    const response = await fetch(
-                        `/api/users/${userId}/toggle-admin`,
-                        {
-                            method: "POST",
-                        },
-                    );
-                    const result = await response.json();
-
-                    if (result.success) {
-                        showToast(result.message, "success");
-                        loadUsers(); // Reload users
-                    } else {
-                        showToast(result.message, "error");
-                    }
-                } catch (error) {
-                    showToast("Network error", "error");
-                }
+            // Toggle admin - redirect to user information page
+            function toggleAdmin(userId) {
+                window.location.href = `/user-details?id=${userId}&tab=settings&action=toggle-admin`;
             }
 
-            async function toggleActive(userId) {
-                try {
-                    const response = await fetch(
-                        `/api/users/${userId}/toggle-active`,
-                        {
-                            method: "POST",
-                        },
-                    );
-                    const result = await response.json();
-
-                    if (result.success) {
-                        showToast(result.message, "success");
-                        loadUsers(); // Reload users
-                    } else {
-                        showToast(result.message, "error");
-                    }
-                } catch (error) {
-                    showToast("Network error", "error");
-                }
+            // Toggle active - redirect to user information page
+            function toggleActive(userId) {
+                window.location.href = `/user-details?id=${userId}&tab=settings&action=toggle-active`;
             }
 
             async function approveResetRequest(requestId) {
@@ -1536,87 +1488,22 @@ MAIL_DEFAULT_SENDER=your-email@gmail.com</code></pre>
 
             // View user details - redirect to dedicated page
             function viewUser(userId) {
-                window.location.href = `/user-details?id=${userId}`;
+                window.location.href = `/user-details?id=${userId}&tab=view`;
             }
 
-            // Edit user
-            async function editUser(userId) {
-                try {
-                    const response = await fetch(`/api/users/${userId}`);
-                    const result = await response.json();
-
-                    if (result.success) {
-                        const user = result.user;
-
-                        // Populate form
-                        document.getElementById("editUserId").value = user.id;
-                        document.getElementById("editFirstName").value =
-                            user.first_name;
-                        document.getElementById("editLastName").value =
-                            user.last_name;
-                        document.getElementById("editEmail").value = user.email;
-                        document.getElementById("editUsername").value =
-                            user.username || "";
-                        document.getElementById("editPhoneNumber").value =
-                            user.phone_number || "";
-                        document.getElementById("editIsAdmin").checked =
-                            user.is_admin;
-                        document.getElementById("editIsApproved").checked =
-                            user.is_approved;
-                        document.getElementById("editIsActive").checked =
-                            user.is_active;
-
-                        document.getElementById("editUserModal").style.display =
-                            "flex";
-                    } else {
-                        showToast("Failed to load user details", "error");
-                    }
-                } catch (error) {
-                    showToast("Network error loading user details", "error");
-                }
+            // Edit user - redirect to user information page
+            function editUser(userId) {
+                window.location.href = `/user-details?id=${userId}&tab=profile`;
             }
 
-            // Change password
+            // Change password - redirect to user information page
             function changePassword(userId) {
-                document.getElementById("passwordUserId").value = userId;
-                document.getElementById("newPassword").value = "";
-                document.getElementById("confirmPassword").value = "";
-                document.getElementById("changePasswordModal").style.display =
-                    "flex";
+                window.location.href = `/user-details?id=${userId}&tab=password`;
             }
 
-            // Delete user
-            async function deleteUser(userId) {
-                const user = users.find((u) => u.id === userId);
-                if (!user) return;
-
-                if (
-                    !confirm(
-                        `Are you sure you want to delete user "${user.full_name}"? This action cannot be undone.`,
-                    )
-                ) {
-                    return;
-                }
-
-                try {
-                    const response = await fetch(
-                        `/api/users/${userId}/delete`,
-                        {
-                            method: "DELETE",
-                        },
-                    );
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        showToast(result.message, "success");
-                        loadUsers(); // Reload users list
-                    } else {
-                        showToast(result.message, "error");
-                    }
-                } catch (error) {
-                    showToast("Network error deleting user", "error");
-                }
+            // Delete user - redirect to user information page
+            function deleteUser(userId) {
+                window.location.href = `/user-details?id=${userId}&action=delete`;
             }
 
             // Close modal
