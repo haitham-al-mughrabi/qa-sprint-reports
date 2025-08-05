@@ -2649,11 +2649,34 @@ function resetAllCharts() {
     initializeCharts(); // Re-initialize all charts to their default empty state
 }
 
-function loadReportForEditing(report) {
+async function loadReportForEditing(report) {
     resetFormData(); // Reset first to clear any previous data
 
-    // Basic fields
-    const basicFields = ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber'];
+    // First, load the dropdown data to ensure options are available
+    await loadFormDropdownData();
+    
+    // Wait a bit for dropdowns to be populated
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Load portfolio first
+    const portfolioSelect = document.getElementById('portfolioName');
+    if (portfolioSelect && report.portfolioName) {
+        portfolioSelect.value = report.portfolioName;
+        // Trigger portfolio selection to load projects
+        await onPortfolioSelection();
+        
+        // Wait for projects to load
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Then load project
+        const projectSelect = document.getElementById('projectName');
+        if (projectSelect && report.projectName) {
+            projectSelect.value = report.projectName;
+        }
+    }
+
+    // Basic fields (excluding portfolioName and projectName as they're handled above)
+    const basicFields = ['sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber'];
     basicFields.forEach(field => {
         const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
@@ -3935,26 +3958,7 @@ async function onProjectSelection() {
 
                 showAutoLoadModal(data);
             } else {
-                console.log('No previous data, but showing modal anyway for testing');
-                // TEMPORARY: Force show modal even without data for testing
-                const testData = {
-                    hasData: true,
-                    latestData: {
-                        sprintNumber: 1,
-                        cycleNumber: 1,
-                        releaseNumber: '1.0',
-                        reportVersion: '1.0',
-                        testerData: [],
-                        teamMembers: []
-                    },
-                    suggestedValues: {
-                        sprintNumber: 2,
-                        cycleNumber: 1,
-                        releaseNumber: '1.0'
-                    }
-                };
-                latestProjectData = testData;
-                showAutoLoadModal(testData);
+                console.log('No previous data found for this project');
                 // No previous data, set defaults
                 setDefaultValues(data.defaultValues);
             }
@@ -4023,7 +4027,7 @@ function loadSelectedData() {
     const loadTesters = document.getElementById('loadTesters').checked;
     const loadTeamMembers = document.getElementById('loadTeamMembers').checked;
 
-    // Load Sprint & Release Information
+    // Load Sprint & Release Information with the new logic
     if (loadSprintData) {
         document.getElementById('sprintNumber').value = suggestedValues.sprintNumber;
         document.getElementById('cycleNumber').value = suggestedValues.cycleNumber;

@@ -1494,15 +1494,97 @@ def get_latest_project_data(portfolio_name, project_name):
                 }
             })
 
-        # Get the latest report first (most recent by ID)
-        latest_report = max(all_reports, key=lambda r: r.id)
+        # Sort reports by ID to get chronological order (latest by creation time)
+        sorted_reports = sorted(all_reports, key=lambda r: r.id)
+        latest_report = sorted_reports[-1]  # Get the most recently created report
+        second_latest = sorted_reports[-2] if len(sorted_reports) > 1 else None
 
         # Find the highest sprint number across all reports
         max_sprint = max((r.sprintNumber or 0) for r in all_reports)
+        
+        # Get reports with the highest sprint number
+        max_sprint_reports = [r for r in all_reports if (r.sprintNumber or 0) == max_sprint]
+        
+        # Find the highest cycle number among reports with the highest sprint
+        max_cycle_in_max_sprint = max((r.cycleNumber or 0) for r in max_sprint_reports)
+        
+        # Get the latest report with max sprint and max cycle
+        latest_max_report = None
+        for r in sorted(max_sprint_reports, key=lambda x: x.id, reverse=True):
+            if (r.cycleNumber or 0) == max_cycle_in_max_sprint:
+                latest_max_report = r
+                break
+        
+        if not latest_max_report:
+            latest_max_report = latest_report
 
-        # Get the last cycle number and release number from the most recent report
-        last_cycle = latest_report.cycleNumber or 1
-        last_release = latest_report.releaseNumber or '1.0'
+        # Current values from the latest report with highest sprint/cycle
+        current_sprint = latest_max_report.sprintNumber or 1
+        current_cycle = latest_max_report.cycleNumber or 1
+        current_release = latest_max_report.releaseNumber or '1.0'
+        
+        # Parse release numbers for comparison
+        def parse_release(release_str):
+            try:
+                parts = str(release_str).split('.')
+                return (int(parts[0]), int(parts[1]) if len(parts) > 1 else 0)
+            except:
+                return (1, 0)
+        
+        def increment_release(release_str):
+            try:
+                parts = str(release_str).split('.')
+                major = int(parts[0])
+                minor = int(parts[1]) if len(parts) > 1 else 0
+                return f"{major}.{minor + 1}"
+            except:
+                return "1.1"
+        
+        # Calculate suggested values based on the requirements
+        if second_latest:
+            # Use chronological order for comparison
+            prev_sprint = second_latest.sprintNumber or 1
+            prev_cycle = second_latest.cycleNumber or 1
+            prev_release = second_latest.releaseNumber or '1.0'
+            
+            current_rel_parsed = parse_release(current_release)
+            prev_rel_parsed = parse_release(prev_release)
+            
+            # Logic based on requirements analysis:
+            if current_sprint == prev_sprint:
+                # Same sprint number - increment cycle
+                suggested_sprint = current_sprint
+                suggested_cycle = current_cycle + 1
+                # Use the first report's release number (prev_release in this case)
+                suggested_release = prev_release
+            elif current_sprint > prev_sprint:
+                # Sprint increased - increment sprint, reset cycle to 1
+                suggested_sprint = current_sprint + 1
+                suggested_cycle = 1
+                # Check if release also increased
+                if current_rel_parsed > prev_rel_parsed:
+                    # Release increased - increment the current release
+                    suggested_release = increment_release(current_release)
+                else:
+                    # Release same - use the first report's release
+                    suggested_release = prev_release
+            else:
+                # Edge case: current sprint is lower than previous
+                # Use the highest sprint number found + 1
+                suggested_sprint = max_sprint + 1
+                suggested_cycle = 1
+                # Use the release from the report with the highest sprint
+                highest_sprint_report = None
+                for r in all_reports:
+                    if (r.sprintNumber or 0) == max_sprint:
+                        highest_sprint_report = r
+                        break
+                suggested_release = highest_sprint_report.releaseNumber if highest_sprint_report else current_release
+        else:
+            # Only one report exists - increment sprint
+            suggested_sprint = current_sprint + 1
+            suggested_cycle = 1
+            suggested_release = current_release
 
         # Parse existing data
         tester_data = json.loads(latest_report.testerData or '[]')
@@ -1523,18 +1605,18 @@ def get_latest_project_data(portfolio_name, project_name):
         return jsonify({
             'hasData': True,
             'latestData': {
-                'sprintNumber': max_sprint,
-                'cycleNumber': last_cycle,
-                'releaseNumber': last_release,
+                'sprintNumber': current_sprint,
+                'cycleNumber': current_cycle,
+                'releaseNumber': current_release,
                 'reportVersion': latest_report.reportVersion or '1.0',
                 'reportDate': latest_report.reportDate,
                 'testerData': tester_data,
                 'teamMembers': team_member_data
             },
             'suggestedValues': {
-                'sprintNumber': max_sprint + 1,
-                'cycleNumber': last_cycle,  # Use last cycle number from most recent report
-                'releaseNumber': last_release,  # Use last release number from most recent report
+                'sprintNumber': suggested_sprint,
+                'cycleNumber': suggested_cycle,
+                'releaseNumber': suggested_release,
                 'reportVersion': latest_report.reportVersion or '1.0'
             }
         })
