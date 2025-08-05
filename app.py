@@ -521,12 +521,20 @@ def reports_page():
     """Serves the reports management HTML page."""
     return render_template('reports.html')
 
+@app.route('/reports_type')
+@login_required
+@approved_user_required
+def reports_type_page():
+    """Serves the report types selection page."""
+    return render_template('reports_type.html')
+
 @app.route('/create-report')
 @login_required
 @approved_user_required
 def create_report_page():
     """Serves the create/edit report HTML page."""
-    return render_template('create_report.html')
+    report_type = request.args.get('type', 'sprint') # Default to sprint
+    return render_template('create_report.html', report_type=report_type)
 
 @app.route('/report/<int:report_id>')
 @login_required

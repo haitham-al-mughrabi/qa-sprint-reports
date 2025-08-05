@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Report Type - QA Reports System</title>
+
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload"
+        as="style" onload="this.rel='stylesheet'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Main styles -->
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/unified-nav.css">
+    <link rel="stylesheet" href="/static/report-types.css">
+
+    <!-- Theme manager (loads early) -->
+    <script src="/static/theme-manager.js" defer></script>
+    
+    <!-- Navigation script -->
+    <script src="/static/nav.js" defer></script>
+</head>
+
+<body>
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-rocket"></i> QA Reports System
+            </div>
+            
+            <button class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="/reports" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-text">Reports</span>
+                </a>
+                <a href="/reports_type" class="nav-link active">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="nav-text">New Report</span>
+                </a>
+                <a href="/manage" class="nav-link">
+                    <i class="fas fa-cogs"></i>
+                    <span class="nav-text">Manage Data</span>
+                </a>
+                <a href="/project-statistics" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span class="nav-text">Statistics</span>
+                </a>
+            </div>
+            
+            <div class="nav-controls">
+                <div class="nav-user">
+                    <div class="nav-dropdown">
+                        <button class="nav-dropdown-btn">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="user-name">User</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="nav-dropdown-content">
+                            <a href="/profile">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </a>
+                            <a href="/user-management" class="admin-only">
+                                <i class="fas fa-users-cog"></i>
+                                User Management
+                            </a>
+                            <a href="/logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <div class="reports-container">
+            <div class="dashboard-header">
+                <h1><i class="fas fa-plus-circle"></i> Select New Report Type</h1>
+                <p>Choose a template to begin creating your quality assurance report.</p>
+            </div>
+            <div class="report-types-grid">
+                <div class="report-type-card" onclick="location.href='/create-report?type=sprint'">
+                    <div class="icon"><i class="fas fa-running"></i></div>
+                    <h2>Sprint Report</h2>
+                    <p>For agile sprint testing cycles, covering user stories, test cases, and bug analysis.</p>
+                </div>
+                <div class="report-type-card" onclick="location.href='/create-report?type=manual'">
+                    <div class="icon"><i class="fas fa-hand-pointer"></i></div>
+                    <h2>Manual Report</h2>
+                    <p>Detailed report for manual test executions, focusing on step-by-step validation.</p>
+                </div>
+                <div class="report-type-card" onclick="location.href='/create-report?type=automation'">
+                    <div class="icon"><i class="fas fa-robot"></i></div>
+                    <h2>Automation Report</h2>
+                    <p>Summary of automated test suite runs, including pass/fail rates and performance metrics.</p>
+                </div>
+                <div class="report-type-card" onclick="location.href='/create-report?type=performance'">
+                    <div class="icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <h2>Performance Report</h2>
+                    <p>Analysis of system performance under load, covering response times and resource usage.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

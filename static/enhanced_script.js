@@ -2547,13 +2547,13 @@ function goToPage(page) {
 
 // --- Report Actions (CRUD) ---
 function createNewReport() {
-    // Redirect to the create report page
-    window.location.href = '/create-report';
+    // Redirect to the report types selection page
+    window.location.href = '/reports_type';
 }
 
 async function regenerateReport(id) {
     // Redirect to the create report page with the report ID for editing
-    window.location.href = `/create-report?id=${id}`;
+    window.location.href = `/reports_type`;
 }
 
 async function deleteReport(id) {

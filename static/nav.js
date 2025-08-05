@@ -177,8 +177,7 @@ function updateActiveNavLink() {
         link.classList.remove('active');
         
         const href = link.getAttribute('href');
-        if (href && (currentPath === href || 
-            (href !== '/' && currentPath.startsWith(href)))) {
+        if (href && (currentPath === href || (href !== '/' && currentPath.startsWith(href + '/')))) {
             link.classList.add('active');
         }
     });
