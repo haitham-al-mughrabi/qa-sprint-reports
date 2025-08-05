@@ -1454,29 +1454,19 @@ def get_form_data():
 def get_latest_project_data(portfolio_name, project_name):
     """Get latest report data for a specific project to auto-populate new reports"""
     try:
-        print(f"DEBUG: Looking for reports with portfolio='{portfolio_name}', project='{project_name}'")
-
-        # Get all reports for this project to find the highest values
-        all_reports = Report.query.filter_by(
-            portfolioName=portfolio_name,
-            projectName=project_name
+        # Get all reports for this project to find the highest values (case-insensitive)
+        all_reports = Report.query.filter(
+            db.func.lower(Report.portfolioName) == portfolio_name.lower(),
+            db.func.lower(Report.projectName) == project_name.lower()
         ).all()
-
-        print(f"DEBUG: Found {len(all_reports)} reports")
-
-        # Also check what reports exist in the database
-        all_existing_reports = Report.query.all()
-        print(f"DEBUG: Total reports in database: {len(all_existing_reports)}")
-        for report in all_existing_reports[:5]:  # Show first 5 reports
-            print(f"DEBUG: Report - Portfolio: '{report.portfolioName}', Project: '{report.projectName}'")
 
         if not all_reports:
             # No previous reports - return default values
             from datetime import datetime
             today = datetime.now().strftime('%d-%m-%Y')
 
-            # Get project to find assigned testers
-            project = Project.query.filter_by(name=project_name).first()
+            # Get project to find assigned testers (case-insensitive)
+            project = Project.query.filter(db.func.lower(Project.name) == project_name.lower()).first()
             project_testers = []
             if project:
                 project_testers = [{'id': t.id, 'name': t.name, 'email': t.email, 'is_automation_engineer': t.is_automation_engineer, 'is_manual_engineer': t.is_manual_engineer, 'role_types': t.role_types, 'role_display': t.role_display} for t in project.testers]
@@ -1590,8 +1580,8 @@ def get_latest_project_data(portfolio_name, project_name):
         tester_data = json.loads(latest_report.testerData or '[]')
         team_member_data = json.loads(latest_report.teamMemberData or '[]')
 
-        # Get project to find assigned testers (merge with existing tester data)
-        project = Project.query.filter_by(name=project_name).first()
+        # Get project to find assigned testers (merge with existing tester data) (case-insensitive)
+        project = Project.query.filter(db.func.lower(Project.name) == project_name.lower()).first()
         if project:
             # Get assigned testers that might not be in the latest report
             assigned_testers = [{'id': t.id, 'name': t.name, 'email': t.email, 'is_automation_engineer': t.is_automation_engineer, 'is_manual_engineer': t.is_manual_engineer} for t in project.testers]

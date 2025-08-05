@@ -3936,8 +3936,14 @@ async function onProjectSelection() {
     projectName = projectSelect.options[projectSelect.selectedIndex].text;
     console.log('Fetching data for:', portfolioName, '/', projectName);
 
+    // Convert to lowercase for case-insensitive matching
+    const portfolioNameLower = portfolioName.toLowerCase();
+    const projectNameLower = projectName.toLowerCase();
+
+    console.log('URL will be:', `/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
+
     try {
-        const response = await fetch(`/api/projects/${encodeURIComponent(portfolioName)}/${encodeURIComponent(projectName)}/latest-data`);
+        const response = await fetch(`/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
         console.log('API response status:', response.status);
 
         if (response.ok) {
@@ -3946,6 +3952,7 @@ async function onProjectSelection() {
 
             if (data.hasData) {
                 console.log('Has data, showing modal');
+                console.log('Data received:', JSON.stringify(data, null, 2));
                 latestProjectData = data;
 
                 // Automatically load testers when project is selected
@@ -3956,9 +3963,11 @@ async function onProjectSelection() {
                     renderTesterList();
                 }
 
+                console.log('About to call showAutoLoadModal...');
                 showAutoLoadModal(data);
             } else {
                 console.log('No previous data found for this project');
+                console.log('Default values:', data.defaultValues);
                 // No previous data, set defaults
                 setDefaultValues(data.defaultValues);
             }
@@ -3977,6 +3986,16 @@ function showAutoLoadModal(data) {
 
     console.log('Modal element:', modal);
     console.log('Preview element:', preview);
+    
+    if (!modal) {
+        console.error('Modal element not found! Make sure you are on the create report page.');
+        return;
+    }
+    
+    if (!preview) {
+        console.error('Preview element not found!');
+        return;
+    }
 
     // Build data preview
     const latestData = data.latestData;
@@ -4011,7 +4030,10 @@ function showAutoLoadModal(data) {
     `;
 
     preview.innerHTML = previewHTML;
+    console.log('Preview HTML set, about to show modal');
+    console.log('Preview HTML content:', previewHTML);
     showModal('autoLoadDataModal');
+    console.log('showModal call completed');
 }
 
 // Function to load selected data
