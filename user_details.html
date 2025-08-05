@@ -31,97 +31,33 @@
         <script src="/static/nav.js" defer></script>
 
         <style>
-            .user-details-container {
-                max-width: 1600px;
-                margin: 0 auto;
-                padding: 20px;
-            }
+            /* User Details Specific Styles */
 
-            .page-header {
+            /* Action Bar */
+            .action-bar {
                 display: flex;
-                align-items: center;
                 justify-content: space-between;
-                gap: 20px;
+                align-items: center;
                 margin-bottom: 30px;
-                padding-bottom: 20px;
-                border-bottom: 2px solid var(--border);
-            }
-
-            .header-left {
-                display: flex;
-                align-items: center;
-                gap: 20px;
-            }
-
-            .back-btn {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                color: var(--text-secondary);
-                text-decoration: none;
-                padding: 10px 16px;
-                border-radius: var(--border-radius);
-                transition: var(--transition);
-                border: 1px solid var(--border);
+                padding: 20px;
                 background: var(--surface);
+                border-radius: var(--border-radius);
+                border: 1px solid var(--border);
+                box-shadow: var(--shadow-light);
             }
 
-            .back-btn:hover {
-                color: var(--primary);
-                border-color: var(--primary);
-                background: rgba(var(--primary-rgb), 0.1);
-                transform: translateX(-2px);
-            }
-
-            .page-title h1 {
-                color: var(--text-primary);
-                margin: 0;
-                font-size: 1.8rem;
-                font-weight: 700;
-            }
-
-            .page-title p {
-                color: var(--text-secondary);
-                margin: 5px 0 0 0;
-                font-size: 0.95rem;
-            }
-
-            .header-actions {
+            .action-left,
+            .action-right {
                 display: flex;
                 gap: 12px;
-            }
-
-            .header-btn {
-                display: flex;
                 align-items: center;
-                gap: 8px;
-                padding: 10px 16px;
-                border: 1px solid var(--border);
-                background: var(--surface);
-                color: var(--text-secondary);
-                text-decoration: none;
-                border-radius: var(--border-radius);
-                font-weight: 500;
-                transition: var(--transition);
-                cursor: pointer;
             }
 
-            .header-btn:hover {
-                border-color: var(--primary);
-                color: var(--primary);
-                background: rgba(var(--primary-rgb), 0.05);
-            }
-
-            .header-btn.danger:hover {
-                border-color: var(--danger);
-                color: var(--danger);
-                background: rgba(239, 68, 68, 0.05);
-            }
 
             .user-layout {
                 display: grid;
-                grid-template-columns: 400px 1fr;
-                gap: 30px;
+                grid-template-columns: 420px 1fr;
+                gap: 40px;
                 align-items: start;
             }
 
@@ -389,9 +325,152 @@
 
             .form-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+                gap: 30px;
+            }
+
+            .form-grid.single-column {
+                grid-template-columns: 1fr;
+                max-width: 600px;
+            }
+
+            .info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
                 gap: 25px;
             }
+
+            .info-card {
+                background: rgba(var(--primary-rgb), 0.03);
+                border: 1px solid var(--border);
+                border-radius: var(--border-radius);
+                padding: 25px;
+                transition: var(--transition);
+            }
+
+            .info-card:hover {
+                background: rgba(var(--primary-rgb), 0.05);
+                border-color: rgba(var(--primary-rgb), 0.2);
+            }
+
+            .info-card-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .info-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 12px 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .info-item:last-child {
+                border-bottom: none;
+            }
+
+            .info-label {
+                color: var(--text-secondary);
+                font-size: 0.95rem;
+                font-weight: 500;
+                min-width: 140px;
+                flex-shrink: 0;
+            }
+
+            .info-value {
+                color: var(--text-primary);
+                font-weight: 600;
+                font-size: 0.95rem;
+                text-align: right;
+                word-break: break-word;
+                flex: 1;
+                margin-left: 15px;
+            }
+
+            .info-value.email {
+                font-family: 'Courier New', monospace;
+                font-size: 0.9rem;
+            }
+
+            .info-value.phone {
+                font-family: 'Courier New', monospace;
+                direction: ltr;
+            }
+
+            .info-value.empty {
+                color: var(--text-secondary);
+                font-style: italic;
+                font-weight: normal;
+            }
+
+            .info-value.status-active {
+                color: var(--success);
+                font-weight: 700;
+            }
+
+            .info-value.status-inactive {
+                color: var(--danger);
+                font-weight: 700;
+            }
+
+            .info-value.status-approved {
+                color: var(--success);
+                font-weight: 700;
+            }
+
+            .info-value.status-pending {
+                color: var(--warning);
+                font-weight: 700;
+            }
+
+            .info-value.role-admin {
+                color: var(--accent);
+                font-weight: 700;
+            }
+
+            .info-value.role-user {
+                color: var(--primary);
+                font-weight: 700;
+            }
+
+            /* Theme-specific adjustments */
+
+            [data-theme="light"] .action-bar {
+                background: #ffffff;
+                border-color: #e2e8f0;
+            }
+
+            [data-theme="light"] .profile-card {
+                background: #ffffff;
+                border-color: #e2e8f0;
+            }
+
+            [data-theme="light"] .content-area {
+                background: #ffffff;
+                border-color: #e2e8f0;
+            }
+
+            [data-theme="light"] .info-card {
+                background: rgba(59, 130, 246, 0.02);
+                border-color: #e2e8f0;
+            }
+
+            [data-theme="light"] .info-card:hover {
+                background: rgba(59, 130, 246, 0.04);
+                border-color: rgba(59, 130, 246, 0.2);
+            }
+
+            [data-theme="light"] .stat-card {
+                background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            }
+
+
 
             .form-group {
                 margin-bottom: 25px;
@@ -428,6 +507,18 @@
                 background: var(--border);
                 color: var(--text-secondary);
                 cursor: not-allowed;
+            }
+
+            .form-group label input[type="checkbox"] {
+                margin-right: 8px;
+                transform: scale(1.2);
+            }
+
+            .form-group small {
+                display: block;
+                margin-top: 5px;
+                color: var(--text-secondary);
+                font-size: 0.85rem;
             }
 
             .password-group {
@@ -903,9 +994,32 @@
             }
 
             /* Responsive Design */
+            @media (max-width: 1400px) {
+                .user-layout {
+                    grid-template-columns: 380px 1fr;
+                    gap: 30px;
+                }
+                
+                .form-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                }
+                
+                .info-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                }
+            }
+
             @media (max-width: 1200px) {
                 .user-layout {
                     grid-template-columns: 360px 1fr;
+                }
+                
+                .form-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                }
+                
+                .info-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
                 }
             }
 
@@ -923,20 +1037,29 @@
                 .stats-grid {
                     grid-template-columns: repeat(4, 1fr);
                 }
+                
+                .form-grid {
+                    grid-template-columns: 1fr;
+                }
+                
+                .info-grid {
+                    grid-template-columns: 1fr;
+                }
+                
+                .form-grid.single-column {
+                    max-width: none;
+                }
             }
 
             @media (max-width: 768px) {
-                .page-header {
+                .action-bar {
                     flex-direction: column;
-                    align-items: stretch;
                     gap: 15px;
                 }
 
-                .header-left {
-                    justify-content: space-between;
-                }
-
-                .header-actions {
+                .action-left,
+                .action-right {
+                    justify-content: center;
                     flex-wrap: wrap;
                 }
 
@@ -977,7 +1100,7 @@
             }
 
             @media (max-width: 480px) {
-                .user-details-container {
+                .dashboard-container {
                     padding: 15px;
                 }
 
@@ -1090,8 +1213,1147 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-sun" id="theme-icon"></i>
+                        <span id="theme-text">Light</span>
+                    </button>
                 </div>
             </div>
         </nav>
+
+    <div class="main-wrapper">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1><i class="fas fa-user-circle"></i> User Information</h1>
+                <p>View and manage user account details</p>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="action-bar">
+                <div class="action-left">
+                    <a href="/user-management" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Users
+                    </a>
+                </div>
+                <div class="action-right">
+                    <button class="btn btn-secondary" onclick="refreshUserData()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn btn-danger" onclick="showDeleteConfirmation()">
+                        <i class="fas fa-trash"></i>
+                        Delete User
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingContainer" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>Loading user details...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorContainer" class="empty-state" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Error Loading User</h3>
+                <p id="errorMessage">Failed to load user details</p>
+                <button class="btn btn-primary" onclick="refreshUserData()">
+                    <i class="fas fa-retry"></i>
+                    Try Again
+                </button>
+            </div>
+
+            <!-- Main Content Layout -->
+            <div id="mainContent" class="user-layout" style="display: none;">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar-container">
+                            <div class="profile-avatar" id="userAvatar">
+                                <span id="avatarInitials">U</span>
+                            </div>
+                            <div class="avatar-status" id="userStatus"></div>
+                        </div>
+                        <h2 class="profile-name" id="userName">Loading...</h2>
+                        <p class="profile-email" id="userEmail">Loading...</p>
+                        <div class="profile-badges" id="userBadges">
+                            <!-- Badges will be populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalReports">0</div>
+                                <div class="stat-label">Reports</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="loginCount">0</div>
+                                <div class="stat-label">Logins</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-item-label">
+                                <i class="fas fa-calendar-plus"></i>
+                                Member Since
+                            </div>
+                            <div class="stat-item-value" id="memberSince">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-item-label">
+                                <i class="fas fa-clock"></i>
+                                Last Login
+                            </div>
+                            <div class="stat-item-value" id="lastLogin">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-item-label">
+                                <i class="fas fa-edit"></i>
+                                Last Updated
+                            </div>
+                            <div class="stat-item-value" id="lastUpdated">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="content-area">
+                    <!-- Tabs Header -->
+                    <div class="tabs-header">
+                        <button class="tab-btn active" onclick="switchTab('view')">
+                            <i class="fas fa-eye"></i>
+                            View Information
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('profile')">
+                            <i class="fas fa-edit"></i>
+                            Edit Profile
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('password')">
+                            <i class="fas fa-key"></i>
+                            Change Password
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('settings')">
+                            <i class="fas fa-cog"></i>
+                            Account Settings
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('activity')">
+                            <i class="fas fa-history"></i>
+                            Activity Log
+                        </button>
+                    </div>
+
+                    <!-- View Information Tab -->
+                    <div id="viewTab" class="tab-content active">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-user-circle"></i>
+                                User Information Overview
+                            </h3>
+                            <div class="info-grid">
+                                <div class="info-card">
+                                    <div class="info-card-title">
+                                        <i class="fas fa-id-card"></i>
+                                        Personal Details
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Full Name</div>
+                                        <div class="info-value" id="viewFullName">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">First Name</div>
+                                        <div class="info-value" id="viewFirstName">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Last Name</div>
+                                        <div class="info-value" id="viewLastName">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Username</div>
+                                        <div class="info-value" id="viewUsername">-</div>
+                                    </div>
+                                </div>
+
+                                <div class="info-card">
+                                    <div class="info-card-title">
+                                        <i class="fas fa-envelope"></i>
+                                        Contact Information
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Email Address</div>
+                                        <div class="info-value email" id="viewEmail">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Phone Number</div>
+                                        <div class="info-value phone" id="viewPhone">-</div>
+                                    </div>
+                                </div>
+
+                                <div class="info-card">
+                                    <div class="info-card-title">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Account Status
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">User Role</div>
+                                        <div class="info-value" id="viewRole">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Account Status</div>
+                                        <div class="info-value" id="viewAccountStatus">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Approval Status</div>
+                                        <div class="info-value" id="viewApprovalStatus">-</div>
+                                    </div>
+                                </div>
+
+                                <div class="info-card">
+                                    <div class="info-card-title">
+                                        <i class="fas fa-clock"></i>
+                                        Account Timeline
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">User ID</div>
+                                        <div class="info-value" id="viewUserId">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Member Since</div>
+                                        <div class="info-value" id="viewMemberSince">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Last Login</div>
+                                        <div class="info-value" id="viewLastLogin">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Last Updated</div>
+                                        <div class="info-value" id="viewLastUpdated">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Tab -->
+                    <div id="profileTab" class="tab-content">
+                        <!-- Messages -->
+                        <div id="profileMessage" class="message"></div>
+
+                        <form id="profileForm">
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-user"></i>
+                                    Personal Information
+                                </h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="firstName">First Name *</label>
+                                        <input type="text" id="firstName" name="firstName" class="form-control" required placeholder="Enter first name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lastName">Last Name *</label>
+                                        <input type="text" id="lastName" name="lastName" class="form-control" required placeholder="Enter last name">
+                                    </div>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="username">Username</label>
+                                        <input type="text" id="username" name="username" class="form-control" placeholder="Enter username (optional)">
+                                        <small>Leave empty to use email as username</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">Email Address *</label>
+                                        <input type="email" id="email" name="email" class="form-control" required placeholder="Enter email address">
+                                    </div>
+                                </div>
+                                <div class="form-grid single-column">
+                                    <div class="form-group">
+                                        <label for="phoneNumber">Phone Number</label>
+                                        <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control" placeholder="Enter phone number (optional)">
+                                        <small>Saudi phone number format: 05xxxxxxxx or +9665xxxxxxxx</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i>
+                                    Save Changes
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                    <i class="fas fa-undo"></i>
+                                    Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Activity Tab -->
+                    <div id="activityTab" class="tab-content">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-history"></i>
+                                Recent Activity
+                            </h3>
+                            <div id="activityLog" class="activity-log">
+                                <div class="loading-container">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading activity log...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Tab -->
+                    <div id="passwordTab" class="tab-content">
+                        <!-- Messages -->
+                        <div id="passwordMessage" class="message"></div>
+
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-key"></i>
+                                Change User Password
+                            </h3>
+                            <div class="form-grid single-column">
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <div class="password-group">
+                                        <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="Enter new password">
+                                        <button type="button" class="password-toggle" onclick="togglePassword('newPassword')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <small>Password must meet security requirements below</small>
+                                    <div class="password-strength" id="passwordStrength" style="display: none;">
+                                        <div class="strength-meter">
+                                            <div class="strength-fill" id="strengthFill"></div>
+                                        </div>
+                                        <div class="strength-text">
+                                            <span id="strengthLabel">Password Strength</span>
+                                            <span id="strengthPercent">0%</span>
+                                        </div>
+                                        <div class="strength-requirements">
+                                            <div class="requirement" id="req-length">
+                                                <i class="fas fa-times"></i>
+                                                At least 8 characters
+                                            </div>
+                                            <div class="requirement" id="req-upper">
+                                                <i class="fas fa-times"></i>
+                                                One uppercase letter
+                                            </div>
+                                            <div class="requirement" id="req-lower">
+                                                <i class="fas fa-times"></i>
+                                                One lowercase letter
+                                            </div>
+                                            <div class="requirement" id="req-number">
+                                                <i class="fas fa-times"></i>
+                                                One number
+                                            </div>
+                                            <div class="requirement" id="req-special">
+                                                <i class="fas fa-times"></i>
+                                                One special character
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" onclick="changeUserPassword()">
+                                <i class="fas fa-save"></i>
+                                Change Password
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetPasswordForm()">
+                                <i class="fas fa-undo"></i>
+                                Clear Form
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Settings Tab -->
+                    <div id="settingsTab" class="tab-content">
+                        <!-- Messages -->
+                        <div id="settingsMessage" class="message"></div>
+
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-shield-alt"></i>
+                                Account Status
+                            </h3>
+                            <div class="form-grid single-column">
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="isAdmin" name="isAdmin">
+                                        Administrator Privileges
+                                    </label>
+                                    <small>Grant administrative access to this user. Admins can manage users, view all reports, and access system settings.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="isApproved" name="isApproved">
+                                        Account Approved
+                                    </label>
+                                    <small>Allow user to access the system. Unapproved users cannot log in or access any features.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="isActive" name="isActive">
+                                        Account Active
+                                    </label>
+                                    <small>Enable or disable user account. Inactive users cannot log in but their data is preserved.</small>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" onclick="updateUserSettings()">
+                                <i class="fas fa-save"></i>
+                                Update Settings
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetSettingsForm()">
+                                <i class="fas fa-undo"></i>
+                                Reset Form
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Confirmation Dialog -->
+        <div id="confirmationDialog" class="confirmation-dialog">
+            <div class="dialog-content">
+                <div class="dialog-icon danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="dialog-title">Delete User Account</h3>
+                <p class="dialog-message">
+                    Are you sure you want to delete this user account? This action cannot be undone and will permanently remove all user data.
+                </p>
+                <div class="dialog-actions">
+                    <button class="btn btn-secondary" onclick="hideDeleteConfirmation()">Cancel</button>
+                    <button class="btn btn-danger" onclick="deleteUser()">Delete User</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- JavaScript -->
+        <script>
+            let currentUser = null;
+            let currentUserId = null;
+
+            // Initialize theme early to prevent FOUC
+            (function() {
+                const savedTheme = localStorage.getItem('theme') || localStorage.getItem('sprint-reports-theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                
+                // Update theme button if elements exist
+                const themeIcon = document.getElementById('theme-icon');
+                const themeText = document.getElementById('theme-text');
+                
+                if (themeIcon && themeText) {
+                    if (savedTheme === 'light') {
+                        themeIcon.className = 'fas fa-moon';
+                        themeText.textContent = 'Dark';
+                    } else {
+                        themeIcon.className = 'fas fa-sun';
+                        themeText.textContent = 'Light';
+                    }
+                }
+            })();
+
+            // Initialize page
+            document.addEventListener('DOMContentLoaded', function() {
+                // Wait a bit for theme manager to load, then initialize
+                setTimeout(() => {
+                    try {
+                        if (typeof window.themeManager !== 'undefined' && window.themeManager.init) {
+                            window.themeManager.init();
+                        } else if (typeof initializeTheme === 'function') {
+                            initializeTheme();
+                        }
+                    } catch (error) {
+                        console.warn('Theme manager initialization failed:', error);
+                    }
+                }, 100);
+
+                // Get user ID from URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                currentUserId = urlParams.get('id');
+                
+                console.log('URL parameters:', window.location.search);
+                console.log('Extracted user ID:', currentUserId);
+                
+                if (!currentUserId) {
+                    showError('No user ID provided in URL. Please access this page from the User Management page.');
+                    return;
+                }
+                
+                if (isNaN(currentUserId)) {
+                    showError('Invalid user ID format. Please check the URL.');
+                    return;
+                }
+
+                // Test API accessibility first, then load user data
+                testApiAccess().then(() => {
+                    loadUserData();
+                }).catch((error) => {
+                    console.error('API access test failed:', error);
+                    loadUserData(); // Try anyway
+                });
+
+                // Setup form handlers
+                setupFormHandlers();
+            });
+
+            // Test API accessibility
+            async function testApiAccess() {
+                try {
+                    const response = await fetch('/api/auth/profile');
+                    if (!response.ok && response.status !== 401) {
+                        throw new Error('API not accessible');
+                    }
+                    console.log('API is accessible');
+                } catch (error) {
+                    console.warn('API access test failed:', error);
+                    throw error;
+                }
+            }
+
+            // Load user data from API
+            async function loadUserData() {
+                try {
+                    console.log('Loading user data for ID:', currentUserId);
+                    showLoading();
+                    
+                    // Validate user ID
+                    if (!currentUserId || isNaN(currentUserId)) {
+                        throw new Error('Invalid user ID provided');
+                    }
+                    
+                    const apiUrl = `/api/users/${currentUserId}`;
+                    console.log('Fetching from:', apiUrl);
+                    
+                    const response = await fetch(apiUrl);
+                    console.log('Response status:', response.status);
+                    
+                    if (response.status === 404) {
+                        throw new Error('User not found');
+                    }
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('API Error:', errorText);
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('API Response:', data);
+                    
+                    if (data.success && data.user) {
+                        currentUser = data.user;
+                        console.log('User data loaded:', currentUser);
+                        populateUserData(currentUser);
+                        loadActivityLog();
+                        hideLoading();
+                    } else {
+                        throw new Error(data.message || 'Failed to load user data');
+                    }
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                    showError(error.message);
+                }
+            }
+
+            // Populate user data in the UI
+            function populateUserData(user) {
+                // Update page title in browser tab
+                document.title = `${user.full_name} - User Information - QA Reports System`;
+
+                // Update profile card
+                const initials = getInitials(user.first_name, user.last_name);
+                document.getElementById('avatarInitials').textContent = initials;
+                document.getElementById('userName').textContent = user.full_name;
+                document.getElementById('userEmail').textContent = user.email;
+
+                // Update status indicator
+                const statusEl = document.getElementById('userStatus');
+                statusEl.className = 'avatar-status ' + (user.is_active ? 'active' : 'inactive');
+
+                // Update badges
+                const badgesEl = document.getElementById('userBadges');
+                badgesEl.innerHTML = '';
+                
+                if (user.is_admin) {
+                    badgesEl.innerHTML += '<span class="badge admin"><i class="fas fa-crown"></i> Admin</span>';
+                } else {
+                    badgesEl.innerHTML += '<span class="badge user"><i class="fas fa-user"></i> User</span>';
+                }
+                
+                if (user.is_approved) {
+                    badgesEl.innerHTML += '<span class="badge approved"><i class="fas fa-check"></i> Approved</span>';
+                } else {
+                    badgesEl.innerHTML += '<span class="badge pending"><i class="fas fa-clock"></i> Pending</span>';
+                }
+                
+                if (!user.is_active) {
+                    badgesEl.innerHTML += '<span class="badge inactive"><i class="fas fa-ban"></i> Inactive</span>';
+                }
+
+                // Update stats
+                document.getElementById('totalReports').textContent = '0'; // TODO: Get from API
+                document.getElementById('loginCount').textContent = '0'; // TODO: Get from API
+                document.getElementById('memberSince').textContent = formatDate(user.created_at);
+                document.getElementById('lastLogin').textContent = user.last_login ? formatDate(user.last_login) : 'Never';
+                document.getElementById('lastUpdated').textContent = formatDate(user.updated_at);
+
+                // Populate view information tab
+                populateViewTab(user);
+
+                // Populate form fields
+                document.getElementById('firstName').value = user.first_name || '';
+                document.getElementById('lastName').value = user.last_name || '';
+                document.getElementById('username').value = user.username || '';
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('phoneNumber').value = user.phone_number || '';
+
+                // Populate settings
+                document.getElementById('isAdmin').checked = user.is_admin;
+                document.getElementById('isApproved').checked = user.is_approved;
+                document.getElementById('isActive').checked = user.is_active;
+            }
+
+            // Populate the view information tab
+            function populateViewTab(user) {
+                // Personal Details
+                document.getElementById('viewFullName').textContent = user.full_name || '-';
+                document.getElementById('viewFirstName').textContent = user.first_name || '-';
+                document.getElementById('viewLastName').textContent = user.last_name || '-';
+                
+                const usernameEl = document.getElementById('viewUsername');
+                if (user.username) {
+                    usernameEl.textContent = user.username;
+                    usernameEl.classList.remove('empty');
+                } else {
+                    usernameEl.textContent = 'Not set';
+                    usernameEl.classList.add('empty');
+                }
+
+                // Contact Information
+                document.getElementById('viewEmail').textContent = user.email || '-';
+                
+                const phoneEl = document.getElementById('viewPhone');
+                if (user.phone_number) {
+                    phoneEl.textContent = user.phone_number;
+                    phoneEl.classList.remove('empty');
+                } else {
+                    phoneEl.textContent = 'Not provided';
+                    phoneEl.classList.add('empty');
+                }
+
+                // Account Status
+                const roleEl = document.getElementById('viewRole');
+                roleEl.textContent = user.is_admin ? 'Administrator' : 'User';
+                roleEl.className = 'info-value ' + (user.is_admin ? 'role-admin' : 'role-user');
+
+                const statusEl = document.getElementById('viewAccountStatus');
+                statusEl.textContent = user.is_active ? 'Active' : 'Inactive';
+                statusEl.className = 'info-value ' + (user.is_active ? 'status-active' : 'status-inactive');
+
+                const approvalEl = document.getElementById('viewApprovalStatus');
+                approvalEl.textContent = user.is_approved ? 'Approved' : 'Pending Approval';
+                approvalEl.className = 'info-value ' + (user.is_approved ? 'status-approved' : 'status-pending');
+
+                // Account Timeline
+                document.getElementById('viewUserId').textContent = user.id;
+                document.getElementById('viewMemberSince').textContent = formatDate(user.created_at);
+                document.getElementById('viewLastLogin').textContent = user.last_login ? formatDate(user.last_login) : 'Never logged in';
+                document.getElementById('viewLastUpdated').textContent = formatDate(user.updated_at);
+            }
+
+            // Load activity log
+            async function loadActivityLog() {
+                const activityEl = document.getElementById('activityLog');
+                
+                // For now, show placeholder data since we don't have activity tracking
+                // TODO: Implement proper activity logging in the backend
+                activityEl.innerHTML = `
+                    <div class="activity-item">
+                        <div class="activity-icon login">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Account Created</div>
+                            <div class="activity-desc">User account was created</div>
+                            <div class="activity-time">
+                                <i class="fas fa-clock"></i>
+                                ${formatDate(currentUser.created_at)}
+                            </div>
+                        </div>
+                    </div>
+                    ${currentUser.last_login ? `
+                    <div class="activity-item">
+                        <div class="activity-icon login">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Last Login</div>
+                            <div class="activity-desc">User logged into the system</div>
+                            <div class="activity-time">
+                                <i class="fas fa-clock"></i>
+                                ${formatDate(currentUser.last_login)}
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h3>Activity Tracking Coming Soon</h3>
+                        <p>Detailed activity logging will be available in a future update.</p>
+                    </div>
+                `;
+            }
+
+            // Setup form handlers
+            function setupFormHandlers() {
+                // Profile form submission
+                document.getElementById('profileForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    await updateUserProfile();
+                });
+
+                // Password strength checker
+                document.getElementById('newPassword').addEventListener('input', function() {
+                    checkPasswordStrength(this.value);
+                });
+            }
+
+            // Update user profile
+            async function updateUserProfile() {
+                const submitBtn = document.querySelector('#profileForm button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                
+                try {
+                    // Show loading state
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                    submitBtn.classList.add('loading');
+
+                    const formData = new FormData(document.getElementById('profileForm'));
+                    const data = {
+                        first_name: formData.get('firstName').trim(),
+                        last_name: formData.get('lastName').trim(),
+                        username: formData.get('username') ? formData.get('username').trim() : null,
+                        email: formData.get('email').trim().toLowerCase(),
+                        phone_number: formData.get('phoneNumber') ? formData.get('phoneNumber').trim() : null
+                    };
+
+                    // Basic validation
+                    if (!data.first_name || !data.last_name || !data.email) {
+                        throw new Error('First name, last name, and email are required');
+                    }
+
+                    if (!isValidEmail(data.email)) {
+                        throw new Error('Please enter a valid email address');
+                    }
+
+                    const response = await fetch(`/api/users/${currentUserId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showMessage('profileMessage', 'Profile updated successfully!', 'success');
+                        // Reload user data to reflect changes
+                        await loadUserData();
+                    } else {
+                        showMessage('profileMessage', result.message || 'Failed to update profile', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    showMessage('profileMessage', error.message || 'An error occurred while updating the profile', 'error');
+                } finally {
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.classList.remove('loading');
+                }
+            }
+
+            // Update user settings (without password)
+            async function updateUserSettings() {
+                const updateBtn = document.querySelector('button[onclick="updateUserSettings()"]');
+                const originalText = updateBtn.innerHTML;
+                
+                try {
+                    // Show loading state
+                    updateBtn.disabled = true;
+                    updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+                    updateBtn.classList.add('loading');
+
+                    const data = {
+                        is_admin: document.getElementById('isAdmin').checked,
+                        is_approved: document.getElementById('isApproved').checked,
+                        is_active: document.getElementById('isActive').checked
+                    };
+
+                    const response = await fetch(`/api/users/${currentUserId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showMessage('settingsMessage', 'Settings updated successfully!', 'success');
+                        // Reload user data to reflect changes
+                        await loadUserData();
+                    } else {
+                        showMessage('settingsMessage', result.message || 'Failed to update settings', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error updating settings:', error);
+                    showMessage('settingsMessage', error.message || 'An error occurred while updating settings', 'error');
+                } finally {
+                    // Reset button state
+                    updateBtn.disabled = false;
+                    updateBtn.innerHTML = originalText;
+                    updateBtn.classList.remove('loading');
+                }
+            }
+
+            // Change user password (separate function)
+            async function changeUserPassword() {
+                const changeBtn = document.querySelector('button[onclick="changeUserPassword()"]');
+                const originalText = changeBtn.innerHTML;
+                
+                try {
+                    // Show loading state
+                    changeBtn.disabled = true;
+                    changeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Changing...';
+                    changeBtn.classList.add('loading');
+
+                    const newPassword = document.getElementById('newPassword').value;
+                    
+                    if (!newPassword) {
+                        throw new Error('Please enter a new password');
+                    }
+
+                    // Validate password strength
+                    if (newPassword.length < 8) {
+                        throw new Error('Password must be at least 8 characters long');
+                    }
+
+                    const data = {
+                        password: newPassword
+                    };
+
+                    const response = await fetch(`/api/users/${currentUserId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showMessage('passwordMessage', 'Password changed successfully!', 'success');
+                        document.getElementById('newPassword').value = '';
+                        hidePasswordStrength();
+                    } else {
+                        showMessage('passwordMessage', result.message || 'Failed to change password', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error changing password:', error);
+                    showMessage('passwordMessage', error.message || 'An error occurred while changing password', 'error');
+                } finally {
+                    // Reset button state
+                    changeBtn.disabled = false;
+                    changeBtn.innerHTML = originalText;
+                    changeBtn.classList.remove('loading');
+                }
+            }
+
+            // Tab switching
+            function switchTab(tabName) {
+                // Remove active class from all tabs and buttons
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to selected tab and button
+                document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+                document.getElementById(`${tabName}Tab`).classList.add('active');
+
+                // Clear any messages when switching tabs
+                const messages = document.querySelectorAll('.message');
+                messages.forEach(msg => msg.classList.remove('show'));
+            }
+
+            // Password strength checker
+            function checkPasswordStrength(password) {
+                const strengthEl = document.getElementById('passwordStrength');
+                const fillEl = document.getElementById('strengthFill');
+                const labelEl = document.getElementById('strengthLabel');
+                const percentEl = document.getElementById('strengthPercent');
+
+                if (!password) {
+                    hidePasswordStrength();
+                    return;
+                }
+
+                strengthEl.style.display = 'block';
+
+                const requirements = {
+                    length: password.length >= 8,
+                    upper: /[A-Z]/.test(password),
+                    lower: /[a-z]/.test(password),
+                    number: /\d/.test(password),
+                    special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+                };
+
+                // Update requirement indicators
+                Object.keys(requirements).forEach(req => {
+                    const reqEl = document.getElementById(`req-${req}`);
+                    const icon = reqEl.querySelector('i');
+                    if (requirements[req]) {
+                        reqEl.classList.add('met');
+                        icon.className = 'fas fa-check';
+                    } else {
+                        reqEl.classList.remove('met');
+                        icon.className = 'fas fa-times';
+                    }
+                });
+
+                // Calculate strength
+                const metCount = Object.values(requirements).filter(Boolean).length;
+                const strength = (metCount / 5) * 100;
+
+                fillEl.style.width = `${strength}%`;
+                percentEl.textContent = `${Math.round(strength)}%`;
+
+                // Update strength class and label
+                fillEl.className = 'strength-fill';
+                if (strength < 40) {
+                    fillEl.classList.add('strength-weak');
+                    labelEl.textContent = 'Weak';
+                } else if (strength < 60) {
+                    fillEl.classList.add('strength-fair');
+                    labelEl.textContent = 'Fair';
+                } else if (strength < 80) {
+                    fillEl.classList.add('strength-good');
+                    labelEl.textContent = 'Good';
+                } else {
+                    fillEl.classList.add('strength-strong');
+                    labelEl.textContent = 'Strong';
+                }
+            }
+
+            function hidePasswordStrength() {
+                document.getElementById('passwordStrength').style.display = 'none';
+            }
+
+            // Password toggle
+            function togglePassword(fieldId) {
+                const field = document.getElementById(fieldId);
+                const icon = field.nextElementSibling.querySelector('i');
+                
+                if (field.type === 'password') {
+                    field.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    field.type = 'password';
+                    icon.className = 'fas fa-eye';
+                }
+            }
+
+            // Reset form
+            function resetForm() {
+                if (currentUser) {
+                    populateUserData(currentUser);
+                }
+            }
+
+            // Reset password form
+            function resetPasswordForm() {
+                document.getElementById('newPassword').value = '';
+                hidePasswordStrength();
+            }
+
+            // Reset settings form
+            function resetSettingsForm() {
+                if (currentUser) {
+                    document.getElementById('isAdmin').checked = currentUser.is_admin;
+                    document.getElementById('isApproved').checked = currentUser.is_approved;
+                    document.getElementById('isActive').checked = currentUser.is_active;
+                }
+            }
+
+            // Delete user confirmation
+            function showDeleteConfirmation() {
+                document.getElementById('confirmationDialog').style.display = 'flex';
+            }
+
+            function hideDeleteConfirmation() {
+                document.getElementById('confirmationDialog').style.display = 'none';
+            }
+
+            async function deleteUser() {
+                try {
+                    const response = await fetch(`/api/users/${currentUserId}/delete`, {
+                        method: 'DELETE'
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Redirect to user management page
+                        window.location.href = '/user-management';
+                    } else {
+                        hideDeleteConfirmation();
+                        showError(result.message || 'Failed to delete user');
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    hideDeleteConfirmation();
+                    showError('An error occurred while deleting the user');
+                }
+            }
+
+            // Refresh user data
+            async function refreshUserData() {
+                await loadUserData();
+            }
+
+            // Utility functions
+            function showLoading() {
+                document.getElementById('loadingContainer').style.display = 'flex';
+                document.getElementById('mainContent').style.display = 'none';
+                document.getElementById('errorContainer').style.display = 'none';
+            }
+
+            function hideLoading() {
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'grid';
+                document.getElementById('errorContainer').style.display = 'none';
+            }
+
+            function showError(message) {
+                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'none';
+                document.getElementById('errorContainer').style.display = 'block';
+            }
+
+            function showMessage(containerId, message, type) {
+                const messageEl = document.getElementById(containerId);
+                messageEl.className = `message message-${type} show`;
+                messageEl.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    ${message}
+                `;
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    messageEl.classList.remove('show');
+                }, 5000);
+            }
+
+            function formatDate(dateString) {
+                if (!dateString) return '-';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            function getInitials(firstName, lastName) {
+                const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+                const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+                return first + last || 'U';
+            }
+
+            // Define theme toggle function if not already available
+            if (typeof window.toggleTheme === 'undefined') {
+                window.toggleTheme = function() {
+                    try {
+                        if (window.themeManager && typeof window.themeManager.toggleTheme === 'function') {
+                            window.themeManager.toggleTheme();
+                        } else {
+                            // Fallback manual theme toggle
+                            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                            
+                            document.documentElement.setAttribute('data-theme', newTheme);
+                            localStorage.setItem('theme', newTheme);
+                            localStorage.setItem('sprint-reports-theme', newTheme);
+                            
+                            const themeIcon = document.getElementById('theme-icon');
+                            const themeText = document.getElementById('theme-text');
+                            
+                            if (themeIcon && themeText) {
+                                if (newTheme === 'light') {
+                                    themeIcon.className = 'fas fa-moon';
+                                    themeText.textContent = 'Dark';
+                                } else {
+                                    themeIcon.className = 'fas fa-sun';
+                                    themeText.textContent = 'Light';
+                                }
+                            }
+                            
+                            console.log('Theme toggled to:', newTheme);
+                        }
+                    } catch (error) {
+                        console.error('Theme toggle failed:', error);
+                    }
+                };
+            }
+
+            // Handle keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + S to save based on active tab
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    const activeTab = document.querySelector('.tab-content.active');
+                    if (activeTab && activeTab.id === 'profileTab') {
+                        updateUserProfile();
+                    } else if (activeTab && activeTab.id === 'passwordTab') {
+                        changeUserPassword();
+                    } else if (activeTab && activeTab.id === 'settingsTab') {
+                        updateUserSettings();
+                    }
+                }
+                
+                // Escape to close confirmation dialog
+                if (e.key === 'Escape') {
+                    hideDeleteConfirmation();
+                }
+            });
+        </script>
     </body>
 </html>
