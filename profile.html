@@ -129,16 +129,132 @@
 
                 <div class="profile-content">
                     <div class="profile-tabs">
-                        <button class="profile-tab active" onclick="showTab('info')">
-                            <i class="fas fa-info-circle"></i> Personal Information
+                        <button class="profile-tab active" onclick="showTab('view')">
+                            <i class="fas fa-eye"></i> View Information
+                        </button>
+                        <button class="profile-tab" onclick="showTab('info')">
+                            <i class="fas fa-edit"></i> Edit Information
                         </button>
                         <button class="profile-tab" onclick="showTab('password')">
                             <i class="fas fa-lock"></i> Change Password
                         </button>
                     </div>
 
+                    <!-- View Information Tab -->
+                    <div id="view-tab" class="tab-content active">
+                        <h2 class="section-title">
+                            <i class="fas fa-user-circle"></i> User Information
+                        </h2>
+
+                        <div class="info-display-grid">
+                            <div class="info-card">
+                                <div class="info-header">
+                                    <i class="fas fa-user"></i>
+                                    <h3>Personal Details</h3>
+                                </div>
+                                <div class="info-content">
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-id-card"></i> Full Name:</span>
+                                        <span class="info-value">{{ user.get_full_name() }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-user"></i> First Name:</span>
+                                        <span class="info-value">{{ user.first_name }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-user"></i> Last Name:</span>
+                                        <span class="info-value">{{ user.last_name }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-at"></i> Username:</span>
+                                        <span class="info-value">{{ user.username or 'Not set' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-card">
+                                <div class="info-header">
+                                    <i class="fas fa-envelope"></i>
+                                    <h3>Contact Information</h3>
+                                </div>
+                                <div class="info-content">
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-envelope"></i> Email Address:</span>
+                                        <span class="info-value">{{ user.email }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-phone"></i> Phone Number:</span>
+                                        <span class="info-value">{{ user.phone_number or 'Not provided' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-card">
+                                <div class="info-header">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <h3>Account Status</h3>
+                                </div>
+                                <div class="info-content">
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-user-shield"></i> Account Type:</span>
+                                        <span class="info-value">
+                                            {% if user.is_admin %}
+                                                <span class="status-badge admin"><i class="fas fa-crown"></i> Administrator</span>
+                                            {% else %}
+                                                <span class="status-badge user"><i class="fas fa-user"></i> User</span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-check-circle"></i> Account Status:</span>
+                                        <span class="info-value">
+                                            {% if user.is_approved %}
+                                                <span class="status-badge approved"><i class="fas fa-check"></i> Approved</span>
+                                            {% else %}
+                                                <span class="status-badge pending"><i class="fas fa-clock"></i> Pending Approval</span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-card">
+                                <div class="info-header">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <h3>Account Timeline</h3>
+                                </div>
+                                <div class="info-content">
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-calendar-plus"></i> Member Since:</span>
+                                        <span class="info-value">{{ user.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-sign-in-alt"></i> Last Login:</span>
+                                        <span class="info-value">
+                                            {% if user.last_login %}
+                                                {{ user.last_login.strftime('%B %d, %Y at %I:%M %p') }}
+                                            {% else %}
+                                                <span class="text-muted">Never logged in</span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label"><i class="fas fa-edit"></i> Profile Updated:</span>
+                                        <span class="info-value">
+                                            {% if user.updated_at %}
+                                                {{ user.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                            {% else %}
+                                                <span class="text-muted">Never updated</span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Personal Information Tab -->
-                    <div id="info-tab" class="tab-content active">
+                    <div id="info-tab" class="tab-content">
                         <h2 class="section-title">
                             <i class="fas fa-user-edit"></i> Edit Information
                         </h2>
@@ -281,6 +397,10 @@
             
             // Add active class to clicked button
             event.target.classList.add('active');
+            
+            // Clear any messages when switching tabs
+            hideMessages('info');
+            hideMessages('password');
         }
 
         // Toggle password visibility
