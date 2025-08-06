@@ -1760,17 +1760,18 @@ select::before {
 
 .additional-info-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 1.5rem;
     margin-bottom: 2rem;
     animation: fadeInUp 0.6s ease-out;
+    margin: 0 auto 2rem auto;
 }
 
 .additional-info-card {
-    min-height: 300px;
+    min-height: 250px;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .additional-info-card .info-card-v2-header {
@@ -3405,4 +3406,337 @@ sure all navigation and action buttons have white text in light theme */
 [data-theme="light"] .clear-all-btn:hover,
 [data-theme="light"] .section-btn:hover {
     color: white !important;
+}
+
+/* ========================================
+   Bug Management List Styles - Restructured
+   ======================================== */
+
+.list-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-large);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.list-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--danger);
+    transition: all 0.3s ease;
+}
+
+.list-item:hover {
+    box-shadow: var(--shadow-heavy);
+    transform: translateY(-2px);
+    border-color: var(--danger);
+}
+
+.list-item:hover::before {
+    width: 6px;
+    background: linear-gradient(to bottom, var(--danger), #dc2626);
+}
+
+.bug-item {
+    /* Bug-specific styles are handled by the general list-item */
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.item-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.item-title i {
+    color: var(--danger);
+    font-size: 1.1em;
+    flex-shrink: 0;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.item-title strong {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.1em;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.item-content {
+    color: var(--text-secondary);
+    font-size: 0.95em;
+    line-height: 1.6;
+    padding-left: 3.25rem;
+    margin-top: 0.5rem;
+}
+
+.item-content p {
+    margin-bottom: 0.75rem;
+}
+
+.item-content p:last-child {
+    margin-bottom: 0;
+}
+
+.item-content a {
+    color: var(--primary);
+    text-decoration: none;
+    word-break: break-all;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius);
+    background: rgba(59, 130, 246, 0.1);
+    display: inline-block;
+    margin-top: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.item-content a:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+}
+
+.delete-btn {
+    background: var(--danger);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.delete-btn:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.delete-btn:active {
+    transform: translateY(0);
+}
+
+/* Severity and Status Badges */
+.severity-badge, .status-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--border-radius);
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.severity-badge.critical {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    border-color: #dc2626;
+}
+
+.severity-badge.high {
+    background: linear-gradient(135deg, #ea580c, #f97316);
+    color: white;
+    border-color: #ea580c;
+}
+
+.severity-badge.medium {
+    background: linear-gradient(135deg, #ca8a04, #eab308);
+    color: white;
+    border-color: #ca8a04;
+}
+
+.severity-badge.low {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+    border-color: #16a34a;
+}
+
+.status-badge.open {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.status-badge.in-progress {
+    background: rgba(234, 179, 8, 0.1);
+    color: var(--warning);
+    border-color: var(--warning);
+}
+
+.status-badge.resolved {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--success);
+    border-color: var(--success);
+}
+
+.status-badge.closed {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--text-secondary);
+    border-color: var(--border);
+}
+
+/* Light Theme Overrides */
+[data-theme="light"] .list-item {
+    background: rgba(248, 250, 252, 0.8);
+    border-color: rgba(226, 232, 240, 0.8);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .list-item:hover {
+    background: rgba(241, 245, 249, 0.9);
+    border-color: rgba(239, 68, 68, 0.3);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .item-title i {
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
+}
+
+[data-theme="light"] .item-content a {
+    background: rgba(59, 130, 246, 0.08);
+    color: #2563eb;
+}
+
+[data-theme="light"] .item-content a:hover {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+[data-theme="light"] .delete-btn {
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15);
+}
+
+[data-theme="light"] .delete-btn:hover {
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.25);
+}
+
+[data-theme="light"] .status-badge.open {
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+[data-theme="light"] .status-badge.in-progress {
+    background: rgba(234, 179, 8, 0.08);
+    color: #ca8a04;
+    border-color: rgba(234, 179, 8, 0.2);
+}
+
+[data-theme="light"] .status-badge.resolved {
+    background: rgba(34, 197, 94, 0.08);
+    color: #16a34a;
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+[data-theme="light"] .status-badge.closed {
+    background: rgba(107, 114, 128, 0.08);
+    color: #6b7280;
+    border-color: rgba(107, 114, 128, 0.2);
+}
+
+/* Dark Theme Specific Enhancements */
+[data-theme="dark"] .list-item {
+    background: linear-gradient(145deg, #1e293b, #334155);
+    border-color: #475569;
+}
+
+[data-theme="dark"] .list-item:hover {
+    background: linear-gradient(145deg, #334155, #475569);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+[data-theme="dark"] .item-title i {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .item-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .item-actions {
+        justify-content: flex-start;
+        order: -1;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-content {
+        padding-left: 0;
+        margin-top: 0.75rem;
+    }
+    
+    .item-title {
+        margin-bottom: 0;
+    }
+    
+    .item-title i {
+        width: 2rem;
+        height: 2rem;
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 480px) {
+    .list-item {
+        padding: 1rem;
+    }
+    
+    .item-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .severity-badge, .status-badge {
+        text-align: center;
+    }
+    
+    .delete-btn {
+        justify-content: center;
+    }
 }

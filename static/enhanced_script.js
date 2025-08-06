@@ -4306,7 +4306,7 @@ function addBug() {
 }
 
 function renderBugsList() {
-    const container = document.getElementById('bugsList');
+    const container = document.getElementById('autoBugsList');
     if (!container) return;
 
     if (bugsData.length === 0) {
