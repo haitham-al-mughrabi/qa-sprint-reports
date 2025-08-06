@@ -117,22 +117,77 @@
             <!-- Sidebar Navigation -->
             <nav class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <h2><i class="fas fa-clipboard"></i> Report Sections</h2>
-                    <button class="back-btn" onclick="window.location.href='/reports_type'"><i
-                            class="fas fa-arrow-left"></i> Back to Select Report Type</button>
-                    <button class="back-btn" onclick="window.location.href='/dashboard'" style="margin-top: 5px;"><i
-                            class="fas fa-tachometer-alt"></i> Back to Dashboard</button>
+                    <!-- Report Type Selector -->
+                    <div class="report-type-selector">
+                        <select id="reportTypeSelect" class="report-type-dropdown" onchange="changeReportType(this.value)">
+                            <option value="sprint">Sprint Report</option>
+                            <option value="manual">Manual Report</option>
+                            <option value="automation">Automation Report</option>
+                            <option value="performance">Performance Report</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="window.location.href='/reports'">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Back To Reports</span>
+                        </button>
+                        <button class="action-btn" onclick="window.location.href='/dashboard'">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Go To Dashboard</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Report Sections Title -->
+                    <div class="sections-title">
+                        <div class="sections-icon">
+                            <i class="fas fa-clipboard"></i>
+                        </div>
+                        <h2>Report Sections</h2>
+                    </div>
                 </div>
-                <!-- Sprint Report Navigation Items -->
-                <a href="#" class="nav-item sprint-nav active" onclick="showSection(0)"><i class="fas fa-info-circle"></i> General Details</a>
-                <a href="#" class="nav-item sprint-nav" onclick="showSection(1)"><i class="fas fa-file-alt"></i> Test Summary</a>
-                <a href="#" class="nav-item sprint-nav" onclick="showSection(2)"><i class="fas fa-plus-square"></i> Additional Info</a>
-                <a href="#" class="nav-item sprint-nav" onclick="showSection(3)"><i class="fas fa-user-check"></i> User Stories</a>
-                <a href="#" class="nav-item sprint-nav" onclick="showSection(4)"><i class="fas fa-vial"></i> Test Cases</a>
-                <a href="#" class="nav-item sprint-nav" onclick="showSection(5)"><i class="fas fa-bug"></i> Issues Analysis</a>
-                <a href="#" class="nav-item sprint-nav" onclick="showSection(6)"><i class="fas fa-bolt"></i> Enhancements</a>
-                <a href="#" class="nav-item sprint-nav" onclick="showSection(7)"><i class="fas fa-robot"></i> Automation Regression</a>
-                <a href="#" class="nav-item sprint-nav" onclick="showSection(8)"><i class="fas fa-note-sticky"></i> QA Notes</a>
+                <!-- Navigation Sections -->
+                <div class="nav-sections">
+                    <!-- Sprint Report Navigation Items -->
+                    <div class="nav-group sprint-nav-group">
+                        <a href="#" class="nav-item sprint-nav active" onclick="showSection(0)">
+                            <div class="nav-icon"><i class="fas fa-info-circle"></i></div>
+                            <div class="nav-label">General Details</div>
+                        </a>
+                        <a href="#" class="nav-item sprint-nav" onclick="showSection(1)">
+                            <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
+                            <div class="nav-label">Test Summary</div>
+                        </a>
+                        <a href="#" class="nav-item sprint-nav" onclick="showSection(2)">
+                            <div class="nav-icon"><i class="fas fa-plus-square"></i></div>
+                            <div class="nav-label">Additional Info</div>
+                        </a>
+                        <a href="#" class="nav-item sprint-nav" onclick="showSection(3)">
+                            <div class="nav-icon"><i class="fas fa-user-check"></i></div>
+                            <div class="nav-label">User Stories</div>
+                        </a>
+                        <a href="#" class="nav-item sprint-nav" onclick="showSection(4)">
+                            <div class="nav-icon"><i class="fas fa-vial"></i></div>
+                            <div class="nav-label">Test Cases</div>
+                        </a>
+                        <a href="#" class="nav-item sprint-nav" onclick="showSection(5)">
+                            <div class="nav-icon"><i class="fas fa-bug"></i></div>
+                            <div class="nav-label">Issues Analysis</div>
+                        </a>
+                        <a href="#" class="nav-item sprint-nav" onclick="showSection(6)">
+                            <div class="nav-icon"><i class="fas fa-bolt"></i></div>
+                            <div class="nav-label">Enhancements</div>
+                        </a>
+                        <a href="#" class="nav-item sprint-nav" onclick="showSection(7)">
+                            <div class="nav-icon"><i class="fas fa-robot"></i></div>
+                            <div class="nav-label">Automation Regression</div>
+                        </a>
+                        <a href="#" class="nav-item sprint-nav" onclick="showSection(8)">
+                            <div class="nav-icon"><i class="fas fa-note-sticky"></i></div>
+                            <div class="nav-label">QA Notes</div>
+                        </a>
+                    </div>
                 
                 <!-- Manual Report Navigation Items (same as sprint but without automation) -->
                 <a href="#" class="nav-item manual-nav" onclick="showSection(0)" style="display: none;"><i class="fas fa-info-circle"></i> General Details</a>
@@ -860,7 +915,7 @@
                         </div>
 
                         <!-- Section 8: QA Notes -->
-                        <div class="section" id="section-7">
+                        <div class="section" id="section-8">
                             <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
                             <div class="qa-notes-layout">
                                 <div class="qa-notes-card">
@@ -883,8 +938,8 @@
                             </div>
                         </div>
 
-                        <!-- Section 9: Automation Regression -->
-                        <div class="section" id="section-8">
+                        <!-- Section 7: Automation Regression -->
+                        <div class="section" id="section-7">
                             <h2 class="section-title"><i class="fas fa-robot"></i> Automation Regression</h2>
 
                             <div class="automation-layout">
@@ -2061,8 +2116,8 @@
                     { id: 'section-4', name: 'testCases', title: 'Test Cases', icon: 'fas fa-vial' },
                     { id: 'section-5', name: 'issues', title: 'Issues Analysis', icon: 'fas fa-bug' },
                     { id: 'section-6', name: 'enhancements', title: 'Enhancements', icon: 'fas fa-bolt' },
-                    { id: 'section-7', name: 'qaNotes', title: 'QA Notes', icon: 'fas fa-note-sticky' },
-                    { id: 'section-8', name: 'automation', title: 'Automation Regression', icon: 'fas fa-robot' }
+                    { id: 'section-7', name: 'automation', title: 'Automation Regression', icon: 'fas fa-robot' },
+                    { id: 'section-8', name: 'qaNotes', title: 'QA Notes', icon: 'fas fa-note-sticky' }
                 ],
                 description: 'Complete sprint testing report with all sections'
             },

@@ -231,7 +231,7 @@ function updateTestingMetricsForReportType(reportType) {
                 <td><small>Sum of all issue priorities</small></td>
             </tr>
             <tr>
-                <td><strong><i class="fas fa-bolt"></i> Enhancements</strong><br><small>Auto-calculated from section 7</small></td>
+                <td><strong><i class="fas fa-bolt"></i> Enhancements</strong><br><small>Auto-calculated from section 6</small></td>
                 <td><input type="number" id="enhancementsMetric" name="enhancementsMetric" readonly class="readonly-field"></td>
                 <td><small>Sum of all enhancement statuses</small></td>
             </tr>
@@ -260,7 +260,7 @@ function updateTestingMetricsForReportType(reportType) {
                 <td><small>Sum of all issue priorities</small></td>
             </tr>
             <tr>
-                <td><strong><i class="fas fa-bolt"></i> Enhancements</strong><br><small>Auto-calculated from section 7</small></td>
+                <td><strong><i class="fas fa-bolt"></i> Enhancements</strong><br><small>Auto-calculated from section 6</small></td>
                 <td><input type="number" id="enhancementsMetric" name="enhancementsMetric" readonly class="readonly-field"></td>
                 <td><small>Sum of all enhancement statuses</small></td>
             </tr>
@@ -1745,7 +1745,7 @@ function clearCurrentSection() {
                 calculateIssuesPercentages();
             } else if (section.id === 'section-6') {
                 calculateEnhancementsPercentages();
-            } else if (section.id === 'section-8') {
+            } else if (section.id === 'section-7') {
                 calculateAutomationPercentages();
                 calculateAutomationStabilityPercentages();
             }
@@ -6047,3 +6047,31 @@ if (typeof originalAddSelectedTeamMember === 'function') {
 
 window.setupAutoSave = setupAutoSave;
 window.clearFormDataOnSubmit = clearFormDataOnSubmit;
+
+// Report Type Selector Function
+function changeReportType(newType) {
+    const currentType = window.currentReportType || 'sprint';
+    
+    if (newType !== currentType) {
+        // Save current form data before switching
+        saveFormDataToLocalStorage();
+        
+        // Update the global report type
+        window.currentReportType = newType;
+        currentReportType = newType;
+        
+        // Configure the form for the new report type
+        if (typeof configureReportType === 'function') {
+            configureReportType(newType);
+        }
+        
+        // Show a toast notification
+        showToast(`Switched to ${newType.charAt(0).toUpperCase() + newType.slice(1)} Report`, 'success');
+        
+        // Reset to first section
+        showSection(0);
+    }
+}
+
+// Make function globally accessible
+window.changeReportType = changeReportType;
