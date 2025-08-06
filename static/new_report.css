@@ -3446,9 +3446,7 @@ sure all navigation and action buttons have white text in light theme */
     background: linear-gradient(to bottom, var(--danger), #dc2626);
 }
 
-.bug-item {
-    /* Bug-specific styles are handled by the general list-item */
-}
+/* Bug-specific styles are handled by the general list-item class */
 
 .item-header {
     display: flex;

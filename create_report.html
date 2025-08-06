@@ -2265,7 +2265,9 @@
                     editingReportId = null; // Reset if not found
                 }
             } else {
-                document.getElementById('formTitle').textContent = 'Create Enhanced QA Report';
+                // Use the current report type configuration for title
+                const config = window.reportTypeConfigs[reportType];
+                document.getElementById('formTitle').textContent = config ? config.title : 'Create Report';
             }
 
             window.addEventListener('beforeunload', (event) => {
@@ -2289,7 +2291,9 @@
                 if (editingReportId) {
                     formTitle.textContent = 'Edit QA Report';
                 } else {
-                    formTitle.textContent = 'Create Enhanced QA Report';
+                    // Use the current report type configuration for title
+                    const config = window.reportTypeConfigs[window.currentReportType];
+                    formTitle.textContent = config ? config.title : 'Create Report';
                 }
             }
         }
