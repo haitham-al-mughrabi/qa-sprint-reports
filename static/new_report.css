@@ -436,7 +436,7 @@
 
 .sections-icon i {
     font-size: 1.5rem;
-    color: white;
+    color: var(--primary-color);
 }
 
 .sections-title h2 {
@@ -503,6 +503,7 @@
 
 .nav-icon i {
     font-size: 1.25rem;
+    color: var(--primary-color);
 }
 
 .nav-label {

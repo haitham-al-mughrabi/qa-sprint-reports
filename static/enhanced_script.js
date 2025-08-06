@@ -3250,6 +3250,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Update title based on report type
         updateReportTitle();
+
+        // Set the report type dropdown to the current report type
+        const reportTypeSelect = document.getElementById('reportTypeSelect');
+        if (reportTypeSelect) {
+            reportTypeSelect.value = currentReportType;
+        }
         
         // Ensure Sprint Reports maintain full backward compatibility
         if (currentReportType === 'sprint') {
@@ -6050,26 +6056,30 @@ window.clearFormDataOnSubmit = clearFormDataOnSubmit;
 
 // Report Type Selector Function
 function changeReportType(newType) {
+    console.log('Changing report type to:', newType);
     const currentType = window.currentReportType || 'sprint';
-    
+
     if (newType !== currentType) {
         // Save current form data before switching
         saveFormDataToLocalStorage();
-        
+
         // Update the global report type
         window.currentReportType = newType;
         currentReportType = newType;
-        
+
         // Configure the form for the new report type
-        if (typeof configureReportType === 'function') {
-            configureReportType(newType);
+        if (newType === 'sprint') {
+            ensureSprintReportCompatibility();
+        } else if (newType === 'manual') {
+            configureManualReport();
+        } else if (newType === 'automation') {
+            configureAutomationReport();
+        } else if (newType === 'performance') {
+            configurePerformanceReport();
         }
-        
+
         // Show a toast notification
         showToast(`Switched to ${newType.charAt(0).toUpperCase() + newType.slice(1)} Report`, 'success');
-        
-        // Reset to first section
-        showSection(0);
     }
 }
 
