@@ -330,6 +330,17 @@
                                                 <input type="text" id="reportDate" name="reportDate"
                                                     pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy">
                                             </div>
+                                            <div class="form-group">
+                                                <label for="environment">Test Environment</label>
+                                                <select id="environment" name="environment" required>
+                                                    <option value="">Select Environment</option>
+                                                    <option value="Development">Development</option>
+                                                    <option value="Testing">Testing</option>
+                                                    <option value="Staging">Staging</option>
+                                                    <option value="Pre-Production">Pre-Production</option>
+                                                    <option value="Production">Production</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1434,18 +1445,6 @@
                                             <label for="perfProjectName">Project Name</label>
                                             <select id="perfProjectName" name="projectName">
                                                 <option value="">Select Project</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="perfEnvironment">Test Environment</label>
-                                            <select id="perfEnvironment" name="environment" required>
-                                                <option value="">Select Environment</option>
-                                                <option value="Development">Development</option>
-                                                <option value="Testing">Testing</option>
-                                                <option value="Staging">Staging</option>
-                                                <option value="Pre-Production">Pre-Production</option>
-                                                <option value="Production">Production</option>
-                                                <option value="Load Testing">Load Testing</option>
                                             </select>
                                         </div>
                                     </div>

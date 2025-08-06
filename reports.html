@@ -223,6 +223,17 @@
                                 <option value="not-testable">Not Testable</option>
                             </select>
                         </div>
+                        
+                        <div class="filter-group">
+                            <label for="reportTypeFilter"><i class="fas fa-list-alt"></i> Report Type</label>
+                            <select id="reportTypeFilter" class="filter-select" onchange="applyFilters()">
+                                <option value="">All Types</option>
+                                <option value="sprint">Sprint</option>
+                                <option value="manual">Manual</option>
+                                <option value="automation">Automation</option>
+                                <option value="performance">Performance</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Filter Controls Row 2 - Date Ranges -->

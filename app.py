@@ -45,8 +45,8 @@ class Report(db.Model):
     releaseNumber = db.Column(db.String(50)) # Add missing releaseNumber field
     reportDate = db.Column(db.String(50))
 
-    # Performance Report specific fields - General Details
-    environment = db.Column(db.String(100))  # For performance reports only
+    # Environment field for all report types
+    environment = db.Column(db.String(100))  # For all report types
     testType = db.Column(db.String(100))  # Test type (Load, Stress, Volume, etc.)
     testTool = db.Column(db.String(100))  # Testing tool (JMeter, LoadRunner, K6, etc.)
     testObjective = db.Column(db.Text)  # Test objectives
@@ -945,7 +945,7 @@ def create_report():
             cycleNumber=int(data.get('cycleNumber') or 0) if data.get('cycleNumber') else None,
             releaseNumber=data.get('releaseNumber'),
             reportDate=data.get('reportDate'),
-            environment=data.get('environment'),  # For performance reports
+            environment=data.get('environment'),  # For all report types
             testType=data.get('testType'),  # For performance reports
             testTool=data.get('testTool'),  # For performance reports
             testObjective=data.get('testObjective'),  # For performance reports

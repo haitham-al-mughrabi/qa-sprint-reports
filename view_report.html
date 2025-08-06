@@ -163,7 +163,7 @@
                     </div>
             </div>
 
-            <div class="dashboard-section">
+            <div class="dashboard-section" id="metricsOverviewSection">
                 <h2 class="section-title"><i class="fas fa-chart-line"></i> Testing Metrics Overview</h2>
                 <div class="info-grid" id="metricsOverview">
                     </div>
@@ -440,6 +440,9 @@
 
         async function loadReportData(id) {
             try {
+                // Show loading toast
+                showToast('Loading report data...', 'info', 2000);
+                
                 // Ensure the URL is correctly formed and accessible
                 const apiUrl = `/api/reports/${id}`;
                 console.log('Fetching report from:', apiUrl); // Log the full API URL
@@ -459,8 +462,12 @@
                 renderReportView(currentReport);
                 document.getElementById('loadingSection').style.display = 'none';
                 document.getElementById('reportContent').style.display = 'block';
+                
+                // Show success toast
+                showToast('Report loaded successfully!', 'success');
             } catch (error) {
                 console.error('Error loading report:', error);
+                showToast('Failed to load report data. Please try again.', 'error');
                 document.getElementById('loadingSection').innerHTML = `
                     <div class="empty-state">
                         <span class="icon">⚠️</span>
@@ -536,10 +543,6 @@
             if (report.reportType === 'performance') {
                 coverInfoHtml += `
                     <div class="info-item">
-                        <div class="info-label">Environment</div>
-                        <div class="info-value">${report.environment || 'N/A'}</div>
-                    </div>
-                    <div class="info-item">
                         <div class="info-label">Test Type</div>
                         <div class="info-value">${report.testType || 'N/A'}</div>
                     </div>
@@ -574,6 +577,10 @@
             
             // Common fields for all report types
             coverInfoHtml += `
+                <div class="info-item">
+                    <div class="info-label">Environment</div>
+                    <div class="info-value">${report.environment || 'N/A'}</div>
+                </div>
                 <div class="info-item">
                     <div class="info-label">Report Version</div>
                     <div class="info-value">v${report.reportVersion || '1.0'}</div>
@@ -1789,14 +1796,14 @@
         function toggleSectionsBasedOnType(reportType) {
             // Define which sections to show for each report type
             const sectionConfig = {
-                sprint: ['userStoriesSection', 'testCasesSection', 'issuesPrioritySection', 'issuesStatusSection', 'enhancementsSection', 'automationRegressionSection'],
-                manual: ['userStoriesSection', 'testCasesSection', 'issuesPrioritySection', 'issuesStatusSection', 'enhancementsSection'],
+                sprint: ['metricsOverviewSection', 'userStoriesSection', 'testCasesSection', 'issuesPrioritySection', 'issuesStatusSection', 'enhancementsSection', 'automationRegressionSection'],
+                manual: ['metricsOverviewSection', 'userStoriesSection', 'testCasesSection', 'issuesPrioritySection', 'issuesStatusSection', 'enhancementsSection'],
                 automation: ['automationRegressionSection'],
                 performance: ['performanceReportSection']
             };
 
             // Hide all sections first
-            const allSections = ['userStoriesSection', 'testCasesSection', 'issuesPrioritySection', 'issuesStatusSection', 'enhancementsSection', 'automationRegressionSection', 'performanceReportSection'];
+            const allSections = ['metricsOverviewSection', 'userStoriesSection', 'testCasesSection', 'issuesPrioritySection', 'issuesStatusSection', 'enhancementsSection', 'automationRegressionSection', 'performanceReportSection'];
             allSections.forEach(sectionId => {
                 const section = document.getElementById(sectionId);
                 if (section) section.style.display = 'none';

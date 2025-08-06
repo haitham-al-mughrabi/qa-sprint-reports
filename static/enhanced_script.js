@@ -625,6 +625,9 @@ async function fetchReport(id) {
 async function saveReport(reportData) {
     const url = editingReportId ? `${API_URL}/${editingReportId}` : API_URL;
     const method = editingReportId ? 'PUT' : 'POST';
+    const actionText = editingReportId ? 'updating' : 'creating';
+
+    showToast(`${actionText === 'creating' ? 'Creating' : 'Updating'} report...`, 'info', 2000);
 
     try {
         const response = await fetch(url, {
@@ -632,25 +635,40 @@ async function saveReport(reportData) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reportData),
         });
+        
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+            throw new Error(errorMessage);
         }
-        return await response.json();
+        
+        const result = await response.json();
+        showToast(`Report ${actionText === 'creating' ? 'created' : 'updated'} successfully!`, 'success');
+        return result;
     } catch (error) {
-        console.error("Failed to save report:", error);
+        console.error(`Failed to save report:`, error);
+        showToast(`Failed to ${actionText === 'creating' ? 'create' : 'update'} report: ${error.message}`, 'error');
         return null;
     }
 }
 
 async function deleteReportDB(id) {
+    showToast('Deleting report...', 'info', 2000);
+    
     try {
         const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+            throw new Error(errorMessage);
         }
-        return await response.json();
+        
+        const result = await response.json();
+        showToast('Report deleted successfully!', 'success');
+        return result;
     } catch (error) {
         console.error("Failed to delete report:", error);
+        showToast(`Failed to delete report: ${error.message}`, 'error');
         return null;
     }
 }
@@ -1727,6 +1745,7 @@ function clearCurrentSection() {
     if (confirm('Are you sure you want to clear all fields in the current section?')) {
         const section = document.getElementById(`section-${currentSection}`);
         if (section) {
+            // Clear all form inputs in the current section
             const inputs = section.querySelectorAll('input:not([readonly]), textarea, select');
             inputs.forEach(input => {
                 if (input.type === 'checkbox' || input.type === 'radio') {
@@ -1736,18 +1755,84 @@ function clearCurrentSection() {
                 }
             });
 
-            // After clearing, recalculate percentages for relevant sections
-            if (section.id === 'section-3') {
-                calculatePercentages();
-            } else if (section.id === 'section-4') {
-                calculateTestCasesPercentages();
-            } else if (section.id === 'section-5') {
-                calculateIssuesPercentages();
-            } else if (section.id === 'section-6') {
-                calculateEnhancementsPercentages();
-            } else if (section.id === 'section-7') {
-                calculateAutomationPercentages();
-                calculateAutomationStabilityPercentages();
+            // Clear section-specific dynamic data based on current section
+            switch (currentSection) {
+                case 1: // Section 2: Dynamic Lists (Requests, Builds, Testers, Team Members)
+                    if (section.querySelector('#requestsList')) {
+                        requestData = [];
+                        renderRequestList();
+                    }
+                    if (section.querySelector('#buildsList')) {
+                        buildData = [];
+                        renderBuildList();
+                    }
+                    if (section.querySelector('#testersList')) {
+                        testerData = [];
+                        renderTesterList();
+                    }
+                    if (section.querySelector('#teamMembersList')) {
+                        teamMemberData = [];
+                        renderTeamMemberList();
+                    }
+                    break;
+                    
+                case 2: // Section 3: User Stories
+                    calculatePercentages();
+                    break;
+                    
+                case 3: // Section 4: Test Cases
+                    calculateTestCasesPercentages();
+                    break;
+                    
+                case 4: // Section 5: Issues
+                    calculateIssuesPercentages();
+                    break;
+                    
+                case 5: // Section 6: Enhancements
+                    calculateEnhancementsPercentages();
+                    break;
+                    
+                case 6: // Section 7: Automation Regression
+                    calculateAutomationPercentages();
+                    calculateAutomationStabilityPercentages();
+                    break;
+                    
+                case 7: // Section 8: QA Notes
+                    qaNotesData = [];
+                    qaNoteFieldsData = [];
+                    renderQANotesList();
+                    renderQANoteFieldsList();
+                    updateQANotesCount();
+                    break;
+                    
+                case 8: // Section 9: Report-specific sections (Automation/Performance)
+                    // Clear automation report data
+                    if (section.querySelector('#autoBugsList')) {
+                        bugsData = [];
+                        renderBugsList();
+                        updateBugsCount();
+                    }
+                    if (section.querySelector('#servicesList')) {
+                        servicesData = [];
+                        if (typeof renderServicesList === 'function') renderServicesList();
+                    }
+                    if (section.querySelector('#modulesList')) {
+                        modulesData = [];
+                        if (typeof renderModulesList === 'function') renderModulesList();
+                    }
+                    
+                    // Clear performance report data
+                    if (section.querySelector('#scenariosList')) {
+                        performanceScenarios = [];
+                        renderScenariosList();
+                        updateScenariosCount();
+                    }
+                    if (section.querySelector('#httpRequestsTableBody')) {
+                        httpRequestsOverview = [];
+                        renderHttpRequestsTable();
+                        updateHttpRequestsCount();
+                    }
+                    break;
             }
 
             showToast('Current section fields have been cleared.', 'info');
@@ -1968,6 +2053,7 @@ let currentFilters = {
     portfolio: '',
     tester: '',
     status: '',
+    reportType: '',
     dateFrom: '',
     dateTo: '',
     sprint: '',
@@ -2054,6 +2140,7 @@ function updateFilterState() {
     currentFilters.portfolio = document.getElementById('portfolioFilter')?.value || '';
     currentFilters.tester = document.getElementById('testerFilter')?.value || '';
     currentFilters.status = document.getElementById('statusFilter')?.value || '';
+    currentFilters.reportType = document.getElementById('reportTypeFilter')?.value || '';
     currentFilters.dateFrom = document.getElementById('dateFromFilter')?.value || '';
     currentFilters.dateTo = document.getElementById('dateToFilter')?.value || '';
     currentFilters.sprint = document.getElementById('sprintFilter')?.value || '';
@@ -2176,6 +2263,14 @@ function filterReports(reports) {
         if (currentFilters.status) {
             const status = report.status || report.testingStatus || '';
             if (status !== currentFilters.status) {
+                return false;
+            }
+        }
+
+        // Report type filter
+        if (currentFilters.reportType) {
+            const reportType = report.reportType || 'sprint'; // Default to 'sprint' if not specified
+            if (reportType !== currentFilters.reportType) {
                 return false;
             }
         }
@@ -2321,6 +2416,7 @@ function updateActiveFiltersDisplay() {
         portfolio: 'Portfolio',
         tester: 'Tester',
         status: 'Status',
+        reportType: 'Report Type',
         dateFrom: 'From Date',
         dateTo: 'To Date',
         sprint: 'Sprint'
@@ -2371,6 +2467,7 @@ function clearAllFilters() {
         'portfolioFilter',
         'testerFilter',
         'statusFilter',
+        'reportTypeFilter',
         'dateFromFilter',
         'dateToFilter',
         'sprintFilter'
@@ -2608,7 +2705,7 @@ function testIndividualFilters() {
     const originalFilters = { ...currentFilters };
 
     // Test search filter
-    currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
+    currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', reportType: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
     currentFilters.search = 'test';
     let filtered = filterReports(allReports);
     console.log('Search "test" results:', filtered.length);
@@ -2616,7 +2713,7 @@ function testIndividualFilters() {
     // Test project filter (use first available project)
     const projects = [...new Set(allReports.map(r => r.project || r.projectName).filter(Boolean))];
     if (projects.length > 0) {
-        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
+        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', reportType: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.project = projects[0];
         filtered = filterReports(allReports);
         console.log(`Project "${projects[0]}" results:`, filtered.length);
@@ -2640,7 +2737,7 @@ function testIndividualFilters() {
 
     const testersList = [...testers];
     if (testersList.length > 0) {
-        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
+        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', reportType: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.tester = testersList[0];
         filtered = filterReports(allReports);
         console.log(`Tester "${testersList[0]}" results:`, filtered.length);
@@ -2660,14 +2757,14 @@ function testIndividualFilters() {
     // Test status filter
     const statuses = [...new Set(allReports.map(r => r.status || r.testingStatus).filter(Boolean))];
     if (statuses.length > 0) {
-        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
+        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', reportType: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.status = statuses[0];
         filtered = filterReports(allReports);
         console.log(`Status "${statuses[0]}" results:`, filtered.length);
     }
 
     // Test no filters (should return all)
-    currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
+    currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', reportType: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
     filtered = filterReports(allReports);
     console.log('No filters results (should be all):', filtered.length);
 
@@ -3045,6 +3142,7 @@ function createNewReport() {
 }
 
 async function regenerateReport(id) {
+    showToast('Loading report for editing...', 'info', 1000);
     // Redirect to the create report page with the report ID for editing
     window.location.href = `/reports_type`;
 }
@@ -3092,14 +3190,12 @@ async function deleteReport(id) {
                 updateDashboardStats(dashboardStatsCache);
             }
             searchReportsImmediate(); // Re-render the reports table
-            showToast('Report deleted successfully', 'success');
-        } else {
-            showToast('Failed to delete report', 'error');
         }
     }
 }
 
 function viewReport(id) {
+    showToast('Loading report...', 'info', 1000);
     window.location.href = `/report/${id}`;
 }
 
@@ -3109,25 +3205,49 @@ function resetFormData() {
     if (form) {
         form.reset();
         document.getElementById('reportDate').value = getCurrentDate();
+        
+        // Reset all data arrays for all report types
         requestData = [];
         buildData = [];
         testerData = [];
-        teamMemberData = []; // Reset team member data
-        qaNoteFieldsData = []; // Reset custom QA note fields
-        qaNotesData = []; // Reset QA notes array data
-        // customFieldsData = []; // Reset custom fields data - REMOVED
+        teamMemberData = [];
+        qaNoteFieldsData = [];
+        qaNotesData = [];
+        bugsData = []; // For automation reports
+        performanceScenarios = []; // For performance reports
+        httpRequestsOverview = []; // For performance reports
+        servicesData = []; // For automation reports
+        modulesData = []; // For automation reports
 
+        // Render all lists to show empty state
         renderRequestList();
         renderBuildList();
         renderTesterList();
         renderTeamMemberList();
         renderQANotesList();
         renderQANoteFieldsList();
+        
+        // Update counts
         updateQANotesCount();
-
+        updateBugsCount();
+        updateScenariosCount();
+        updateHttpRequestsCount();
+        
+        // Render report-specific lists
+        if (typeof renderBugsList === 'function') renderBugsList();
+        if (typeof renderScenariosList === 'function') renderScenariosList();
+        if (typeof renderHttpRequestsTable === 'function') renderHttpRequestsTable();
+        
+        // Reset all charts and calculations
         resetAllCharts();
-        currentSection = 0; // Reset to first section
+        resetAllCalculations();
+        
+        // Reset navigation
+        currentSection = 0;
         updateNavigationButtons();
+        
+        // Clear any localStorage data
+        clearFormDataFromLocalStorage();
     }
 }
 
@@ -3140,6 +3260,41 @@ function resetAllCharts() {
     if (enhancementsChart) enhancementsChart.destroy();
 
     initializeCharts(); // Re-initialize all charts to their default empty state
+}
+
+function resetAllCalculations() {
+    // Reset all calculated totals and percentages
+    const calculatedFields = [
+        'totalStories', 'totalTestCases', 'totalIssues', 'totalEnhancements',
+        'totalAutomationTestCases', 'automationPassedPercentage', 'automationFailedPercentage',
+        'automationSkippedPercentage', 'automationStablePercentage', 'automationFlakyPercentage'
+    ];
+    
+    calculatedFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+            element.value = '';
+        }
+    });
+    
+    // Reset all percentage fields
+    const percentageFields = document.querySelectorAll('input[id$="Percentage"], input[id*="percentage"], .percentage-display');
+    percentageFields.forEach(field => {
+        if (field.tagName === 'INPUT') {
+            field.value = '';
+        } else {
+            field.textContent = '0%';
+        }
+    });
+    
+    // Reset metric fields
+    const metricFields = ['bugsMetric', 'scenariosMetric', 'httpRequestsMetric'];
+    metricFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+            element.value = '0';
+        }
+    });
 }
 
 async function loadReportForEditing(report) {
@@ -3169,7 +3324,7 @@ async function loadReportForEditing(report) {
     }
 
     // Basic fields (excluding portfolioName and projectName as they're handled above)
-    const basicFields = ['sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber'];
+    const basicFields = ['sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber', 'environment'];
     basicFields.forEach(field => {
         const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
@@ -3291,6 +3446,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (qaReportForm) {
         qaReportForm.addEventListener('submit', async function (e) {
             e.preventDefault();
+            
+            // Check if form is valid
+            if (!this.checkValidity()) {
+                showToast('Please fill in all required fields before saving.', 'warning');
+                this.reportValidity();
+                return;
+            }
 
             const formData = new FormData(this);
             const reportData = {};
@@ -3339,15 +3501,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const savedReport = await saveReport(reportData);
             if (savedReport) {
-                showToast('Report saved successfully!', 'success');
-
                 // Clear form data from localStorage and reset form
                 clearFormDataOnSubmit();
 
-                // Redirect to reports list after saving
-                window.location.href = '/reports';
-            } else {
-                showToast('Failed to save report. Please try again.', 'error');
+                // Redirect to reports list after saving with a delay to show the success toast
+                setTimeout(() => {
+                    window.location.href = '/reports';
+                }, 1500);
             }
         });
     }
@@ -3356,6 +3516,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- Enhanced Export Functions ---
 async function exportReportAsPdf(id) {
+    showToast('Preparing PDF export...', 'info', 2000);
+    
     const report = allReportsCache.find(r => r.id === id);
     if (!report) {
         console.error("Report not found for PDF export:", id);
@@ -3517,11 +3679,18 @@ async function exportReportAsPdf(id) {
         });
     }
 
-    doc.save(`QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.pdf`);
-    showToast('PDF report exported successfully!', 'success');
+    try {
+        doc.save(`QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.pdf`);
+        showToast('PDF report exported successfully!', 'success');
+    } catch (error) {
+        console.error('Error exporting PDF file:', error);
+        showToast('Failed to export PDF file. Please try again.', 'error');
+    }
 }
 
 async function exportReportAsExcel(id) {
+    showToast('Preparing Excel export...', 'info', 2000);
+    
     const report = allReportsCache.find(r => r.id === id);
     if (!report) {
         console.error("Report not found for Excel export:", id);
@@ -3702,8 +3871,13 @@ async function exportReportAsExcel(id) {
         const wsTeamMembers = XLSX.utils.aoa_to_sheet([teamMemberHeaders, ...teamMembersSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsTeamMembers, "Team Members");
     }
-    XLSX.writeFile(workbook, `QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.xlsx`);
-    showToast('Excel report exported successfully!', 'success');
+    try {
+        XLSX.writeFile(workbook, `QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.xlsx`);
+        showToast('Excel report exported successfully!', 'success');
+    } catch (error) {
+        console.error('Error exporting Excel file:', error);
+        showToast('Failed to export Excel file. Please try again.', 'error');
+    }
 }
 
 // --- Modal & Utility Functions ---
@@ -5838,7 +6012,7 @@ function saveFormDataToLocalStorage() {
         const additionalFields = [
             'reportDate', 'portfolioName', 'projectName', 'sprintNumber',
             'reportVersion', 'cycleNumber', 'releaseNumber', 'testSummary',
-            'testingStatus'
+            'testingStatus', 'environment'
         ];
 
         additionalFields.forEach(fieldId => {
@@ -5862,12 +6036,19 @@ function saveFormDataToLocalStorage() {
 
         localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formObject));
 
-        // Save arrays (requests, builds, testers, team members)
+        // Save arrays (all report types data)
         const arrayData = {
             requestData: requestData,
             buildData: buildData,
             testerData: testerData,
-            teamMemberData: teamMemberData
+            teamMemberData: teamMemberData,
+            qaNoteFieldsData: qaNoteFieldsData,
+            qaNotesData: qaNotesData,
+            bugsData: bugsData,
+            performanceScenarios: performanceScenarios,
+            httpRequestsOverview: httpRequestsOverview,
+            servicesData: servicesData,
+            modulesData: modulesData
         };
 
         localStorage.setItem(FORM_ARRAYS_KEY, JSON.stringify(arrayData));
@@ -5936,6 +6117,46 @@ function loadFormDataFromLocalStorage() {
                 teamMemberData = arrayObject.teamMemberData;
                 renderTeamMemberList();
             }
+            
+            // Load all report-specific data arrays
+            if (arrayObject.qaNoteFieldsData) {
+                qaNoteFieldsData = arrayObject.qaNoteFieldsData;
+                renderQANoteFieldsList();
+            }
+            
+            if (arrayObject.qaNotesData) {
+                qaNotesData = arrayObject.qaNotesData;
+                renderQANotesList();
+                updateQANotesCount();
+            }
+            
+            if (arrayObject.bugsData) {
+                bugsData = arrayObject.bugsData;
+                if (typeof renderBugsList === 'function') renderBugsList();
+                updateBugsCount();
+            }
+            
+            if (arrayObject.performanceScenarios) {
+                performanceScenarios = arrayObject.performanceScenarios;
+                if (typeof renderScenariosList === 'function') renderScenariosList();
+                updateScenariosCount();
+            }
+            
+            if (arrayObject.httpRequestsOverview) {
+                httpRequestsOverview = arrayObject.httpRequestsOverview;
+                if (typeof renderHttpRequestsTable === 'function') renderHttpRequestsTable();
+                updateHttpRequestsCount();
+            }
+            
+            if (arrayObject.servicesData) {
+                servicesData = arrayObject.servicesData;
+                if (typeof renderServicesList === 'function') renderServicesList();
+            }
+            
+            if (arrayObject.modulesData) {
+                modulesData = arrayObject.modulesData;
+                if (typeof renderModulesList === 'function') renderModulesList();
+            }
         } else {
             console.log('No saved array data found');
         }
@@ -5984,13 +6205,18 @@ function clearFormDataOnSubmit() {
         // Clear form data from localStorage
         clearFormDataFromLocalStorage();
 
-        // Reset form arrays
+        // Reset all form arrays for all report types
         requestData = [];
         buildData = [];
         testerData = [];
         teamMemberData = [];
         qaNoteFieldsData = [];
         qaNotesData = [];
+        bugsData = [];
+        performanceScenarios = [];
+        httpRequestsOverview = [];
+        servicesData = [];
+        modulesData = [];
 
         // Reset form fields
         const form = document.getElementById('qaReportForm');
@@ -5998,8 +6224,9 @@ function clearFormDataOnSubmit() {
             form.reset();
         }
 
-        // Reset charts if they exist
+        // Reset charts and calculations if they exist
         resetAllCharts();
+        resetAllCalculations();
 
         // Reset current section to the first one
         currentSection = 0;
