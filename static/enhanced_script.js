@@ -35,6 +35,12 @@ function ensureSprintReportCompatibility() {
     // Update Testing Metrics for Sprint Report
     updateTestingMetricsForReportType('sprint');
     
+    // Set report date
+    const reportDateField = document.getElementById('reportDate');
+    if (reportDateField && !reportDateField.value) {
+        reportDateField.value = getCurrentDate();
+    }
+    
     // Hide all sections first, then show the first section
     document.querySelectorAll('.section').forEach(s => {
         s.classList.remove('active');
@@ -69,6 +75,12 @@ function configureManualReport() {
     // Update Testing Metrics for Manual Report
     updateTestingMetricsForReportType('manual');
     
+    // Set report date
+    const reportDateField = document.getElementById('reportDate');
+    if (reportDateField && !reportDateField.value) {
+        reportDateField.value = getCurrentDate();
+    }
+    
     // Hide all sections first, then show the first section
     document.querySelectorAll('.section').forEach(s => {
         s.classList.remove('active');
@@ -91,10 +103,17 @@ function configureAutomationReport() {
         item.style.display = 'none';
     });
     
-    // Show only automation navigation items
+    // Show only automation navigation items and keep them visible
     const automationNavItems = document.querySelectorAll('.automation-nav');
-    automationNavItems.forEach(item => {
+    automationNavItems.forEach((item, index) => {
         item.style.display = 'block';
+        item.style.visibility = 'visible';
+        // Set first item as active
+        if (index === 0) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
     });
     
     // Update progress bar for automation report (7 sections)
@@ -102,6 +121,16 @@ function configureAutomationReport() {
     
     // Update Testing Metrics for Automation Report
     updateTestingMetricsForReportType('automation');
+    
+    // Set report date for automation report
+    const reportDateField = document.getElementById('reportDate');
+    const autoReportDateField = document.getElementById('autoReportDate');
+    if (reportDateField && !reportDateField.value) {
+        reportDateField.value = getCurrentDate();
+    }
+    if (autoReportDateField && !autoReportDateField.value) {
+        autoReportDateField.value = getCurrentDate();
+    }
     
     // Hide all sections first, then show the first section
     document.querySelectorAll('.section').forEach(s => {
@@ -131,8 +160,18 @@ function configurePerformanceReport() {
         item.style.display = 'block';
     });
     
-    // Update progress bar for performance report (4 sections)
-    updateProgressBarForReportType('performance', 4);
+    // Update progress bar for performance report (6 sections)
+    updateProgressBarForReportType('performance', 6);
+    
+    // Set report date for performance report
+    const reportDateField = document.getElementById('reportDate');
+    const perfReportDateField = document.getElementById('perfReportDate');
+    if (reportDateField && !reportDateField.value) {
+        reportDateField.value = getCurrentDate();
+    }
+    if (perfReportDateField && !perfReportDateField.value) {
+        perfReportDateField.value = getCurrentDate();
+    }
     
     // Hide all sections first, then show the first section
     document.querySelectorAll('.section').forEach(s => {
@@ -143,7 +182,7 @@ function configurePerformanceReport() {
     // Show the first section
     setTimeout(() => showSection(0), 100);
     
-    console.log('✅ Performance Report configured (4 sections with performance-specific content)');
+    console.log('✅ Performance Report configured (6 sections with performance-specific content)');
 }
 
 // Function to update Additional Information section for Automation Reports
@@ -232,38 +271,19 @@ function updateTestingMetricsForReportType(reportType) {
             </tr>
         `;
     } else if (reportType === 'automation') {
-        // Automation Report - Show only automation-related metrics
-        metricsHTML = `
-            <tr>
-                <td><strong><i class="fas fa-robot"></i> Automation Test Cases</strong><br><small>Auto-calculated from regression section</small></td>
-                <td><input type="number" id="automationTotalMetric" name="automationTotalMetric" readonly class="readonly-field"></td>
-                <td><small>Total automation test cases</small></td>
-            </tr>
-            <tr>
-                <td><strong><i class="fas fa-chart-bar"></i> QA Automation Notes</strong><br><small>Auto-calculated from notes section</small></td>
-                <td><input type="number" name="qaNotesMetric" id="qaNotesMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
-                <td><small>Number of QA automation notes</small></td>
-            </tr>
-            <tr>
-                <td><strong><i class="fas fa-bug"></i> Bugs Count</strong><br><small>Auto-calculated from bugs section</small></td>
-                <td><input type="number" name="bugsMetric" id="bugsMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
-                <td><small>Number of bugs tracked</small></td>
-            </tr>
-        `;
+        // Automation Report - Hide Testing Metrics section completely
+        const metricsCard = document.querySelector('#section-a1 .metrics-table-card');
+        if (metricsCard) {
+            metricsCard.style.display = 'none';
+        }
+        return; // Don't populate metrics table
     } else if (reportType === 'performance') {
-        // Performance Report - Show performance-related metrics
-        metricsHTML = `
-            <tr>
-                <td><strong><i class="fas fa-play-circle"></i> Test Scenarios</strong><br><small>Auto-calculated from scenarios section</small></td>
-                <td><input type="number" name="scenariosMetric" id="scenariosMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
-                <td><small>Number of performance scenarios</small></td>
-            </tr>
-            <tr>
-                <td><strong><i class="fas fa-network-wired"></i> HTTP Requests</strong><br><small>Auto-calculated from requests section</small></td>
-                <td><input type="number" name="httpRequestsMetric" id="httpRequestsMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
-                <td><small>Number of HTTP requests tracked</small></td>
-            </tr>
-        `;
+        // Performance Report - Hide Testing Metrics section completely  
+        const metricsCard = document.querySelector('#section-p1 .metrics-table-card');
+        if (metricsCard) {
+            metricsCard.style.display = 'none';
+        }
+        return; // Don't populate metrics table
     }
     
     metricsTable.innerHTML = metricsHTML;
@@ -293,10 +313,37 @@ function updateHttpRequestsCount() {
     }
 }
 
+// Function to update report title based on report type
+function updateReportTitle() {
+    const formTitle = document.getElementById('formTitle');
+    if (formTitle) {
+        let title = 'Create Report';
+        switch (currentReportType) {
+            case 'sprint':
+                title = 'Sprint Report';
+                break;
+            case 'manual':
+                title = 'Manual Report';
+                break;
+            case 'automation':
+                title = 'Automation Report';
+                break;
+            case 'performance':
+                title = 'Performance Report';
+                break;
+        }
+        formTitle.textContent = title;
+        document.title = title + ' - QA Reports System';
+    }
+}
+
 // Function to update progress bar for different report types
 function updateProgressBarForReportType(reportType, totalSections) {
     const progressSteps = document.querySelector('.progress-steps');
-    if (!progressSteps) return;
+    if (!progressSteps) {
+        console.error('Progress steps element not found!');
+        return;
+    }
     
     // Clear existing steps
     progressSteps.innerHTML = '';
@@ -312,8 +359,8 @@ function updateProgressBarForReportType(reportType, totalSections) {
             { step: 4, icon: 'fas fa-vial', label: 'Tests' },
             { step: 5, icon: 'fas fa-bug', label: 'Issues' },
             { step: 6, icon: 'fas fa-bolt', label: 'Enhance' },
-            { step: 7, icon: 'fas fa-note-sticky', label: 'Notes' },
-            { step: 8, icon: 'fas fa-robot', label: 'Auto' }
+            { step: 7, icon: 'fas fa-robot', label: 'Auto' },
+            { step: 8, icon: 'fas fa-note-sticky', label: 'Notes' }
         ];
     } else if (reportType === 'manual') {
         stepConfigs = [
@@ -339,9 +386,11 @@ function updateProgressBarForReportType(reportType, totalSections) {
     } else if (reportType === 'performance') {
         stepConfigs = [
             { step: 0, icon: 'fas fa-info-circle', label: 'General' },
-            { step: 1, icon: 'fas fa-tachometer-alt', label: 'Summary' },
-            { step: 2, icon: 'fas fa-play-circle', label: 'Scenarios' },
-            { step: 3, icon: 'fas fa-network-wired', label: 'Requests' }
+            { step: 1, icon: 'fas fa-tachometer-alt', label: 'Metrics' },
+            { step: 2, icon: 'fas fa-chart-line', label: 'Response' },
+            { step: 3, icon: 'fas fa-table', label: 'Criteria' },
+            { step: 4, icon: 'fas fa-play-circle', label: 'Scenarios' },
+            { step: 5, icon: 'fas fa-network-wired', label: 'Requests' }
         ];
     }
     
@@ -1814,8 +1863,8 @@ function updateProgressBar() {
     
     if (currentReportType === 'sprint') {
         totalSections = 9;
-        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'QA Notes', 'Automation Regression'];
-        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-note-sticky', 'fas fa-robot'];
+        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'Automation Regression', 'QA Notes'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-robot', 'fas fa-note-sticky'];
     } else if (currentReportType === 'manual') {
         totalSections = 8;
         sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'QA Notes'];
@@ -1825,14 +1874,14 @@ function updateProgressBar() {
         sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'Regression Test Results', 'QA Automation Notes', 'Covered Services & Modules', 'Bugs'];
         stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-robot', 'fas fa-note-sticky', 'fas fa-cogs', 'fas fa-bug'];
     } else if (currentReportType === 'performance') {
-        totalSections = 4;
-        sectionTitles = ['Performance General Details', 'Performance Test Summary', 'Performance Test Scenarios', 'HTTP Requests Overview'];
-        stepIcons = ['fas fa-info-circle', 'fas fa-tachometer-alt', 'fas fa-play-circle', 'fas fa-network-wired'];
+        totalSections = 6;
+        sectionTitles = ['Performance General Details', 'Test Metrics & Load', 'Response Time Analysis', 'Performance Criteria Results', 'Performance Test Scenarios', 'HTTP Requests Overview'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-tachometer-alt', 'fas fa-chart-line', 'fas fa-table', 'fas fa-play-circle', 'fas fa-network-wired'];
     } else {
         // Default fallback
         totalSections = 9;
-        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'QA Notes', 'Automation Regression'];
-        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-note-sticky', 'fas fa-robot'];
+        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'Automation Regression', 'QA Notes'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-robot', 'fas fa-note-sticky'];
     }
 
     // Calculate progress - show completion based on current section
@@ -3199,6 +3248,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentReportType = window.currentReportType;
         console.log('Report type set to:', currentReportType);
         
+        // Update title based on report type
+        updateReportTitle();
+        
         // Ensure Sprint Reports maintain full backward compatibility
         if (currentReportType === 'sprint') {
             ensureSprintReportCompatibility();
@@ -3219,9 +3271,11 @@ document.addEventListener('DOMContentLoaded', () => {
             configurePerformanceReport();
         }
         
-        // Initialize charts after a short delay to ensure DOM is ready
+        // Load form dropdown data for all report types
+        loadFormDropdownData();
+        
+        // Initialize charts and progress bar after a short delay to ensure DOM is ready
         setTimeout(() => {
-            console.log('Initializing charts...');
             initializeCharts();
             initializeProgressSteps();
         }, 500);
@@ -4560,24 +4614,26 @@ function removeQANoteField(fieldId) {
 }
 
 async function populatePortfolioDropdownForCreateReport(portfolios) {
-    const select = document.getElementById('portfolioName');
-    if (!select) {
-        console.error('Portfolio select element not found!');
-        return;
-    }
+    // Get all possible portfolio dropdowns for different report types
+    const selectors = ['portfolioName', 'autoPortfolioName', 'perfPortfolioName'];
+    
+    selectors.forEach(selectorId => {
+        const select = document.getElementById(selectorId);
+        if (!select) return; // Skip if this dropdown doesn't exist on current page
+        
+        // Clear loading state and add basic options
+        select.innerHTML = '<option value="">Select Portfolio</option>';
+        select.innerHTML += '<option value="no-portfolio">No Portfolio (Standalone Project)</option>';
 
-    // Clear loading state and add basic options
-    select.innerHTML = '<option value="">Select Portfolio</option>';
-    select.innerHTML += '<option value="no-portfolio">No Portfolio (Standalone Project)</option>';
-
-    // Add dynamic portfolios from database
-    if (portfolios && Array.isArray(portfolios) && portfolios.length > 0) {
-        portfolios.forEach(portfolio => {
-            const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
-            // Store the actual ID in a data attribute
-            select.innerHTML += `<option value="${value}" data-id="${portfolio.id}">${portfolio.name}</option>`;
-        });
-    }
+        // Add dynamic portfolios from database
+        if (portfolios && Array.isArray(portfolios) && portfolios.length > 0) {
+            portfolios.forEach(portfolio => {
+                const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
+                // Store the actual ID in a data attribute
+                select.innerHTML += `<option value="${value}" data-id="${portfolio.id}">${portfolio.name}</option>`;
+            });
+        }
+    });
 }
 
 // Function called when portfolio is selected
@@ -4695,10 +4751,11 @@ async function onProjectSelection() {
     const portfolioNameLower = portfolioName.toLowerCase();
     const projectNameLower = projectName.toLowerCase();
 
-    console.log('URL will be:', `/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
+    const url = `/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data?report_type=${encodeURIComponent(currentReportType || 'sprint')}`;
+    console.log('URL will be:', url);
 
     try {
-        const response = await fetch(`/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
+        const response = await fetch(url);
         console.log('API response status:', response.status);
 
         if (response.ok) {
@@ -4752,35 +4809,43 @@ function showAutoLoadModal(data) {
         return;
     }
 
-    // Build data preview
+    // Build data preview based on report type
     const latestData = data.latestData;
     const suggestedValues = data.suggestedValues;
 
-    let previewHTML = `
-        <h4>Latest Report Data:</h4>
-        <div class="data-preview-item">
-            <span class="data-preview-label">Sprint Number:</span>
-            <span class="data-preview-value">${latestData.sprintNumber} → Suggested: ${suggestedValues.sprintNumber}</span>
-        </div>
-        <div class="data-preview-item">
-            <span class="data-preview-label">Cycle Number:</span>
-            <span class="data-preview-value">${latestData.cycleNumber} → Suggested: ${suggestedValues.cycleNumber}</span>
-        </div>
+    let previewHTML = `<h4>Latest ${currentReportType.charAt(0).toUpperCase() + currentReportType.slice(1)} Report Data:</h4>`;
+    
+    // Common fields for all report types
+    if (currentReportType === 'sprint' || currentReportType === 'manual') {
+        previewHTML += `
+            <div class="data-preview-item">
+                <span class="data-preview-label">Sprint Number:</span>
+                <span class="data-preview-value">${latestData.sprintNumber || 'N/A'} → Suggested: ${suggestedValues.sprintNumber || 'N/A'}</span>
+            </div>
+            <div class="data-preview-item">
+                <span class="data-preview-label">Cycle Number:</span>
+                <span class="data-preview-value">${latestData.cycleNumber || 'N/A'} → Suggested: ${suggestedValues.cycleNumber || 'N/A'}</span>
+            </div>
+        `;
+    }
+    
+    // Common fields for all report types
+    previewHTML += `
         <div class="data-preview-item">
             <span class="data-preview-label">Release Number:</span>
-            <span class="data-preview-value">${latestData.releaseNumber} → Suggested: ${suggestedValues.releaseNumber}</span>
+            <span class="data-preview-value">${latestData.releaseNumber || 'N/A'} → Suggested: ${suggestedValues.releaseNumber || 'N/A'}</span>
         </div>
         <div class="data-preview-item">
             <span class="data-preview-label">Report Version:</span>
-            <span class="data-preview-value">${latestData.reportVersion}</span>
+            <span class="data-preview-value">${latestData.reportVersion || 'N/A'}</span>
         </div>
         <div class="data-preview-item">
             <span class="data-preview-label">Testers:</span>
-            <span class="data-preview-value">${latestData.testerData.length} tester(s)</span>
+            <span class="data-preview-value">${latestData.testerData ? latestData.testerData.length : 0} tester(s)</span>
         </div>
         <div class="data-preview-item">
             <span class="data-preview-label">Team Members:</span>
-            <span class="data-preview-value">${latestData.teamMembers.length} member(s)</span>
+            <span class="data-preview-value">${latestData.teamMembers ? latestData.teamMembers.length : 0} member(s)</span>
         </div>
     `;
 
@@ -4845,19 +4910,33 @@ function setDefaultValues(defaults) {
     const today = new Date();
     const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
 
+    // Helper function to set value if element exists
+    function setValue(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.value = value;
+        }
+    }
+
     if (defaults) {
-        document.getElementById('sprintNumber').value = defaults.sprintNumber;
-        document.getElementById('cycleNumber').value = defaults.cycleNumber;
-        document.getElementById('releaseNumber').value = defaults.releaseNumber;
-        document.getElementById('reportVersion').value = defaults.reportVersion;
-        document.getElementById('reportDate').value = defaults.reportDate;
+        setValue('sprintNumber', defaults.sprintNumber);
+        setValue('cycleNumber', defaults.cycleNumber);
+        setValue('releaseNumber', defaults.releaseNumber);
+        setValue('reportVersion', defaults.reportVersion);
+        // Set report date for all report types
+        setValue('reportDate', defaults.reportDate);
+        setValue('autoReportDate', defaults.reportDate); // for automation reports
+        setValue('perfReportDate', defaults.reportDate); // for performance reports
     } else {
         // Fallback defaults
-        document.getElementById('sprintNumber').value = 1;
-        document.getElementById('cycleNumber').value = 1;
-        document.getElementById('releaseNumber').value = '1.0';
-        document.getElementById('reportVersion').value = '1.0';
-        document.getElementById('reportDate').value = formattedDate;
+        setValue('sprintNumber', 1);
+        setValue('cycleNumber', 1);
+        setValue('releaseNumber', '1.0');
+        setValue('reportVersion', '1.0');
+        // Set report date for all report types
+        setValue('reportDate', formattedDate);
+        setValue('autoReportDate', formattedDate); // for automation reports
+        setValue('perfReportDate', formattedDate); // for performance reports
     }
 }
 
@@ -4892,14 +4971,25 @@ async function loadPortfoliosOnly() {
 }
 
 // Load projects for a specific portfolio
-async function loadProjectsForPortfolio(portfolioId) {
+async function loadProjectsForPortfolio(portfolioId, portfolioDropdownId) {
     try {
         console.log('Loading projects for portfolio:', portfolioId);
         const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
         if (response.ok) {
             const projects = await response.json();
-            populateProjectDropdownFiltered(projects);
-            enableProjectField();
+            
+            // Determine corresponding project dropdown
+            let projectDropdownId;
+            if (portfolioDropdownId === 'portfolioName') {
+                projectDropdownId = 'projectName';
+            } else if (portfolioDropdownId === 'autoPortfolioName') {
+                projectDropdownId = 'autoProjectName';
+            } else if (portfolioDropdownId === 'perfPortfolioName') {
+                projectDropdownId = 'perfProjectName';
+            }
+            
+            populateProjectDropdownFiltered(projects, projectDropdownId);
+            enableProjectField(projectDropdownId);
         } else {
             throw new Error('Failed to load projects');
         }
@@ -4912,7 +5002,8 @@ async function loadProjectsForPortfolio(portfolioId) {
 // Disable all form fields except Portfolio Name
 function disableFormFieldsExceptPortfolio() {
     const fieldsToDisable = [
-        'projectName', 'sprintNumber', 'cycleNumber', 'releaseNumber',
+        'projectName', 'autoProjectName', 'perfProjectName',
+        'sprintNumber', 'cycleNumber', 'releaseNumber',
         'reportName', 'reportVersion', 'reportDate'
     ];
 
@@ -4925,19 +5016,22 @@ function disableFormFieldsExceptPortfolio() {
         }
     });
 
-    // Also disable the project dropdown initially
-    const projectSelect = document.getElementById('projectName');
-    if (projectSelect) {
-        projectSelect.innerHTML = '<option value="">Select Portfolio first</option>';
-        projectSelect.disabled = true;
-        projectSelect.style.opacity = '0.5';
-        projectSelect.style.cursor = 'not-allowed';
-    }
+    // Also disable all project dropdowns initially
+    const projectSelectors = ['projectName', 'autoProjectName', 'perfProjectName'];
+    projectSelectors.forEach(selectorId => {
+        const projectSelect = document.getElementById(selectorId);
+        if (projectSelect) {
+            projectSelect.innerHTML = '<option value="">Select Portfolio first</option>';
+            projectSelect.disabled = true;
+            projectSelect.style.opacity = '0.5';
+            projectSelect.style.cursor = 'not-allowed';
+        }
+    });
 }
 
 // Enable project field after portfolio is selected
-function enableProjectField() {
-    const projectSelect = document.getElementById('projectName');
+function enableProjectField(projectDropdownId = 'projectName') {
+    const projectSelect = document.getElementById(projectDropdownId);
     if (projectSelect) {
         projectSelect.disabled = false;
         projectSelect.style.opacity = '1';
@@ -4985,10 +5079,20 @@ async function onPortfolioChange(event) {
     const selectedOption = event.target.selectedOptions[0];
     if (selectedOption && selectedOption.value && selectedOption.dataset.id) {
         const portfolioId = selectedOption.dataset.id;
-        await loadProjectsForPortfolio(portfolioId);
+        const portfolioDropdownId = event.target.id;
+        await loadProjectsForPortfolio(portfolioId, portfolioDropdownId);
 
-        // Clear project selection when portfolio changes
-        const projectSelect = document.getElementById('projectName');
+        // Clear corresponding project selection when portfolio changes
+        let projectDropdownId;
+        if (portfolioDropdownId === 'portfolioName') {
+            projectDropdownId = 'projectName';
+        } else if (portfolioDropdownId === 'autoPortfolioName') {
+            projectDropdownId = 'autoProjectName';
+        } else if (portfolioDropdownId === 'perfPortfolioName') {
+            projectDropdownId = 'perfProjectName';
+        }
+        
+        const projectSelect = document.getElementById(projectDropdownId);
         if (projectSelect) {
             projectSelect.value = '';
         }
@@ -5033,8 +5137,8 @@ function disableFieldsAfterPortfolio() {
 }
 
 // Enhanced project dropdown population for filtered projects
-function populateProjectDropdownFiltered(projects) {
-    const select = document.getElementById('projectName');
+function populateProjectDropdownFiltered(projects, projectDropdownId = 'projectName') {
+    const select = document.getElementById(projectDropdownId);
     if (!select) return;
 
     select.innerHTML = '<option value="">Select Project</option>';
@@ -5116,6 +5220,431 @@ window.onProjectChangeProgressive = onProjectChangeProgressive;
 window.enableAllRemainingFields = enableAllRemainingFields;
 window.populateProjectDropdownFiltered = populateProjectDropdownFiltered;
 window.initializeCharts = initializeCharts; // Make it globally accessible
+
+// Automation calculations and chart functions
+function calculateAutomationTotals() {
+    const passed = parseInt(document.getElementById('autoPassedTestCases')?.value) || 0;
+    const failed = parseInt(document.getElementById('autoFailedTestCases')?.value) || 0;
+    const skipped = parseInt(document.getElementById('autoSkippedTestCases')?.value) || 0;
+    const total = passed + failed + skipped;
+    
+    // Update total field
+    const totalField = document.getElementById('autoTotalTestCases');
+    if (totalField) totalField.value = total;
+    
+    // Calculate percentages
+    if (total > 0) {
+        const passedPercent = ((passed / total) * 100).toFixed(2);
+        const failedPercent = ((failed / total) * 100).toFixed(2);
+        const skippedPercent = ((skipped / total) * 100).toFixed(2);
+        
+        // Update percentage fields
+        const passedPercentField = document.getElementById('autoPassedPercentage');
+        const failedPercentField = document.getElementById('autoFailedPercentage');
+        const skippedPercentField = document.getElementById('autoSkippedPercentage');
+        
+        if (passedPercentField) passedPercentField.value = passedPercent;
+        if (failedPercentField) failedPercentField.value = failedPercent;
+        if (skippedPercentField) skippedPercentField.value = skippedPercent;
+    }
+    
+    // Update tables and charts
+    updateAutomationTable();
+    updateAutomationChart();
+    updateTestCasesChart();
+    updateTestCasesTable();
+}
+
+function calculateAutomationStability() {
+    const stable = parseInt(document.getElementById('autoStableTests')?.value) || 0;
+    const flaky = parseInt(document.getElementById('autoFlakyTests')?.value) || 0;
+    const total = stable + flaky;
+    
+    // Update total field
+    const totalField = document.getElementById('autoStabilityTotal');
+    if (totalField) totalField.value = total;
+    
+    // Calculate percentages
+    if (total > 0) {
+        const stablePercent = ((stable / total) * 100).toFixed(2);
+        const flakyPercent = ((flaky / total) * 100).toFixed(2);
+        
+        // Update percentage fields
+        const stablePercentField = document.getElementById('autoStablePercentage');
+        const flakyPercentField = document.getElementById('autoFlakyPercentage');
+        
+        if (stablePercentField) stablePercentField.value = stablePercent;
+        if (flakyPercentField) flakyPercentField.value = flakyPercent;
+    }
+    
+    // Update tables and charts
+    updateAutomationTable();
+    updateTestStabilityChart();
+    updateTestStabilityTable();
+}
+
+function updateAutomationTable() {
+    // Update regression test data in table
+    const passed = parseInt(document.getElementById('autoPassedTestCases')?.value) || 0;
+    const failed = parseInt(document.getElementById('autoFailedTestCases')?.value) || 0;
+    const skipped = parseInt(document.getElementById('autoSkippedTestCases')?.value) || 0;
+    const total = passed + failed + skipped;
+    const passRate = total > 0 ? ((passed / total) * 100).toFixed(1) + '%' : '0%';
+    
+    // Update stability data in table
+    const stable = parseInt(document.getElementById('autoStableTests')?.value) || 0;
+    const flaky = parseInt(document.getElementById('autoFlakyTests')?.value) || 0;
+    const stabilityTotal = stable + flaky;
+    const stabilityRate = stabilityTotal > 0 ? ((stable / stabilityTotal) * 100).toFixed(1) + '%' : '0%';
+    
+    // Update table elements
+    const tableElements = {
+        'tablePassedTests': passed,
+        'tableFailedTests': failed,
+        'tableSkippedTests': skipped,
+        'tableTotalTests': total,
+        'tablePassRate': passRate,
+        'tableStableTests': stable,
+        'tableFlakyTests': flaky,
+        'tableStabilityTotal': stabilityTotal,
+        'tableStabilityRate': stabilityRate
+    };
+    
+    Object.entries(tableElements).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    });
+}
+
+function updateAutomationChart() {
+    const canvas = document.getElementById('automationTestResultsChart');
+    if (!canvas) return;
+    
+    const passed = parseInt(document.getElementById('autoPassedTestCases')?.value) || 0;
+    const failed = parseInt(document.getElementById('autoFailedTestCases')?.value) || 0;
+    const skipped = parseInt(document.getElementById('autoSkippedTestCases')?.value) || 0;
+    
+    if (passed === 0 && failed === 0 && skipped === 0) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window.automationChart) {
+        window.automationChart.destroy();
+    }
+    
+    window.automationChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Passed', 'Failed', 'Skipped'],
+            datasets: [{
+                data: [passed, failed, skipped],
+                backgroundColor: ['#22c55e', '#ef4444', '#f59e0b'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Automation Test Results',
+                    font: { size: 16, weight: 'bold' }
+                }
+            }
+        }
+    });
+}
+
+// Test Cases Chart and Table Functions
+function updateTestCasesChart() {
+    const canvas = document.getElementById('testCasesChart');
+    if (!canvas) return;
+    
+    const passed = parseInt(document.getElementById('autoPassedTestCases')?.value) || 0;
+    const failed = parseInt(document.getElementById('autoFailedTestCases')?.value) || 0;
+    const skipped = parseInt(document.getElementById('autoSkippedTestCases')?.value) || 0;
+    
+    if (passed === 0 && failed === 0 && skipped === 0) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window.testCasesChart) {
+        window.testCasesChart.destroy();
+    }
+    
+    window.testCasesChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Passed', 'Failed', 'Skipped'],
+            datasets: [{
+                data: [passed, failed, skipped],
+                backgroundColor: ['#22c55e', '#ef4444', '#f59e0b'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Test Cases Distribution',
+                    font: { size: 16, weight: 'bold' }
+                }
+            }
+        }
+    });
+}
+
+function updateTestCasesTable() {
+    const passed = parseInt(document.getElementById('autoPassedTestCases')?.value) || 0;
+    const failed = parseInt(document.getElementById('autoFailedTestCases')?.value) || 0;
+    const skipped = parseInt(document.getElementById('autoSkippedTestCases')?.value) || 0;
+    const total = passed + failed + skipped;
+    
+    const passedPercent = total > 0 ? ((passed / total) * 100).toFixed(1) + '%' : '0%';
+    const failedPercent = total > 0 ? ((failed / total) * 100).toFixed(1) + '%' : '0%';
+    const skippedPercent = total > 0 ? ((skipped / total) * 100).toFixed(1) + '%' : '0%';
+    
+    // Update table elements
+    const elements = {
+        'tablePassedCount': passed,
+        'tableFailedCount': failed,
+        'tableSkippedCount': skipped,
+        'tableTotalCount': total,
+        'tablePassedPercent': passedPercent,
+        'tableFailedPercent': failedPercent,
+        'tableSkippedPercent': skippedPercent
+    };
+    
+    Object.entries(elements).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    });
+}
+
+// Test Stability Chart and Table Functions
+function updateTestStabilityChart() {
+    const canvas = document.getElementById('testStabilityChart');
+    if (!canvas) return;
+    
+    const stable = parseInt(document.getElementById('autoStableTests')?.value) || 0;
+    const flaky = parseInt(document.getElementById('autoFlakyTests')?.value) || 0;
+    
+    if (stable === 0 && flaky === 0) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window.testStabilityChart) {
+        window.testStabilityChart.destroy();
+    }
+    
+    window.testStabilityChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Stable Tests', 'Flaky Tests'],
+            datasets: [{
+                data: [stable, flaky],
+                backgroundColor: ['#10b981', '#f97316'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Test Stability Analysis',
+                    font: { size: 16, weight: 'bold' }
+                }
+            }
+        }
+    });
+}
+
+function updateTestStabilityTable() {
+    const stable = parseInt(document.getElementById('autoStableTests')?.value) || 0;
+    const flaky = parseInt(document.getElementById('autoFlakyTests')?.value) || 0;
+    const total = stable + flaky;
+    
+    const stablePercent = total > 0 ? ((stable / total) * 100).toFixed(1) + '%' : '0%';
+    const flakyPercent = total > 0 ? ((flaky / total) * 100).toFixed(1) + '%' : '0%';
+    
+    // Update table elements
+    const elements = {
+        'tableStableCount': stable,
+        'tableFlakyCount': flaky,
+        'tableStabilityTotalCount': total,
+        'tableStablePercent': stablePercent,
+        'tableFlakyPercent': flakyPercent
+    };
+    
+    Object.entries(elements).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    });
+}
+
+// Services and Modules Management Functions
+let servicesData = [];
+let modulesData = [];
+
+function showServiceModal() {
+    showModal('serviceModal');
+}
+
+function showModuleModal() {
+    showModal('moduleModal');
+}
+
+function addService() {
+    const serviceName = document.getElementById('serviceName')?.value.trim();
+    const serviceDescription = document.getElementById('serviceDescription')?.value.trim();
+    
+    if (!serviceName) {
+        alert('Please enter a service name');
+        return;
+    }
+    
+    const service = {
+        id: Date.now(),
+        name: serviceName,
+        description: serviceDescription || ''
+    };
+    
+    servicesData.push(service);
+    renderServicesList();
+    closeModal('serviceModal');
+    
+    // Clear form
+    document.getElementById('serviceName').value = '';
+    document.getElementById('serviceDescription').value = '';
+}
+
+function addModule() {
+    const moduleName = document.getElementById('moduleName')?.value.trim();
+    const moduleDescription = document.getElementById('moduleDescription')?.value.trim();
+    
+    if (!moduleName) {
+        alert('Please enter a module name');
+        return;
+    }
+    
+    const module = {
+        id: Date.now(),
+        name: moduleName,
+        description: moduleDescription || ''
+    };
+    
+    modulesData.push(module);
+    renderModulesList();
+    closeModal('moduleModal');
+    
+    // Clear form
+    document.getElementById('moduleName').value = '';
+    document.getElementById('moduleDescription').value = '';
+}
+
+function renderServicesList() {
+    const container = document.getElementById('coveredServicesList');
+    if (!container) return;
+    
+    if (servicesData.length === 0) {
+        container.innerHTML = '<div class="empty-state">No services added yet. Click "Add Service" to get started.</div>';
+        return;
+    }
+    
+    const servicesHTML = servicesData.map(service => `
+        <div class="dynamic-item">
+            <div class="dynamic-item-content">
+                <h4>${service.name}</h4>
+                ${service.description ? `<p>${service.description}</p>` : ''}
+            </div>
+            <div class="dynamic-item-actions">
+                <button type="button" class="btn-remove" onclick="removeService(${service.id})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = servicesHTML;
+}
+
+function renderModulesList() {
+    const container = document.getElementById('coveredModulesList');
+    if (!container) return;
+    
+    if (modulesData.length === 0) {
+        container.innerHTML = '<div class="empty-state">No modules added yet. Click "Add Module" to get started.</div>';
+        return;
+    }
+    
+    const modulesHTML = modulesData.map(module => `
+        <div class="dynamic-item">
+            <div class="dynamic-item-content">
+                <h4>${module.name}</h4>
+                ${module.description ? `<p>${module.description}</p>` : ''}
+            </div>
+            <div class="dynamic-item-actions">
+                <button type="button" class="btn-remove" onclick="removeModule(${module.id})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = modulesHTML;
+}
+
+function removeService(id) {
+    servicesData = servicesData.filter(service => service.id !== id);
+    renderServicesList();
+}
+
+function removeModule(id) {
+    modulesData = modulesData.filter(module => module.id !== id);
+    renderModulesList();
+}
+
+// Make automation functions globally accessible
+window.calculateAutomationTotals = calculateAutomationTotals;
+window.calculateAutomationStability = calculateAutomationStability;
+window.showServiceModal = showServiceModal;
+window.showModuleModal = showModuleModal;
+window.addService = addService;
+window.addModule = addModule;
+window.removeService = removeService;
+window.removeModule = removeModule;
 
 // Theme Toggle Functionality
 function toggleTheme() {

@@ -120,6 +120,8 @@
                     <h2><i class="fas fa-clipboard"></i> Report Sections</h2>
                     <button class="back-btn" onclick="window.location.href='/reports_type'"><i
                             class="fas fa-arrow-left"></i> Back to Select Report Type</button>
+                    <button class="back-btn" onclick="window.location.href='/dashboard'" style="margin-top: 5px;"><i
+                            class="fas fa-tachometer-alt"></i> Back to Dashboard</button>
                 </div>
                 <!-- Sprint Report Navigation Items -->
                 <a href="#" class="nav-item sprint-nav active" onclick="showSection(0)"><i class="fas fa-info-circle"></i> General Details</a>
@@ -129,8 +131,8 @@
                 <a href="#" class="nav-item sprint-nav" onclick="showSection(4)"><i class="fas fa-vial"></i> Test Cases</a>
                 <a href="#" class="nav-item sprint-nav" onclick="showSection(5)"><i class="fas fa-bug"></i> Issues Analysis</a>
                 <a href="#" class="nav-item sprint-nav" onclick="showSection(6)"><i class="fas fa-bolt"></i> Enhancements</a>
-                <a href="#" class="nav-item sprint-nav" onclick="showSection(7)"><i class="fas fa-note-sticky"></i> QA Notes</a>
-                <a href="#" class="nav-item sprint-nav" onclick="showSection(8)"><i class="fas fa-robot"></i> Automation Regression</a>
+                <a href="#" class="nav-item sprint-nav" onclick="showSection(7)"><i class="fas fa-robot"></i> Automation Regression</a>
+                <a href="#" class="nav-item sprint-nav" onclick="showSection(8)"><i class="fas fa-note-sticky"></i> QA Notes</a>
                 
                 <!-- Manual Report Navigation Items (same as sprint but without automation) -->
                 <a href="#" class="nav-item manual-nav" onclick="showSection(0)" style="display: none;"><i class="fas fa-info-circle"></i> General Details</a>
@@ -153,16 +155,18 @@
                 
                 <!-- Performance Report Navigation Items -->
                 <a href="#" class="nav-item performance-nav" onclick="showSection(0)" style="display: none;"><i class="fas fa-info-circle"></i> Performance General Details</a>
-                <a href="#" class="nav-item performance-nav" onclick="showSection(1)" style="display: none;"><i class="fas fa-tachometer-alt"></i> Performance Test Summary</a>
-                <a href="#" class="nav-item performance-nav" onclick="showSection(2)" style="display: none;"><i class="fas fa-play-circle"></i> Performance Test Scenarios</a>
-                <a href="#" class="nav-item performance-nav" onclick="showSection(3)" style="display: none;"><i class="fas fa-network-wired"></i> HTTP Requests Overview</a>
+                <a href="#" class="nav-item performance-nav" onclick="showSection(1)" style="display: none;"><i class="fas fa-tachometer-alt"></i> Test Metrics & Load</a>
+                <a href="#" class="nav-item performance-nav" onclick="showSection(2)" style="display: none;"><i class="fas fa-chart-line"></i> Response Time Analysis</a>
+                <a href="#" class="nav-item performance-nav" onclick="showSection(3)" style="display: none;"><i class="fas fa-table"></i> Performance Criteria Results</a>
+                <a href="#" class="nav-item performance-nav" onclick="showSection(4)" style="display: none;"><i class="fas fa-play-circle"></i> Performance Test Scenarios</a>
+                <a href="#" class="nav-item performance-nav" onclick="showSection(5)" style="display: none;"><i class="fas fa-network-wired"></i> HTTP Requests Overview</a>
             </nav>
 
             <!-- Main Content -->
             <div class="main-content">
                 <div class="dashboard-header">
                     <div class="header-content">
-                        <h1 id="formTitle">Create Sprint Report</h1>
+                        <h1 id="formTitle">Create Report</h1>
                         <p>Complete all sections to generate your comprehensive QA testing report</p>
                     </div>
                 </div>
@@ -188,60 +192,7 @@
                             <div class="progress-fill" id="progressFill" style="width: 0%"></div>
                         </div>
                         <div class="progress-steps">
-                            <div class="step active" data-step="0">
-                                <div class="step-circle">
-                                    <i class="fas fa-info-circle"></i>
-                                </div>
-                                <span class="step-label">General</span>
-                            </div>
-                            <div class="step" data-step="1">
-                                <div class="step-circle">
-                                    <i class="fas fa-chart-bar"></i>
-                                </div>
-                                <span class="step-label">Summary</span>
-                            </div>
-                            <div class="step" data-step="2">
-                                <div class="step-circle">
-                                    <i class="fas fa-plus-square"></i>
-                                </div>
-                                <span class="step-label">Additional</span>
-                            </div>
-                            <div class="step" data-step="3">
-                                <div class="step-circle">
-                                    <i class="fas fa-user-check"></i>
-                                </div>
-                                <span class="step-label">Stories</span>
-                            </div>
-                            <div class="step" data-step="4">
-                                <div class="step-circle">
-                                    <i class="fas fa-vial"></i>
-                                </div>
-                                <span class="step-label">Tests</span>
-                            </div>
-                            <div class="step" data-step="5">
-                                <div class="step-circle">
-                                    <i class="fas fa-bug"></i>
-                                </div>
-                                <span class="step-label">Issues</span>
-                            </div>
-                            <div class="step" data-step="6">
-                                <div class="step-circle">
-                                    <i class="fas fa-bolt"></i>
-                                </div>
-                                <span class="step-label">Enhance</span>
-                            </div>
-                            <div class="step" data-step="7">
-                                <div class="step-circle">
-                                    <i class="fas fa-note-sticky"></i>
-                                </div>
-                                <span class="step-label">Notes</span>
-                            </div>
-                            <div class="step" data-step="8">
-                                <div class="step-circle">
-                                    <i class="fas fa-robot"></i>
-                                </div>
-                                <span class="step-label">Auto</span>
-                            </div>
+                            <!-- Progress steps will be dynamically generated by JavaScript -->
                         </div>
                     </div>
                 </div>
@@ -1121,7 +1072,7 @@
                                     <div class="info-card-v2-content form-row-fields">
                                         <div class="form-group">
                                             <label for="autoPortfolioName">Portfolio Name</label>
-                                            <select id="autoPortfolioName" name="portfolioName">
+                                            <select id="autoPortfolioName" name="portfolioName" onchange="onPortfolioChange(event)">
                                                 <option value="">Select Portfolio</option>
                                             </select>
                                         </div>
@@ -1211,26 +1162,7 @@
                                     </div>
                                 </div>
 
-                                <div class="metrics-table-card test-summary-card">
-                                    <div class="info-card-v2-header">
-                                        <i class="fas fa-chart-line"></i>
-                                        <h3>Testing Metrics (Auto-Calculated)</h3>
-                                    </div>
-                                    <div class="info-card-v2-content">
-                                        <table class="data-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Metric</th>
-                                                    <th>Value</th>
-                                                    <th>Source</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="autoMetricsTableBody">
-                                                <!-- Will be populated by JavaScript -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                                <!-- Testing Metrics section removed for automation reports -->
                             </div>
                         </div>
 
@@ -1300,32 +1232,50 @@
                                                 <input type="number" id="autoTotalTestCases" name="automationTotalTestCases" readonly class="readonly-field">
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <!-- Section 2: Percentage Analysis -->
-                                <div class="automation-section-card automation-percentage-card">
-                                    <div class="info-card-v2-header">
-                                        <i class="fas fa-percentage"></i>
-                                        <h3>Percentage Analysis</h3>
-                                    </div>
-                                    <div class="info-card-v2-content">
-                                        <div class="form-row-fields">
-                                            <div class="form-group">
-                                                <label for="autoPassedPercentage">Passed Percentage</label>
-                                                <input type="number" id="autoPassedPercentage" name="automationPassedPercentage" step="0.01" readonly class="readonly-field">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="autoFailedPercentage">Failed Percentage</label>
-                                                <input type="number" id="autoFailedPercentage" name="automationFailedPercentage" step="0.01" readonly class="readonly-field">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="autoSkippedPercentage">Skipped Percentage</label>
-                                                <input type="number" id="autoSkippedPercentage" name="automationSkippedPercentage" step="0.01" readonly class="readonly-field">
-                                            </div>
+                                        
+                                        <!-- Test Cases Summary Chart -->
+                                        <div class="chart-container" style="margin-top: 20px;">
+                                            <canvas id="automationTestCasesChart" width="400" height="200"></canvas>
+                                        </div>
+                                        
+                                        <!-- Test Cases Summary Table -->
+                                        <div class="table-container" style="margin-top: 20px;">
+                                            <table class="data-table" id="testCasesTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Status</th>
+                                                        <th>Count</th>
+                                                        <th>Percentage</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="testCasesTableBody">
+                                                    <tr>
+                                                        <td><strong>Passed</strong></td>
+                                                        <td><span id="tablePassedCount">0</span></td>
+                                                        <td><span id="tablePassedPercent">0%</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Failed</strong></td>
+                                                        <td><span id="tableFailedCount">0</span></td>
+                                                        <td><span id="tableFailedPercent">0%</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Skipped</strong></td>
+                                                        <td><span id="tableSkippedCount">0</span></td>
+                                                        <td><span id="tableSkippedPercent">0%</span></td>
+                                                    </tr>
+                                                    <tr class="table-total">
+                                                        <td><strong>Total</strong></td>
+                                                        <td><strong><span id="tableTotalCount">0</span></strong></td>
+                                                        <td><strong>100%</strong></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Percentage Analysis section removed as requested -->
 
                                 <!-- Section 3: Test Stability -->
                                 <div class="automation-section-card automation-stability-card">
@@ -1358,6 +1308,96 @@
                                                 <input type="number" id="autoFlakyPercentage" name="automationFlakyPercentage" step="0.01" readonly class="readonly-field">
                                             </div>
                                         </div>
+                                        
+                                        <!-- Test Stability Chart -->
+                                        <div class="chart-container" style="margin-top: 20px;">
+                                            <canvas id="automationStabilityChart" width="400" height="200"></canvas>
+                                        </div>
+                                        
+                                        <!-- Test Stability Table -->
+                                        <div class="table-container" style="margin-top: 20px;">
+                                            <table class="data-table" id="testStabilityTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Test Type</th>
+                                                        <th>Count</th>
+                                                        <th>Percentage</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="testStabilityTableBody">
+                                                    <tr>
+                                                        <td><strong>Stable Tests</strong></td>
+                                                        <td><span id="tableStableCount">0</span></td>
+                                                        <td><span id="tableStablePercent">0%</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Flaky Tests</strong></td>
+                                                        <td><span id="tableFlakyCount">0</span></td>
+                                                        <td><span id="tableFlakyPercent">0%</span></td>
+                                                    </tr>
+                                                    <tr class="table-total">
+                                                        <td><strong>Total</strong></td>
+                                                        <td><strong><span id="tableStabilityTotalCount">0</span></strong></td>
+                                                        <td><strong>100%</strong></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section 4: Charts and Tables -->
+                                <div class="automation-section-card automation-charts-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <h3>Test Results Visualization</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="chart-container">
+                                            <canvas id="automationTestResultsChart" width="400" height="200"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section 5: Detailed Results Table -->
+                                <div class="automation-section-card automation-table-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-table"></i>
+                                        <h3>Detailed Test Results</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="table-container">
+                                            <table class="data-table" id="automationResultsTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Test Category</th>
+                                                        <th>Passed</th>
+                                                        <th>Failed</th>
+                                                        <th>Skipped</th>
+                                                        <th>Total</th>
+                                                        <th>Pass Rate</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="automationResultsTableBody">
+                                                    <tr>
+                                                        <td><strong>Regression Tests</strong></td>
+                                                        <td><span id="tablePassedTests">0</span></td>
+                                                        <td><span id="tableFailedTests">0</span></td>
+                                                        <td><span id="tableSkippedTests">0</span></td>
+                                                        <td><span id="tableTotalTests">0</span></td>
+                                                        <td><span id="tablePassRate">0%</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Test Stability</strong></td>
+                                                        <td><span id="tableStableTests">0</span></td>
+                                                        <td><span id="tableFlakyTests">0</span></td>
+                                                        <td>-</td>
+                                                        <td><span id="tableStabilityTotal">0</span></td>
+                                                        <td><span id="tableStabilityRate">0%</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1388,30 +1428,34 @@
                         <div class="section" id="section-a5" style="display: none;">
                             <h2 class="section-title"><i class="fas fa-cogs"></i> Covered Services & Modules</h2>
                             <div class="services-modules-layout">
+                                <!-- Covered Services Section -->
                                 <div class="info-card-v2">
                                     <div class="info-card-v2-header">
                                         <i class="fas fa-server"></i>
                                         <h3>Covered Services</h3>
+                                        <button type="button" class="card-btn" onclick="showServiceModal()">
+                                            <i class="fas fa-plus"></i> Add Service
+                                        </button>
                                     </div>
                                     <div class="info-card-v2-content">
-                                        <div class="form-group">
-                                            <label for="autoCoveredServices">Services Covered in Testing</label>
-                                            <textarea id="autoCoveredServices" name="coveredServices" placeholder="List the services that were covered in automation testing..." rows="8"></textarea>
-                                            <small class="field-hint">List all services, APIs, microservices, or backend components that were tested</small>
+                                        <div class="dynamic-list" id="coveredServicesList">
+                                            <div class="empty-state">No services added yet. Click "Add Service" to get started.</div>
                                         </div>
                                     </div>
                                 </div>
 
+                                <!-- Covered Modules & Test Suites Section -->
                                 <div class="info-card-v2">
                                     <div class="info-card-v2-header">
                                         <i class="fas fa-puzzle-piece"></i>
                                         <h3>Covered Modules & Test Suites</h3>
+                                        <button type="button" class="card-btn" onclick="showModuleModal()">
+                                            <i class="fas fa-plus"></i> Add Module
+                                        </button>
                                     </div>
                                     <div class="info-card-v2-content">
-                                        <div class="form-group">
-                                            <label for="autoCoveredModules">Modules and Test Suites</label>
-                                            <textarea id="autoCoveredModules" name="coveredModules" placeholder="List the modules, test suites, and test categories that were executed..." rows="8"></textarea>
-                                            <small class="field-hint">Include test suites, modules, feature areas, and test categories</small>
+                                        <div class="dynamic-list" id="coveredModulesList">
+                                            <div class="empty-state">No modules added yet. Click "Add Module" to get started.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -1447,12 +1491,12 @@
                                 <div class="info-card-v2 project-details-card">
                                     <div class="info-card-v2-header">
                                         <i class="fas fa-folder-open"></i>
-                                        <h3>Project Details</h3>
+                                        <h3>Project Information</h3>
                                     </div>
                                     <div class="info-card-v2-content form-row-fields">
                                         <div class="form-group">
                                             <label for="perfPortfolioName">Portfolio Name</label>
-                                            <select id="perfPortfolioName" name="portfolioName">
+                                            <select id="perfPortfolioName" name="portfolioName" onchange="onPortfolioChange(event)">
                                                 <option value="">Select Portfolio</option>
                                             </select>
                                         </div>
@@ -1463,12 +1507,13 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label for="perfEnvironment">Environment</label>
+                                            <label for="perfEnvironment">Test Environment</label>
                                             <select id="perfEnvironment" name="environment" required>
                                                 <option value="">Select Environment</option>
                                                 <option value="Development">Development</option>
                                                 <option value="Testing">Testing</option>
                                                 <option value="Staging">Staging</option>
+                                                <option value="Pre-Production">Pre-Production</option>
                                                 <option value="Production">Production</option>
                                                 <option value="Load Testing">Load Testing</option>
                                             </select>
@@ -1480,37 +1525,82 @@
                                 <div class="bottom-cards-row">
                                     <div class="info-card-v2">
                                         <div class="info-card-v2-header">
-                                            <i class="fas fa-file-text"></i>
+                                            <i class="fas fa-file-alt"></i>
                                             <h3>Report Information</h3>
                                         </div>
-                                        <div class="info-card-v2-content">
+                                        <div class="info-card-v2-content form-row-fields">
                                             <div class="form-group">
                                                 <label for="perfReportName">Report Name</label>
-                                                <input type="text" id="perfReportName" name="reportName" placeholder="Enter performance report name">
+                                                <input type="text" id="perfReportName" name="reportName" placeholder="Performance Test Report - Sprint X">
                                             </div>
                                             <div class="form-group">
-                                                <label for="perfReportVersion">Version</label>
-                                                <input type="text" id="perfReportVersion" name="reportVersion" placeholder="e.g., 1.0">
+                                                <label for="perfReportVersion">Report Version</label>
+                                                <input type="text" id="perfReportVersion" name="reportVersion" placeholder="v1.0">
                                             </div>
                                             <div class="form-group">
-                                                <label for="perfReportDate">Report Date</label>
+                                                <label for="perfReportDate">Report Date (dd-mm-yyyy)</label>
                                                 <input type="text" id="perfReportDate" name="reportDate" pattern="\\d{2}-\\d{2}-\\d{4}" placeholder="dd-mm-yyyy">
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-card-v2">
+                                        <div class="info-card-v2-header">
+                                            <i class="fas fa-cogs"></i>
+                                            <h3>Test Configuration</h3>
+                                        </div>
+                                        <div class="info-card-v2-content form-row-fields">
+                                            <div class="form-group">
+                                                <label for="perfTestType">Test Type</label>
+                                                <select id="perfTestType" name="testType">
+                                                    <option value="">Select Test Type</option>
+                                                    <option value="Load Testing">Load Testing</option>
+                                                    <option value="Stress Testing">Stress Testing</option>
+                                                    <option value="Volume Testing">Volume Testing</option>
+                                                    <option value="Spike Testing">Spike Testing</option>
+                                                    <option value="Endurance Testing">Endurance Testing</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="perfTestDuration">Test Duration</label>
+                                                <input type="text" id="perfTestDuration" name="testDuration" placeholder="e.g., 30 minutes">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="perfTestTool">Testing Tool</label>
+                                                <input type="text" id="perfTestTool" name="testTool" placeholder="e.g., JMeter, LoadRunner, K6">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Test Objectives and Scope -->
+                                <div class="info-card-v2">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-bullseye"></i>
+                                        <h3>Test Objectives & Scope</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="form-group">
+                                            <label for="perfTestObjective">Test Objective</label>
+                                            <textarea id="perfTestObjective" name="testObjective" rows="3" placeholder="Describe the main objectives of this performance test..."></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="perfTestScope">Test Scope</label>
+                                            <textarea id="perfTestScope" name="testScope" rows="3" placeholder="Define what is included/excluded in this performance test..."></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Section 12: Performance Test Summary (Performance Report Only) -->
+                        <!-- Section 12: Test Metrics & Load (Performance Report Only) -->
                         <div class="section" id="section-p1" style="display: none;">
-                            <h2 class="section-title"><i class="fas fa-tachometer-alt"></i> Performance Test Summary</h2>
+                            <h2 class="section-title"><i class="fas fa-tachometer-alt"></i> Test Metrics & Load</h2>
                             <div class="test-summary-layout">
-                                <!-- Performance Test Summary Section 1 -->
                                 <div class="performance-summary-card">
                                     <div class="info-card-v2-header">
                                         <i class="fas fa-tachometer-alt"></i>
-                                        <h3>Test Summary - Section 1</h3>
+                                        <h3>Load Configuration</h3>
                                     </div>
                                     <div class="info-card-v2-content">
                                         <div class="form-row-fields">
@@ -1518,28 +1608,6 @@
                                                 <label for="userLoad">User Load</label>
                                                 <input type="text" id="userLoad" name="userLoad" placeholder="e.g., 100 concurrent users">
                                             </div>
-                                            <div class="form-group">
-                                                <label for="responseTime">Response Time</label>
-                                                <input type="text" id="responseTime" name="responseTime" placeholder="e.g., 250ms average">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="requestVolume">Request Volume</label>
-                                                <input type="text" id="requestVolume" name="requestVolume" placeholder="e.g., 10,000 requests">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="errorRate">Error Rate</label>
-                                                <input type="text" id="errorRate" name="errorRate" placeholder="e.g., 0.5%">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="slowestResponse">Slowest Response</label>
-                                                <input type="text" id="slowestResponse" name="slowestResponse" placeholder="e.g., 2.5s">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="fastestResponse">Fastest Response</label>
-                                                <input type="text" id="fastestResponse" name="fastestResponse" placeholder="e.g., 50ms">
-                                            </div>
-                                        </div>
-                                        <div class="form-row-fields">
                                             <div class="form-group">
                                                 <label for="numberOfUsers">Number of Users (VUs)</label>
                                                 <input type="text" id="numberOfUsers" name="numberOfUsers" placeholder="e.g., 100 VUs">
@@ -1549,24 +1617,39 @@
                                                 <input type="text" id="executionDuration" name="executionDuration" placeholder="e.g., 30 minutes">
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <!-- Performance Test Summary Section 2 -->
-                                <div class="performance-summary-card">
-                                    <div class="info-card-v2-header">
-                                        <i class="fas fa-chart-line"></i>
-                                        <h3>Test Summary - Section 2</h3>
-                                    </div>
-                                    <div class="info-card-v2-content">
                                         <div class="form-row-fields">
+                                            <div class="form-group">
+                                                <label for="requestVolume">Request Volume</label>
+                                                <input type="text" id="requestVolume" name="requestVolume" placeholder="e.g., 10,000 requests">
+                                            </div>
                                             <div class="form-group">
                                                 <label for="maxThroughput">Max Throughput</label>
                                                 <input type="text" id="maxThroughput" name="maxThroughput" placeholder="e.g., 500 req/sec">
                                             </div>
                                             <div class="form-group">
-                                                <label for="httpFailures">HTTP Failures</label>
-                                                <input type="text" id="httpFailures" name="httpFailures" placeholder="e.g., 25 failures">
+                                                <label for="errorRate">Error Rate</label>
+                                                <input type="text" id="errorRate" name="errorRate" placeholder="e.g., 0.5%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 13: Response Time Analysis (Performance Report Only) -->
+                        <div class="section" id="section-p2" style="display: none;">
+                            <h2 class="section-title"><i class="fas fa-chart-line"></i> Response Time Analysis</h2>
+                            <div class="test-summary-layout">
+                                <div class="performance-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-line"></i>
+                                        <h3>Response Time Metrics</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="form-row-fields">
+                                            <div class="form-group">
+                                                <label for="responseTime">Average Response Time</label>
+                                                <input type="text" id="responseTime" name="responseTime" placeholder="e.g., 250ms average">
                                             </div>
                                             <div class="form-group">
                                                 <label for="avgResponseTime">AVG Response Time</label>
@@ -1577,14 +1660,33 @@
                                                 <input type="text" id="responseTime95Percent" name="responseTime95Percent" placeholder="e.g., 450ms">
                                             </div>
                                         </div>
+                                        <div class="form-row-fields">
+                                            <div class="form-group">
+                                                <label for="fastestResponse">Fastest Response</label>
+                                                <input type="text" id="fastestResponse" name="fastestResponse" placeholder="e.g., 50ms">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="slowestResponse">Slowest Response</label>
+                                                <input type="text" id="slowestResponse" name="slowestResponse" placeholder="e.g., 2.5s">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="httpFailures">HTTP Failures</label>
+                                                <input type="text" id="httpFailures" name="httpFailures" placeholder="e.g., 25 failures">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
 
-                                <!-- Performance Criteria Results Table -->
+                        <!-- Section 14: Performance Criteria Results (Performance Report Only) -->
+                        <div class="section" id="section-p3" style="display: none;">
+                            <h2 class="section-title"><i class="fas fa-table"></i> Performance Criteria Results</h2>
+                            <div class="test-summary-layout">
                                 <div class="performance-summary-card">
                                     <div class="info-card-v2-header">
                                         <i class="fas fa-table"></i>
-                                        <h3>Performance Criteria Results</h3>
+                                        <h3>Detailed Performance Criteria</h3>
                                     </div>
                                     <div class="info-card-v2-content">
                                         <div class="table-container">
@@ -1628,8 +1730,8 @@
                             </div>
                         </div>
 
-                        <!-- Section 13: Performance Test Scenarios (Performance Report Only) -->
-                        <div class="section" id="section-p2" style="display: none;">
+                        <!-- Section 15: Performance Test Scenarios (Performance Report Only) -->
+                        <div class="section" id="section-p4" style="display: none;">
                             <h2 class="section-title"><i class="fas fa-play-circle"></i> Performance Test Scenarios</h2>
                             <div class="performance-scenarios-layout">
                                 <div class="info-card-v2">
@@ -1649,8 +1751,8 @@
                             </div>
                         </div>
 
-                        <!-- Section 14: HTTP Requests Status Overview (Performance Report Only) -->
-                        <div class="section" id="section-p3" style="display: none;">
+                        <!-- Section 16: HTTP Requests Status Overview (Performance Report Only) -->
+                        <div class="section" id="section-p5" style="display: none;">
                             <h2 class="section-title"><i class="fas fa-network-wired"></i> HTTP Requests Status Overview</h2>
                             <div class="http-requests-layout">
                                 <div class="info-card-v2">
@@ -1848,6 +1950,48 @@
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('addQANoteModal')">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="addQANote()">Add Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Service Modal -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <h3>🔧 Add Service</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="serviceName">Service Name:</label>
+                    <input type="text" id="serviceName" placeholder="Enter service name..." required>
+                </div>
+                <div class="form-group">
+                    <label for="serviceDescription">Description (Optional):</label>
+                    <textarea id="serviceDescription" placeholder="Enter service description..." rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('serviceModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addService()">Add Service</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Module Modal -->
+    <div id="moduleModal" class="modal">
+        <div class="modal-content">
+            <h3>🧩 Add Module</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="moduleName">Module Name:</label>
+                    <input type="text" id="moduleName" placeholder="Enter module name..." required>
+                </div>
+                <div class="form-group">
+                    <label for="moduleDescription">Description (Optional):</label>
+                    <textarea id="moduleDescription" placeholder="Enter module description..." rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('moduleModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addModule()">Add Module</button>
             </div>
         </div>
     </div>
@@ -2056,9 +2200,11 @@
                 title: 'Create Performance Report',
                 sections: [
                     { id: 'section-p0', name: 'general', title: 'Performance General Details', icon: 'fas fa-info-circle' },
-                    { id: 'section-p1', name: 'summary', title: 'Performance Test Summary', icon: 'fas fa-tachometer-alt' },
-                    { id: 'section-p2', name: 'scenarios', title: 'Performance Test Scenarios', icon: 'fas fa-play-circle' },
-                    { id: 'section-p3', name: 'httpRequests', title: 'HTTP Requests Overview', icon: 'fas fa-network-wired' }
+                    { id: 'section-p1', name: 'testMetrics', title: 'Test Metrics & Load', icon: 'fas fa-tachometer-alt' },
+                    { id: 'section-p2', name: 'responseAnalysis', title: 'Response Time Analysis', icon: 'fas fa-chart-line' },
+                    { id: 'section-p3', name: 'criteriaResults', title: 'Performance Criteria Results', icon: 'fas fa-table' },
+                    { id: 'section-p4', name: 'scenarios', title: 'Performance Test Scenarios', icon: 'fas fa-play-circle' },
+                    { id: 'section-p5', name: 'httpRequests', title: 'HTTP Requests Overview', icon: 'fas fa-network-wired' }
                 ],
                 description: 'Performance testing report with load metrics and analysis'
             }
@@ -2084,7 +2230,15 @@
             // Show only relevant sections and navigation items
             config.sections.forEach((sectionConfig, index) => {
                 const section = document.getElementById(sectionConfig.id);
-                const navItem = document.querySelector(`[onclick="showSection(${sectionConfig.id.split('-')[1]})"]`);
+                
+                // Use the report type specific class selector to find nav items
+                const navClass = reportType === 'sprint' ? '.sprint-nav' : 
+                                reportType === 'manual' ? '.manual-nav' :
+                                reportType === 'automation' ? '.automation-nav' :
+                                reportType === 'performance' ? '.performance-nav' : '.nav-item';
+                
+                const navItems = document.querySelectorAll(`${navClass}[onclick="showSection(${index})"]`);
+                const navItem = navItems[0]; // Get the first match
                 
                 if (section) {
                     section.style.display = 'block';
@@ -2097,40 +2251,18 @@
                 }
             });
             
-            // Update progress bar
-            updateProgressBarForReportType(config);
-        }
-        
-        // Function to update progress bar based on report type
-        function updateProgressBarForReportType(config) {
-            const progressSteps = document.querySelector('.progress-steps');
-            if (!progressSteps) return;
+            // Progress bar will be updated by the external JavaScript file
+            if (typeof updateProgressBar === 'function') {
+                updateProgressBar();
+            }
             
-            // Clear existing steps
-            progressSteps.innerHTML = '';
-            
-            // Add steps for current report type
-            config.sections.forEach((sectionConfig, index) => {
-                const step = document.createElement('div');
-                step.className = `step ${index === 0 ? 'active' : ''}`;
-                step.setAttribute('data-step', index);
-                step.innerHTML = `
-                    <div class="step-circle">
-                        <i class="${sectionConfig.icon}"></i>
-                    </div>
-                    <span class="step-label">${sectionConfig.title.split(' ')[0]}</span>
-                `;
-                progressSteps.appendChild(step);
-            });
-            
-            // Update progress text
-            const progressStep = document.getElementById('progressStep');
-            const progressTitle = document.getElementById('progressTitle');
-            if (progressStep && progressTitle) {
-                progressStep.textContent = `Step 1 of ${config.sections.length}`;
-                progressTitle.textContent = config.sections[0].title;
+            // Ensure form dropdown data is loaded for all report types
+            if (typeof loadFormDropdownData === 'function') {
+                loadFormDropdownData();
             }
         }
+        
+        // Progress bar is now handled by the external JavaScript file
         
         // Update page title and form title based on report type
         function updatePageForReportType() {
@@ -2144,18 +2276,7 @@
                     formTitle.textContent = config.title;
                 }
                 
-                // Add breadcrumb navigation
-                const headerContent = document.querySelector('.header-content');
-                if (headerContent && !headerContent.querySelector('.breadcrumb')) {
-                    const breadcrumb = document.createElement('div');
-                    breadcrumb.className = 'breadcrumb';
-                    breadcrumb.innerHTML = `
-                        <a href="/reports_type">Select Report Type</a>
-                        <span class="separator">></span>
-                        <span class="current">${config.title}</span>
-                    `;
-                    headerContent.appendChild(breadcrumb);
-                }
+                // Breadcrumb navigation removed as requested
                 
                 // Configure sections for this report type
                 setTimeout(() => {

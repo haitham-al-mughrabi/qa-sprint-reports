@@ -1676,11 +1676,20 @@ def get_form_data():
 def get_latest_project_data(portfolio_name, project_name):
     """Get latest report data for a specific project to auto-populate new reports"""
     try:
-        # Get all reports for this project to find the highest values (case-insensitive)
-        all_reports = Report.query.filter(
+        # Get report type from query parameter (default to 'sprint' for backward compatibility)
+        report_type = request.args.get('report_type', 'sprint')
+        
+        # Get all reports for this project and report type to find the highest values (case-insensitive)
+        query = Report.query.filter(
             db.func.lower(Report.portfolioName) == portfolio_name.lower(),
             db.func.lower(Report.projectName) == project_name.lower()
-        ).all()
+        )
+        
+        # Filter by report type if provided
+        if report_type:
+            query = query.filter(db.func.lower(Report.reportType) == report_type.lower())
+            
+        all_reports = query.all()
 
         if not all_reports:
             # No previous reports - return default values
