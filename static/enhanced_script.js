@@ -17,30 +17,32 @@ let currentReportType = 'sprint'; // Default to sprint for backward compatibilit
 function ensureSprintReportCompatibility() {
     console.log('Ensuring Sprint Report backward compatibility...');
     
-    // Make sure all 9 sections are visible for Sprint Reports
-    const sprintSections = [
-        'section-0', 'section-1', 'section-2', 'section-3', 'section-4',
-        'section-5', 'section-6', 'section-7', 'section-8'
-    ];
-    
-    sprintSections.forEach(sectionId => {
-        const section = document.getElementById(sectionId);
-        if (section) {
-            section.style.display = 'block';
-        }
+    // Hide all navigation items first
+    const allNavItems = document.querySelectorAll('#sidebar .nav-item');
+    allNavItems.forEach(item => {
+        item.style.display = 'none';
     });
     
-    // Make sure all navigation items are visible
-    const navItems = document.querySelectorAll('#sidebar .nav-item');
-    navItems.forEach(item => {
+    // Show only sprint navigation items
+    const sprintNavItems = document.querySelectorAll('.sprint-nav');
+    sprintNavItems.forEach(item => {
         item.style.display = 'block';
     });
+    
+    // Update progress bar for sprint report (9 sections)
+    updateProgressBarForReportType('sprint', 9);
     
     // Update Testing Metrics for Sprint Report
     updateTestingMetricsForReportType('sprint');
     
-    // Ensure the first section is active
-    showSection(0);
+    // Hide all sections first, then show the first section
+    document.querySelectorAll('.section').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
+    
+    // Show the first section
+    setTimeout(() => showSection(0), 100);
     
     console.log('✅ Sprint Report compatibility ensured');
 }
@@ -49,57 +51,32 @@ function ensureSprintReportCompatibility() {
 function configureManualReport() {
     console.log('Configuring Manual Report...');
     
-    // Manual Report sections (all except section-8 which is Automation Regression)
-    const manualSections = [
-        'section-0', 'section-1', 'section-2', 'section-3', 
-        'section-4', 'section-5', 'section-6', 'section-7'
-    ];
-    
-    // Hide all sections first
-    const allSections = document.querySelectorAll('.section');
-    allSections.forEach(section => {
-        section.style.display = 'none';
-    });
-    
-    // Show only Manual Report sections (but keep them hidden initially)
-    manualSections.forEach(sectionId => {
-        const section = document.getElementById(sectionId);
-        if (section) {
-            section.style.display = 'none'; // Keep hidden, showSection will show the active one
-        }
-    });
-    
     // Hide all navigation items first
     const allNavItems = document.querySelectorAll('#sidebar .nav-item');
     allNavItems.forEach(item => {
         item.style.display = 'none';
     });
     
-    // Show only relevant navigation items (exclude Automation Regression)
-    const manualNavItems = [
-        { index: 0, title: 'General Details', icon: 'fas fa-info-circle' },
-        { index: 1, title: 'Test Summary', icon: 'fas fa-file-alt' },
-        { index: 2, title: 'Additional Info', icon: 'fas fa-plus-square' },
-        { index: 3, title: 'User Stories', icon: 'fas fa-user-check' },
-        { index: 4, title: 'Test Cases', icon: 'fas fa-vial' },
-        { index: 5, title: 'Issues Analysis', icon: 'fas fa-bug' },
-        { index: 6, title: 'Enhancements', icon: 'fas fa-bolt' },
-        { index: 7, title: 'QA Notes', icon: 'fas fa-note-sticky' }
-    ];
-    
-    manualNavItems.forEach((navConfig, displayIndex) => {
-        const navItem = document.querySelector(`[onclick="showSection(${navConfig.index})"]`);
-        if (navItem) {
-            navItem.style.display = 'block';
-            navItem.innerHTML = `<i class="${navConfig.icon}"></i> ${navConfig.title}`;
-        }
+    // Show only manual navigation items
+    const manualNavItems = document.querySelectorAll('.manual-nav');
+    manualNavItems.forEach(item => {
+        item.style.display = 'block';
     });
+    
+    // Update progress bar for manual report (8 sections)
+    updateProgressBarForReportType('manual', 8);
     
     // Update Testing Metrics for Manual Report
     updateTestingMetricsForReportType('manual');
     
-    // Ensure the first section is active
-    showSection(0);
+    // Hide all sections first, then show the first section
+    document.querySelectorAll('.section').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
+    
+    // Show the first section
+    setTimeout(() => showSection(0), 100);
     
     console.log('✅ Manual Report configured (8 sections, excluding Automation Regression)');
 }
@@ -108,68 +85,32 @@ function configureManualReport() {
 function configureAutomationReport() {
     console.log('Configuring Automation Report...');
     
-    // Automation Report sections: General Details, Test Summary, Additional Info, 
-    // Regression Test Results, QA Automation Notes, Covered Services & Modules, Bugs
-    const automationSections = [
-        'section-0', // General Details
-        'section-1', // Test Summary & Status  
-        'section-2', // Additional Information
-        'section-8', // Regression Test Results (renamed from Automation Regression)
-        'section-7', // QA Automation Notes (renamed from QA Notes)
-        'section-9', // Covered Services & Modules (new)
-        'section-10' // Bugs (new)
-    ];
-    
-    // Hide all sections first
-    const allSections = document.querySelectorAll('.section');
-    allSections.forEach(section => {
-        section.style.display = 'none';
-    });
-    
-    // Show only Automation Report sections (but keep them hidden initially)
-    automationSections.forEach(sectionId => {
-        const section = document.getElementById(sectionId);
-        if (section) {
-            section.style.display = 'none'; // Keep hidden, showSection will show the active one
-        }
-    });
-    
     // Hide all navigation items first
     const allNavItems = document.querySelectorAll('#sidebar .nav-item');
     allNavItems.forEach(item => {
         item.style.display = 'none';
     });
     
-    // Configure navigation items for Automation Report
-    const automationNavItems = [
-        { index: 0, title: 'General Details', icon: 'fas fa-info-circle' },
-        { index: 1, title: 'Test Summary', icon: 'fas fa-file-alt' },
-        { index: 2, title: 'Additional Info', icon: 'fas fa-plus-square' },
-        { index: 8, title: 'Regression Test Results', icon: 'fas fa-robot' }, // Renamed
-        { index: 7, title: 'QA Automation Notes', icon: 'fas fa-note-sticky' }, // Renamed
-        { index: 9, title: 'Covered Services & Modules', icon: 'fas fa-cogs' }, // New
-        { index: 10, title: 'Bugs', icon: 'fas fa-bug' } // New
-    ];
-    
-    automationNavItems.forEach((navConfig, displayIndex) => {
-        const navItem = document.querySelector(`[onclick="showSection(${navConfig.index})"]`);
-        if (navItem) {
-            navItem.style.display = 'block';
-            navItem.innerHTML = `<i class="${navConfig.icon}"></i> ${navConfig.title}`;
-        }
+    // Show only automation navigation items
+    const automationNavItems = document.querySelectorAll('.automation-nav');
+    automationNavItems.forEach(item => {
+        item.style.display = 'block';
     });
     
-    // Update section titles for Automation Report
-    updateAutomationSectionTitles();
-    
-    // Update Additional Information section for Automation Report
-    updateAutomationAdditionalInfo();
+    // Update progress bar for automation report (7 sections)
+    updateProgressBarForReportType('automation', 7);
     
     // Update Testing Metrics for Automation Report
     updateTestingMetricsForReportType('automation');
     
-    // Ensure the first section is active
-    showSection(0);
+    // Hide all sections first, then show the first section
+    document.querySelectorAll('.section').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
+    
+    // Show the first section
+    setTimeout(() => showSection(0), 100);
     
     console.log('✅ Automation Report configured (7 sections with renamed and new sections)');
 }
@@ -178,59 +119,29 @@ function configureAutomationReport() {
 function configurePerformanceReport() {
     console.log('Configuring Performance Report...');
     
-    // Performance Report sections: Performance General Details, Performance Test Summary,
-    // Performance Test Scenarios, HTTP Requests Overview
-    const performanceSections = [
-        'section-0',  // Performance General Details (modified)
-        'section-1',  // Performance Test Summary (modified)
-        'section-11', // Performance Test Scenarios (new)
-        'section-12'  // HTTP Requests Status Overview (new)
-    ];
-    
-    // Hide all sections first
-    const allSections = document.querySelectorAll('.section');
-    allSections.forEach(section => {
-        section.style.display = 'none';
-    });
-    
-    // Show only Performance Report sections (but keep them hidden initially)
-    performanceSections.forEach(sectionId => {
-        const section = document.getElementById(sectionId);
-        if (section) {
-            section.style.display = 'none'; // Keep hidden, showSection will show the active one
-        }
-    });
-    
     // Hide all navigation items first
     const allNavItems = document.querySelectorAll('#sidebar .nav-item');
     allNavItems.forEach(item => {
         item.style.display = 'none';
     });
     
-    // Configure navigation items for Performance Report
-    const performanceNavItems = [
-        { index: 0, title: 'Performance General Details', icon: 'fas fa-info-circle' },
-        { index: 1, title: 'Performance Test Summary', icon: 'fas fa-tachometer-alt' },
-        { index: 11, title: 'Performance Test Scenarios', icon: 'fas fa-play-circle' },
-        { index: 12, title: 'HTTP Requests Overview', icon: 'fas fa-network-wired' }
-    ];
-    
-    performanceNavItems.forEach((navConfig, displayIndex) => {
-        const navItem = document.querySelector(`[onclick="showSection(${navConfig.index})"]`);
-        if (navItem) {
-            navItem.style.display = 'block';
-            navItem.innerHTML = `<i class="${navConfig.icon}"></i> ${navConfig.title}`;
-        }
+    // Show only performance navigation items
+    const performanceNavItems = document.querySelectorAll('.performance-nav');
+    performanceNavItems.forEach(item => {
+        item.style.display = 'block';
     });
     
-    // Update section titles for Performance Report
-    updatePerformanceSectionTitles();
+    // Update progress bar for performance report (4 sections)
+    updateProgressBarForReportType('performance', 4);
     
-    // Update section content for Performance Report
-    updatePerformanceSectionContent();
+    // Hide all sections first, then show the first section
+    document.querySelectorAll('.section').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
     
-    // Ensure the first section is active
-    showSection(0);
+    // Show the first section
+    setTimeout(() => showSection(0), 100);
     
     console.log('✅ Performance Report configured (4 sections with performance-specific content)');
 }
@@ -382,202 +293,87 @@ function updateHttpRequestsCount() {
     }
 }
 
-// Function to update section titles for Performance Report
-function updatePerformanceSectionTitles() {
-    // Update "General Details" to "Performance General Details"
-    const generalSection = document.querySelector('#section-0 .section-title');
-    if (generalSection) {
-        generalSection.innerHTML = '<i class="fas fa-info-circle"></i> Performance General Details';
+// Function to update progress bar for different report types
+function updateProgressBarForReportType(reportType, totalSections) {
+    const progressSteps = document.querySelector('.progress-steps');
+    if (!progressSteps) return;
+    
+    // Clear existing steps
+    progressSteps.innerHTML = '';
+    
+    let stepConfigs = [];
+    
+    if (reportType === 'sprint') {
+        stepConfigs = [
+            { step: 0, icon: 'fas fa-info-circle', label: 'General' },
+            { step: 1, icon: 'fas fa-chart-bar', label: 'Summary' },
+            { step: 2, icon: 'fas fa-plus-square', label: 'Additional' },
+            { step: 3, icon: 'fas fa-user-check', label: 'Stories' },
+            { step: 4, icon: 'fas fa-vial', label: 'Tests' },
+            { step: 5, icon: 'fas fa-bug', label: 'Issues' },
+            { step: 6, icon: 'fas fa-bolt', label: 'Enhance' },
+            { step: 7, icon: 'fas fa-note-sticky', label: 'Notes' },
+            { step: 8, icon: 'fas fa-robot', label: 'Auto' }
+        ];
+    } else if (reportType === 'manual') {
+        stepConfigs = [
+            { step: 0, icon: 'fas fa-info-circle', label: 'General' },
+            { step: 1, icon: 'fas fa-chart-bar', label: 'Summary' },
+            { step: 2, icon: 'fas fa-plus-square', label: 'Additional' },
+            { step: 3, icon: 'fas fa-user-check', label: 'Stories' },
+            { step: 4, icon: 'fas fa-vial', label: 'Tests' },
+            { step: 5, icon: 'fas fa-bug', label: 'Issues' },
+            { step: 6, icon: 'fas fa-bolt', label: 'Enhance' },
+            { step: 7, icon: 'fas fa-note-sticky', label: 'Notes' }
+        ];
+    } else if (reportType === 'automation') {
+        stepConfigs = [
+            { step: 0, icon: 'fas fa-info-circle', label: 'General' },
+            { step: 1, icon: 'fas fa-chart-bar', label: 'Summary' },
+            { step: 2, icon: 'fas fa-plus-square', label: 'Additional' },
+            { step: 3, icon: 'fas fa-robot', label: 'Regression' },
+            { step: 4, icon: 'fas fa-note-sticky', label: 'Notes' },
+            { step: 5, icon: 'fas fa-cogs', label: 'Services' },
+            { step: 6, icon: 'fas fa-bug', label: 'Bugs' }
+        ];
+    } else if (reportType === 'performance') {
+        stepConfigs = [
+            { step: 0, icon: 'fas fa-info-circle', label: 'General' },
+            { step: 1, icon: 'fas fa-tachometer-alt', label: 'Summary' },
+            { step: 2, icon: 'fas fa-play-circle', label: 'Scenarios' },
+            { step: 3, icon: 'fas fa-network-wired', label: 'Requests' }
+        ];
     }
     
-    // Update "Test Summary" to "Performance Test Summary"
-    const summarySection = document.querySelector('#section-1 .section-title');
-    if (summarySection) {
-        summarySection.innerHTML = '<i class="fas fa-tachometer-alt"></i> Performance Test Summary';
-    }
-}
-
-// Function to update section content for Performance Report
-function updatePerformanceSectionContent() {
-    // Update General Details section for Performance Report
-    updatePerformanceGeneralDetails();
-    
-    // Update Test Summary section for Performance Report
-    updatePerformanceTestSummary();
-}
-
-function updatePerformanceGeneralDetails() {
-    const generalSection = document.getElementById('section-0');
-    if (!generalSection) return;
-    
-    // Add environment field to the General Details section for Performance Reports
-    const projectDetailsCard = generalSection.querySelector('.project-details-card .info-card-v2-content');
-    if (projectDetailsCard) {
-        // Check if environment field already exists
-        if (!projectDetailsCard.querySelector('#environment')) {
-            const environmentField = `
-                <div class="form-group">
-                    <label for="environment">Environment</label>
-                    <select id="environment" name="environment">
-                        <option value="">Select Environment</option>
-                        <option value="Development">Development</option>
-                        <option value="Testing">Testing</option>
-                        <option value="Staging">Staging</option>
-                        <option value="Production">Production</option>
-                        <option value="Load Testing">Load Testing</option>
-                    </select>
-                </div>
-            `;
-            projectDetailsCard.insertAdjacentHTML('beforeend', environmentField);
-        }
-    }
-}
-
-function updatePerformanceTestSummary() {
-    const testSummarySection = document.getElementById('section-1');
-    if (!testSummarySection) return;
-    
-    // Replace the content with Performance-specific Test Summary
-    const testSummaryLayout = testSummarySection.querySelector('.test-summary-layout');
-    if (testSummaryLayout) {
-        testSummaryLayout.innerHTML = `
-            <!-- Performance Test Summary Section 1 -->
-            <div class="performance-summary-card">
-                <div class="info-card-v2-header">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <h3>Test Summary - Section 1</h3>
-                </div>
-                <div class="info-card-v2-content">
-                    <div class="form-row-fields">
-                        <div class="form-group">
-                            <label for="userLoad">User Load</label>
-                            <input type="text" id="userLoad" name="userLoad" placeholder="e.g., 100 concurrent users">
-                        </div>
-                        <div class="form-group">
-                            <label for="responseTime">Response Time</label>
-                            <input type="text" id="responseTime" name="responseTime" placeholder="e.g., 250ms average">
-                        </div>
-                        <div class="form-group">
-                            <label for="requestVolume">Request Volume</label>
-                            <input type="text" id="requestVolume" name="requestVolume" placeholder="e.g., 10,000 requests">
-                        </div>
-                        <div class="form-group">
-                            <label for="errorRate">Error Rate</label>
-                            <input type="text" id="errorRate" name="errorRate" placeholder="e.g., 0.5%">
-                        </div>
-                        <div class="form-group">
-                            <label for="slowestResponse">Slowest Response</label>
-                            <input type="text" id="slowestResponse" name="slowestResponse" placeholder="e.g., 2.5s">
-                        </div>
-                        <div class="form-group">
-                            <label for="fastestResponse">Fastest Response</label>
-                            <input type="text" id="fastestResponse" name="fastestResponse" placeholder="e.g., 50ms">
-                        </div>
-                    </div>
-                    <div class="form-row-fields">
-                        <div class="form-group">
-                            <label for="numberOfUsers">Number of Users (VUs)</label>
-                            <input type="text" id="numberOfUsers" name="numberOfUsers" placeholder="e.g., 100 VUs">
-                        </div>
-                        <div class="form-group">
-                            <label for="executionDuration">Execution Duration</label>
-                            <input type="text" id="executionDuration" name="executionDuration" placeholder="e.g., 30 minutes">
-                        </div>
-                    </div>
-                </div>
+    // Create step elements
+    stepConfigs.forEach((config, index) => {
+        const stepDiv = document.createElement('div');
+        stepDiv.className = `step ${index === 0 ? 'active' : ''}`;
+        stepDiv.setAttribute('data-step', config.step);
+        stepDiv.style.cursor = 'pointer';
+        stepDiv.onclick = () => showSection(config.step);
+        
+        stepDiv.innerHTML = `
+            <div class="step-circle">
+                <i class="${config.icon}"></i>
             </div>
-
-            <!-- Performance Test Summary Section 2 -->
-            <div class="performance-summary-card">
-                <div class="info-card-v2-header">
-                    <i class="fas fa-chart-line"></i>
-                    <h3>Test Summary - Section 2</h3>
-                </div>
-                <div class="info-card-v2-content">
-                    <div class="form-row-fields">
-                        <div class="form-group">
-                            <label for="maxThroughput">Max Throughput</label>
-                            <input type="text" id="maxThroughput" name="maxThroughput" placeholder="e.g., 500 req/sec">
-                        </div>
-                        <div class="form-group">
-                            <label for="httpFailures">HTTP Failures</label>
-                            <input type="text" id="httpFailures" name="httpFailures" placeholder="e.g., 25 failures">
-                        </div>
-                        <div class="form-group">
-                            <label for="avgResponseTime">AVG Response Time</label>
-                            <input type="text" id="avgResponseTime" name="avgResponseTime" placeholder="e.g., 180ms">
-                        </div>
-                        <div class="form-group">
-                            <label for="responseTime95Percent">95% Response Time</label>
-                            <input type="text" id="responseTime95Percent" name="responseTime95Percent" placeholder="e.g., 450ms">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Performance Criteria Results Table -->
-            <div class="performance-summary-card">
-                <div class="info-card-v2-header">
-                    <i class="fas fa-table"></i>
-                    <h3>Performance Criteria Results</h3>
-                </div>
-                <div class="info-card-v2-content">
-                    <div class="table-container">
-                        <table class="data-table" id="criteriaResultsTable">
-                            <thead>
-                                <tr>
-                                    <th>Criteria</th>
-                                    <th>Results</th>
-                                </tr>
-                            </thead>
-                            <tbody id="criteriaResultsTableBody">
-                                <tr>
-                                    <td><strong>Number of users</strong></td>
-                                    <td><input type="text" name="criteriaUsers" placeholder="e.g., 100"></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Total number of requests</strong></td>
-                                    <td><input type="text" name="criteriaTotalRequests" placeholder="e.g., 10,000"></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Number of Failed Requests</strong></td>
-                                    <td><input type="text" name="criteriaFailedRequests" placeholder="e.g., 25"></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Status/error codes</strong></td>
-                                    <td><input type="text" name="criteriaStatusCodes" placeholder="e.g., 200: 9975, 500: 25"></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Average Response</strong></td>
-                                    <td><input type="text" name="criteriaAvgResponse" placeholder="e.g., 250ms"></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Max Response Time</strong></td>
-                                    <td><input type="text" name="criteriaMaxResponse" placeholder="e.g., 2.5s"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            <span class="step-label">${config.label}</span>
         `;
-    }
+        
+        progressSteps.appendChild(stepDiv);
+    });
+    
+    // Update progress text
+    const progressStep = document.getElementById('progressStep');
+    const progressTitle = document.getElementById('progressTitle');
+    if (progressStep) progressStep.textContent = `Step 1 of ${totalSections}`;
+    if (progressTitle) progressTitle.textContent = stepConfigs[0] ? stepConfigs[0].label : 'General';
 }
+
+// Performance Report now uses dedicated sections
 
 // Function to update section titles for Automation Report
-function updateAutomationSectionTitles() {
-    // Rename "Automation Regression" to "Regression Test Results"
-    const automationSection = document.querySelector('#section-8 .section-title');
-    if (automationSection) {
-        automationSection.innerHTML = '<i class="fas fa-robot"></i> Regression Test Results';
-    }
-    
-    // Rename "QA Notes" to "QA Automation Notes"
-    const qaNotesSection = document.querySelector('#section-7 .section-title');
-    if (qaNotesSection) {
-        qaNotesSection.innerHTML = '<i class="fas fa-note-sticky"></i> QA Automation Notes';
-    }
-}
+// Automation section titles are now handled by dedicated sections
 
 // Constants for localStorage keys
 const FORM_DATA_KEY = 'qaReportFormData';
@@ -1916,37 +1712,63 @@ function clearCurrentSection() {
 // function showPage(pageId) { ... }
 
 function showSection(sectionIndex) {
-    // Get current report type configuration
-    const config = window.reportTypeConfigs && window.reportTypeConfigs[currentReportType];
-    if (!config) {
-        // Fallback to original behavior if no config
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(`section-${sectionIndex}`)?.classList.add('active');
-        document.querySelectorAll('#sidebar .nav-item').forEach((item, index) => {
-            item.classList.toggle('active', index === sectionIndex);
-        });
-        currentSection = sectionIndex;
-        updateNavigationButtons();
-        updateProgressBar();
-        window.scrollTo(0, 0);
-        return;
+    console.log('showSection called with index:', sectionIndex, 'for report type:', currentReportType);
+    
+    // Always hide all sections first - be very explicit about this
+    document.querySelectorAll('.section').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
+    
+    // Determine which section to show based on report type
+    let targetSectionId = `section-${sectionIndex}`;
+    
+    if (currentReportType === 'automation') {
+        targetSectionId = `section-a${sectionIndex}`;
+    } else if (currentReportType === 'performance') {
+        targetSectionId = `section-p${sectionIndex}`;
     }
-    
-    // Find the section configuration by index
-    const sectionConfig = config.sections[sectionIndex];
-    if (!sectionConfig) return;
-    
-    // Hide all sections and remove active class
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     
     // Show the target section
-    const targetSection = document.getElementById(sectionConfig.id);
+    const targetSection = document.getElementById(targetSectionId);
     if (targetSection) {
+        targetSection.style.display = 'block';
         targetSection.classList.add('active');
+        console.log('Showing section:', targetSectionId);
+        
+        // Initialize charts if this section contains charts
+        setTimeout(() => {
+            if (targetSection.querySelector('canvas')) {
+                console.log('Initializing charts for section:', targetSectionId);
+                initializeCharts();
+            }
+        }, 100);
+    } else {
+        console.warn('Target section not found:', targetSectionId);
+        // Fallback to regular section naming
+        const fallbackSection = document.getElementById(`section-${sectionIndex}`);
+        if (fallbackSection) {
+            fallbackSection.style.display = 'block';
+            fallbackSection.classList.add('active');
+            console.log('Fallback: Showing section-' + sectionIndex);
+            
+            // Initialize charts if this section contains charts
+            setTimeout(() => {
+                if (fallbackSection.querySelector('canvas')) {
+                    console.log('Initializing charts for fallback section:', `section-${sectionIndex}`);
+                    initializeCharts();
+                }
+            }, 100);
+        }
     }
 
-    // Update navigation items
-    document.querySelectorAll('#sidebar .nav-item').forEach((item, index) => {
+    // Update navigation items - find the correct navigation items for current report type
+    const navSelector = currentReportType === 'sprint' ? '.sprint-nav' : 
+                       currentReportType === 'manual' ? '.manual-nav' :
+                       currentReportType === 'automation' ? '.automation-nav' :
+                       currentReportType === 'performance' ? '.performance-nav' : '.nav-item';
+    
+    document.querySelectorAll(`#sidebar ${navSelector}`).forEach((item, index) => {
         item.classList.toggle('active', index === sectionIndex);
     });
 
@@ -1987,22 +1809,31 @@ function updateNavigationButtons() {
 }
 
 function updateProgressBar() {
-    // Get current report type configuration
-    const config = window.reportTypeConfigs && window.reportTypeConfigs[currentReportType];
+    // Get section titles based on report type
+    let totalSections, sectionTitles, stepIcons;
     
-    // Fallback to original values if no config
-    const totalSections = config ? config.sections.length : 9;
-    const sectionTitles = config ? config.sections.map(s => s.title) : [
-        'General Details',
-        'Test Summary',
-        'Additional Info',
-        'User Stories',
-        'Test Cases',
-        'Issues Analysis',
-        'Enhancements',
-        'QA Notes',
-        'Automation Regression'
-    ];
+    if (currentReportType === 'sprint') {
+        totalSections = 9;
+        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'QA Notes', 'Automation Regression'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-note-sticky', 'fas fa-robot'];
+    } else if (currentReportType === 'manual') {
+        totalSections = 8;
+        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'QA Notes'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-note-sticky'];
+    } else if (currentReportType === 'automation') {
+        totalSections = 7;
+        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'Regression Test Results', 'QA Automation Notes', 'Covered Services & Modules', 'Bugs'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-robot', 'fas fa-note-sticky', 'fas fa-cogs', 'fas fa-bug'];
+    } else if (currentReportType === 'performance') {
+        totalSections = 4;
+        sectionTitles = ['Performance General Details', 'Performance Test Summary', 'Performance Test Scenarios', 'HTTP Requests Overview'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-tachometer-alt', 'fas fa-play-circle', 'fas fa-network-wired'];
+    } else {
+        // Default fallback
+        totalSections = 9;
+        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'QA Notes', 'Automation Regression'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-note-sticky', 'fas fa-robot'];
+    }
 
     // Calculate progress - show completion based on current section
     const completedSections = currentSection; // Sections completed (0-based)
@@ -2023,6 +1854,10 @@ function updateProgressBar() {
     // Update step indicators
     document.querySelectorAll('.step').forEach((step, index) => {
         step.classList.remove('active', 'completed');
+        
+        // Make sure step is clickable
+        step.style.cursor = 'pointer';
+        step.onclick = () => showSection(index);
 
         if (index === currentSection) {
             step.classList.add('active');
@@ -2036,17 +1871,6 @@ function updateProgressBar() {
         } else {
             // Reset icon for future steps
             const icon = step.querySelector('.step-circle i');
-            const stepIcons = config ? config.sections.map(s => s.icon) : [
-                'fas fa-info-circle',
-                'fas fa-chart-bar',
-                'fas fa-plus-square',
-                'fas fa-user-check',
-                'fas fa-vial',
-                'fas fa-bug',
-                'fas fa-bolt',
-                'fas fa-note-sticky',
-                'fas fa-robot'
-            ];
             if (icon && stepIcons[index]) {
                 icon.className = stepIcons[index] || 'fas fa-circle';
             }
@@ -2057,6 +1881,7 @@ function updateProgressBar() {
 // Add click functionality to progress steps
 function initializeProgressSteps() {
     document.querySelectorAll('.step').forEach((step, index) => {
+        step.style.cursor = 'pointer';
         step.addEventListener('click', () => {
             showSection(index);
         });
@@ -3393,6 +3218,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentReportType === 'performance') {
             configurePerformanceReport();
         }
+        
+        // Initialize charts after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            console.log('Initializing charts...');
+            initializeCharts();
+            initializeProgressSteps();
+        }, 500);
     }
     
     const qaReportForm = document.getElementById('qaReportForm');
