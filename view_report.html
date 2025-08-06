@@ -110,7 +110,7 @@
         <div class="dashboard-container">
             <div class="page-header centered">
                 <div class="header-content">
-                    <h1 id="reportTitle">Sprint Testing Report</h1>
+                    <h1 id="reportTitle">Testing Report</h1>
                     <p id="reportSubtitle">Loading report details...</p>
                 </div>
             </div>
@@ -169,7 +169,7 @@
                     </div>
             </div>
 
-            <div class="dashboard-section">
+            <div class="dashboard-section" id="userStoriesSection">
                 <h2 class="section-title"><i class="fas fa-user-check"></i> User Stories Analysis</h2>
                 <div class="charts-container">
                     <div class="chart-section card">
@@ -186,7 +186,7 @@
                 </div>
             </div>
 
-            <div class="dashboard-section">
+            <div class="dashboard-section" id="testCasesSection">
                 <h2 class="section-title"><i class="fas fa-flask"></i> Test Cases Analysis</h2>
                 <div class="charts-container">
                     <div class="chart-section card">
@@ -203,7 +203,7 @@
                 </div>
             </div>
 
-            <div class="dashboard-section">
+            <div class="dashboard-section" id="issuesPrioritySection">
                 <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> Issues by Priority</h2>
                 <div class="charts-container">
                     <div class="chart-section card">
@@ -220,7 +220,7 @@
                 </div>
             </div>
 
-            <div class="dashboard-section">
+            <div class="dashboard-section" id="issuesStatusSection">
                 <h2 class="section-title"><i class="fas fa-tasks"></i> Issues by Status</h2>
                 <div class="charts-container">
                     <div class="chart-section card">
@@ -237,7 +237,7 @@
                 </div>
             </div>
 
-            <div class="dashboard-section">
+            <div class="dashboard-section" id="enhancementsSection">
                 <h2 class="section-title"><i class="fas fa-magic"></i> Enhancements Analysis</h2>
                 <div class="charts-container">
                     <div class="chart-section card">
@@ -254,7 +254,7 @@
                 </div>
             </div>
 
-            <div class="dashboard-section">
+            <div class="dashboard-section" id="automationRegressionSection">
                 <h2 class="section-title"><i class="fas fa-robot"></i> Automation Regression</h2>
                 <div class="charts-container">
                     <div class="chart-section card">
@@ -280,6 +280,61 @@
                         <div class="chart-container">
                             <canvas id="automationStabilityViewChart" width="400" height="300"></canvas>
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Performance Report Section -->
+            <div class="dashboard-section" id="performanceReportSection" style="display: none;">
+                <h2 class="section-title"><i class="fas fa-tachometer-alt"></i> Performance Testing Results</h2>
+                
+                <!-- Test Configuration -->
+                <div class="charts-container">
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Test Configuration</h3>
+                        <div id="performanceTestConfigTable"></div>
+                    </div>
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Test Environment</h3>
+                        <div id="performanceEnvironmentInfo"></div>
+                    </div>
+                </div>
+                
+                <!-- Performance Metrics -->
+                <div class="charts-container">
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Performance Metrics</h3>
+                        <table class="data-table" id="performanceMetricsTable">
+                        </table>
+                    </div>
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Response Time Analysis</h3>
+                        <div class="chart-container">
+                            <canvas id="performanceMetricsChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Performance Data -->
+                <div class="charts-container">
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Throughput & Failures</h3>
+                        <table class="data-table" id="performanceThroughputTable">
+                        </table>
+                    </div>
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Performance Summary</h3>
+                        <div class="chart-container">
+                            <canvas id="performanceSummaryChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Performance Criteria Results -->
+                <div class="charts-container">
+                    <div class="chart-section card full-width">
+                        <h3 class="chart-title">Performance Criteria Results</h3>
+                        <div id="performanceCriteriaTable"></div>
                     </div>
                 </div>
             </div>
@@ -421,8 +476,9 @@
             // Determine current theme
             const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
 
-            // Update header
-            document.getElementById('reportTitle').textContent = `${report.portfolioName} - Sprint ${report.sprintNumber}`;
+            // Update header based on report type
+            const reportTypeTitle = getReportTypeTitle(report.reportType, report);
+            document.getElementById('reportTitle').textContent = `${report.portfolioName} - ${reportTypeTitle}`;
             document.getElementById('reportSubtitle').textContent = `${report.projectName} | Version ${report.reportVersion} | ${formatDate(report.reportDate)}`;
 
             // Render cover information
@@ -434,21 +490,35 @@
             // Render metrics overview
             renderMetricsOverview(report);
             
-            // Render charts and tables
-            renderUserStoriesView(report, isLightMode);
-            renderTestCasesView(report, isLightMode);
-            renderIssuesView(report, isLightMode); // This function now handles both priority and status
-            renderEnhancementsView(report, isLightMode);
-            renderAutomationRegressionView(report, isLightMode);
+            // Show/hide sections based on report type
+            toggleSectionsBasedOnType(report.reportType);
             
-            // Render additional sections
+            // Render charts and tables based on report type
+            if (report.reportType === 'performance') {
+                renderPerformanceReport(report, isLightMode);
+            } else {
+                // Sprint and Manual reports show user stories, test cases, issues, enhancements
+                if (report.reportType === 'sprint' || report.reportType === 'manual') {
+                    renderUserStoriesView(report, isLightMode);
+                    renderTestCasesView(report, isLightMode);
+                    renderIssuesView(report, isLightMode);
+                    renderEnhancementsView(report, isLightMode);
+                }
+                
+                // Sprint and Automation reports show automation regression
+                if (report.reportType === 'sprint' || report.reportType === 'automation') {
+                    renderAutomationRegressionView(report, isLightMode);
+                }
+            }
+            
+            // Render additional sections (common to all types)
             renderAdditionalInfo(report);
             renderQANotes(report);
         }
 
         function renderCoverInfo(report) {
             const coverInfo = document.getElementById('coverInfo');
-            coverInfo.innerHTML = `
+            let coverInfoHtml = `
                 <div class="info-item">
                     <div class="info-label">Portfolio Name</div>
                     <div class="info-value">${report.portfolioName || 'N/A'}</div>
@@ -458,26 +528,62 @@
                     <div class="info-value">${report.projectName || 'N/A'}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Sprint Number</div>
-                    <div class="info-value">#${report.sprintNumber || 'N/A'}</div>
-                </div>
+                    <div class="info-label">Report Type</div>
+                    <div class="info-value">${(report.reportType || 'sprint').toUpperCase()}</div>
+                </div>`;
+            
+            // Show different fields based on report type
+            if (report.reportType === 'performance') {
+                coverInfoHtml += `
+                    <div class="info-item">
+                        <div class="info-label">Environment</div>
+                        <div class="info-value">${report.environment || 'N/A'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Test Type</div>
+                        <div class="info-value">${report.testType || 'N/A'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Testing Tool</div>
+                        <div class="info-value">${report.testTool || 'N/A'}</div>
+                    </div>`;
+            } else {
+                // Sprint, Manual, Automation reports
+                if (report.sprintNumber) {
+                    coverInfoHtml += `
+                        <div class="info-item">
+                            <div class="info-label">Sprint Number</div>
+                            <div class="info-value">#${report.sprintNumber}</div>
+                        </div>`;
+                }
+                if (report.cycleNumber) {
+                    coverInfoHtml += `
+                        <div class="info-item">
+                            <div class="info-label">Cycle Number</div>
+                            <div class="info-value">${report.cycleNumber}</div>
+                        </div>`;
+                }
+                if (report.releaseNumber) {
+                    coverInfoHtml += `
+                        <div class="info-item">
+                            <div class="info-label">Release Number</div>
+                            <div class="info-value">${report.releaseNumber}</div>
+                        </div>`;
+                }
+            }
+            
+            // Common fields for all report types
+            coverInfoHtml += `
                 <div class="info-item">
                     <div class="info-label">Report Version</div>
                     <div class="info-value">v${report.reportVersion || '1.0'}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Release Number</div>
-                    <div class="info-value">${report.releaseNumber || 'N/A'}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Cycle Number</div>
-                    <div class="info-value">${report.cycleNumber || 'N/A'}</div>
-                </div>
-                <div class="info-item">
                     <div class="info-label">Report Date</div>
                     <div class="info-value">${formatDate(report.reportDate)}</div>
-                </div>
-            `;
+                </div>`;
+                
+            coverInfo.innerHTML = coverInfoHtml;
         }
 
         function renderTestSummary(report) {
@@ -1022,6 +1128,169 @@
             });
         }
 
+        function renderPerformanceReport(report, isLightMode) {
+            // Test Configuration Table
+            const testConfigDiv = document.getElementById('performanceTestConfigTable');
+            testConfigDiv.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Configuration Item</th><th>Value</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Test Type</td><td>${report.testType || 'N/A'}</td></tr>
+                        <tr><td>Testing Tool</td><td>${report.testTool || 'N/A'}</td></tr>
+                        <tr><td>Number of Users</td><td>${report.numberOfUsers || 'N/A'}</td></tr>
+                        <tr><td>Execution Duration</td><td>${report.executionDuration || 'N/A'}</td></tr>
+                    </tbody>
+                </table>
+            `;
+
+            // Test Environment Info
+            const envDiv = document.getElementById('performanceEnvironmentInfo');
+            envDiv.innerHTML = `
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Environment</div>
+                        <div class="info-value">${report.environment || 'N/A'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Test Objective</div>
+                        <div class="info-value">${report.testObjective || 'Not specified'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Test Scope</div>
+                        <div class="info-value">${report.testScope || 'Not specified'}</div>
+                    </div>
+                </div>
+            `;
+
+            // Performance Metrics Table
+            const metricsTable = document.getElementById('performanceMetricsTable');
+            metricsTable.innerHTML = `
+                <thead>
+                    <tr><th>Metric</th><th>Value</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>User Load</td><td>${report.userLoad || 'N/A'}</td></tr>
+                    <tr><td>Response Time</td><td>${report.responseTime || 'N/A'}</td></tr>
+                    <tr><td>Request Volume</td><td>${report.requestVolume || 'N/A'}</td></tr>
+                    <tr><td>Error Rate</td><td>${report.errorRate || 'N/A'}</td></tr>
+                    <tr><td>Slowest Response</td><td>${report.slowestResponse || 'N/A'}</td></tr>
+                    <tr><td>Fastest Response</td><td>${report.fastestResponse || 'N/A'}</td></tr>
+                </tbody>
+            `;
+
+            // Throughput Table  
+            const throughputTable = document.getElementById('performanceThroughputTable');
+            throughputTable.innerHTML = `
+                <thead>
+                    <tr><th>Metric</th><th>Value</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Max Throughput</td><td>${report.maxThroughput || 'N/A'}</td></tr>
+                    <tr><td>HTTP Failures</td><td>${report.httpFailures || 'N/A'}</td></tr>
+                    <tr><td>Average Response Time</td><td>${report.avgResponseTime || 'N/A'}</td></tr>
+                    <tr><td>95th Percentile Response Time</td><td>${report.responseTime95Percent || 'N/A'}</td></tr>
+                </tbody>
+            `;
+
+            // Performance Criteria Results
+            const criteriaDiv = document.getElementById('performanceCriteriaTable');
+            if (report.performanceCriteriaResults && report.performanceCriteriaResults.length > 0) {
+                let criteriaHtml = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Users</th>
+                                <th>Total Requests</th>
+                                <th>Failed Requests</th>
+                                <th>Status Codes</th>
+                                <th>Avg Response</th>
+                                <th>Max Response</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                report.performanceCriteriaResults.forEach(criteria => {
+                    criteriaHtml += `
+                        <tr>
+                            <td>${criteria.users || 'N/A'}</td>
+                            <td>${criteria.totalRequests || 'N/A'}</td>
+                            <td>${criteria.failedRequests || 'N/A'}</td>
+                            <td>${criteria.statusCodes || 'N/A'}</td>
+                            <td>${criteria.avgResponse || 'N/A'}</td>
+                            <td>${criteria.maxResponse || 'N/A'}</td>
+                        </tr>
+                    `;
+                });
+                
+                criteriaHtml += `</tbody></table>`;
+                criteriaDiv.innerHTML = criteriaHtml;
+            } else {
+                criteriaDiv.innerHTML = '<div class="empty-state"><p>No performance criteria results available.</p></div>';
+            }
+
+            // Create Performance Metrics Chart
+            renderPerformanceMetricsChart(report, isLightMode);
+            renderPerformanceSummaryChart(report, isLightMode);
+        }
+
+        function renderPerformanceMetricsChart(report, isLightMode) {
+            const ctx = document.getElementById('performanceMetricsChart').getContext('2d');
+            if (viewCharts.performanceMetrics) viewCharts.performanceMetrics.destroy();
+            
+            const responseTimeData = [
+                parseFloat(report.responseTime?.replace(/[^\d.]/g, '') || 0),
+                parseFloat(report.avgResponseTime?.replace(/[^\d.]/g, '') || 0),
+                parseFloat(report.responseTime95Percent?.replace(/[^\d.]/g, '') || 0),
+                parseFloat(report.slowestResponse?.replace(/[^\d.]/g, '') || 0),
+                parseFloat(report.fastestResponse?.replace(/[^\d.]/g, '') || 0)
+            ];
+
+            viewCharts.performanceMetrics = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Response Time', 'Avg Response', '95th Percentile', 'Slowest', 'Fastest'],
+                    datasets: [{
+                        label: 'Response Time (ms)',
+                        data: responseTimeData,
+                        backgroundColor: [
+                            '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#06d6a0'
+                        ],
+                        borderWidth: 2,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getBarChartOptions('Response Time (ms)', isLightMode)
+            });
+        }
+
+        function renderPerformanceSummaryChart(report, isLightMode) {
+            const ctx = document.getElementById('performanceSummaryChart').getContext('2d');
+            if (viewCharts.performanceSummary) viewCharts.performanceSummary.destroy();
+            
+            const errorRate = parseFloat(report.errorRate?.replace(/[^\d.]/g, '') || 0);
+            const successRate = 100 - errorRate;
+            
+            viewCharts.performanceSummary = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Success Rate', 'Error Rate'],
+                    datasets: [{
+                        data: [successRate, errorRate],
+                        backgroundColor: [
+                            '#10b981', // Green - Success
+                            '#ef4444'  // Red - Errors
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'var(--surface)'
+                    }]
+                },
+                options: getViewChartOptions(isLightMode)
+            });
+        }
+
         // Function to update all charts when theme changes
         function updateChartsForTheme() {
             if (!currentReport) return;
@@ -1046,6 +1315,12 @@
             renderEnhancementsChart(currentReport, isLightMode);
             renderAutomationTestCasesChart(currentReport, isLightMode);
             renderAutomationStabilityChart(currentReport, isLightMode);
+            
+            // Performance report charts
+            if (currentReport.reportType === 'performance') {
+                renderPerformanceMetricsChart(currentReport, isLightMode);
+                renderPerformanceSummaryChart(currentReport, isLightMode);
+            }
         }
 
         // Individual chart rendering functions for theme updates
@@ -1494,6 +1769,80 @@
             const date = new Date(dateString.includes('-') && dateString.length === 10 ? 
                 dateString.split('-').reverse().join('-') : dateString);
             return isNaN(date) ? 'Invalid Date' : date.toLocaleDateString('en-GB');
+        }
+
+        function getReportTypeTitle(reportType, report) {
+            switch (reportType) {
+                case 'sprint':
+                    return `Sprint ${report.sprintNumber || 'N/A'} Testing Report`;
+                case 'manual':
+                    return `Manual Testing Report - Cycle ${report.cycleNumber || 'N/A'}`;
+                case 'automation':
+                    return `Automation Testing Report - Sprint ${report.sprintNumber || 'N/A'}`;
+                case 'performance':
+                    return `Performance Testing Report - ${report.environment || 'Unknown Environment'}`;
+                default:
+                    return 'Testing Report';
+            }
+        }
+
+        function toggleSectionsBasedOnType(reportType) {
+            // Define which sections to show for each report type
+            const sectionConfig = {
+                sprint: ['userStoriesSection', 'testCasesSection', 'issuesPrioritySection', 'issuesStatusSection', 'enhancementsSection', 'automationRegressionSection'],
+                manual: ['userStoriesSection', 'testCasesSection', 'issuesPrioritySection', 'issuesStatusSection', 'enhancementsSection'],
+                automation: ['automationRegressionSection'],
+                performance: ['performanceReportSection']
+            };
+
+            // Hide all sections first
+            const allSections = ['userStoriesSection', 'testCasesSection', 'issuesPrioritySection', 'issuesStatusSection', 'enhancementsSection', 'automationRegressionSection', 'performanceReportSection'];
+            allSections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) section.style.display = 'none';
+            });
+
+            // Show sections for the current report type
+            const sectionsToShow = sectionConfig[reportType] || [];
+            sectionsToShow.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) section.style.display = 'block';
+            });
+        }
+
+        function getExportFilename(report, fileType) {
+            const portfolioName = report.portfolioName || 'UnknownPortfolio';
+            const projectName = report.projectName || 'UnknownProject';
+            const reportType = (report.reportType || 'sprint').toUpperCase();
+            
+            let identifier = '';
+            switch (report.reportType) {
+                case 'sprint':
+                    identifier = `Sprint_${report.sprintNumber || 'N_A'}`;
+                    break;
+                case 'manual':
+                    identifier = `Cycle_${report.cycleNumber || 'N_A'}`;
+                    break;
+                case 'automation':
+                    identifier = `Sprint_${report.sprintNumber || 'N_A'}_Automation`;
+                    break;
+                case 'performance':
+                    identifier = `${report.environment || 'Unknown_Env'}_Performance`;
+                    break;
+                default:
+                    identifier = 'Report';
+            }
+            
+            switch (fileType) {
+                case 'pdf':
+                    return `QA_Report_${reportType}_${portfolioName}_${identifier}_Complete.pdf`;
+                case 'styled-pdf':
+                    return `QA_Report_${reportType}_${portfolioName}_${identifier}_Styled.pdf`;
+                case 'xlsx':
+                    return `QA_Report_${reportType}_${portfolioName}_${identifier}_Complete.xlsx`;
+                default:
+                    return `QA_Report_${reportType}_${portfolioName}_${identifier}.${fileType}`;
+            }
         }
 
         function getStatusClass(status) {
@@ -2085,7 +2434,8 @@
                 doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 20, { align: 'center' });
             }
 
-            doc.save(`QA_Report_Complete_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}.pdf`);
+            const filename = getExportFilename(currentReport, 'pdf');
+            doc.save(filename);
             showSuccessToast('Comprehensive PDF export completed successfully!');
         }
 
@@ -2272,7 +2622,8 @@
             //     XLSX.utils.book_append_sheet(workbook, wsCustomFields, "Custom Fields");
             // }
 
-            XLSX.writeFile(workbook, `QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_Complete.xlsx`);
+            const filename = getExportFilename(currentReport, 'xlsx');
+            XLSX.writeFile(workbook, filename);
             showSuccessToast('Excel export completed successfully!');
         }
 
@@ -2359,7 +2710,8 @@
                 }
             }
 
-            pdf.save(`QA_Report_${currentReport.portfolioName}_Sprint_${currentReport.sprintNumber}_Styled.pdf`);
+            const filename = getExportFilename(currentReport, 'styled-pdf');
+            pdf.save(filename);
             showSuccessToast('Styled PDF export completed successfully!');
         }
 

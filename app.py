@@ -47,6 +47,10 @@ class Report(db.Model):
 
     # Performance Report specific fields - General Details
     environment = db.Column(db.String(100))  # For performance reports only
+    testType = db.Column(db.String(100))  # Test type (Load, Stress, Volume, etc.)
+    testTool = db.Column(db.String(100))  # Testing tool (JMeter, LoadRunner, K6, etc.)
+    testObjective = db.Column(db.Text)  # Test objectives
+    testScope = db.Column(db.Text)  # Test scope
 
     # Test Summary
     testSummary = db.Column(db.Text)
@@ -348,6 +352,10 @@ class Report(db.Model):
             'releaseNumber': self.releaseNumber,
             'reportDate': self.reportDate,
             'environment': self.environment,
+            'testType': self.testType,
+            'testTool': self.testTool,
+            'testObjective': self.testObjective,
+            'testScope': self.testScope,
             'testSummary': self.testSummary,
             'testingStatus': self.testingStatus,
 
@@ -938,6 +946,10 @@ def create_report():
             releaseNumber=data.get('releaseNumber'),
             reportDate=data.get('reportDate'),
             environment=data.get('environment'),  # For performance reports
+            testType=data.get('testType'),  # For performance reports
+            testTool=data.get('testTool'),  # For performance reports
+            testObjective=data.get('testObjective'),  # For performance reports
+            testScope=data.get('testScope'),  # For performance reports
             testSummary=data.get('testSummary'),
             testingStatus=data.get('testingStatus'),
 
@@ -1885,6 +1897,7 @@ def update_report(id):
         # Update basic fields common to all report types
         basic_fields = ['reportType', 'portfolioName', 'projectName', 'sprintNumber', 'reportVersion',
                        'reportName', 'cycleNumber', 'releaseNumber', 'reportDate', 'environment',
+                       'testType', 'testTool', 'testObjective', 'testScope',
                        'testSummary', 'testingStatus']
         
         for field in basic_fields:
