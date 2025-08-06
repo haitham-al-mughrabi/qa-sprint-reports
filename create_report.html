@@ -1085,6 +1085,122 @@
                             </div>
                         </div>
 
+                        <!-- Section 10: Covered Services & Modules (Automation Report Only) -->
+                        <div class="section" id="section-9" style="display: none;">
+                            <h2 class="section-title"><i class="fas fa-cogs"></i> Covered Services & Modules</h2>
+                            <div class="services-modules-layout">
+                                <div class="info-card-v2">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-server"></i>
+                                        <h3>Covered Services</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="form-group">
+                                            <label for="coveredServices">Services Covered in Testing</label>
+                                            <textarea id="coveredServices" name="coveredServices" 
+                                                placeholder="List the services that were covered in automation testing..."
+                                                rows="8"></textarea>
+                                            <small class="field-hint">List all services, APIs, microservices, or backend components that were tested</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="info-card-v2">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-puzzle-piece"></i>
+                                        <h3>Covered Modules & Test Suites</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="form-group">
+                                            <label for="coveredModules">Modules and Test Suites</label>
+                                            <textarea id="coveredModules" name="coveredModules" 
+                                                placeholder="List the modules, test suites, and test categories that were executed..."
+                                                rows="8"></textarea>
+                                            <small class="field-hint">Include test suites, modules, feature areas, and test categories</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 11: Bugs (Automation Report Only) -->
+                        <div class="section" id="section-10" style="display: none;">
+                            <h2 class="section-title"><i class="fas fa-bug"></i> Bugs</h2>
+                            <div class="bugs-layout">
+                                <div class="info-card-v2">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-bug"></i>
+                                        <h3>Bug Tracking</h3>
+                                        <button type="button" class="card-btn" onclick="showBugModal()">
+                                            <i class="fas fa-plus"></i> Add Bug
+                                        </button>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="dynamic-list" id="bugsList">
+                                            <div class="empty-state">No bugs added yet. Click "Add Bug" to get started.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 12: Performance Test Scenarios (Performance Report Only) -->
+                        <div class="section" id="section-11" style="display: none;">
+                            <h2 class="section-title"><i class="fas fa-play-circle"></i> Performance Test Scenarios</h2>
+                            <div class="performance-scenarios-layout">
+                                <div class="info-card-v2">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-play-circle"></i>
+                                        <h3>Performance Test Scenarios</h3>
+                                        <button type="button" class="card-btn" onclick="showScenarioModal()">
+                                            <i class="fas fa-plus"></i> Add Scenario
+                                        </button>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="dynamic-list" id="scenariosList">
+                                            <div class="empty-state">No scenarios added yet. Click "Add Scenario" to get started.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 13: HTTP Requests Status Overview (Performance Report Only) -->
+                        <div class="section" id="section-12" style="display: none;">
+                            <h2 class="section-title"><i class="fas fa-network-wired"></i> HTTP Requests Status Overview</h2>
+                            <div class="http-requests-layout">
+                                <div class="info-card-v2">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-network-wired"></i>
+                                        <h3>HTTP Requests Status Overview</h3>
+                                        <button type="button" class="card-btn" onclick="showHttpRequestModal()">
+                                            <i class="fas fa-plus"></i> Add Request
+                                        </button>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="table-container">
+                                            <table class="data-table" id="httpRequestsTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Request / Endpoint</th>
+                                                        <th>Status</th>
+                                                        <th>Count</th>
+                                                        <th>AVG Time</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="httpRequestsTableBody">
+                                                    <tr class="empty-row">
+                                                        <td colspan="5" class="empty-state">No HTTP requests added yet. Click "Add Request" to get started.</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Navigation Buttons -->
                         <div class="navigation-buttons">
                             <button type="button" class="nav-btn" id="prevBtn" onclick="previousSection()" disabled>←
@@ -1298,6 +1414,278 @@
 
     <!-- Toast Container -->
     <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Bug Modal (for Automation Reports) -->
+    <div id="bugModal" class="modal">
+        <div class="modal-content">
+            <h3>🐛 Add Bug</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="bugTitle">Bug Title:</label>
+                    <input type="text" id="bugTitle" placeholder="Enter bug title...">
+                </div>
+                <div class="form-group">
+                    <label for="bugDescription">Bug Description:</label>
+                    <textarea id="bugDescription" placeholder="Describe the bug..." rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="bugUrl">Bug URL:</label>
+                    <input type="url" id="bugUrl" placeholder="https://jira.company.com/bug/123">
+                </div>
+                <div class="form-group">
+                    <label for="bugSeverity">Severity:</label>
+                    <select id="bugSeverity">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bugStatus">Status:</label>
+                    <select id="bugStatus">
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Fixed">Fixed</option>
+                        <option value="Closed">Closed</option>
+                        <option value="Deferred">Deferred</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('bugModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addBug()">Add Bug</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Scenario Modal -->
+    <div id="scenarioModal" class="modal">
+        <div class="modal-content">
+            <h3>🎯 Add Performance Test Scenario</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="scenarioName">Scenario Name:</label>
+                    <input type="text" id="scenarioName" placeholder="Enter scenario name...">
+                </div>
+                <div class="form-group">
+                    <label for="scenarioUsers">Users:</label>
+                    <input type="number" id="scenarioUsers" placeholder="Number of users..." min="1">
+                </div>
+                <div class="form-group">
+                    <label for="scenarioSteps">Steps:</label>
+                    <textarea id="scenarioSteps" placeholder="Describe the test steps..." rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('scenarioModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addScenario()">Add Scenario</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HTTP Request Modal -->
+    <div id="httpRequestModal" class="modal">
+        <div class="modal-content">
+            <h3>🌐 Add HTTP Request</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="requestEndpoint">Request / Endpoint:</label>
+                    <input type="text" id="requestEndpoint" placeholder="e.g., /api/users, GET /login">
+                </div>
+                <div class="form-group">
+                    <label for="requestStatus">Status:</label>
+                    <input type="text" id="requestStatus" placeholder="e.g., 200, 404, 500">
+                </div>
+                <div class="form-group">
+                    <label for="requestCount">Count:</label>
+                    <input type="number" id="requestCount" placeholder="Number of requests..." min="1">
+                </div>
+                <div class="form-group">
+                    <label for="requestAvgTime">Average Time:</label>
+                    <input type="text" id="requestAvgTime" placeholder="e.g., 250ms, 1.2s">
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('httpRequestModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addHttpRequest()">Add Request</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Report Type Configuration -->
+    <script>
+        // Get report type from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const reportType = urlParams.get('type') || 'sprint';
+        
+        // Store report type globally for use by other scripts
+        window.currentReportType = reportType;
+        
+        // Report type configurations
+        window.reportTypeConfigs = {
+            sprint: {
+                title: 'Create Sprint Report',
+                sections: [
+                    { id: 'section-0', name: 'general', title: 'General Details', icon: 'fas fa-info-circle' },
+                    { id: 'section-1', name: 'summary', title: 'Test Summary', icon: 'fas fa-file-alt' },
+                    { id: 'section-2', name: 'additional', title: 'Additional Info', icon: 'fas fa-plus-square' },
+                    { id: 'section-3', name: 'userStories', title: 'User Stories', icon: 'fas fa-user-check' },
+                    { id: 'section-4', name: 'testCases', title: 'Test Cases', icon: 'fas fa-vial' },
+                    { id: 'section-5', name: 'issues', title: 'Issues Analysis', icon: 'fas fa-bug' },
+                    { id: 'section-6', name: 'enhancements', title: 'Enhancements', icon: 'fas fa-bolt' },
+                    { id: 'section-7', name: 'qaNotes', title: 'QA Notes', icon: 'fas fa-note-sticky' },
+                    { id: 'section-8', name: 'automation', title: 'Automation Regression', icon: 'fas fa-robot' }
+                ],
+                description: 'Complete sprint testing report with all sections'
+            },
+            manual: {
+                title: 'Create Manual Report',
+                sections: [
+                    { id: 'section-0', name: 'general', title: 'General Details', icon: 'fas fa-info-circle' },
+                    { id: 'section-1', name: 'summary', title: 'Test Summary', icon: 'fas fa-file-alt' },
+                    { id: 'section-2', name: 'additional', title: 'Additional Info', icon: 'fas fa-plus-square' },
+                    { id: 'section-3', name: 'userStories', title: 'User Stories', icon: 'fas fa-user-check' },
+                    { id: 'section-4', name: 'testCases', title: 'Test Cases', icon: 'fas fa-vial' },
+                    { id: 'section-5', name: 'issues', title: 'Issues Analysis', icon: 'fas fa-bug' },
+                    { id: 'section-6', name: 'enhancements', title: 'Enhancements', icon: 'fas fa-bolt' },
+                    { id: 'section-7', name: 'qaNotes', title: 'QA Notes', icon: 'fas fa-note-sticky' }
+                ],
+                description: 'Manual testing report without automation regression'
+            },
+            automation: {
+                title: 'Create Automation Report',
+                sections: [
+                    { id: 'section-0', name: 'general', title: 'General Details', icon: 'fas fa-info-circle' },
+                    { id: 'section-1', name: 'summary', title: 'Test Summary', icon: 'fas fa-file-alt' },
+                    { id: 'section-2', name: 'additional', title: 'Additional Info', icon: 'fas fa-plus-square' },
+                    { id: 'section-8', name: 'automation', title: 'Regression Test Results', icon: 'fas fa-robot' },
+                    { id: 'section-7', name: 'qaNotes', title: 'QA Automation Notes', icon: 'fas fa-note-sticky' },
+                    { id: 'section-9', name: 'services', title: 'Covered Services & Modules', icon: 'fas fa-cogs' },
+                    { id: 'section-10', name: 'bugs', title: 'Bugs', icon: 'fas fa-bug' }
+                ],
+                description: 'Automation testing report with regression results and coverage'
+            },
+            performance: {
+                title: 'Create Performance Report',
+                sections: [
+                    { id: 'section-0', name: 'general', title: 'Performance General Details', icon: 'fas fa-info-circle' },
+                    { id: 'section-1', name: 'summary', title: 'Performance Test Summary', icon: 'fas fa-tachometer-alt' },
+                    { id: 'section-11', name: 'scenarios', title: 'Performance Test Scenarios', icon: 'fas fa-play-circle' },
+                    { id: 'section-12', name: 'httpRequests', title: 'HTTP Requests Overview', icon: 'fas fa-network-wired' }
+                ],
+                description: 'Performance testing report with load metrics and analysis'
+            }
+        };
+        
+        // Function to configure form sections based on report type
+        function configureSectionsForReportType() {
+            const config = window.reportTypeConfigs[reportType];
+            if (!config) return;
+            
+            // Hide all sections first
+            const allSections = document.querySelectorAll('.section');
+            allSections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Hide all navigation items
+            const allNavItems = document.querySelectorAll('.nav-item');
+            allNavItems.forEach(item => {
+                item.style.display = 'none';
+            });
+            
+            // Show only relevant sections and navigation items
+            config.sections.forEach((sectionConfig, index) => {
+                const section = document.getElementById(sectionConfig.id);
+                const navItem = document.querySelector(`[onclick="showSection(${sectionConfig.id.split('-')[1]})"]`);
+                
+                if (section) {
+                    section.style.display = 'block';
+                    section.setAttribute('data-section-name', sectionConfig.name);
+                }
+                
+                if (navItem) {
+                    navItem.style.display = 'block';
+                    navItem.innerHTML = `<i class="${sectionConfig.icon}"></i> ${sectionConfig.title}`;
+                }
+            });
+            
+            // Update progress bar
+            updateProgressBarForReportType(config);
+        }
+        
+        // Function to update progress bar based on report type
+        function updateProgressBarForReportType(config) {
+            const progressSteps = document.querySelector('.progress-steps');
+            if (!progressSteps) return;
+            
+            // Clear existing steps
+            progressSteps.innerHTML = '';
+            
+            // Add steps for current report type
+            config.sections.forEach((sectionConfig, index) => {
+                const step = document.createElement('div');
+                step.className = `step ${index === 0 ? 'active' : ''}`;
+                step.setAttribute('data-step', index);
+                step.innerHTML = `
+                    <div class="step-circle">
+                        <i class="${sectionConfig.icon}"></i>
+                    </div>
+                    <span class="step-label">${sectionConfig.title.split(' ')[0]}</span>
+                `;
+                progressSteps.appendChild(step);
+            });
+            
+            // Update progress text
+            const progressStep = document.getElementById('progressStep');
+            const progressTitle = document.getElementById('progressTitle');
+            if (progressStep && progressTitle) {
+                progressStep.textContent = `Step 1 of ${config.sections.length}`;
+                progressTitle.textContent = config.sections[0].title;
+            }
+        }
+        
+        // Update page title and form title based on report type
+        function updatePageForReportType() {
+            const config = window.reportTypeConfigs[reportType];
+            if (config) {
+                document.title = config.title + ' - QA Reports System';
+                
+                // Update form title if element exists
+                const formTitle = document.getElementById('formTitle');
+                if (formTitle) {
+                    formTitle.textContent = config.title;
+                }
+                
+                // Add breadcrumb navigation
+                const headerContent = document.querySelector('.header-content');
+                if (headerContent && !headerContent.querySelector('.breadcrumb')) {
+                    const breadcrumb = document.createElement('div');
+                    breadcrumb.className = 'breadcrumb';
+                    breadcrumb.innerHTML = `
+                        <a href="/reports_type">Select Report Type</a>
+                        <span class="separator">></span>
+                        <span class="current">${config.title}</span>
+                    `;
+                    headerContent.appendChild(breadcrumb);
+                }
+                
+                // Configure sections for this report type
+                setTimeout(() => {
+                    configureSectionsForReportType();
+                }, 100); // Small delay to ensure DOM is ready
+            }
+        }
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePageForReportType();
+            console.log('Report type initialized:', reportType);
+        });
+    </script>
 
     <!-- Link to the external JavaScript files -->
     <script src="/static/enhanced_script.js"></script>

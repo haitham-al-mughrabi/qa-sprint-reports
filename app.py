@@ -32,15 +32,21 @@ email_service.init_app(app)
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
+    # Report Type - NEW FIELD for multi-report support
+    reportType = db.Column(db.String(20), default='sprint', nullable=False)  # 'sprint', 'manual', 'automation', 'performance'
+
     # Cover Information
     portfolioName = db.Column(db.String(100), nullable=False)
     projectName = db.Column(db.String(100), nullable=False)
-    sprintNumber = db.Column(db.Integer, nullable=False)
+    sprintNumber = db.Column(db.Integer, nullable=True)  # Made nullable for performance reports
     reportVersion = db.Column(db.String(50))
     reportName = db.Column(db.String(255)) # New field for custom report name
     cycleNumber = db.Column(db.Integer)
     releaseNumber = db.Column(db.String(50)) # Add missing releaseNumber field
     reportDate = db.Column(db.String(50))
+
+    # Performance Report specific fields - General Details
+    environment = db.Column(db.String(100))  # For performance reports only
 
     # Test Summary
     testSummary = db.Column(db.Text)
@@ -100,6 +106,32 @@ class Report(db.Model):
     # QA Notes
     qaNotesData = db.Column(db.Text, default='[]')  # Store multiple QA notes as JSON array
     qaNoteFieldsData = db.Column(db.Text, default='[]')  # Store custom QA note fields as JSON array
+
+    # Performance Report specific fields - Test Summary Section 1
+    userLoad = db.Column(db.String(100))
+    responseTime = db.Column(db.String(100))
+    requestVolume = db.Column(db.String(100))
+    errorRate = db.Column(db.String(100))
+    slowestResponse = db.Column(db.String(100))
+    fastestResponse = db.Column(db.String(100))
+    numberOfUsers = db.Column(db.String(100))  # x VUs
+    executionDuration = db.Column(db.String(100))
+
+    # Performance Report specific fields - Test Summary Section 2
+    maxThroughput = db.Column(db.String(100))
+    httpFailures = db.Column(db.String(100))
+    avgResponseTime = db.Column(db.String(100))
+    responseTime95Percent = db.Column(db.String(100))
+
+    # Performance Report JSON fields for complex data
+    performanceCriteriaResults = db.Column(db.Text, default='[]')  # Table data for criteria/results
+    performanceScenarios = db.Column(db.Text, default='[]')  # Performance test scenarios
+    httpRequestsOverview = db.Column(db.Text, default='[]')  # HTTP requests status overview table
+
+    # Automation Report specific fields
+    coveredServices = db.Column(db.Text)  # Text area for services
+    coveredModules = db.Column(db.Text)   # Text area for modules and test suites
+    bugsData = db.Column(db.Text, default='[]')  # JSON array for bugs (similar to QA notes)
 
     # Automation Regression Data
     # Section 1: Test Cases (auto-calculated from existing test cases)
@@ -197,10 +229,116 @@ class Report(db.Model):
             self.automationStablePercentage = 0.0
             self.automationFlakyPercentage = 0.0
 
+    def validate_report_type(self):
+        """Validate that the report type is one of the allowed values"""
+        allowed_types = ['sprint', 'manual', 'automation', 'performance']
+        if self.reportType not in allowed_types:
+            return False, f"Invalid report type. Must be one of: {', '.join(allowed_types)}"
+        return True, "Valid report type"
+
+    def validate_required_fields(self):
+        """Validate required fields based on report type"""
+        errors = []
+        
+        # Common required fields for all report types
+        if not self.portfolioName:
+            errors.append("Portfolio name is required")
+        if not self.projectName:
+            errors.append("Project name is required")
+        if not self.reportDate:
+            errors.append("Report date is required")
+        
+        # Type-specific validation
+        if self.reportType == 'sprint':
+            if not self.sprintNumber:
+                errors.append("Sprint number is required for Sprint reports")
+        elif self.reportType == 'manual':
+            if not self.sprintNumber:
+                errors.append("Sprint number is required for Manual reports")
+        elif self.reportType == 'performance':
+            if not self.environment:
+                errors.append("Environment is required for Performance reports")
+            # Sprint number is optional for performance reports
+        # Automation reports can work with or without sprint number
+        
+        return len(errors) == 0, errors
+
+    def validate_performance_data(self):
+        """Validate performance report specific data"""
+        if self.reportType != 'performance':
+            return True, []
+        
+        errors = []
+        
+        # Validate JSON fields
+        try:
+            if self.performanceCriteriaResults:
+                json.loads(self.performanceCriteriaResults)
+        except (json.JSONDecodeError, TypeError):
+            errors.append("Invalid performance criteria results data")
+        
+        try:
+            if self.performanceScenarios:
+                json.loads(self.performanceScenarios)
+        except (json.JSONDecodeError, TypeError):
+            errors.append("Invalid performance scenarios data")
+        
+        try:
+            if self.httpRequestsOverview:
+                json.loads(self.httpRequestsOverview)
+        except (json.JSONDecodeError, TypeError):
+            errors.append("Invalid HTTP requests overview data")
+        
+        return len(errors) == 0, errors
+
+    def validate_automation_data(self):
+        """Validate automation report specific data"""
+        if self.reportType != 'automation':
+            return True, []
+        
+        errors = []
+        
+        # Validate bugs data JSON
+        try:
+            if self.bugsData:
+                json.loads(self.bugsData)
+        except (json.JSONDecodeError, TypeError):
+            errors.append("Invalid bugs data")
+        
+        return len(errors) == 0, errors
+
+    def validate_all(self):
+        """Run all validation checks for the report"""
+        all_errors = []
+        
+        # Check report type
+        is_valid, message = self.validate_report_type()
+        if not is_valid:
+            all_errors.append(message)
+            return False, all_errors  # Stop if report type is invalid
+        
+        # Check required fields
+        is_valid, errors = self.validate_required_fields()
+        if not is_valid:
+            all_errors.extend(errors)
+        
+        # Check performance data
+        is_valid, errors = self.validate_performance_data()
+        if not is_valid:
+            all_errors.extend(errors)
+        
+        # Check automation data
+        is_valid, errors = self.validate_automation_data()
+        if not is_valid:
+            all_errors.extend(errors)
+        
+        return len(all_errors) == 0, all_errors
+
     def to_dict(self):
         """Converts the Report object to a dictionary for JSON serialization."""
         return {
             'id': self.id,
+            'reportType': self.reportType,
             'portfolioName': self.portfolioName,
             'projectName': self.projectName,
             'sprintNumber': self.sprintNumber,
@@ -209,6 +347,7 @@ class Report(db.Model):
             'cycleNumber': self.cycleNumber,
             'releaseNumber': self.releaseNumber,
             'reportDate': self.reportDate,
+            'environment': self.environment,
             'testSummary': self.testSummary,
             'testingStatus': self.testingStatus,
 
@@ -277,6 +416,28 @@ class Report(db.Model):
             'automationStabilityTotal': self.automationStabilityTotal,
             'automationStablePercentage': self.automationStablePercentage,
             'automationFlakyPercentage': self.automationFlakyPercentage,
+
+            # Performance Report specific fields
+            'userLoad': self.userLoad,
+            'responseTime': self.responseTime,
+            'requestVolume': self.requestVolume,
+            'errorRate': self.errorRate,
+            'slowestResponse': self.slowestResponse,
+            'fastestResponse': self.fastestResponse,
+            'numberOfUsers': self.numberOfUsers,
+            'executionDuration': self.executionDuration,
+            'maxThroughput': self.maxThroughput,
+            'httpFailures': self.httpFailures,
+            'avgResponseTime': self.avgResponseTime,
+            'responseTime95Percent': self.responseTime95Percent,
+            'performanceCriteriaResults': json.loads(self.performanceCriteriaResults or '[]'),
+            'performanceScenarios': json.loads(self.performanceScenarios or '[]'),
+            'httpRequestsOverview': json.loads(self.httpRequestsOverview or '[]'),
+
+            # Automation Report specific fields
+            'coveredServices': self.coveredServices,
+            'coveredModules': self.coveredModules,
+            'bugsData': json.loads(self.bugsData or '[]'),
 
             # Metadata
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
@@ -547,13 +708,19 @@ def view_report(report_id):
 @login_required
 @approved_user_required
 def get_reports():
-    """Fetches reports from the database with pagination and search."""
+    """Fetches reports from the database with pagination, search, and filtering."""
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     search_query = request.args.get('search', '', type=str)
+    report_type = request.args.get('type', '', type=str)  # New: filter by report type
 
     query = Report.query
 
+    # Filter by report type if specified
+    if report_type and report_type in ['sprint', 'manual', 'automation', 'performance']:
+        query = query.filter(Report.reportType == report_type)
+
+    # Apply search filter
     if search_query:
         search_term = f"%{search_query}%"
         query = query.filter(
@@ -561,12 +728,20 @@ def get_reports():
                 Report.portfolioName.ilike(search_term),
                 Report.projectName.ilike(search_term),
                 Report.sprintNumber.ilike(search_term),
-                Report.reportVersion.ilike(search_term)
+                Report.reportVersion.ilike(search_term),
+                Report.reportName.ilike(search_term),
+                Report.reportType.ilike(search_term)  # New: search by report type
             )
         )
 
     pagination = query.order_by(Report.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
     reports = pagination.items
+
+    # Get report type counts for filtering UI
+    type_counts = {}
+    for report_type_name in ['sprint', 'manual', 'automation', 'performance']:
+        count = Report.query.filter(Report.reportType == report_type_name).count()
+        type_counts[report_type_name] = count
 
     return jsonify({
         'reports': [report.to_dict() for report in reports],
@@ -574,7 +749,8 @@ def get_reports():
         'page': page,
         'totalPages': pagination.pages,
         'hasNext': pagination.has_next,
-        'hasPrev': pagination.has_prev
+        'hasPrev': pagination.has_prev,
+        'typeCounts': type_counts  # New: provide type counts for UI
     })
 
 @app.route('/api/reports/<int:report_id>', methods=['GET'])
@@ -747,76 +923,114 @@ def create_report():
         if not data:
             return jsonify({'error': 'No data provided'}), 400
 
-        # Validate required fields
-        required_fields = ['portfolioName', 'projectName', 'sprintNumber']
-        for field in required_fields:
-            if not data.get(field):
-                return jsonify({'error': f'Missing required field: {field}'}), 400
+        # Get report type (default to 'sprint' for backward compatibility)
+        report_type = data.get('reportType', 'sprint')
 
+        # Create new report with basic fields
         new_report = Report(
+            reportType=report_type,
             portfolioName=data.get('portfolioName'),
             projectName=data.get('projectName'),
-            sprintNumber=int(data.get('sprintNumber') or 0),
+            sprintNumber=int(data.get('sprintNumber') or 0) if data.get('sprintNumber') else None,
             reportVersion=data.get('reportVersion'),
-            reportName=data.get('reportName'), # New field
-            cycleNumber=int(data.get('cycleNumber') or 0),
-            releaseNumber=data.get('releaseNumber'), # Add releaseNumber field
+            reportName=data.get('reportName'),
+            cycleNumber=int(data.get('cycleNumber') or 0) if data.get('cycleNumber') else None,
+            releaseNumber=data.get('releaseNumber'),
             reportDate=data.get('reportDate'),
+            environment=data.get('environment'),  # For performance reports
             testSummary=data.get('testSummary'),
             testingStatus=data.get('testingStatus'),
 
-            # Dynamic data
+            # Dynamic data (common to all report types)
             requestData=json.dumps(data.get('requestData', [])),
             buildData=json.dumps(data.get('buildData', [])),
             testerData=json.dumps(data.get('testerData', [])),
-            teamMemberData=json.dumps(data.get('teamMemberData', [])), # New field
-
-            # User Stories
-            passedUserStories=int(data.get('passedUserStories') or 0),
-            passedWithIssuesUserStories=int(data.get('passedWithIssuesUserStories') or 0),
-            failedUserStories=int(data.get('failedUserStories') or 0),
-            blockedUserStories=int(data.get('blockedUserStories') or 0),
-            cancelledUserStories=int(data.get('cancelledUserStories') or 0),
-            deferredUserStories=int(data.get('deferredUserStories') or 0),
-            notTestableUserStories=int(data.get('notTestableUserStories') or 0),
-
-            # Test Cases
-            passedTestCases=int(data.get('passedTestCases') or 0),
-            passedWithIssuesTestCases=int(data.get('passedWithIssuesTestCases') or 0),
-            failedTestCases=int(data.get('failedTestCases') or 0),
-            blockedTestCases=int(data.get('blockedTestCases') or 0),
-            cancelledTestCases=int(data.get('cancelledTestCases') or 0),
-            deferredTestCases=int(data.get('deferredTestCases') or 0),
-            notTestableTestCases=int(data.get('notTestableTestCases') or 0),
-
-            # Issues
-            criticalIssues=int(data.get('criticalIssues') or 0),
-            highIssues=int(data.get('highIssues') or 0),
-            mediumIssues=int(data.get('mediumIssues') or 0),
-            lowIssues=int(data.get('lowIssues') or 0),
-            newIssues=int(data.get('newIssues') or 0),
-            fixedIssues=int(data.get('fixedIssues') or 0),
-            notFixedIssues=int(data.get('notFixedIssues') or 0),
-            reopenedIssues=int(data.get('reopenedIssues') or 0),
-            deferredIssues=int(data.get('deferredIssues') or 0),
-
-            # Enhancements
-            newEnhancements=int(data.get('newEnhancements') or 0),
-            implementedEnhancements=int(data.get('implementedEnhancements') or 0),
-            existsEnhancements=int(data.get('existsEnhancements') or 0),
-
-            # Other metrics
-            qaNotesData=json.dumps(data.get('qaNotesData', [])),
-            qaNoteFieldsData=json.dumps(data.get('qaNoteFieldsData', [])),
-
-            # Automation Regression Data
-            automationPassedTestCases=int(data.get('automationPassedTestCases') or 0),
-            automationFailedTestCases=int(data.get('automationFailedTestCases') or 0),
-            automationSkippedTestCases=int(data.get('automationSkippedTestCases') or 0),
-            automationStableTests=int(data.get('automationStableTests') or 0),
-            automationFlakyTests=int(data.get('automationFlakyTests') or 0),
-
+            teamMemberData=json.dumps(data.get('teamMemberData', [])),
         )
+
+        # Add type-specific fields based on report type
+        if report_type in ['sprint', 'manual']:
+            # User Stories (for Sprint and Manual reports)
+            new_report.passedUserStories = int(data.get('passedUserStories') or 0)
+            new_report.passedWithIssuesUserStories = int(data.get('passedWithIssuesUserStories') or 0)
+            new_report.failedUserStories = int(data.get('failedUserStories') or 0)
+            new_report.blockedUserStories = int(data.get('blockedUserStories') or 0)
+            new_report.cancelledUserStories = int(data.get('cancelledUserStories') or 0)
+            new_report.deferredUserStories = int(data.get('deferredUserStories') or 0)
+            new_report.notTestableUserStories = int(data.get('notTestableUserStories') or 0)
+
+            # Test Cases (for Sprint and Manual reports)
+            new_report.passedTestCases = int(data.get('passedTestCases') or 0)
+            new_report.passedWithIssuesTestCases = int(data.get('passedWithIssuesTestCases') or 0)
+            new_report.failedTestCases = int(data.get('failedTestCases') or 0)
+            new_report.blockedTestCases = int(data.get('blockedTestCases') or 0)
+            new_report.cancelledTestCases = int(data.get('cancelledTestCases') or 0)
+            new_report.deferredTestCases = int(data.get('deferredTestCases') or 0)
+            new_report.notTestableTestCases = int(data.get('notTestableTestCases') or 0)
+
+            # Issues (for Sprint and Manual reports)
+            new_report.criticalIssues = int(data.get('criticalIssues') or 0)
+            new_report.highIssues = int(data.get('highIssues') or 0)
+            new_report.mediumIssues = int(data.get('mediumIssues') or 0)
+            new_report.lowIssues = int(data.get('lowIssues') or 0)
+            new_report.newIssues = int(data.get('newIssues') or 0)
+            new_report.fixedIssues = int(data.get('fixedIssues') or 0)
+            new_report.notFixedIssues = int(data.get('notFixedIssues') or 0)
+            new_report.reopenedIssues = int(data.get('reopenedIssues') or 0)
+            new_report.deferredIssues = int(data.get('deferredIssues') or 0)
+
+            # Enhancements (for Sprint and Manual reports)
+            new_report.newEnhancements = int(data.get('newEnhancements') or 0)
+            new_report.implementedEnhancements = int(data.get('implementedEnhancements') or 0)
+            new_report.existsEnhancements = int(data.get('existsEnhancements') or 0)
+
+            # QA Notes
+            new_report.qaNotesData = json.dumps(data.get('qaNotesData', []))
+            new_report.qaNoteFieldsData = json.dumps(data.get('qaNoteFieldsData', []))
+
+        if report_type in ['sprint', 'automation']:
+            # Automation Regression Data (for Sprint and Automation reports)
+            new_report.automationPassedTestCases = int(data.get('automationPassedTestCases') or 0)
+            new_report.automationFailedTestCases = int(data.get('automationFailedTestCases') or 0)
+            new_report.automationSkippedTestCases = int(data.get('automationSkippedTestCases') or 0)
+            new_report.automationStableTests = int(data.get('automationStableTests') or 0)
+            new_report.automationFlakyTests = int(data.get('automationFlakyTests') or 0)
+
+        if report_type == 'automation':
+            # Automation-specific fields
+            new_report.coveredServices = data.get('coveredServices')
+            new_report.coveredModules = data.get('coveredModules')
+            new_report.bugsData = json.dumps(data.get('bugsData', []))
+            # QA Automation Notes (renamed from QA Notes for automation reports)
+            new_report.qaNotesData = json.dumps(data.get('qaNotesData', []))
+            new_report.qaNoteFieldsData = json.dumps(data.get('qaNoteFieldsData', []))
+
+        if report_type == 'performance':
+            # Performance Report specific fields - Test Summary Section 1
+            new_report.userLoad = data.get('userLoad')
+            new_report.responseTime = data.get('responseTime')
+            new_report.requestVolume = data.get('requestVolume')
+            new_report.errorRate = data.get('errorRate')
+            new_report.slowestResponse = data.get('slowestResponse')
+            new_report.fastestResponse = data.get('fastestResponse')
+            new_report.numberOfUsers = data.get('numberOfUsers')
+            new_report.executionDuration = data.get('executionDuration')
+
+            # Performance Report specific fields - Test Summary Section 2
+            new_report.maxThroughput = data.get('maxThroughput')
+            new_report.httpFailures = data.get('httpFailures')
+            new_report.avgResponseTime = data.get('avgResponseTime')
+            new_report.responseTime95Percent = data.get('responseTime95Percent')
+
+            # Performance Report JSON fields for complex data
+            new_report.performanceCriteriaResults = json.dumps(data.get('performanceCriteriaResults', []))
+            new_report.performanceScenarios = json.dumps(data.get('performanceScenarios', []))
+            new_report.httpRequestsOverview = json.dumps(data.get('httpRequestsOverview', []))
+
+        # Validate the report data
+        is_valid, validation_errors = new_report.validate_all()
+        if not is_valid:
+            return jsonify({'error': 'Validation failed', 'details': validation_errors}), 400
 
         # Calculate totals and scores
         new_report.calculate_totals()
@@ -1645,47 +1859,115 @@ def manage_data_page():
 # Similar routes for projects, testers, team members
 
 @app.route('/api/reports/<int:id>', methods=['PUT'])
+@login_required
+@approved_user_required
 def update_report(id):
     """Updates an existing report by its ID."""
-    report = Report.query.get_or_404(id)
-    data = request.get_json()
+    try:
+        report = Report.query.get_or_404(id)
+        data = request.get_json()
 
-    # Update fields
-    for field in ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion',
-                  'reportName', 'cycleNumber', 'releaseNumber', 'reportDate', 'testSummary', 'testingStatus',
-                  'passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories',
-                  'blockedUserStories', 'cancelledUserStories', 'deferredUserStories',
-                  'notTestableUserStories', 'passedTestCases', 'passedWithIssuesTestCases',
-                  'failedTestCases', 'blockedTestCases', 'cancelledTestCases',
-                  'deferredTestCases', 'notTestableTestCases', 'criticalIssues',
-                  'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues',
-                  'notFixedIssues', 'reopenedIssues', 'deferredIssues', 'newEnhancements',
-                  'implementedEnhancements', 'existsEnhancements', 'automationPassedTestCases',
-                  'automationFailedTestCases', 'automationSkippedTestCases', 'automationStableTests',
-                  'automationFlakyTests']:
-        if field in data:
-            setattr(report, field, data[field])
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
 
-    # Update JSON fields
-    if 'requestData' in data:
-        report.requestData = json.dumps(data['requestData'])
-    if 'buildData' in data:
-        report.buildData = json.dumps(data['buildData'])
-    if 'testerData' in data:
-        report.testerData = json.dumps(data['testerData'])
-    if 'teamMemberData' in data:
-        report.teamMemberData = json.dumps(data['teamMemberData'])
-    if 'qaNotesData' in data:
-        report.qaNotesData = json.dumps(data['qaNotesData'])
-    if 'qaNoteFieldsData' in data:
-        report.qaNoteFieldsData = json.dumps(data['qaNoteFieldsData'])
+        # Get report type (use existing type if not provided)
+        report_type = data.get('reportType', report.reportType)
+        
+        # Update basic fields common to all report types
+        basic_fields = ['reportType', 'portfolioName', 'projectName', 'sprintNumber', 'reportVersion',
+                       'reportName', 'cycleNumber', 'releaseNumber', 'reportDate', 'environment',
+                       'testSummary', 'testingStatus']
+        
+        for field in basic_fields:
+            if field in data:
+                if field == 'sprintNumber' and data[field] is not None:
+                    setattr(report, field, int(data[field]) if data[field] else None)
+                elif field == 'cycleNumber' and data[field] is not None:
+                    setattr(report, field, int(data[field]) if data[field] else None)
+                else:
+                    setattr(report, field, data[field])
 
+        # Update type-specific fields based on report type
+        if report_type in ['sprint', 'manual']:
+            # User Stories fields
+            user_story_fields = ['passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories',
+                               'blockedUserStories', 'cancelledUserStories', 'deferredUserStories', 'notTestableUserStories']
+            for field in user_story_fields:
+                if field in data:
+                    setattr(report, field, int(data[field] or 0))
 
-    # Recalculate totals and scores
-    report.calculate_totals()
+            # Test Cases fields
+            test_case_fields = ['passedTestCases', 'passedWithIssuesTestCases', 'failedTestCases',
+                              'blockedTestCases', 'cancelledTestCases', 'deferredTestCases', 'notTestableTestCases']
+            for field in test_case_fields:
+                if field in data:
+                    setattr(report, field, int(data[field] or 0))
 
-    db.session.commit()
-    return jsonify(report.to_dict())
+            # Issues fields
+            issue_fields = ['criticalIssues', 'highIssues', 'mediumIssues', 'lowIssues', 'newIssues',
+                          'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredIssues']
+            for field in issue_fields:
+                if field in data:
+                    setattr(report, field, int(data[field] or 0))
+
+            # Enhancements fields
+            enhancement_fields = ['newEnhancements', 'implementedEnhancements', 'existsEnhancements']
+            for field in enhancement_fields:
+                if field in data:
+                    setattr(report, field, int(data[field] or 0))
+
+        if report_type in ['sprint', 'automation']:
+            # Automation Regression fields
+            automation_fields = ['automationPassedTestCases', 'automationFailedTestCases', 'automationSkippedTestCases',
+                               'automationStableTests', 'automationFlakyTests']
+            for field in automation_fields:
+                if field in data:
+                    setattr(report, field, int(data[field] or 0))
+
+        if report_type == 'automation':
+            # Automation-specific fields
+            if 'coveredServices' in data:
+                report.coveredServices = data['coveredServices']
+            if 'coveredModules' in data:
+                report.coveredModules = data['coveredModules']
+
+        if report_type == 'performance':
+            # Performance Report specific fields
+            performance_fields = ['userLoad', 'responseTime', 'requestVolume', 'errorRate', 'slowestResponse',
+                                'fastestResponse', 'numberOfUsers', 'executionDuration', 'maxThroughput',
+                                'httpFailures', 'avgResponseTime', 'responseTime95Percent']
+            for field in performance_fields:
+                if field in data:
+                    setattr(report, field, data[field])
+
+        # Update JSON fields
+        json_fields = ['requestData', 'buildData', 'testerData', 'teamMemberData', 'qaNotesData', 'qaNoteFieldsData']
+        
+        if report_type == 'automation':
+            json_fields.append('bugsData')
+        
+        if report_type == 'performance':
+            json_fields.extend(['performanceCriteriaResults', 'performanceScenarios', 'httpRequestsOverview'])
+
+        for field in json_fields:
+            if field in data:
+                setattr(report, field, json.dumps(data[field]))
+
+        # Validate the updated report data
+        is_valid, validation_errors = report.validate_all()
+        if not is_valid:
+            return jsonify({'error': 'Validation failed', 'details': validation_errors}), 400
+
+        # Recalculate totals and scores
+        report.calculate_totals()
+
+        db.session.commit()
+        return jsonify(report.to_dict())
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating report: {str(e)}")
+        return jsonify({'error': f'Failed to update report: {str(e)}'}), 500
 
 @app.route('/api/reports/<int:id>', methods=['DELETE'])
 def delete_report(id):

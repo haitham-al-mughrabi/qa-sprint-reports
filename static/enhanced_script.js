@@ -10,6 +10,575 @@ let dashboardStatsCache = null; // Cache for dashboard statistics with structure
 // Auto-save functionality
 let autoSaveTimeout = null;
 
+// Report type management
+let currentReportType = 'sprint'; // Default to sprint for backward compatibility
+
+// Function to ensure Sprint Reports maintain full backward compatibility
+function ensureSprintReportCompatibility() {
+    console.log('Ensuring Sprint Report backward compatibility...');
+    
+    // Make sure all 9 sections are visible for Sprint Reports
+    const sprintSections = [
+        'section-0', 'section-1', 'section-2', 'section-3', 'section-4',
+        'section-5', 'section-6', 'section-7', 'section-8'
+    ];
+    
+    sprintSections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.style.display = 'block';
+        }
+    });
+    
+    // Make sure all navigation items are visible
+    const navItems = document.querySelectorAll('#sidebar .nav-item');
+    navItems.forEach(item => {
+        item.style.display = 'block';
+    });
+    
+    // Update Testing Metrics for Sprint Report
+    updateTestingMetricsForReportType('sprint');
+    
+    // Ensure the first section is active
+    showSection(0);
+    
+    console.log('✅ Sprint Report compatibility ensured');
+}
+
+// Function to configure Manual Reports (all sections except Automation Regression)
+function configureManualReport() {
+    console.log('Configuring Manual Report...');
+    
+    // Manual Report sections (all except section-8 which is Automation Regression)
+    const manualSections = [
+        'section-0', 'section-1', 'section-2', 'section-3', 
+        'section-4', 'section-5', 'section-6', 'section-7'
+    ];
+    
+    // Hide all sections first
+    const allSections = document.querySelectorAll('.section');
+    allSections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show only Manual Report sections (but keep them hidden initially)
+    manualSections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.style.display = 'none'; // Keep hidden, showSection will show the active one
+        }
+    });
+    
+    // Hide all navigation items first
+    const allNavItems = document.querySelectorAll('#sidebar .nav-item');
+    allNavItems.forEach(item => {
+        item.style.display = 'none';
+    });
+    
+    // Show only relevant navigation items (exclude Automation Regression)
+    const manualNavItems = [
+        { index: 0, title: 'General Details', icon: 'fas fa-info-circle' },
+        { index: 1, title: 'Test Summary', icon: 'fas fa-file-alt' },
+        { index: 2, title: 'Additional Info', icon: 'fas fa-plus-square' },
+        { index: 3, title: 'User Stories', icon: 'fas fa-user-check' },
+        { index: 4, title: 'Test Cases', icon: 'fas fa-vial' },
+        { index: 5, title: 'Issues Analysis', icon: 'fas fa-bug' },
+        { index: 6, title: 'Enhancements', icon: 'fas fa-bolt' },
+        { index: 7, title: 'QA Notes', icon: 'fas fa-note-sticky' }
+    ];
+    
+    manualNavItems.forEach((navConfig, displayIndex) => {
+        const navItem = document.querySelector(`[onclick="showSection(${navConfig.index})"]`);
+        if (navItem) {
+            navItem.style.display = 'block';
+            navItem.innerHTML = `<i class="${navConfig.icon}"></i> ${navConfig.title}`;
+        }
+    });
+    
+    // Update Testing Metrics for Manual Report
+    updateTestingMetricsForReportType('manual');
+    
+    // Ensure the first section is active
+    showSection(0);
+    
+    console.log('✅ Manual Report configured (8 sections, excluding Automation Regression)');
+}
+
+// Function to configure Automation Reports
+function configureAutomationReport() {
+    console.log('Configuring Automation Report...');
+    
+    // Automation Report sections: General Details, Test Summary, Additional Info, 
+    // Regression Test Results, QA Automation Notes, Covered Services & Modules, Bugs
+    const automationSections = [
+        'section-0', // General Details
+        'section-1', // Test Summary & Status  
+        'section-2', // Additional Information
+        'section-8', // Regression Test Results (renamed from Automation Regression)
+        'section-7', // QA Automation Notes (renamed from QA Notes)
+        'section-9', // Covered Services & Modules (new)
+        'section-10' // Bugs (new)
+    ];
+    
+    // Hide all sections first
+    const allSections = document.querySelectorAll('.section');
+    allSections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show only Automation Report sections (but keep them hidden initially)
+    automationSections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.style.display = 'none'; // Keep hidden, showSection will show the active one
+        }
+    });
+    
+    // Hide all navigation items first
+    const allNavItems = document.querySelectorAll('#sidebar .nav-item');
+    allNavItems.forEach(item => {
+        item.style.display = 'none';
+    });
+    
+    // Configure navigation items for Automation Report
+    const automationNavItems = [
+        { index: 0, title: 'General Details', icon: 'fas fa-info-circle' },
+        { index: 1, title: 'Test Summary', icon: 'fas fa-file-alt' },
+        { index: 2, title: 'Additional Info', icon: 'fas fa-plus-square' },
+        { index: 8, title: 'Regression Test Results', icon: 'fas fa-robot' }, // Renamed
+        { index: 7, title: 'QA Automation Notes', icon: 'fas fa-note-sticky' }, // Renamed
+        { index: 9, title: 'Covered Services & Modules', icon: 'fas fa-cogs' }, // New
+        { index: 10, title: 'Bugs', icon: 'fas fa-bug' } // New
+    ];
+    
+    automationNavItems.forEach((navConfig, displayIndex) => {
+        const navItem = document.querySelector(`[onclick="showSection(${navConfig.index})"]`);
+        if (navItem) {
+            navItem.style.display = 'block';
+            navItem.innerHTML = `<i class="${navConfig.icon}"></i> ${navConfig.title}`;
+        }
+    });
+    
+    // Update section titles for Automation Report
+    updateAutomationSectionTitles();
+    
+    // Update Additional Information section for Automation Report
+    updateAutomationAdditionalInfo();
+    
+    // Update Testing Metrics for Automation Report
+    updateTestingMetricsForReportType('automation');
+    
+    // Ensure the first section is active
+    showSection(0);
+    
+    console.log('✅ Automation Report configured (7 sections with renamed and new sections)');
+}
+
+// Function to configure Performance Reports
+function configurePerformanceReport() {
+    console.log('Configuring Performance Report...');
+    
+    // Performance Report sections: Performance General Details, Performance Test Summary,
+    // Performance Test Scenarios, HTTP Requests Overview
+    const performanceSections = [
+        'section-0',  // Performance General Details (modified)
+        'section-1',  // Performance Test Summary (modified)
+        'section-11', // Performance Test Scenarios (new)
+        'section-12'  // HTTP Requests Status Overview (new)
+    ];
+    
+    // Hide all sections first
+    const allSections = document.querySelectorAll('.section');
+    allSections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show only Performance Report sections (but keep them hidden initially)
+    performanceSections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.style.display = 'none'; // Keep hidden, showSection will show the active one
+        }
+    });
+    
+    // Hide all navigation items first
+    const allNavItems = document.querySelectorAll('#sidebar .nav-item');
+    allNavItems.forEach(item => {
+        item.style.display = 'none';
+    });
+    
+    // Configure navigation items for Performance Report
+    const performanceNavItems = [
+        { index: 0, title: 'Performance General Details', icon: 'fas fa-info-circle' },
+        { index: 1, title: 'Performance Test Summary', icon: 'fas fa-tachometer-alt' },
+        { index: 11, title: 'Performance Test Scenarios', icon: 'fas fa-play-circle' },
+        { index: 12, title: 'HTTP Requests Overview', icon: 'fas fa-network-wired' }
+    ];
+    
+    performanceNavItems.forEach((navConfig, displayIndex) => {
+        const navItem = document.querySelector(`[onclick="showSection(${navConfig.index})"]`);
+        if (navItem) {
+            navItem.style.display = 'block';
+            navItem.innerHTML = `<i class="${navConfig.icon}"></i> ${navConfig.title}`;
+        }
+    });
+    
+    // Update section titles for Performance Report
+    updatePerformanceSectionTitles();
+    
+    // Update section content for Performance Report
+    updatePerformanceSectionContent();
+    
+    // Ensure the first section is active
+    showSection(0);
+    
+    console.log('✅ Performance Report configured (4 sections with performance-specific content)');
+}
+
+// Function to update Additional Information section for Automation Reports
+function updateAutomationAdditionalInfo() {
+    const additionalInfoSection = document.getElementById('section-2');
+    if (!additionalInfoSection) return;
+    
+    // Hide Request Information and Build Information for Automation Reports
+    const requestCard = additionalInfoSection.querySelector('.info-card-v2:has([onclick="showRequestModal()"])');
+    const buildCard = additionalInfoSection.querySelector('.info-card-v2:has([onclick="showBuildModal()"])');
+    
+    if (requestCard) requestCard.style.display = 'none';
+    if (buildCard) buildCard.style.display = 'none';
+    
+    // Keep only Tester(s) Information and Team Members
+    const testerCard = additionalInfoSection.querySelector('.info-card-v2:has([onclick="showTesterModal()"])');
+    const teamMemberCard = additionalInfoSection.querySelector('.info-card-v2:has([onclick="showTeamMemberModal()"])');
+    
+    if (testerCard) testerCard.style.display = 'block';
+    if (teamMemberCard) teamMemberCard.style.display = 'block';
+}
+
+// Function to update Testing Metrics based on report type
+function updateTestingMetricsForReportType(reportType) {
+    const metricsTable = document.querySelector('#section-1 .data-table tbody');
+    if (!metricsTable) return;
+    
+    let metricsHTML = '';
+    
+    if (reportType === 'sprint') {
+        // Sprint Report - Show all metrics
+        metricsHTML = `
+            <tr>
+                <td><strong><i class="fas fa-user-check"></i> User Stories</strong><br><small>Auto-calculated from section 4</small></td>
+                <td><input type="number" id="userStoriesMetric" name="userStoriesMetric" readonly class="readonly-field"></td>
+                <td><small>Sum of all user story statuses</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-flask"></i> Test Cases</strong><br><small>Auto-calculated from section 5</small></td>
+                <td><input type="number" id="testCasesMetric" name="testCasesMetric" readonly class="readonly-field"></td>
+                <td><small>Sum of all test case statuses</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-bug"></i> Issues</strong><br><small>Auto-calculated from section 6</small></td>
+                <td><input type="number" id="issuesMetric" name="issuesMetric" readonly class="readonly-field"></td>
+                <td><small>Sum of all issue priorities</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-bolt"></i> Enhancements</strong><br><small>Auto-calculated from section 7</small></td>
+                <td><input type="number" id="enhancementsMetric" name="enhancementsMetric" readonly class="readonly-field"></td>
+                <td><small>Sum of all enhancement statuses</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-chart-bar"></i> QA Notes Count</strong><br><small>Auto-calculated from section 8</small></td>
+                <td><input type="number" name="qaNotesMetric" id="qaNotesMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
+                <td><small>Number of QA notes</small></td>
+            </tr>
+        `;
+    } else if (reportType === 'manual') {
+        // Manual Report - Show all metrics except automation
+        metricsHTML = `
+            <tr>
+                <td><strong><i class="fas fa-user-check"></i> User Stories</strong><br><small>Auto-calculated from section 4</small></td>
+                <td><input type="number" id="userStoriesMetric" name="userStoriesMetric" readonly class="readonly-field"></td>
+                <td><small>Sum of all user story statuses</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-flask"></i> Test Cases</strong><br><small>Auto-calculated from section 5</small></td>
+                <td><input type="number" id="testCasesMetric" name="testCasesMetric" readonly class="readonly-field"></td>
+                <td><small>Sum of all test case statuses</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-bug"></i> Issues</strong><br><small>Auto-calculated from section 6</small></td>
+                <td><input type="number" id="issuesMetric" name="issuesMetric" readonly class="readonly-field"></td>
+                <td><small>Sum of all issue priorities</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-bolt"></i> Enhancements</strong><br><small>Auto-calculated from section 7</small></td>
+                <td><input type="number" id="enhancementsMetric" name="enhancementsMetric" readonly class="readonly-field"></td>
+                <td><small>Sum of all enhancement statuses</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-chart-bar"></i> QA Notes Count</strong><br><small>Auto-calculated from section 8</small></td>
+                <td><input type="number" name="qaNotesMetric" id="qaNotesMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
+                <td><small>Number of QA notes</small></td>
+            </tr>
+        `;
+    } else if (reportType === 'automation') {
+        // Automation Report - Show only automation-related metrics
+        metricsHTML = `
+            <tr>
+                <td><strong><i class="fas fa-robot"></i> Automation Test Cases</strong><br><small>Auto-calculated from regression section</small></td>
+                <td><input type="number" id="automationTotalMetric" name="automationTotalMetric" readonly class="readonly-field"></td>
+                <td><small>Total automation test cases</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-chart-bar"></i> QA Automation Notes</strong><br><small>Auto-calculated from notes section</small></td>
+                <td><input type="number" name="qaNotesMetric" id="qaNotesMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
+                <td><small>Number of QA automation notes</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-bug"></i> Bugs Count</strong><br><small>Auto-calculated from bugs section</small></td>
+                <td><input type="number" name="bugsMetric" id="bugsMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
+                <td><small>Number of bugs tracked</small></td>
+            </tr>
+        `;
+    } else if (reportType === 'performance') {
+        // Performance Report - Show performance-related metrics
+        metricsHTML = `
+            <tr>
+                <td><strong><i class="fas fa-play-circle"></i> Test Scenarios</strong><br><small>Auto-calculated from scenarios section</small></td>
+                <td><input type="number" name="scenariosMetric" id="scenariosMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
+                <td><small>Number of performance scenarios</small></td>
+            </tr>
+            <tr>
+                <td><strong><i class="fas fa-network-wired"></i> HTTP Requests</strong><br><small>Auto-calculated from requests section</small></td>
+                <td><input type="number" name="httpRequestsMetric" id="httpRequestsMetric" min="0" placeholder="0" readonly class="readonly-field"></td>
+                <td><small>Number of HTTP requests tracked</small></td>
+            </tr>
+        `;
+    }
+    
+    metricsTable.innerHTML = metricsHTML;
+}
+
+// Function to update bugs count metric
+function updateBugsCount() {
+    const bugsMetricField = document.getElementById('bugsMetric');
+    if (bugsMetricField) {
+        bugsMetricField.value = bugsData.length;
+    }
+}
+
+// Function to update scenarios count metric
+function updateScenariosCount() {
+    const scenariosMetricField = document.getElementById('scenariosMetric');
+    if (scenariosMetricField) {
+        scenariosMetricField.value = performanceScenarios.length;
+    }
+}
+
+// Function to update HTTP requests count metric
+function updateHttpRequestsCount() {
+    const httpRequestsMetricField = document.getElementById('httpRequestsMetric');
+    if (httpRequestsMetricField) {
+        httpRequestsMetricField.value = httpRequestsOverview.length;
+    }
+}
+
+// Function to update section titles for Performance Report
+function updatePerformanceSectionTitles() {
+    // Update "General Details" to "Performance General Details"
+    const generalSection = document.querySelector('#section-0 .section-title');
+    if (generalSection) {
+        generalSection.innerHTML = '<i class="fas fa-info-circle"></i> Performance General Details';
+    }
+    
+    // Update "Test Summary" to "Performance Test Summary"
+    const summarySection = document.querySelector('#section-1 .section-title');
+    if (summarySection) {
+        summarySection.innerHTML = '<i class="fas fa-tachometer-alt"></i> Performance Test Summary';
+    }
+}
+
+// Function to update section content for Performance Report
+function updatePerformanceSectionContent() {
+    // Update General Details section for Performance Report
+    updatePerformanceGeneralDetails();
+    
+    // Update Test Summary section for Performance Report
+    updatePerformanceTestSummary();
+}
+
+function updatePerformanceGeneralDetails() {
+    const generalSection = document.getElementById('section-0');
+    if (!generalSection) return;
+    
+    // Add environment field to the General Details section for Performance Reports
+    const projectDetailsCard = generalSection.querySelector('.project-details-card .info-card-v2-content');
+    if (projectDetailsCard) {
+        // Check if environment field already exists
+        if (!projectDetailsCard.querySelector('#environment')) {
+            const environmentField = `
+                <div class="form-group">
+                    <label for="environment">Environment</label>
+                    <select id="environment" name="environment">
+                        <option value="">Select Environment</option>
+                        <option value="Development">Development</option>
+                        <option value="Testing">Testing</option>
+                        <option value="Staging">Staging</option>
+                        <option value="Production">Production</option>
+                        <option value="Load Testing">Load Testing</option>
+                    </select>
+                </div>
+            `;
+            projectDetailsCard.insertAdjacentHTML('beforeend', environmentField);
+        }
+    }
+}
+
+function updatePerformanceTestSummary() {
+    const testSummarySection = document.getElementById('section-1');
+    if (!testSummarySection) return;
+    
+    // Replace the content with Performance-specific Test Summary
+    const testSummaryLayout = testSummarySection.querySelector('.test-summary-layout');
+    if (testSummaryLayout) {
+        testSummaryLayout.innerHTML = `
+            <!-- Performance Test Summary Section 1 -->
+            <div class="performance-summary-card">
+                <div class="info-card-v2-header">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <h3>Test Summary - Section 1</h3>
+                </div>
+                <div class="info-card-v2-content">
+                    <div class="form-row-fields">
+                        <div class="form-group">
+                            <label for="userLoad">User Load</label>
+                            <input type="text" id="userLoad" name="userLoad" placeholder="e.g., 100 concurrent users">
+                        </div>
+                        <div class="form-group">
+                            <label for="responseTime">Response Time</label>
+                            <input type="text" id="responseTime" name="responseTime" placeholder="e.g., 250ms average">
+                        </div>
+                        <div class="form-group">
+                            <label for="requestVolume">Request Volume</label>
+                            <input type="text" id="requestVolume" name="requestVolume" placeholder="e.g., 10,000 requests">
+                        </div>
+                        <div class="form-group">
+                            <label for="errorRate">Error Rate</label>
+                            <input type="text" id="errorRate" name="errorRate" placeholder="e.g., 0.5%">
+                        </div>
+                        <div class="form-group">
+                            <label for="slowestResponse">Slowest Response</label>
+                            <input type="text" id="slowestResponse" name="slowestResponse" placeholder="e.g., 2.5s">
+                        </div>
+                        <div class="form-group">
+                            <label for="fastestResponse">Fastest Response</label>
+                            <input type="text" id="fastestResponse" name="fastestResponse" placeholder="e.g., 50ms">
+                        </div>
+                    </div>
+                    <div class="form-row-fields">
+                        <div class="form-group">
+                            <label for="numberOfUsers">Number of Users (VUs)</label>
+                            <input type="text" id="numberOfUsers" name="numberOfUsers" placeholder="e.g., 100 VUs">
+                        </div>
+                        <div class="form-group">
+                            <label for="executionDuration">Execution Duration</label>
+                            <input type="text" id="executionDuration" name="executionDuration" placeholder="e.g., 30 minutes">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Test Summary Section 2 -->
+            <div class="performance-summary-card">
+                <div class="info-card-v2-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Test Summary - Section 2</h3>
+                </div>
+                <div class="info-card-v2-content">
+                    <div class="form-row-fields">
+                        <div class="form-group">
+                            <label for="maxThroughput">Max Throughput</label>
+                            <input type="text" id="maxThroughput" name="maxThroughput" placeholder="e.g., 500 req/sec">
+                        </div>
+                        <div class="form-group">
+                            <label for="httpFailures">HTTP Failures</label>
+                            <input type="text" id="httpFailures" name="httpFailures" placeholder="e.g., 25 failures">
+                        </div>
+                        <div class="form-group">
+                            <label for="avgResponseTime">AVG Response Time</label>
+                            <input type="text" id="avgResponseTime" name="avgResponseTime" placeholder="e.g., 180ms">
+                        </div>
+                        <div class="form-group">
+                            <label for="responseTime95Percent">95% Response Time</label>
+                            <input type="text" id="responseTime95Percent" name="responseTime95Percent" placeholder="e.g., 450ms">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Criteria Results Table -->
+            <div class="performance-summary-card">
+                <div class="info-card-v2-header">
+                    <i class="fas fa-table"></i>
+                    <h3>Performance Criteria Results</h3>
+                </div>
+                <div class="info-card-v2-content">
+                    <div class="table-container">
+                        <table class="data-table" id="criteriaResultsTable">
+                            <thead>
+                                <tr>
+                                    <th>Criteria</th>
+                                    <th>Results</th>
+                                </tr>
+                            </thead>
+                            <tbody id="criteriaResultsTableBody">
+                                <tr>
+                                    <td><strong>Number of users</strong></td>
+                                    <td><input type="text" name="criteriaUsers" placeholder="e.g., 100"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total number of requests</strong></td>
+                                    <td><input type="text" name="criteriaTotalRequests" placeholder="e.g., 10,000"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Number of Failed Requests</strong></td>
+                                    <td><input type="text" name="criteriaFailedRequests" placeholder="e.g., 25"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status/error codes</strong></td>
+                                    <td><input type="text" name="criteriaStatusCodes" placeholder="e.g., 200: 9975, 500: 25"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Average Response</strong></td>
+                                    <td><input type="text" name="criteriaAvgResponse" placeholder="e.g., 250ms"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Max Response Time</strong></td>
+                                    <td><input type="text" name="criteriaMaxResponse" placeholder="e.g., 2.5s"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Function to update section titles for Automation Report
+function updateAutomationSectionTitles() {
+    // Rename "Automation Regression" to "Regression Test Results"
+    const automationSection = document.querySelector('#section-8 .section-title');
+    if (automationSection) {
+        automationSection.innerHTML = '<i class="fas fa-robot"></i> Regression Test Results';
+    }
+    
+    // Rename "QA Notes" to "QA Automation Notes"
+    const qaNotesSection = document.querySelector('#section-7 .section-title');
+    if (qaNotesSection) {
+        qaNotesSection.innerHTML = '<i class="fas fa-note-sticky"></i> QA Automation Notes';
+    }
+}
+
 // Constants for localStorage keys
 const FORM_DATA_KEY = 'qaReportFormData';
 const FORM_ARRAYS_KEY = 'qaReportArrayData';
@@ -20,6 +589,10 @@ let requestData = [];
 let buildData = [];
 let testerData = [];
 let qaNoteFieldsData = []; // New: for custom QA note fields
+let bugsData = []; // New: for automation report bugs
+let performanceScenarios = []; // New: for performance test scenarios
+let httpRequestsOverview = []; // New: for HTTP requests overview
+// Performance criteria results are now handled directly from form fields, no need for array
 // let customFieldsData = []; // This will be used if custom fields are implemented - REMOVED
 let userStoriesChart = null;
 let testCasesChart = null;
@@ -1343,9 +1916,36 @@ function clearCurrentSection() {
 // function showPage(pageId) { ... }
 
 function showSection(sectionIndex) {
+    // Get current report type configuration
+    const config = window.reportTypeConfigs && window.reportTypeConfigs[currentReportType];
+    if (!config) {
+        // Fallback to original behavior if no config
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(`section-${sectionIndex}`)?.classList.add('active');
+        document.querySelectorAll('#sidebar .nav-item').forEach((item, index) => {
+            item.classList.toggle('active', index === sectionIndex);
+        });
+        currentSection = sectionIndex;
+        updateNavigationButtons();
+        updateProgressBar();
+        window.scrollTo(0, 0);
+        return;
+    }
+    
+    // Find the section configuration by index
+    const sectionConfig = config.sections[sectionIndex];
+    if (!sectionConfig) return;
+    
+    // Hide all sections and remove active class
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(`section-${sectionIndex}`)?.classList.add('active');
+    
+    // Show the target section
+    const targetSection = document.getElementById(sectionConfig.id);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
 
+    // Update navigation items
     document.querySelectorAll('#sidebar .nav-item').forEach((item, index) => {
         item.classList.toggle('active', index === sectionIndex);
     });
@@ -1357,10 +1957,14 @@ function showSection(sectionIndex) {
 }
 
 function nextSection() {
-    if (currentSection < 8) { // Max section index is 8 (Automation Regression)
+    const config = window.reportTypeConfigs && window.reportTypeConfigs[currentReportType];
+    const maxSection = config ? config.sections.length - 1 : 8;
+    
+    if (currentSection < maxSection) {
         showSection(currentSection + 1);
     }
 }
+
 function previousSection() {
     if (currentSection > 0) {
         showSection(currentSection - 1);
@@ -1368,15 +1972,27 @@ function previousSection() {
 }
 
 function updateNavigationButtons() {
-    document.getElementById('prevBtn').disabled = currentSection === 0;
-    const isLastSection = currentSection === 8;
-    document.getElementById('nextBtn').style.display = isLastSection ? 'none' : 'inline-block';
-    document.getElementById('submitBtn').style.display = isLastSection ? 'inline-block' : 'none';
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (prevBtn) prevBtn.disabled = currentSection === 0;
+    
+    const config = window.reportTypeConfigs && window.reportTypeConfigs[currentReportType];
+    const maxSection = config ? config.sections.length - 1 : 8;
+    const isLastSection = currentSection === maxSection;
+    
+    if (nextBtn) nextBtn.style.display = isLastSection ? 'none' : 'inline-block';
+    if (submitBtn) submitBtn.style.display = isLastSection ? 'inline-block' : 'none';
 }
 
 function updateProgressBar() {
-    const totalSections = 9;
-    const sectionTitles = [
+    // Get current report type configuration
+    const config = window.reportTypeConfigs && window.reportTypeConfigs[currentReportType];
+    
+    // Fallback to original values if no config
+    const totalSections = config ? config.sections.length : 9;
+    const sectionTitles = config ? config.sections.map(s => s.title) : [
         'General Details',
         'Test Summary',
         'Additional Info',
@@ -1394,12 +2010,15 @@ function updateProgressBar() {
     const percentage = (completedSections / totalSections) * 100;
 
     // Update progress percentage and fill
-    document.getElementById('progressPercent').textContent = `${Math.round(percentage)}%`;
-    document.getElementById('progressFill').style.width = `${percentage}%`;
-
-    // Update step and title text
-    document.getElementById('progressStep').textContent = `Step ${currentStepNumber} of ${totalSections}`;
-    document.getElementById('progressTitle').textContent = sectionTitles[currentSection] || 'Unknown Section';
+    const progressPercent = document.getElementById('progressPercent');
+    const progressFill = document.getElementById('progressFill');
+    const progressStep = document.getElementById('progressStep');
+    const progressTitle = document.getElementById('progressTitle');
+    
+    if (progressPercent) progressPercent.textContent = `${Math.round(percentage)}%`;
+    if (progressFill) progressFill.style.width = `${percentage}%`;
+    if (progressStep) progressStep.textContent = `Step ${currentStepNumber} of ${totalSections}`;
+    if (progressTitle) progressTitle.textContent = sectionTitles[currentSection] || 'Unknown Section';
 
     // Update step indicators
     document.querySelectorAll('.step').forEach((step, index) => {
@@ -1417,7 +2036,7 @@ function updateProgressBar() {
         } else {
             // Reset icon for future steps
             const icon = step.querySelector('.step-circle i');
-            const stepIcons = [
+            const stepIcons = config ? config.sections.map(s => s.icon) : [
                 'fas fa-info-circle',
                 'fas fa-chart-bar',
                 'fas fa-plus-square',
@@ -1428,7 +2047,7 @@ function updateProgressBar() {
                 'fas fa-note-sticky',
                 'fas fa-robot'
             ];
-            if (icon) {
+            if (icon && stepIcons[index]) {
                 icon.className = stepIcons[index] || 'fas fa-circle';
             }
         }
@@ -2750,6 +3369,32 @@ async function loadReportForEditing(report) {
 // Form submission handler
 // This listener should only be active on the create_report.html page
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize report type from global variable set by create_report.html
+    if (window.currentReportType) {
+        currentReportType = window.currentReportType;
+        console.log('Report type set to:', currentReportType);
+        
+        // Ensure Sprint Reports maintain full backward compatibility
+        if (currentReportType === 'sprint') {
+            ensureSprintReportCompatibility();
+        }
+        
+        // Configure Manual Reports
+        if (currentReportType === 'manual') {
+            configureManualReport();
+        }
+        
+        // Configure Automation Reports
+        if (currentReportType === 'automation') {
+            configureAutomationReport();
+        }
+        
+        // Configure Performance Reports
+        if (currentReportType === 'performance') {
+            configurePerformanceReport();
+        }
+    }
+    
     const qaReportForm = document.getElementById('qaReportForm');
     if (qaReportForm) {
         qaReportForm.addEventListener('submit', async function (e) {
@@ -2772,6 +3417,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            // Add report type
+            reportData.reportType = currentReportType;
+            
             // Add dynamic data (requestData, buildData, testerData, teamMemberData)
             reportData.requestData = requestData;
             reportData.buildData = buildData;
@@ -2779,6 +3427,22 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.teamMemberData = teamMemberData; // Add team member data
             reportData.qaNoteFieldsData = qaNoteFieldsData; // Add custom QA note fields
             reportData.qaNotesData = qaNotesData; // Add QA notes array data
+            reportData.bugsData = bugsData; // Add bugs data for automation reports
+            reportData.performanceScenarios = performanceScenarios; // Add performance scenarios
+            reportData.httpRequestsOverview = httpRequestsOverview; // Add HTTP requests overview
+            
+            // Collect performance criteria results from form fields
+            if (currentReportType === 'performance') {
+                const criteriaResults = [
+                    { criteria: 'Number of users', result: document.querySelector('[name="criteriaUsers"]')?.value || '' },
+                    { criteria: 'Total number of requests', result: document.querySelector('[name="criteriaTotalRequests"]')?.value || '' },
+                    { criteria: 'Number of Failed Requests', result: document.querySelector('[name="criteriaFailedRequests"]')?.value || '' },
+                    { criteria: 'Status/error codes', result: document.querySelector('[name="criteriaStatusCodes"]')?.value || '' },
+                    { criteria: 'Average Response', result: document.querySelector('[name="criteriaAvgResponse"]')?.value || '' },
+                    { criteria: 'Max Response Time', result: document.querySelector('[name="criteriaMaxResponse"]')?.value || '' }
+                ];
+                reportData.performanceCriteriaResults = criteriaResults;
+            }
             // reportData.customFields = customFieldsData; // Add custom fields data - REMOVED
 
             const savedReport = await saveReport(reportData);
@@ -3715,6 +4379,265 @@ function updateQANotesCount() {
         countField.value = qaNotesData.length;
     }
 }
+
+// --- Bug Management Functions (for Automation Reports) ---
+
+function showBugModal() {
+    showModal('bugModal');
+    // Clear the form fields when opening the modal
+    document.getElementById('bugTitle').value = '';
+    document.getElementById('bugDescription').value = '';
+    document.getElementById('bugUrl').value = '';
+    document.getElementById('bugSeverity').value = 'Medium';
+    document.getElementById('bugStatus').value = 'Open';
+}
+
+function addBug() {
+    const title = document.getElementById('bugTitle').value.trim();
+    const description = document.getElementById('bugDescription').value.trim();
+    const url = document.getElementById('bugUrl').value.trim();
+    const severity = document.getElementById('bugSeverity').value;
+    const status = document.getElementById('bugStatus').value;
+
+    if (title && description) {
+        const bug = {
+            id: 'bug_' + Date.now(),
+            title: title,
+            description: description,
+            url: url,
+            severity: severity,
+            status: status,
+            createdAt: new Date().toISOString()
+        };
+        
+        bugsData.push(bug);
+        renderBugsList();
+        closeModal('bugModal');
+        showToast('Bug added successfully!', 'success');
+    } else {
+        showToast('Please enter both title and description.', 'warning');
+    }
+}
+
+function renderBugsList() {
+    const container = document.getElementById('bugsList');
+    if (!container) return;
+
+    if (bugsData.length === 0) {
+        container.innerHTML = '<div class="empty-state">No bugs added yet. Click "Add Bug" to get started.</div>';
+        return;
+    }
+
+    let html = '';
+    bugsData.forEach((bug, index) => {
+        const severityClass = bug.severity.toLowerCase();
+        const statusClass = bug.status.toLowerCase().replace(' ', '-');
+        
+        html += `
+            <div class="list-item bug-item">
+                <div class="item-header">
+                    <div class="item-title">
+                        <i class="fas fa-bug"></i>
+                        <strong>${bug.title}</strong>
+                    </div>
+                    <div class="item-actions">
+                        <span class="severity-badge ${severityClass}">${bug.severity}</span>
+                        <span class="status-badge ${statusClass}">${bug.status}</span>
+                        <button class="delete-btn" onclick="removeBug(${index})" title="Remove Bug">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="item-content">
+                    <p>${bug.description}</p>
+                    ${bug.url ? `<p><strong>URL:</strong> <a href="${bug.url}" target="_blank">${bug.url}</a></p>` : ''}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+    
+    // Update bugs count metric
+    updateBugsCount();
+}
+
+function removeBug(index) {
+    if (confirm('Are you sure you want to remove this bug?')) {
+        bugsData.splice(index, 1);
+        renderBugsList();
+        updateBugsCount();
+        showToast('Bug removed successfully!', 'success');
+    }
+}
+
+// --- Performance Report Management Functions ---
+
+function showScenarioModal() {
+    showModal('scenarioModal');
+    // Clear the form fields when opening the modal
+    document.getElementById('scenarioName').value = '';
+    document.getElementById('scenarioUsers').value = '';
+    document.getElementById('scenarioSteps').value = '';
+}
+
+function addScenario() {
+    const name = document.getElementById('scenarioName').value.trim();
+    const users = document.getElementById('scenarioUsers').value.trim();
+    const steps = document.getElementById('scenarioSteps').value.trim();
+
+    if (name && users && steps) {
+        const scenario = {
+            id: 'scenario_' + Date.now(),
+            scenario_name: name,
+            users: users,
+            steps: steps,
+            createdAt: new Date().toISOString()
+        };
+        
+        performanceScenarios.push(scenario);
+        renderScenariosList();
+        closeModal('scenarioModal');
+        showToast('Performance scenario added successfully!', 'success');
+    } else {
+        showToast('Please fill in all fields.', 'warning');
+    }
+}
+
+function renderScenariosList() {
+    const container = document.getElementById('scenariosList');
+    if (!container) return;
+
+    if (performanceScenarios.length === 0) {
+        container.innerHTML = '<div class="empty-state">No scenarios added yet. Click "Add Scenario" to get started.</div>';
+        return;
+    }
+
+    let html = '';
+    performanceScenarios.forEach((scenario, index) => {
+        html += `
+            <div class="list-item scenario-item">
+                <div class="item-header">
+                    <div class="item-title">
+                        <i class="fas fa-play-circle"></i>
+                        <strong>${scenario.scenario_name}</strong>
+                    </div>
+                    <div class="item-actions">
+                        <span class="users-badge">${scenario.users} users</span>
+                        <button class="delete-btn" onclick="removeScenario(${index})" title="Remove Scenario">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="item-content">
+                    <p><strong>Steps:</strong></p>
+                    <p>${scenario.steps}</p>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+    
+    // Update scenarios count metric
+    updateScenariosCount();
+}
+
+function removeScenario(index) {
+    if (confirm('Are you sure you want to remove this scenario?')) {
+        performanceScenarios.splice(index, 1);
+        renderScenariosList();
+        updateScenariosCount();
+        showToast('Scenario removed successfully!', 'success');
+    }
+}
+
+function showHttpRequestModal() {
+    showModal('httpRequestModal');
+    // Clear the form fields when opening the modal
+    document.getElementById('requestEndpoint').value = '';
+    document.getElementById('requestStatus').value = '';
+    document.getElementById('requestCount').value = '';
+    document.getElementById('requestAvgTime').value = '';
+}
+
+function addHttpRequest() {
+    const endpoint = document.getElementById('requestEndpoint').value.trim();
+    const status = document.getElementById('requestStatus').value.trim();
+    const count = document.getElementById('requestCount').value.trim();
+    const avgTime = document.getElementById('requestAvgTime').value.trim();
+
+    if (endpoint && status && count && avgTime) {
+        const request = {
+            id: 'request_' + Date.now(),
+            request_endpoint: endpoint,
+            status: status,
+            count: count,
+            avg_time: avgTime,
+            createdAt: new Date().toISOString()
+        };
+        
+        httpRequestsOverview.push(request);
+        renderHttpRequestsTable();
+        closeModal('httpRequestModal');
+        showToast('HTTP request added successfully!', 'success');
+    } else {
+        showToast('Please fill in all fields.', 'warning');
+    }
+}
+
+function renderHttpRequestsTable() {
+    const tbody = document.getElementById('httpRequestsTableBody');
+    if (!tbody) return;
+
+    if (httpRequestsOverview.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5" class="empty-state">No HTTP requests added yet. Click "Add Request" to get started.</td></tr>';
+        return;
+    }
+
+    let html = '';
+    httpRequestsOverview.forEach((request, index) => {
+        const statusClass = getStatusClass(request.status);
+        html += `
+            <tr>
+                <td><code>${request.request_endpoint}</code></td>
+                <td><span class="status-badge ${statusClass}">${request.status}</span></td>
+                <td>${request.count}</td>
+                <td>${request.avg_time}</td>
+                <td>
+                    <button class="delete-btn" onclick="removeHttpRequest(${index})" title="Remove Request">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+    
+    // Update HTTP requests count metric
+    updateHttpRequestsCount();
+}
+
+function removeHttpRequest(index) {
+    if (confirm('Are you sure you want to remove this HTTP request?')) {
+        httpRequestsOverview.splice(index, 1);
+        renderHttpRequestsTable();
+        updateHttpRequestsCount();
+        showToast('HTTP request removed successfully!', 'success');
+    }
+}
+
+function getStatusClass(status) {
+    const statusCode = parseInt(status);
+    if (statusCode >= 200 && statusCode < 300) return 'success';
+    if (statusCode >= 300 && statusCode < 400) return 'warning';
+    if (statusCode >= 400 && statusCode < 500) return 'error';
+    if (statusCode >= 500) return 'critical';
+    return 'default';
+}
+
+
 
 // --- Page Management & Navigation (Simplified for multi-page app) ---
 

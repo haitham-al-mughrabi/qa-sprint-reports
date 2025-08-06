@@ -25,6 +25,70 @@
     
     <!-- Navigation script -->
     <script src="/static/nav.js" defer></script>
+
+    <script>
+        // Report type selection functionality
+        function selectReportType(type) {
+            // Add loading state
+            const card = event.currentTarget;
+            card.style.opacity = '0.7';
+            card.style.pointerEvents = 'none';
+            
+            // Add loading indicator
+            const icon = card.querySelector('.icon i');
+            const originalIcon = icon.className;
+            icon.className = 'fas fa-spinner fa-spin';
+            
+            // Navigate to create report with type parameter
+            setTimeout(() => {
+                window.location.href = `/create-report?type=${type}`;
+            }, 500);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load user info
+            await loadUserInfo();
+            
+            // Initialize theme
+            if (window.themeManager) {
+                window.themeManager.init();
+            }
+            
+            // Add hover effects
+            const cards = document.querySelectorAll('.report-type-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+
+        // Load user info function (if not already defined)
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/auth/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        document.querySelector('.user-name').textContent = data.user.first_name + ' ' + data.user.last_name;
+                        
+                        // Show/hide admin-only elements
+                        const adminElements = document.querySelectorAll('.admin-only');
+                        adminElements.forEach(element => {
+                            element.style.display = data.user.is_admin ? 'block' : 'none';
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+    </script>
 </head>
 
 <body>
@@ -96,31 +160,94 @@
     </nav>
 
     <div class="main-wrapper">
-        <div class="reports-container">
-            <div class="dashboard-header">
-                <h1><i class="fas fa-plus-circle"></i> Select New Report Type</h1>
-                <p>Choose a template to begin creating your quality assurance report.</p>
+        <div class="dashboard-container">
+            <div class="page-header centered">
+                <div class="header-content">
+                    <h1><i class="fas fa-plus-circle"></i> Select New Report Type</h1>
+                    <p>Choose a template to begin creating your quality assurance report.</p>
+                </div>
             </div>
+            
+            <div class="reports-container">
             <div class="report-types-grid">
-                <div class="report-type-card" onclick="location.href='/create-report?type=sprint'">
+                <!-- Sprint Report Card -->
+                <div class="report-type-card" onclick="selectReportType('sprint')">
                     <div class="icon"><i class="fas fa-running"></i></div>
                     <h2>Sprint Report</h2>
-                    <p>For agile sprint testing cycles, covering user stories, test cases, and bug analysis.</p>
+                    <p>Complete agile sprint testing report with all current sections including user stories, test cases, issues analysis, enhancements, and automation regression.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">✓ User Stories</span>
+                        <span class="feature-tag">✓ Test Cases</span>
+                        <span class="feature-tag">✓ Issues Analysis</span>
+                        <span class="feature-tag">✓ Enhancements</span>
+                        <span class="feature-tag">✓ Automation Regression</span>
+                        <span class="feature-tag">✓ QA Notes</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="report-type-badge sprint">Full Report</span>
+                    </div>
                 </div>
-                <div class="report-type-card" onclick="location.href='/create-report?type=manual'">
+
+                <!-- Manual Report Card -->
+                <div class="report-type-card" onclick="selectReportType('manual')">
                     <div class="icon"><i class="fas fa-hand-pointer"></i></div>
                     <h2>Manual Report</h2>
-                    <p>Detailed report for manual test executions, focusing on step-by-step validation.</p>
+                    <p>Focused manual testing report with all sprint sections except automation regression. Perfect for manual testing cycles.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">✓ User Stories</span>
+                        <span class="feature-tag">✓ Test Cases</span>
+                        <span class="feature-tag">✓ Issues Analysis</span>
+                        <span class="feature-tag">✓ Enhancements</span>
+                        <span class="feature-tag">✓ QA Notes</span>
+                        <span class="feature-tag excluded">✗ Automation Regression</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="report-type-badge manual">Manual Focus</span>
+                    </div>
                 </div>
-                <div class="report-type-card" onclick="location.href='/create-report?type=automation'">
+
+                <!-- Automation Report Card -->
+                <div class="report-type-card" onclick="selectReportType('automation')">
                     <div class="icon"><i class="fas fa-robot"></i></div>
                     <h2>Automation Report</h2>
-                    <p>Summary of automated test suite runs, including pass/fail rates and performance metrics.</p>
+                    <p>Specialized automation testing report with regression results, covered services, modules, and bug tracking.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">✓ Regression Test Results</span>
+                        <span class="feature-tag">✓ Covered Services & Modules</span>
+                        <span class="feature-tag">✓ Bug Tracking</span>
+                        <span class="feature-tag">✓ QA Automation Notes</span>
+                        <span class="feature-tag excluded">✗ User Stories</span>
+                        <span class="feature-tag excluded">✗ Manual Test Cases</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="report-type-badge automation">Automation Focus</span>
+                    </div>
                 </div>
-                <div class="report-type-card" onclick="location.href='/create-report?type=performance'">
+
+                <!-- Performance Report Card -->
+                <div class="report-type-card" onclick="selectReportType('performance')">
                     <div class="icon"><i class="fas fa-tachometer-alt"></i></div>
                     <h2>Performance Report</h2>
-                    <p>Analysis of system performance under load, covering response times and resource usage.</p>
+                    <p>Comprehensive performance testing report with load metrics, scenarios, and HTTP request analysis.</p>
+                    <div class="card-features">
+                        <span class="feature-tag">✓ Load Testing Metrics</span>
+                        <span class="feature-tag">✓ Performance Scenarios</span>
+                        <span class="feature-tag">✓ HTTP Request Analysis</span>
+                        <span class="feature-tag">✓ Response Time Analysis</span>
+                        <span class="feature-tag">✓ Throughput Metrics</span>
+                        <span class="feature-tag">✓ Error Rate Analysis</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="report-type-badge performance">Performance Focus</span>
+                    </div>
+                </div>
+            </div>
+
+                <!-- Back to Reports Button -->
+                <div class="action-buttons">
+                    <button class="btn-secondary" onclick="window.location.href='/reports'">
+                        <i class="fas fa-arrow-left"></i> Back to Reports
+                    </button>
                 </div>
             </div>
         </div>
