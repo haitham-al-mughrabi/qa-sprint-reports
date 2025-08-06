@@ -155,7 +155,7 @@
                 
                 <!-- Performance Report Navigation Items -->
                 <a href="#" class="nav-item performance-nav" onclick="showSection(0)" style="display: none;"><i class="fas fa-info-circle"></i> Performance General Details</a>
-                <a href="#" class="nav-item performance-nav" onclick="showSection(1)" style="display: none;"><i class="fas fa-tachometer-alt"></i> Test Metrics & Load</a>
+                <a href="#" class="nav-item performance-nav" onclick="showSection(1)" style="display: none;"><i class="fas fa-tachometer-alt"></i> Test Summary</a>
                 <a href="#" class="nav-item performance-nav" onclick="showSection(2)" style="display: none;"><i class="fas fa-chart-line"></i> Response Time Analysis</a>
                 <a href="#" class="nav-item performance-nav" onclick="showSection(3)" style="display: none;"><i class="fas fa-table"></i> Performance Criteria Results</a>
                 <a href="#" class="nav-item performance-nav" onclick="showSection(4)" style="display: none;"><i class="fas fa-play-circle"></i> Performance Test Scenarios</a>
@@ -1562,10 +1562,6 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label for="perfTestDuration">Test Duration</label>
-                                                <input type="text" id="perfTestDuration" name="testDuration" placeholder="e.g., 30 minutes">
-                                            </div>
-                                            <div class="form-group">
                                                 <label for="perfTestTool">Testing Tool</label>
                                                 <input type="text" id="perfTestTool" name="testTool" placeholder="e.g., JMeter, LoadRunner, K6">
                                             </div>
@@ -1593,23 +1589,20 @@
                             </div>
                         </div>
 
-                        <!-- Section 12: Test Metrics & Load (Performance Report Only) -->
+                        <!-- Section 12: Test Summary (Performance Report Only) -->
                         <div class="section" id="section-p1" style="display: none;">
-                            <h2 class="section-title"><i class="fas fa-tachometer-alt"></i> Test Metrics & Load</h2>
+                            <h2 class="section-title"><i class="fas fa-tachometer-alt"></i> Test Summary</h2>
                             <div class="test-summary-layout">
+                                <!-- New section with two input fields -->
                                 <div class="performance-summary-card">
                                     <div class="info-card-v2-header">
-                                        <i class="fas fa-tachometer-alt"></i>
-                                        <h3>Load Configuration</h3>
+                                        <i class="fas fa-users"></i>
+                                        <h3>Test Execution Details</h3>
                                     </div>
                                     <div class="info-card-v2-content">
                                         <div class="form-row-fields">
                                             <div class="form-group">
-                                                <label for="userLoad">User Load</label>
-                                                <input type="text" id="userLoad" name="userLoad" placeholder="e.g., 100 concurrent users">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="numberOfUsers">Number of Users (VUs)</label>
+                                                <label for="numberOfUsers">Number of Users</label>
                                                 <input type="text" id="numberOfUsers" name="numberOfUsers" placeholder="e.g., 100 VUs">
                                             </div>
                                             <div class="form-group">
@@ -1617,20 +1610,50 @@
                                                 <input type="text" id="executionDuration" name="executionDuration" placeholder="e.g., 30 minutes">
                                             </div>
                                         </div>
-                                        <div class="form-row-fields">
-                                            <div class="form-group">
-                                                <label for="requestVolume">Request Volume</label>
-                                                <input type="text" id="requestVolume" name="requestVolume" placeholder="e.g., 10,000 requests">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="maxThroughput">Max Throughput</label>
-                                                <input type="text" id="maxThroughput" name="maxThroughput" placeholder="e.g., 500 req/sec">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="errorRate">Error Rate</label>
-                                                <input type="text" id="errorRate" name="errorRate" placeholder="e.g., 0.5%">
-                                            </div>
-                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Load Configuration converted to table -->
+                                <div class="performance-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <h3>Load Configuration</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Metric</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>User Load</strong></td>
+                                                    <td><input type="text" id="userLoad" name="userLoad" placeholder="e.g., 100 concurrent users" style="border: none; background: transparent; width: 100%; padding: 8px; font-size: 14px;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Response Time</strong></td>
+                                                    <td><input type="text" id="responseTime" name="responseTime" placeholder="e.g., 250ms average" style="border: none; background: transparent; width: 100%; padding: 8px; font-size: 14px;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Request Volume</strong></td>
+                                                    <td><input type="text" id="requestVolume" name="requestVolume" placeholder="e.g., 10,000 requests" style="border: none; background: transparent; width: 100%; padding: 8px; font-size: 14px;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Error Rate</strong></td>
+                                                    <td><input type="text" id="errorRate" name="errorRate" placeholder="e.g., 0.5%" style="border: none; background: transparent; width: 100%; padding: 8px; font-size: 14px;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Slowest</strong></td>
+                                                    <td><input type="text" id="slowestResponse" name="slowestResponse" placeholder="e.g., 2.5s" style="border: none; background: transparent; width: 100%; padding: 8px; font-size: 14px;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Fastest</strong></td>
+                                                    <td><input type="text" id="fastestResponse" name="fastestResponse" placeholder="e.g., 50ms" style="border: none; background: transparent; width: 100%; padding: 8px; font-size: 14px;"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -1646,34 +1669,32 @@
                                         <h3>Response Time Metrics</h3>
                                     </div>
                                     <div class="info-card-v2-content">
-                                        <div class="form-row-fields">
-                                            <div class="form-group">
-                                                <label for="responseTime">Average Response Time</label>
-                                                <input type="text" id="responseTime" name="responseTime" placeholder="e.g., 250ms average">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="avgResponseTime">AVG Response Time</label>
-                                                <input type="text" id="avgResponseTime" name="avgResponseTime" placeholder="e.g., 180ms">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="responseTime95Percent">95% Response Time</label>
-                                                <input type="text" id="responseTime95Percent" name="responseTime95Percent" placeholder="e.g., 450ms">
-                                            </div>
-                                        </div>
-                                        <div class="form-row-fields">
-                                            <div class="form-group">
-                                                <label for="fastestResponse">Fastest Response</label>
-                                                <input type="text" id="fastestResponse" name="fastestResponse" placeholder="e.g., 50ms">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="slowestResponse">Slowest Response</label>
-                                                <input type="text" id="slowestResponse" name="slowestResponse" placeholder="e.g., 2.5s">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="httpFailures">HTTP Failures</label>
-                                                <input type="text" id="httpFailures" name="httpFailures" placeholder="e.g., 25 failures">
-                                            </div>
-                                        </div>
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Metric</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Max Throughput</strong></td>
+                                                    <td><input type="text" id="maxThroughput" name="maxThroughput" placeholder="e.g., 500 req/sec" style="border: none; background: transparent; width: 100%; padding: 8px; font-size: 14px;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>HTTP Failures</strong></td>
+                                                    <td><input type="text" id="httpFailures" name="httpFailures" placeholder="e.g., 25 failures" style="border: none; background: transparent; width: 100%; padding: 8px; font-size: 14px;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>AVG Response Time</strong></td>
+                                                    <td><input type="text" id="avgResponseTime" name="avgResponseTime" placeholder="e.g., 180ms" style="border: none; background: transparent; width: 100%; padding: 8px; font-size: 14px;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>95% Response Time</strong></td>
+                                                    <td><input type="text" id="responseTime95Percent" name="responseTime95Percent" placeholder="e.g., 450ms" style="border: none; background: transparent; width: 100%; padding: 8px; font-size: 14px;"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -2200,7 +2221,7 @@
                 title: 'Create Performance Report',
                 sections: [
                     { id: 'section-p0', name: 'general', title: 'Performance General Details', icon: 'fas fa-info-circle' },
-                    { id: 'section-p1', name: 'testMetrics', title: 'Test Metrics & Load', icon: 'fas fa-tachometer-alt' },
+                    { id: 'section-p1', name: 'testSummary', title: 'Test Summary', icon: 'fas fa-tachometer-alt' },
                     { id: 'section-p2', name: 'responseAnalysis', title: 'Response Time Analysis', icon: 'fas fa-chart-line' },
                     { id: 'section-p3', name: 'criteriaResults', title: 'Performance Criteria Results', icon: 'fas fa-table' },
                     { id: 'section-p4', name: 'scenarios', title: 'Performance Test Scenarios', icon: 'fas fa-play-circle' },

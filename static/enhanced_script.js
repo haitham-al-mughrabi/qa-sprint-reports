@@ -386,7 +386,7 @@ function updateProgressBarForReportType(reportType, totalSections) {
     } else if (reportType === 'performance') {
         stepConfigs = [
             { step: 0, icon: 'fas fa-info-circle', label: 'General' },
-            { step: 1, icon: 'fas fa-tachometer-alt', label: 'Metrics' },
+            { step: 1, icon: 'fas fa-tachometer-alt', label: 'Summary' },
             { step: 2, icon: 'fas fa-chart-line', label: 'Response' },
             { step: 3, icon: 'fas fa-table', label: 'Criteria' },
             { step: 4, icon: 'fas fa-play-circle', label: 'Scenarios' },
