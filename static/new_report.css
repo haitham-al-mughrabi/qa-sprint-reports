@@ -357,6 +357,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    flex-shrink: 0;
 }
 
 .report-type-selector {
@@ -414,9 +415,11 @@
 }
 
 .sections-title {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 1.5rem 0;
-    border-top: 1px solid var(--border);
+    width: 100%;
 }
 
 .sections-icon {
@@ -447,6 +450,9 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-right: 10px;
 }
 
 .nav-item {
@@ -512,18 +518,20 @@
 
 /* Sidebar Styles */
 .sidebar {
-    flex: 0 0 320px;
-    background: rgba(30, 41, 59, 0.4);
-    backdrop-filter: blur(8px);
+    width: 250px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
     padding: 1.5rem;
-    border-radius: var(--border-radius-large);
-    border: 1px solid rgba(51, 65, 85, 0.3);
-    position: sticky;
-    top: calc(var(--nav-height, 4rem) + 20px);
-    height: calc(100vh - var(--nav-height, 4rem) - 40px);
-    overflow-y: auto;
-    z-index: 10;
-    transition: all 0.3s ease;
+    position: fixed;
+    height: calc(100vh - var(--nav-height) - 3rem);
+    top: var(--nav-height);
+    left: 0;
+    transition: var(--transition);
+    z-index: 100;
+    box-shadow: var(--shadow-light);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .sidebar.collapsed {
@@ -1161,23 +1169,7 @@
     min-height: 100vh;
 }
 
-.sidebar {
-    width: 250px;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: 1.5rem;
-    position: fixed;
-    height: calc(100vh - var(--nav-height));
-    top: var(--nav-height);
-    left: 0;
-    overflow-y: auto;
-    transition: var(--transition);
-    z-index: 100;
-    box-shadow: var(--shadow-light);
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
+
 
 .sidebar-header {
     margin-bottom: 1rem;
