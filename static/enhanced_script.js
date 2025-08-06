@@ -1743,7 +1743,14 @@ function clearAllFields() {
 
 function clearCurrentSection() {
     if (confirm('Are you sure you want to clear all fields in the current section?')) {
-        const section = document.getElementById(`section-${currentSection}`);
+        let targetSectionId = `section-${currentSection}`;
+        if (currentReportType === 'automation') {
+            targetSectionId = `section-a${currentSection}`;
+        } else if (currentReportType === 'performance') {
+            targetSectionId = `section-p${currentSection}`;
+        }
+
+        const section = document.getElementById(targetSectionId);
         if (section) {
             // Clear all form inputs in the current section
             const inputs = section.querySelectorAll('input:not([readonly]), textarea, select');
@@ -1755,87 +1762,140 @@ function clearCurrentSection() {
                 }
             });
 
-            // Clear section-specific dynamic data based on current section
-            switch (currentSection) {
-                case 1: // Section 2: Dynamic Lists (Requests, Builds, Testers, Team Members)
-                    if (section.querySelector('#requestsList')) {
-                        requestData = [];
-                        renderRequestList();
-                    }
-                    if (section.querySelector('#buildsList')) {
-                        buildData = [];
-                        renderBuildList();
-                    }
-                    if (section.querySelector('#testersList')) {
-                        testerData = [];
-                        renderTesterList();
-                    }
-                    if (section.querySelector('#teamMembersList')) {
-                        teamMemberData = [];
-                        renderTeamMemberList();
+            // Clear section-specific dynamic data based on current report type and section
+            switch (currentReportType) {
+                case 'sprint':
+                case 'manual':
+                    switch (currentSection) {
+                        case 1: // Section 2: Dynamic Lists (Requests, Builds, Testers, Team Members)
+                            if (section.querySelector('#requestsList')) {
+                                requestData = [];
+                                renderRequestList();
+                            }
+                            if (section.querySelector('#buildsList')) {
+                                buildData = [];
+                                renderBuildList();
+                            }
+                            if (section.querySelector('#testersList')) {
+                                testerData = [];
+                                renderTesterList();
+                            }
+                            if (section.querySelector('#teamMembersList')) {
+                                teamMemberData = [];
+                                renderTeamMemberList();
+                            }
+                            break;
+                        case 2: // Section 3: User Stories
+                            calculatePercentages();
+                            break;
+                        case 3: // Section 4: Test Cases
+                            calculateTestCasesPercentages();
+                            break;
+                        case 4: // Section 5: Issues
+                            calculateIssuesPercentages();
+                            break;
+                        case 5: // Section 6: Enhancements
+                            calculateEnhancementsPercentages();
+                            break;
+                        case 6: // Section 7: Automation Regression (Sprint only)
+                            if (currentReportType === 'sprint') {
+                                calculateAutomationPercentages();
+                                calculateAutomationStabilityPercentages();
+                            }
+                            break;
+                        case 7: // Section 8: QA Notes (Manual/Sprint)
+                            qaNotesData = [];
+                            qaNoteFieldsData = [];
+                            renderQANotesList();
+                            renderQANoteFieldsList();
+                            updateQANotesCount();
+                            break;
                     }
                     break;
-                    
-                case 2: // Section 3: User Stories
-                    calculatePercentages();
-                    break;
-                    
-                case 3: // Section 4: Test Cases
-                    calculateTestCasesPercentages();
-                    break;
-                    
-                case 4: // Section 5: Issues
-                    calculateIssuesPercentages();
-                    break;
-                    
-                case 5: // Section 6: Enhancements
-                    calculateEnhancementsPercentages();
-                    break;
-                    
-                case 6: // Section 7: Automation Regression
-                    calculateAutomationPercentages();
-                    calculateAutomationStabilityPercentages();
-                    break;
-                    
-                case 7: // Section 8: QA Notes
-                    qaNotesData = [];
-                    qaNoteFieldsData = [];
-                    renderQANotesList();
-                    renderQANoteFieldsList();
-                    updateQANotesCount();
-                    break;
-                    
-                case 8: // Section 9: Report-specific sections (Automation/Performance)
-                    // Clear automation report data
-                    if (section.querySelector('#autoBugsList')) {
-                        bugsData = [];
-                        renderBugsList();
-                        updateBugsCount();
+
+                case 'automation':
+                    switch (currentSection) {
+                        case 1: // Section a1: Test Summary (Automation) - No specific dynamic data to clear here beyond inputs
+                            break;
+                        case 2: // Section a2: Additional Info (Automation) - Requests, Builds, Testers, Team Members
+                            if (section.querySelector('#requestsList')) {
+                                requestData = [];
+                                renderRequestList();
+                            }
+                            if (section.querySelector('#buildsList')) {
+                                buildData = [];
+                                renderBuildList();
+                            }
+                            if (section.querySelector('#testersList')) {
+                                testerData = [];
+                                renderTesterList();
+                            }
+                            if (section.querySelector('#teamMembersList')) {
+                                teamMemberData = [];
+                                renderTeamMemberList();
+                            }
+                            break;
+                        case 3: // Section a3: Regression Test Results (Automation)
+                            calculateAutomationPercentages();
+                            calculateAutomationStabilityPercentages();
+                            break;
+                        case 4: // Section a4: QA Automation Notes (Automation)
+                            qaNotesData = [];
+                            qaNoteFieldsData = [];
+                            renderQANotesList();
+                            renderQANoteFieldsList();
+                            updateQANotesCount();
+                            break;
+                        case 5: // Section a5: Covered Services & Modules (Automation)
+                            if (section.querySelector('#servicesList')) {
+                                servicesData = [];
+                                if (typeof renderServicesList === 'function') renderServicesList();
+                            }
+                            if (section.querySelector('#modulesList')) {
+                                modulesData = [];
+                                if (typeof renderModulesList === 'function') renderModulesList();
+                            }
+                            break;
+                        case 6: // Section a6: Bugs (Automation)
+                            if (section.querySelector('#autoBugsList')) {
+                                bugsData = [];
+                                renderBugsList();
+                                updateBugsCount();
+                            }
+                            break;
                     }
-                    if (section.querySelector('#servicesList')) {
-                        servicesData = [];
-                        if (typeof renderServicesList === 'function') renderServicesList();
-                    }
-                    if (section.querySelector('#modulesList')) {
-                        modulesData = [];
-                        if (typeof renderModulesList === 'function') renderModulesList();
-                    }
-                    
-                    // Clear performance report data
-                    if (section.querySelector('#scenariosList')) {
-                        performanceScenarios = [];
-                        renderScenariosList();
-                        updateScenariosCount();
-                    }
-                    if (section.querySelector('#httpRequestsTableBody')) {
-                        httpRequestsOverview = [];
-                        renderHttpRequestsTable();
-                        updateHttpRequestsCount();
+                    break;
+
+                case 'performance':
+                    switch (currentSection) {
+                        case 1: // Section p1: Test Metrics & Load (Performance) - No specific dynamic data to clear beyond inputs
+                            break;
+                        case 2: // Section p2: Response Time Analysis (Performance) - No specific dynamic data to clear beyond inputs
+                            break;
+                        case 3: // Section p3: Performance Criteria Results (Performance) - No specific dynamic data to clear beyond inputs
+                            break;
+                        case 4: // Section p4: Performance Test Scenarios (Performance)
+                            if (section.querySelector('#scenariosList')) {
+                                performanceScenarios = [];
+                                renderScenariosList();
+                                updateScenariosCount();
+                            }
+                            break;
+                        case 5: // Section p5: HTTP Requests Overview (Performance)
+                            if (section.querySelector('#httpRequestsTableBody')) {
+                                httpRequestsOverview = [];
+                                renderHttpRequestsTable();
+                                updateHttpRequestsCount();
+                            }
+                            break;
                     }
                     break;
             }
 
             showToast('Current section fields have been cleared.', 'info');
+        } else {
+            console.warn('Could not find section with ID:', targetSectionId);
+            showToast('Failed to clear section: Section not found.', 'error');
         }
     }
 }
