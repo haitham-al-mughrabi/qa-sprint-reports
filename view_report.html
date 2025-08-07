@@ -1754,9 +1754,9 @@
                 evaluationSection.style.display = 'block';
                 
                 if (evaluationData.length > 0) {
-                    // Calculate final score out of 100 (average of all scores)
+                    // Calculate final score as sum of all scores, capped at 100
                     const totalScore = evaluationData.reduce((sum, item) => sum + item.score, 0);
-                    const finalScore = Math.round(totalScore / evaluationData.length);
+                    const finalScore = Math.min(totalScore, 100);
                     
                     // Create evaluation scores table
                     let tableHtml = `
@@ -1788,7 +1788,7 @@
                                 <tr class="evaluation-final-score">
                                     <td><strong>Final Score</strong></td>
                                     <td><strong>${finalScore}/100</strong></td>
-                                    <td><em>Auto-calculated total</em></td>
+                                    <td><em>Sum of all scores (max 100)</em></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -2673,10 +2673,10 @@
                     item.reason
                 ]);
                 
-                // Calculate final score out of 100 (average)
+                // Calculate final score as sum of all scores, capped at 100
                 const totalScore = currentReport.evaluationData.reduce((sum, item) => sum + item.score, 0);
-                const finalScore = Math.round(totalScore / currentReport.evaluationData.length);
-                evaluationRows.push(['Final Score', `${finalScore}/100`, 'Auto-calculated total']);
+                const finalScore = Math.min(totalScore, 100);
+                evaluationRows.push(['Final Score', `${finalScore}/100`, 'Sum of all scores (max 100)']);
                 
                 doc.autoTable({
                     head: [evaluationHeaders],
@@ -2776,7 +2776,7 @@
                 ["Automation Flaky Tests", currentReport.automationFlakyTests || 0],
                 ["QA Notes", currentReport.qaNotesData && currentReport.qaNotesData.length > 0 ? `${currentReport.qaNotesData.length} notes` : 'N/A'],
                 ["Evaluation Score", (currentReport.reportType === 'sprint' || currentReport.reportType === 'manual') && currentReport.evaluationData && currentReport.evaluationData.length > 0 ? 
-                    `${Math.round(currentReport.evaluationData.reduce((sum, item) => sum + item.score, 0) / currentReport.evaluationData.length)}/100` : 'N/A']
+                    `${Math.min(currentReport.evaluationData.reduce((sum, item) => sum + item.score, 0), 100)}/100` : 'N/A']
             ];
             const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
             XLSX.utils.book_append_sheet(workbook, wsSummary, "Summary");
@@ -2851,8 +2851,8 @@
                 
                 // Add final score row
                 const totalScore = currentReport.evaluationData.reduce((sum, item) => sum + item.score, 0);
-                const finalScore = Math.round(totalScore / currentReport.evaluationData.length);
-                evaluationSheetData.push(["Final Score", `${finalScore}/100`, "Auto-calculated total"]);
+                const finalScore = Math.min(totalScore, 100);
+                evaluationSheetData.push(["Final Score", `${finalScore}/100`, "Sum of all scores (max 100)"]);
                 
                 const wsEvaluation = XLSX.utils.aoa_to_sheet([evaluationHeaders, ...evaluationSheetData]);
                 XLSX.utils.book_append_sheet(workbook, wsEvaluation, "Evaluation");

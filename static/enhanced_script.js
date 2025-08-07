@@ -4098,7 +4098,7 @@ async function addProject() {
 
 function getCurrentDate() {
     const today = new Date();
-    return `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
 function formatDate(dateString) {
@@ -5138,7 +5138,7 @@ function loadSelectedData() {
         document.getElementById('reportVersion').value = latestData.reportVersion;
         // Set today's date
         const today = new Date();
-        const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+        const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
         document.getElementById('reportDate').value = formattedDate;
     }
 
@@ -5165,7 +5165,7 @@ function loadSelectedData() {
 // Function to set default values for new projects
 function setDefaultValues(defaults) {
     const today = new Date();
-    const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+    const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
 
     // Helper function to set value if element exists
     function setValue(id, value) {
@@ -6464,8 +6464,8 @@ function updateEvaluationScore() {
         }
     }
 
-    // Calculate final score out of 100 (average of all filled scores)
-    const finalScore = filledCount > 0 ? Math.round(totalScore / filledCount) : 0;
+    // Calculate final score as sum of all filled scores, capped at 100
+    const finalScore = Math.min(totalScore, 100);
 
     // Update final score display
     const finalScoreElement = document.getElementById('finalScore');

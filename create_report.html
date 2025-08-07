@@ -950,7 +950,7 @@
                                                 <tr class="final-score-row">
                                                     <td><strong>Final Score</strong></td>
                                                     <td><strong id="finalScore">0/100</strong></td>
-                                                    <td><em>Auto-calculated total</em></td>
+                                                    <td><em>Sum of all scores (max 100)</em></td>
                                                 </tr>
                                             </tfoot>
                                         </table>
@@ -1195,8 +1195,8 @@
                                                 <input type="text" id="autoReportVersion" name="reportVersion" placeholder="e.g., 1.0, 2.1">
                                             </div>
                                             <div class="form-group">
-                                                <label for="autoReportDate">Report Date (dd-mm-yyyy)</label>
-                                                <input type="text" id="autoReportDate" name="reportDate" pattern="\\d{2}-\\d{2}-\\d{4}" placeholder="dd-mm-yyyy">
+                                                <label for="autoReportDate">Report Date</label>
+                                                <input type="date" id="autoReportDate" name="reportDate" required>
                                             </div>
                                         </div>
                                     </div>
@@ -1527,8 +1527,8 @@
                                                 <input type="text" id="perfReportVersion" name="reportVersion" placeholder="v1.0">
                                             </div>
                                             <div class="form-group">
-                                                <label for="perfReportDate">Report Date (dd-mm-yyyy)</label>
-                                                <input type="text" id="perfReportDate" name="reportDate" pattern="\\d{2}-\\d{2}-\\d{4}" placeholder="dd-mm-yyyy">
+                                                <label for="perfReportDate">Report Date</label>
+                                                <input type="date" id="perfReportDate" name="reportDate" required>
                                             </div>
                                         </div>
                                     </div>
