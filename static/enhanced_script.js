@@ -16,19 +16,13 @@ let currentReportType = 'sprint'; // Default to sprint for backward compatibilit
 // Function to ensure Sprint Reports maintain full backward compatibility
 function ensureSprintReportCompatibility() {
     console.log('Ensuring Sprint Report backward compatibility...');
-    
-    // Hide all navigation groups first
-    const allNavGroups = document.querySelectorAll('.nav-group');
-    allNavGroups.forEach(group => {
-        group.style.display = 'none';
-    });
-    
+
     // Show only sprint navigation group
     const sprintNavGroup = document.querySelector('.sprint-nav-group');
     if (sprintNavGroup) {
         sprintNavGroup.style.display = 'block';
     }
-    
+
     // Set active state for first sprint nav item
     const sprintNavItems = document.querySelectorAll('.sprint-nav');
     sprintNavItems.forEach((item, index) => {
@@ -38,47 +32,41 @@ function ensureSprintReportCompatibility() {
             item.classList.remove('active');
         }
     });
-    
+
     // Update progress bar for sprint report (10 sections)
     updateProgressBarForReportType('sprint', 10);
-    
+
     // Update Testing Metrics for Sprint Report
     updateTestingMetricsForReportType('sprint');
-    
+
     // Set report date
     const reportDateField = document.getElementById('reportDate');
     if (reportDateField && !reportDateField.value) {
         reportDateField.value = getCurrentDate();
     }
-    
+
     // Hide all sections first, then show the first section
     document.querySelectorAll('.section').forEach(s => {
         s.classList.remove('active');
         s.style.display = 'none';
     });
-    
+
     // Show the first section
     setTimeout(() => showSection(0), 100);
-    
+
     console.log('✅ Sprint Report compatibility ensured');
 }
 
 // Function to configure Manual Reports (all sections except Automation Regression)
 function configureManualReport() {
     console.log('Configuring Manual Report...');
-    
-    // Hide all navigation groups first
-    const allNavGroups = document.querySelectorAll('.nav-group');
-    allNavGroups.forEach(group => {
-        group.style.display = 'none';
-    });
-    
+
     // Show only manual navigation group
     const manualNavGroup = document.querySelector('.manual-nav-group');
     if (manualNavGroup) {
         manualNavGroup.style.display = 'block';
     }
-    
+
     // Set active state for first manual nav item
     const manualNavItems = document.querySelectorAll('.manual-nav');
     manualNavItems.forEach((item, index) => {
@@ -88,41 +76,35 @@ function configureManualReport() {
             item.classList.remove('active');
         }
     });
-    
+
     // Update progress bar for manual report (9 sections)
     updateProgressBarForReportType('manual', 9);
-    
+
     // Update Testing Metrics for Manual Report
     updateTestingMetricsForReportType('manual');
-    
+
     // Set report date
     const reportDateField = document.getElementById('reportDate');
     if (reportDateField && !reportDateField.value) {
         reportDateField.value = getCurrentDate();
     }
-    
+
     // Hide all sections first, then show the first section
     document.querySelectorAll('.section').forEach(s => {
         s.classList.remove('active');
         s.style.display = 'none';
     });
-    
+
     // Show the first section
     setTimeout(() => showSection(0), 100);
-    
+
     console.log('✅ Manual Report configured (9 sections, excluding Automation Regression)');
 }
 
 // Function to configure Automation Reports
 function configureAutomationReport() {
     console.log('Configuring Automation Report...');
-    
-    // Hide all navigation items first
-    const allNavItems = document.querySelectorAll('#sidebar .nav-item');
-    allNavItems.forEach(item => {
-        item.style.display = 'none';
-    });
-    
+
     // Show only automation navigation items and keep them visible
     const automationNavItems = document.querySelectorAll('.automation-nav');
     automationNavItems.forEach((item, index) => {
@@ -135,13 +117,13 @@ function configureAutomationReport() {
             item.classList.remove('active');
         }
     });
-    
-    // Update progress bar for automation report (7 sections)
-    updateProgressBarForReportType('automation', 7);
-    
+
+    // Update progress bar for automation report (8 sections)
+    updateProgressBarForReportType('automation', 8);
+
     // Update Testing Metrics for Automation Report
     updateTestingMetricsForReportType('automation');
-    
+
     // Set report date for automation report
     const reportDateField = document.getElementById('reportDate');
     const autoReportDateField = document.getElementById('autoReportDate');
@@ -151,38 +133,38 @@ function configureAutomationReport() {
     if (autoReportDateField && !autoReportDateField.value) {
         autoReportDateField.value = getCurrentDate();
     }
-    
+
     // Hide all sections first, then show the first section
     document.querySelectorAll('.section').forEach(s => {
         s.classList.remove('active');
         s.style.display = 'none';
     });
-    
+
     // Show the first section
     setTimeout(() => showSection(0), 100);
-    
-    console.log('✅ Automation Report configured (7 sections with renamed and new sections)');
+
+    console.log('✅ Automation Report configured (8 sections with renamed and new sections)');
 }
 
 // Function to configure Performance Reports
 function configurePerformanceReport() {
     console.log('Configuring Performance Report...');
-    
-    // Hide all navigation items first
-    const allNavItems = document.querySelectorAll('#sidebar .nav-item');
-    allNavItems.forEach(item => {
-        item.style.display = 'none';
-    });
-    
+
     // Show only performance navigation items
     const performanceNavItems = document.querySelectorAll('.performance-nav');
-    performanceNavItems.forEach(item => {
+    performanceNavItems.forEach((item, index) => {
         item.style.display = 'block';
+        // Set first item as active
+        if (index === 0) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
     });
-    
+
     // Update progress bar for performance report (6 sections)
     updateProgressBarForReportType('performance', 6);
-    
+
     // Set report date for performance report
     const reportDateField = document.getElementById('reportDate');
     const perfReportDateField = document.getElementById('perfReportDate');
@@ -192,16 +174,16 @@ function configurePerformanceReport() {
     if (perfReportDateField && !perfReportDateField.value) {
         perfReportDateField.value = getCurrentDate();
     }
-    
+
     // Hide all sections first, then show the first section
     document.querySelectorAll('.section').forEach(s => {
         s.classList.remove('active');
         s.style.display = 'none';
     });
-    
+
     // Show the first section
     setTimeout(() => showSection(0), 100);
-    
+
     console.log('✅ Performance Report configured (6 sections with performance-specific content)');
 }
 
@@ -209,18 +191,18 @@ function configurePerformanceReport() {
 function updateAutomationAdditionalInfo() {
     const additionalInfoSection = document.getElementById('section-2');
     if (!additionalInfoSection) return;
-    
+
     // Hide Request Information and Build Information for Automation Reports
     const requestCard = additionalInfoSection.querySelector('.info-card-v2:has([onclick="showRequestModal()"])');
     const buildCard = additionalInfoSection.querySelector('.info-card-v2:has([onclick="showBuildModal()"])');
-    
+
     if (requestCard) requestCard.style.display = 'none';
     if (buildCard) buildCard.style.display = 'none';
-    
+
     // Keep only Tester(s) Information and Team Members
     const testerCard = additionalInfoSection.querySelector('.info-card-v2:has([onclick="showTesterModal()"])');
     const teamMemberCard = additionalInfoSection.querySelector('.info-card-v2:has([onclick="showTeamMemberModal()"])');
-    
+
     if (testerCard) testerCard.style.display = 'block';
     if (teamMemberCard) teamMemberCard.style.display = 'block';
 }
@@ -229,9 +211,9 @@ function updateAutomationAdditionalInfo() {
 function updateTestingMetricsForReportType(reportType) {
     const metricsTable = document.querySelector('#section-1 .data-table tbody');
     if (!metricsTable) return;
-    
+
     let metricsHTML = '';
-    
+
     if (reportType === 'sprint') {
         // Sprint Report - Show all metrics
         metricsHTML = `
@@ -305,7 +287,7 @@ function updateTestingMetricsForReportType(reportType) {
         }
         return; // Don't populate metrics table
     }
-    
+
     metricsTable.innerHTML = metricsHTML;
 }
 
@@ -364,12 +346,12 @@ function updateProgressBarForReportType(reportType, totalSections) {
         console.error('Progress steps element not found!');
         return;
     }
-    
+
     // Clear existing steps
     progressSteps.innerHTML = '';
-    
+
     let stepConfigs = [];
-    
+
     if (reportType === 'sprint') {
         stepConfigs = [
             { step: 0, icon: 'fas fa-info-circle', label: 'General' },
@@ -402,8 +384,9 @@ function updateProgressBarForReportType(reportType, totalSections) {
             { step: 2, icon: 'fas fa-plus-square', label: 'Additional' },
             { step: 3, icon: 'fas fa-robot', label: 'Regression' },
             { step: 4, icon: 'fas fa-note-sticky', label: 'Notes' },
-            { step: 5, icon: 'fas fa-cogs', label: 'Services' },
-            { step: 6, icon: 'fas fa-bug', label: 'Bugs' }
+            { step: 5, icon: 'fas fa-server', label: 'Services' },
+            { step: 6, icon: 'fas fa-puzzle-piece', label: 'Modules' },
+            { step: 7, icon: 'fas fa-bug', label: 'Bugs' }
         ];
     } else if (reportType === 'performance') {
         stepConfigs = [
@@ -415,7 +398,7 @@ function updateProgressBarForReportType(reportType, totalSections) {
             { step: 5, icon: 'fas fa-network-wired', label: 'Requests' }
         ];
     }
-    
+
     // Create step elements
     stepConfigs.forEach((config, index) => {
         const stepDiv = document.createElement('div');
@@ -423,17 +406,17 @@ function updateProgressBarForReportType(reportType, totalSections) {
         stepDiv.setAttribute('data-step', config.step);
         stepDiv.style.cursor = 'pointer';
         stepDiv.onclick = () => showSection(config.step);
-        
+
         stepDiv.innerHTML = `
             <div class="step-circle">
                 <i class="${config.icon}"></i>
             </div>
             <span class="step-label">${config.label}</span>
         `;
-        
+
         progressSteps.appendChild(stepDiv);
     });
-    
+
     // Update progress text
     const progressStep = document.getElementById('progressStep');
     const progressTitle = document.getElementById('progressTitle');
@@ -657,13 +640,13 @@ async function saveReport(reportData) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reportData),
         });
-        
+
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             const errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
             throw new Error(errorMessage);
         }
-        
+
         const result = await response.json();
         showToast(`Report ${actionText === 'creating' ? 'created' : 'updated'} successfully!`, 'success');
         return result;
@@ -676,7 +659,7 @@ async function saveReport(reportData) {
 
 async function deleteReportDB(id) {
     showToast('Deleting report...', 'info', 2000);
-    
+
     try {
         const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         if (!response.ok) {
@@ -684,7 +667,7 @@ async function deleteReportDB(id) {
             const errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
             throw new Error(errorMessage);
         }
-        
+
         const result = await response.json();
         showToast('Report deleted successfully!', 'success');
         return result;
@@ -1935,29 +1918,29 @@ function clearCurrentSection() {
 
 function showSection(sectionIndex) {
     console.log('showSection called with index:', sectionIndex, 'for report type:', currentReportType);
-    
+
     // Always hide all sections first - be very explicit about this
     document.querySelectorAll('.section').forEach(s => {
         s.classList.remove('active');
         s.style.display = 'none';
     });
-    
+
     // Determine which section to show based on report type
     let targetSectionId = `section-${sectionIndex}`;
-    
+
     if (currentReportType === 'automation') {
         targetSectionId = `section-a${sectionIndex}`;
     } else if (currentReportType === 'performance') {
         targetSectionId = `section-p${sectionIndex}`;
     }
-    
+
     // Show the target section
     const targetSection = document.getElementById(targetSectionId);
     if (targetSection) {
         targetSection.style.display = 'block';
         targetSection.classList.add('active');
         console.log('Showing section:', targetSectionId);
-        
+
         // Initialize charts if this section contains charts
         setTimeout(() => {
             if (targetSection.querySelector('canvas')) {
@@ -1973,7 +1956,7 @@ function showSection(sectionIndex) {
             fallbackSection.style.display = 'block';
             fallbackSection.classList.add('active');
             console.log('Fallback: Showing section-' + sectionIndex);
-            
+
             // Initialize charts if this section contains charts
             setTimeout(() => {
                 if (fallbackSection.querySelector('canvas')) {
@@ -1985,11 +1968,11 @@ function showSection(sectionIndex) {
     }
 
     // Update navigation items - find the correct navigation items for current report type
-    const navSelector = currentReportType === 'sprint' ? '.sprint-nav' : 
-                       currentReportType === 'manual' ? '.manual-nav' :
-                       currentReportType === 'automation' ? '.automation-nav' :
-                       currentReportType === 'performance' ? '.performance-nav' : '.nav-item';
-    
+    const navSelector = currentReportType === 'sprint' ? '.sprint-nav' :
+        currentReportType === 'manual' ? '.manual-nav' :
+            currentReportType === 'automation' ? '.automation-nav' :
+                currentReportType === 'performance' ? '.performance-nav' : '.nav-item';
+
     document.querySelectorAll(`#sidebar ${navSelector}`).forEach((item, index) => {
         item.classList.toggle('active', index === sectionIndex);
     });
@@ -2003,7 +1986,7 @@ function showSection(sectionIndex) {
 function nextSection() {
     const config = window.reportTypeConfigs && window.reportTypeConfigs[currentReportType];
     const maxSection = config ? config.sections.length - 1 : 8;
-    
+
     if (currentSection < maxSection) {
         showSection(currentSection + 1);
     }
@@ -2019,13 +2002,13 @@ function updateNavigationButtons() {
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const submitBtn = document.getElementById('submitBtn');
-    
+
     if (prevBtn) prevBtn.disabled = currentSection === 0;
-    
+
     const config = window.reportTypeConfigs && window.reportTypeConfigs[currentReportType];
     const maxSection = config ? config.sections.length - 1 : 8;
     const isLastSection = currentSection === maxSection;
-    
+
     if (nextBtn) nextBtn.style.display = isLastSection ? 'none' : 'inline-block';
     if (submitBtn) submitBtn.style.display = isLastSection ? 'inline-block' : 'none';
 }
@@ -2033,28 +2016,28 @@ function updateNavigationButtons() {
 function updateProgressBar() {
     // Get section titles based on report type
     let totalSections, sectionTitles, stepIcons;
-    
+
     if (currentReportType === 'sprint') {
-        totalSections = 9;
-        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'Automation Regression', 'QA Notes'];
-        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-robot', 'fas fa-note-sticky'];
+        totalSections = 10;
+        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'Automation Regression', 'Evaluation', 'QA Notes'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-robot', 'fas fa-star', 'fas fa-note-sticky'];
     } else if (currentReportType === 'manual') {
-        totalSections = 8;
-        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'QA Notes'];
-        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-note-sticky'];
+        totalSections = 9;
+        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'Evaluation', 'QA Notes'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-star', 'fas fa-note-sticky'];
     } else if (currentReportType === 'automation') {
-        totalSections = 7;
-        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'Regression Test Results', 'QA Automation Notes', 'Covered Services & Modules', 'Bugs'];
-        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-robot', 'fas fa-note-sticky', 'fas fa-cogs', 'fas fa-bug'];
+        totalSections = 8;
+        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'Regression Test Results', 'QA Automation Notes', 'Covered Services', 'Covered Modules', 'Bugs'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-robot', 'fas fa-note-sticky', 'fas fa-server', 'fas fa-puzzle-piece', 'fas fa-bug'];
     } else if (currentReportType === 'performance') {
         totalSections = 6;
         sectionTitles = ['Performance General Details', 'Test Metrics & Load', 'Response Time Analysis', 'Performance Criteria Results', 'Performance Test Scenarios', 'HTTP Requests Overview'];
         stepIcons = ['fas fa-info-circle', 'fas fa-tachometer-alt', 'fas fa-chart-line', 'fas fa-table', 'fas fa-play-circle', 'fas fa-network-wired'];
     } else {
-        // Default fallback
-        totalSections = 9;
-        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'Automation Regression', 'QA Notes'];
-        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-robot', 'fas fa-note-sticky'];
+        // Default fallback (sprint)
+        totalSections = 10;
+        sectionTitles = ['General Details', 'Test Summary', 'Additional Info', 'User Stories', 'Test Cases', 'Issues Analysis', 'Enhancements', 'Automation Regression', 'Evaluation', 'QA Notes'];
+        stepIcons = ['fas fa-info-circle', 'fas fa-chart-bar', 'fas fa-plus-square', 'fas fa-user-check', 'fas fa-vial', 'fas fa-bug', 'fas fa-bolt', 'fas fa-robot', 'fas fa-star', 'fas fa-note-sticky'];
     }
 
     // Calculate progress - show completion based on current section
@@ -2067,7 +2050,7 @@ function updateProgressBar() {
     const progressFill = document.getElementById('progressFill');
     const progressStep = document.getElementById('progressStep');
     const progressTitle = document.getElementById('progressTitle');
-    
+
     if (progressPercent) progressPercent.textContent = `${Math.round(percentage)}%`;
     if (progressFill) progressFill.style.width = `${percentage}%`;
     if (progressStep) progressStep.textContent = `Step ${currentStepNumber} of ${totalSections}`;
@@ -2076,7 +2059,7 @@ function updateProgressBar() {
     // Update step indicators
     document.querySelectorAll('.step').forEach((step, index) => {
         step.classList.remove('active', 'completed');
-        
+
         // Make sure step is clickable
         step.style.cursor = 'pointer';
         step.onclick = () => showSection(index);
@@ -3293,7 +3276,7 @@ function resetFormData() {
     if (form) {
         form.reset();
         document.getElementById('reportDate').value = getCurrentDate();
-        
+
         // Reset all data arrays for all report types
         requestData = [];
         buildData = [];
@@ -3314,26 +3297,26 @@ function resetFormData() {
         renderTeamMemberList();
         renderQANotesList();
         renderQANoteFieldsList();
-        
+
         // Update counts
         updateQANotesCount();
         updateBugsCount();
         updateScenariosCount();
         updateHttpRequestsCount();
-        
+
         // Render report-specific lists
         if (typeof renderBugsList === 'function') renderBugsList();
         if (typeof renderScenariosList === 'function') renderScenariosList();
         if (typeof renderHttpRequestsTable === 'function') renderHttpRequestsTable();
-        
+
         // Reset all charts and calculations
         resetAllCharts();
         resetAllCalculations();
-        
+
         // Reset navigation
         currentSection = 0;
         updateNavigationButtons();
-        
+
         // Clear any localStorage data
         clearFormDataFromLocalStorage();
     }
@@ -3357,14 +3340,14 @@ function resetAllCalculations() {
         'totalAutomationTestCases', 'automationPassedPercentage', 'automationFailedPercentage',
         'automationSkippedPercentage', 'automationStablePercentage', 'automationFlakyPercentage'
     ];
-    
+
     calculatedFields.forEach(fieldId => {
         const element = document.getElementById(fieldId);
         if (element) {
             element.value = '';
         }
     });
-    
+
     // Reset all percentage fields
     const percentageFields = document.querySelectorAll('input[id$="Percentage"], input[id*="percentage"], .percentage-display');
     percentageFields.forEach(field => {
@@ -3374,7 +3357,7 @@ function resetAllCalculations() {
             field.textContent = '0%';
         }
     });
-    
+
     // Reset metric fields
     const metricFields = ['bugsMetric', 'scenariosMetric', 'httpRequestsMetric'];
     metricFields.forEach(fieldId => {
@@ -3390,7 +3373,7 @@ async function loadReportForEditing(report) {
 
     // First, load the dropdown data to ensure options are available
     await loadFormDropdownData();
-    
+
     // Wait a bit for dropdowns to be populated
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -3400,10 +3383,10 @@ async function loadReportForEditing(report) {
         portfolioSelect.value = report.portfolioName;
         // Trigger portfolio selection to load projects
         await onPortfolioSelection();
-        
+
         // Wait for projects to load
         await new Promise(resolve => setTimeout(resolve, 300));
-        
+
         // Then load project
         const projectSelect = document.getElementById('projectName');
         if (projectSelect && report.projectName) {
@@ -3464,7 +3447,7 @@ async function loadReportForEditing(report) {
     teamMemberData = report.teamMemberData || []; // Assuming this field exists in your report model
     qaNoteFieldsData = report.qaNoteFieldsData || []; // Load custom QA note fields
     qaNotesData = report.qaNotesData || []; // Load QA notes array data
-    
+
     // Load evaluation data for sprint and manual reports
     if (report.evaluationData && Array.isArray(report.evaluationData)) {
         loadEvaluationData(report.evaluationData);
@@ -3495,7 +3478,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.currentReportType) {
         currentReportType = window.currentReportType;
         console.log('Report type set to:', currentReportType);
-        
+
         // Update title based on report type
         updateReportTitle();
 
@@ -3504,42 +3487,42 @@ document.addEventListener('DOMContentLoaded', () => {
         if (reportTypeSelect) {
             reportTypeSelect.value = currentReportType;
         }
-        
+
         // Ensure Sprint Reports maintain full backward compatibility
         if (currentReportType === 'sprint') {
             ensureSprintReportCompatibility();
         }
-        
+
         // Configure Manual Reports
         if (currentReportType === 'manual') {
             configureManualReport();
         }
-        
+
         // Configure Automation Reports
         if (currentReportType === 'automation') {
             configureAutomationReport();
         }
-        
+
         // Configure Performance Reports
         if (currentReportType === 'performance') {
             configurePerformanceReport();
         }
-        
+
         // Load form dropdown data for all report types
         loadFormDropdownData();
-        
+
         // Initialize charts and progress bar after a short delay to ensure DOM is ready
         setTimeout(() => {
             initializeCharts();
             initializeProgressSteps();
         }, 500);
     }
-    
+
     const qaReportForm = document.getElementById('qaReportForm');
     if (qaReportForm) {
         qaReportForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             // Check if form is valid
             if (!this.checkValidity()) {
                 showToast('Please fill in all required fields before saving.', 'warning');
@@ -3566,7 +3549,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Add report type
             reportData.reportType = currentReportType;
-            
+
             // Add dynamic data (requestData, buildData, testerData, teamMemberData)
             reportData.requestData = requestData;
             reportData.buildData = buildData;
@@ -3578,7 +3561,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.bugsData = bugsData; // Add bugs data for automation reports
             reportData.performanceScenarios = performanceScenarios; // Add performance scenarios
             reportData.httpRequestsOverview = httpRequestsOverview; // Add HTTP requests overview
-            
+
             // Collect performance criteria results from form fields
             if (currentReportType === 'performance') {
                 const criteriaResults = [
@@ -3611,7 +3594,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- Enhanced Export Functions ---
 async function exportReportAsPdf(id) {
     showToast('Preparing PDF export...', 'info', 2000);
-    
+
     const report = allReportsCache.find(r => r.id === id);
     if (!report) {
         console.error("Report not found for PDF export:", id);
@@ -3784,7 +3767,7 @@ async function exportReportAsPdf(id) {
 
 async function exportReportAsExcel(id) {
     showToast('Preparing Excel export...', 'info', 2000);
-    
+
     const report = allReportsCache.find(r => r.id === id);
     if (!report) {
         console.error("Report not found for Excel export:", id);
@@ -4569,7 +4552,7 @@ function addBug() {
             status: status,
             createdAt: new Date().toISOString()
         };
-        
+
         bugsData.push(bug);
         renderBugsList();
         closeModal('bugModal');
@@ -4592,7 +4575,7 @@ function renderBugsList() {
     bugsData.forEach((bug, index) => {
         const severityClass = bug.severity.toLowerCase();
         const statusClass = bug.status.toLowerCase().replace(' ', '-');
-        
+
         html += `
             <div class="list-item bug-item">
                 <div class="item-header">
@@ -4617,7 +4600,7 @@ function renderBugsList() {
     });
 
     container.innerHTML = html;
-    
+
     // Update bugs count metric
     updateBugsCount();
 }
@@ -4654,7 +4637,7 @@ function addScenario() {
             steps: steps,
             createdAt: new Date().toISOString()
         };
-        
+
         performanceScenarios.push(scenario);
         renderScenariosList();
         closeModal('scenarioModal');
@@ -4698,7 +4681,7 @@ function renderScenariosList() {
     });
 
     container.innerHTML = html;
-    
+
     // Update scenarios count metric
     updateScenariosCount();
 }
@@ -4736,7 +4719,7 @@ function addHttpRequest() {
             avg_time: avgTime,
             createdAt: new Date().toISOString()
         };
-        
+
         httpRequestsOverview.push(request);
         renderHttpRequestsTable();
         closeModal('httpRequestModal');
@@ -4774,7 +4757,7 @@ function renderHttpRequestsTable() {
     });
 
     tbody.innerHTML = html;
-    
+
     // Update HTTP requests count metric
     updateHttpRequestsCount();
 }
@@ -4890,11 +4873,11 @@ function removeQANoteField(fieldId) {
 async function populatePortfolioDropdownForCreateReport(portfolios) {
     // Get all possible portfolio dropdowns for different report types
     const selectors = ['portfolioName', 'autoPortfolioName', 'perfPortfolioName'];
-    
+
     selectors.forEach(selectorId => {
         const select = document.getElementById(selectorId);
         if (!select) return; // Skip if this dropdown doesn't exist on current page
-        
+
         // Clear loading state and add basic options
         select.innerHTML = '<option value="">Select Portfolio</option>';
         select.innerHTML += '<option value="no-portfolio">No Portfolio (Standalone Project)</option>';
@@ -5072,12 +5055,12 @@ function showAutoLoadModal(data) {
 
     console.log('Modal element:', modal);
     console.log('Preview element:', preview);
-    
+
     if (!modal) {
         console.error('Modal element not found! Make sure you are on the create report page.');
         return;
     }
-    
+
     if (!preview) {
         console.error('Preview element not found!');
         return;
@@ -5088,7 +5071,7 @@ function showAutoLoadModal(data) {
     const suggestedValues = data.suggestedValues;
 
     let previewHTML = `<h4>Latest ${currentReportType.charAt(0).toUpperCase() + currentReportType.slice(1)} Report Data:</h4>`;
-    
+
     // Common fields for all report types
     if (currentReportType === 'sprint' || currentReportType === 'manual') {
         previewHTML += `
@@ -5102,7 +5085,7 @@ function showAutoLoadModal(data) {
             </div>
         `;
     }
-    
+
     // Common fields for all report types
     previewHTML += `
         <div class="data-preview-item">
@@ -5251,7 +5234,7 @@ async function loadProjectsForPortfolio(portfolioId, portfolioDropdownId) {
         const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
         if (response.ok) {
             const projects = await response.json();
-            
+
             // Determine corresponding project dropdown
             let projectDropdownId;
             if (portfolioDropdownId === 'portfolioName') {
@@ -5261,7 +5244,7 @@ async function loadProjectsForPortfolio(portfolioId, portfolioDropdownId) {
             } else if (portfolioDropdownId === 'perfPortfolioName') {
                 projectDropdownId = 'perfProjectName';
             }
-            
+
             populateProjectDropdownFiltered(projects, projectDropdownId);
             enableProjectField(projectDropdownId);
         } else {
@@ -5365,7 +5348,7 @@ async function onPortfolioChange(event) {
         } else if (portfolioDropdownId === 'perfPortfolioName') {
             projectDropdownId = 'perfProjectName';
         }
-        
+
         const projectSelect = document.getElementById(projectDropdownId);
         if (projectSelect) {
             projectSelect.value = '';
@@ -5501,27 +5484,27 @@ function calculateAutomationTotals() {
     const failed = parseInt(document.getElementById('autoFailedTestCases')?.value) || 0;
     const skipped = parseInt(document.getElementById('autoSkippedTestCases')?.value) || 0;
     const total = passed + failed + skipped;
-    
+
     // Update total field
     const totalField = document.getElementById('autoTotalTestCases');
     if (totalField) totalField.value = total;
-    
+
     // Calculate percentages
     if (total > 0) {
         const passedPercent = ((passed / total) * 100).toFixed(2);
         const failedPercent = ((failed / total) * 100).toFixed(2);
         const skippedPercent = ((skipped / total) * 100).toFixed(2);
-        
+
         // Update percentage fields
         const passedPercentField = document.getElementById('autoPassedPercentage');
         const failedPercentField = document.getElementById('autoFailedPercentage');
         const skippedPercentField = document.getElementById('autoSkippedPercentage');
-        
+
         if (passedPercentField) passedPercentField.value = passedPercent;
         if (failedPercentField) failedPercentField.value = failedPercent;
         if (skippedPercentField) skippedPercentField.value = skippedPercent;
     }
-    
+
     // Update tables and charts
     updateAutomationTable();
     updateAutomationChart();
@@ -5533,24 +5516,24 @@ function calculateAutomationStability() {
     const stable = parseInt(document.getElementById('autoStableTests')?.value) || 0;
     const flaky = parseInt(document.getElementById('autoFlakyTests')?.value) || 0;
     const total = stable + flaky;
-    
+
     // Update total field
     const totalField = document.getElementById('autoStabilityTotal');
     if (totalField) totalField.value = total;
-    
+
     // Calculate percentages
     if (total > 0) {
         const stablePercent = ((stable / total) * 100).toFixed(2);
         const flakyPercent = ((flaky / total) * 100).toFixed(2);
-        
+
         // Update percentage fields
         const stablePercentField = document.getElementById('autoStablePercentage');
         const flakyPercentField = document.getElementById('autoFlakyPercentage');
-        
+
         if (stablePercentField) stablePercentField.value = stablePercent;
         if (flakyPercentField) flakyPercentField.value = flakyPercent;
     }
-    
+
     // Update tables and charts
     updateAutomationTable();
     updateTestStabilityChart();
@@ -5564,13 +5547,13 @@ function updateAutomationTable() {
     const skipped = parseInt(document.getElementById('autoSkippedTestCases')?.value) || 0;
     const total = passed + failed + skipped;
     const passRate = total > 0 ? ((passed / total) * 100).toFixed(1) + '%' : '0%';
-    
+
     // Update stability data in table
     const stable = parseInt(document.getElementById('autoStableTests')?.value) || 0;
     const flaky = parseInt(document.getElementById('autoFlakyTests')?.value) || 0;
     const stabilityTotal = stable + flaky;
     const stabilityRate = stabilityTotal > 0 ? ((stable / stabilityTotal) * 100).toFixed(1) + '%' : '0%';
-    
+
     // Update table elements
     const tableElements = {
         'tablePassedTests': passed,
@@ -5583,7 +5566,7 @@ function updateAutomationTable() {
         'tableStabilityTotal': stabilityTotal,
         'tableStabilityRate': stabilityRate
     };
-    
+
     Object.entries(tableElements).forEach(([id, value]) => {
         const element = document.getElementById(id);
         if (element) element.textContent = value;
@@ -5593,20 +5576,20 @@ function updateAutomationTable() {
 function updateAutomationChart() {
     const canvas = document.getElementById('automationTestResultsChart');
     if (!canvas) return;
-    
+
     const passed = parseInt(document.getElementById('autoPassedTestCases')?.value) || 0;
     const failed = parseInt(document.getElementById('autoFailedTestCases')?.value) || 0;
     const skipped = parseInt(document.getElementById('autoSkippedTestCases')?.value) || 0;
-    
+
     if (passed === 0 && failed === 0 && skipped === 0) return;
-    
+
     const ctx = canvas.getContext('2d');
-    
+
     // Destroy existing chart if it exists
     if (window.automationChart) {
         window.automationChart.destroy();
     }
-    
+
     window.automationChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -5643,20 +5626,20 @@ function updateAutomationChart() {
 function updateTestCasesChart() {
     const canvas = document.getElementById('testCasesChart');
     if (!canvas) return;
-    
+
     const passed = parseInt(document.getElementById('autoPassedTestCases')?.value) || 0;
     const failed = parseInt(document.getElementById('autoFailedTestCases')?.value) || 0;
     const skipped = parseInt(document.getElementById('autoSkippedTestCases')?.value) || 0;
-    
+
     if (passed === 0 && failed === 0 && skipped === 0) return;
-    
+
     const ctx = canvas.getContext('2d');
-    
+
     // Destroy existing chart if it exists
     if (window.testCasesChart) {
         window.testCasesChart.destroy();
     }
-    
+
     window.testCasesChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -5694,11 +5677,11 @@ function updateTestCasesTable() {
     const failed = parseInt(document.getElementById('autoFailedTestCases')?.value) || 0;
     const skipped = parseInt(document.getElementById('autoSkippedTestCases')?.value) || 0;
     const total = passed + failed + skipped;
-    
+
     const passedPercent = total > 0 ? ((passed / total) * 100).toFixed(1) + '%' : '0%';
     const failedPercent = total > 0 ? ((failed / total) * 100).toFixed(1) + '%' : '0%';
     const skippedPercent = total > 0 ? ((skipped / total) * 100).toFixed(1) + '%' : '0%';
-    
+
     // Update table elements
     const elements = {
         'tablePassedCount': passed,
@@ -5709,7 +5692,7 @@ function updateTestCasesTable() {
         'tableFailedPercent': failedPercent,
         'tableSkippedPercent': skippedPercent
     };
-    
+
     Object.entries(elements).forEach(([id, value]) => {
         const element = document.getElementById(id);
         if (element) element.textContent = value;
@@ -5720,19 +5703,19 @@ function updateTestCasesTable() {
 function updateTestStabilityChart() {
     const canvas = document.getElementById('testStabilityChart');
     if (!canvas) return;
-    
+
     const stable = parseInt(document.getElementById('autoStableTests')?.value) || 0;
     const flaky = parseInt(document.getElementById('autoFlakyTests')?.value) || 0;
-    
+
     if (stable === 0 && flaky === 0) return;
-    
+
     const ctx = canvas.getContext('2d');
-    
+
     // Destroy existing chart if it exists
     if (window.testStabilityChart) {
         window.testStabilityChart.destroy();
     }
-    
+
     window.testStabilityChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -5769,10 +5752,10 @@ function updateTestStabilityTable() {
     const stable = parseInt(document.getElementById('autoStableTests')?.value) || 0;
     const flaky = parseInt(document.getElementById('autoFlakyTests')?.value) || 0;
     const total = stable + flaky;
-    
+
     const stablePercent = total > 0 ? ((stable / total) * 100).toFixed(1) + '%' : '0%';
     const flakyPercent = total > 0 ? ((flaky / total) * 100).toFixed(1) + '%' : '0%';
-    
+
     // Update table elements
     const elements = {
         'tableStableCount': stable,
@@ -5781,7 +5764,7 @@ function updateTestStabilityTable() {
         'tableStablePercent': stablePercent,
         'tableFlakyPercent': flakyPercent
     };
-    
+
     Object.entries(elements).forEach(([id, value]) => {
         const element = document.getElementById(id);
         if (element) element.textContent = value;
@@ -5803,22 +5786,22 @@ function showModuleModal() {
 function addService() {
     const serviceName = document.getElementById('serviceName')?.value.trim();
     const serviceDescription = document.getElementById('serviceDescription')?.value.trim();
-    
+
     if (!serviceName) {
         alert('Please enter a service name');
         return;
     }
-    
+
     const service = {
         id: Date.now(),
         name: serviceName,
         description: serviceDescription || ''
     };
-    
+
     servicesData.push(service);
     renderServicesList();
     closeModal('serviceModal');
-    
+
     // Clear form
     document.getElementById('serviceName').value = '';
     document.getElementById('serviceDescription').value = '';
@@ -5827,22 +5810,22 @@ function addService() {
 function addModule() {
     const moduleName = document.getElementById('moduleName')?.value.trim();
     const moduleDescription = document.getElementById('moduleDescription')?.value.trim();
-    
+
     if (!moduleName) {
         alert('Please enter a module name');
         return;
     }
-    
+
     const module = {
         id: Date.now(),
         name: moduleName,
         description: moduleDescription || ''
     };
-    
+
     modulesData.push(module);
     renderModulesList();
     closeModal('moduleModal');
-    
+
     // Clear form
     document.getElementById('moduleName').value = '';
     document.getElementById('moduleDescription').value = '';
@@ -5851,12 +5834,12 @@ function addModule() {
 function renderServicesList() {
     const container = document.getElementById('coveredServicesList');
     if (!container) return;
-    
+
     if (servicesData.length === 0) {
         container.innerHTML = '<div class="empty-state">No services added yet. Click "Add Service" to get started.</div>';
         return;
     }
-    
+
     const servicesHTML = servicesData.map(service => `
         <div class="dynamic-item">
             <div class="dynamic-item-content">
@@ -5870,19 +5853,19 @@ function renderServicesList() {
             </div>
         </div>
     `).join('');
-    
+
     container.innerHTML = servicesHTML;
 }
 
 function renderModulesList() {
     const container = document.getElementById('coveredModulesList');
     if (!container) return;
-    
+
     if (modulesData.length === 0) {
         container.innerHTML = '<div class="empty-state">No modules added yet. Click "Add Module" to get started.</div>';
         return;
     }
-    
+
     const modulesHTML = modulesData.map(module => `
         <div class="dynamic-item">
             <div class="dynamic-item-content">
@@ -5896,7 +5879,7 @@ function renderModulesList() {
             </div>
         </div>
     `).join('');
-    
+
     container.innerHTML = modulesHTML;
 }
 
@@ -6212,46 +6195,46 @@ function loadFormDataFromLocalStorage() {
                 teamMemberData = arrayObject.teamMemberData;
                 renderTeamMemberList();
             }
-            
+
             // Load all report-specific data arrays
             if (arrayObject.qaNoteFieldsData) {
                 qaNoteFieldsData = arrayObject.qaNoteFieldsData;
                 renderQANoteFieldsList();
             }
-            
+
             if (arrayObject.qaNotesData) {
                 qaNotesData = arrayObject.qaNotesData;
                 renderQANotesList();
                 updateQANotesCount();
             }
-            
+
             if (arrayObject.evaluationData) {
                 loadEvaluationData(arrayObject.evaluationData);
             }
-            
+
             if (arrayObject.bugsData) {
                 bugsData = arrayObject.bugsData;
                 if (typeof renderBugsList === 'function') renderBugsList();
                 updateBugsCount();
             }
-            
+
             if (arrayObject.performanceScenarios) {
                 performanceScenarios = arrayObject.performanceScenarios;
                 if (typeof renderScenariosList === 'function') renderScenariosList();
                 updateScenariosCount();
             }
-            
+
             if (arrayObject.httpRequestsOverview) {
                 httpRequestsOverview = arrayObject.httpRequestsOverview;
                 if (typeof renderHttpRequestsTable === 'function') renderHttpRequestsTable();
                 updateHttpRequestsCount();
             }
-            
+
             if (arrayObject.servicesData) {
                 servicesData = arrayObject.servicesData;
                 if (typeof renderServicesList === 'function') renderServicesList();
             }
-            
+
             if (arrayObject.modulesData) {
                 modulesData = arrayObject.modulesData;
                 if (typeof renderModulesList === 'function') renderModulesList();
@@ -6394,15 +6377,32 @@ function changeReportType(newType) {
         window.currentReportType = newType;
         currentReportType = newType;
 
+        // Update the report title
+        updateReportTitle();
+
+        // Hide all navigation groups first
+        const allNavGroups = document.querySelectorAll('.nav-group');
+        allNavGroups.forEach(group => {
+            group.style.display = 'none';
+        });
+
+        // Hide all individual nav items (for automation and performance)
+        const allNavItems = document.querySelectorAll('#sidebar .nav-item');
+        allNavItems.forEach(item => {
+            if (!item.closest('.nav-group')) {
+                item.style.display = 'none';
+            }
+        });
+
         // Configure the form for the new report type
         if (newType === 'sprint') {
             ensureSprintReportCompatibility();
         } else if (newType === 'manual') {
             configureManualReport();
-        } else if (newType === 'automation') {
-            configureAutomationReport();
         } else if (newType === 'performance') {
             configurePerformanceReport();
+        } else if (newType === 'automation') {
+            configureAutomationReport();
         }
 
         // Show a toast notification
@@ -6426,32 +6426,32 @@ function updateEvaluationScore() {
         'Involvement', 'Requirements Quality', 'QA Plan Review', 'UX', 'Cooperation',
         'Critical Bugs', 'High Bugs', 'Medium Bugs', 'Low Bugs'
     ];
-    
+
     const fieldIds = [
         'involvementScore', 'requirementsScore', 'qaPlanScore', 'uxScore', 'cooperationScore',
         'criticalBugsScore', 'highBugsScore', 'mediumBugsScore', 'lowBugsScore'
     ];
-    
+
     const reasonIds = [
         'involvementReason', 'requirementsReason', 'qaPlanReason', 'uxReason', 'cooperationReason',
         'criticalBugsReason', 'highBugsReason', 'mediumBugsReason', 'lowBugsReason'
     ];
-    
+
     // Clear existing evaluation data
     evaluationData = [];
-    
+
     let totalScore = 0;
     let filledCount = 0;
-    
+
     // Collect data from form inputs
     for (let i = 0; i < criteria.length; i++) {
         const scoreInput = document.getElementById(fieldIds[i]);
         const reasonInput = document.getElementById(reasonIds[i]);
-        
+
         if (scoreInput && reasonInput) {
             const score = parseInt(scoreInput.value) || 0;
             const reason = reasonInput.value.trim();
-            
+
             if (score > 0) {
                 evaluationData.push({
                     criteria: criteria[i],
@@ -6463,16 +6463,16 @@ function updateEvaluationScore() {
             }
         }
     }
-    
+
     // Calculate final score out of 100 (average of all filled scores)
     const finalScore = filledCount > 0 ? Math.round(totalScore / filledCount) : 0;
-    
+
     // Update final score display
     const finalScoreElement = document.getElementById('finalScore');
     if (finalScoreElement) {
         finalScoreElement.textContent = `${finalScore}/100`;
     }
-    
+
     // Update chart
     updateEvaluationChart();
 }
@@ -6481,14 +6481,14 @@ function updateEvaluationScore() {
 function updateEvaluationChart() {
     const canvas = document.getElementById('evaluationChart');
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
-    
+
     // Destroy existing chart if it exists
     if (window.evaluationChartInstance) {
         window.evaluationChartInstance.destroy();
     }
-    
+
     if (evaluationData.length === 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = '#666';
@@ -6497,7 +6497,7 @@ function updateEvaluationChart() {
         ctx.fillText('No data to display', canvas.width / 2, canvas.height / 2);
         return;
     }
-    
+
     // Prepare data for pie chart
     const labels = evaluationData.map(item => item.criteria);
     const data = evaluationData.map(item => item.score);
@@ -6505,7 +6505,7 @@ function updateEvaluationChart() {
         '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
         '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0'
     ];
-    
+
     // Create new pie chart
     window.evaluationChartInstance = new Chart(ctx, {
         type: 'pie',
@@ -6542,7 +6542,7 @@ function updateEvaluationChart() {
                 },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             const label = context.label || '';
                             const value = context.parsed;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
@@ -6559,10 +6559,10 @@ function updateEvaluationChart() {
 // Function to load evaluation data into form
 function loadEvaluationData(data) {
     if (!data || !Array.isArray(data)) return;
-    
+
     // Clear existing data
     evaluationData = [...data];
-    
+
     // Map criteria to field IDs
     const criteriaToFieldId = {
         'Involvement': 'involvementScore',
@@ -6575,7 +6575,7 @@ function loadEvaluationData(data) {
         'Medium Bugs': 'mediumBugsScore',
         'Low Bugs': 'lowBugsScore'
     };
-    
+
     const criteriaToReasonId = {
         'Involvement': 'involvementReason',
         'Requirements Quality': 'requirementsReason',
@@ -6587,21 +6587,21 @@ function loadEvaluationData(data) {
         'Medium Bugs': 'mediumBugsReason',
         'Low Bugs': 'lowBugsReason'
     };
-    
+
     // Load data into form fields
     data.forEach(item => {
         const scoreFieldId = criteriaToFieldId[item.criteria];
         const reasonFieldId = criteriaToReasonId[item.criteria];
-        
+
         if (scoreFieldId && reasonFieldId) {
             const scoreField = document.getElementById(scoreFieldId);
             const reasonField = document.getElementById(reasonFieldId);
-            
+
             if (scoreField) scoreField.value = item.score;
             if (reasonField) reasonField.value = item.reason;
         }
     });
-    
+
     // Update final score and chart
     updateEvaluationScore();
 }
