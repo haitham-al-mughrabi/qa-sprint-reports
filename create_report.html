@@ -183,20 +183,54 @@
                             <div class="nav-label">Automation Regression</div>
                         </a>
                         <a href="#" class="nav-item sprint-nav" onclick="showSection(8)">
+                            <div class="nav-icon"><i class="fas fa-star"></i></div>
+                            <div class="nav-label">Evaluation</div>
+                        </a>
+                        <a href="#" class="nav-item sprint-nav" onclick="showSection(9)">
                             <div class="nav-icon"><i class="fas fa-note-sticky"></i></div>
                             <div class="nav-label">QA Notes</div>
                         </a>
                     </div>
                 
                 <!-- Manual Report Navigation Items (same as sprint but without automation) -->
-                <a href="#" class="nav-item manual-nav" onclick="showSection(0)" style="display: none;"><i class="fas fa-info-circle"></i> General Details</a>
-                <a href="#" class="nav-item manual-nav" onclick="showSection(1)" style="display: none;"><i class="fas fa-file-alt"></i> Test Summary</a>
-                <a href="#" class="nav-item manual-nav" onclick="showSection(2)" style="display: none;"><i class="fas fa-plus-square"></i> Additional Info</a>
-                <a href="#" class="nav-item manual-nav" onclick="showSection(3)" style="display: none;"><i class="fas fa-user-check"></i> User Stories</a>
-                <a href="#" class="nav-item manual-nav" onclick="showSection(4)" style="display: none;"><i class="fas fa-vial"></i> Test Cases</a>
-                <a href="#" class="nav-item manual-nav" onclick="showSection(5)" style="display: none;"><i class="fas fa-bug"></i> Issues Analysis</a>
-                <a href="#" class="nav-item manual-nav" onclick="showSection(6)" style="display: none;"><i class="fas fa-bolt"></i> Enhancements</a>
-                <a href="#" class="nav-item manual-nav" onclick="showSection(7)" style="display: none;"><i class="fas fa-note-sticky"></i> QA Notes</a>
+                <div class="nav-group manual-nav-group" style="display: none;">
+                    <a href="#" class="nav-item manual-nav active" onclick="showSection(0)">
+                        <div class="nav-icon"><i class="fas fa-info-circle"></i></div>
+                        <div class="nav-label">General Details</div>
+                    </a>
+                    <a href="#" class="nav-item manual-nav" onclick="showSection(1)">
+                        <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
+                        <div class="nav-label">Test Summary</div>
+                    </a>
+                    <a href="#" class="nav-item manual-nav" onclick="showSection(2)">
+                        <div class="nav-icon"><i class="fas fa-plus-square"></i></div>
+                        <div class="nav-label">Additional Info</div>
+                    </a>
+                    <a href="#" class="nav-item manual-nav" onclick="showSection(3)">
+                        <div class="nav-icon"><i class="fas fa-user-check"></i></div>
+                        <div class="nav-label">User Stories</div>
+                    </a>
+                    <a href="#" class="nav-item manual-nav" onclick="showSection(4)">
+                        <div class="nav-icon"><i class="fas fa-vial"></i></div>
+                        <div class="nav-label">Test Cases</div>
+                    </a>
+                    <a href="#" class="nav-item manual-nav" onclick="showSection(5)">
+                        <div class="nav-icon"><i class="fas fa-bug"></i></div>
+                        <div class="nav-label">Issues Analysis</div>
+                    </a>
+                    <a href="#" class="nav-item manual-nav" onclick="showSection(6)">
+                        <div class="nav-icon"><i class="fas fa-bolt"></i></div>
+                        <div class="nav-label">Enhancements</div>
+                    </a>
+                    <a href="#" class="nav-item manual-nav" onclick="showSection(7)">
+                        <div class="nav-icon"><i class="fas fa-star"></i></div>
+                        <div class="nav-label">Evaluation</div>
+                    </a>
+                    <a href="#" class="nav-item manual-nav" onclick="showSection(8)">
+                        <div class="nav-icon"><i class="fas fa-note-sticky"></i></div>
+                        <div class="nav-label">QA Notes</div>
+                    </a>
+                </div>
                 
                 <!-- Automation Report Navigation Items -->
                 <a href="#" class="nav-item automation-nav" onclick="showSection(0)" style="display: none;"><i class="fas fa-info-circle"></i> General Details</a>
@@ -924,8 +958,152 @@
                             </div>
                         </div>
 
-                        <!-- Section 8: QA Notes -->
+                        <!-- Section 8: Evaluation (Sprint and Manual Reports Only) -->
                         <div class="section" id="section-8">
+                            <h2 class="section-title"><i class="fas fa-star"></i> Evaluation</h2>
+                            
+                            <!-- Evaluation Criteria -->
+                            <div class="evaluation-criteria-card">
+                                <div class="info-card-v2-header">
+                                    <i class="fas fa-list-check"></i>
+                                    <h3>Evaluation Criteria</h3>
+                                </div>
+                                <div class="info-card-v2-content">
+                                    <div class="criteria-text">
+                                        <h4><i class="fas fa-users"></i> Involvement</h4>
+                                        <p>The QA team is testing within the sprint and is involved in all the scrum ceremonies.</p>
+                                        
+                                        <h4><i class="fas fa-file-alt"></i> Requirements Quality</h4>
+                                        <p>The quality of the user stories and documents.</p>
+                                        
+                                        <h4><i class="fas fa-clipboard-check"></i> QA Plan Review</h4>
+                                        <p>Review the QA plan that the vendor will provide.</p>
+                                        
+                                        <h4><i class="fas fa-desktop"></i> UX</h4>
+                                        <p>The user flow (it will be checked against the Ministry's evaluation criteria).</p>
+                                        
+                                        <h4><i class="fas fa-handshake"></i> Cooperation</h4>
+                                        <p>This will measure the cooperation between QA, Product Owners, and vendors.</p>
+                                        
+                                        <h4><i class="fas fa-exclamation-triangle"></i> Critical Bugs</h4>
+                                        <p>1 cycle (must be fixed on the next cycle of the bug detection).</p>
+                                        
+                                        <h4><i class="fas fa-exclamation-circle"></i> High Bugs</h4>
+                                        <p>1 cycle (must be fixed on the next cycle of the bug detection).</p>
+                                        
+                                        <h4><i class="fas fa-minus-circle"></i> Medium Bugs</h4>
+                                        <p>2 cycles (must be fixed on the second cycle of the bug detection).</p>
+                                        
+                                        <h4><i class="fas fa-info-circle"></i> Low Bugs</h4>
+                                        <p>We start counting once the number of detected low bugs => 10.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Evaluation Table and Chart Layout -->
+                            <div class="evaluation-analysis-layout">
+                                <!-- Evaluation Table Card -->
+                                <div class="evaluation-table-card analysis-table-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-table"></i>
+                                        <h3>Evaluation Scores</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <table class="data-table" id="evaluationTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Criteria</th>
+                                                    <th>Score</th>
+                                                    <th>Reason</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Involvement</strong></td>
+                                                    <td><input type="number" id="involvementScore" name="involvementScore" min="0" max="100" placeholder="0-100" onchange="updateEvaluationScore()"></td>
+                                                    <td><input type="text" id="involvementReason" name="involvementReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Requirements Quality</strong></td>
+                                                    <td><input type="number" id="requirementsScore" name="requirementsScore" min="0" max="100" placeholder="0-100" onchange="updateEvaluationScore()"></td>
+                                                    <td><input type="text" id="requirementsReason" name="requirementsReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>QA Plan Review</strong></td>
+                                                    <td><input type="number" id="qaPlanScore" name="qaPlanScore" min="0" max="100" placeholder="0-100" onchange="updateEvaluationScore()"></td>
+                                                    <td><input type="text" id="qaPlanReason" name="qaPlanReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>UX</strong></td>
+                                                    <td><input type="number" id="uxScore" name="uxScore" min="0" max="100" placeholder="0-100" onchange="updateEvaluationScore()"></td>
+                                                    <td><input type="text" id="uxReason" name="uxReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Cooperation</strong></td>
+                                                    <td><input type="number" id="cooperationScore" name="cooperationScore" min="0" max="100" placeholder="0-100" onchange="updateEvaluationScore()"></td>
+                                                    <td><input type="text" id="cooperationReason" name="cooperationReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Critical Bugs</strong></td>
+                                                    <td><input type="number" id="criticalBugsScore" name="criticalBugsScore" min="0" max="100" placeholder="0-100" onchange="updateEvaluationScore()"></td>
+                                                    <td><input type="text" id="criticalBugsReason" name="criticalBugsReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>High Bugs</strong></td>
+                                                    <td><input type="number" id="highBugsScore" name="highBugsScore" min="0" max="100" placeholder="0-100" onchange="updateEvaluationScore()"></td>
+                                                    <td><input type="text" id="highBugsReason" name="highBugsReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Medium Bugs</strong></td>
+                                                    <td><input type="number" id="mediumBugsScore" name="mediumBugsScore" min="0" max="100" placeholder="0-100" onchange="updateEvaluationScore()"></td>
+                                                    <td><input type="text" id="mediumBugsReason" name="mediumBugsReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Low Bugs</strong></td>
+                                                    <td><input type="number" id="lowBugsScore" name="lowBugsScore" min="0" max="100" placeholder="0-100" onchange="updateEvaluationScore()"></td>
+                                                    <td><input type="text" id="lowBugsReason" name="lowBugsReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="final-score-row">
+                                                    <td><strong>Final Score</strong></td>
+                                                    <td><strong id="finalScore">0/100</strong></td>
+                                                    <td><em>Auto-calculated total</em></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Evaluation Chart Card -->
+                                <div class="evaluation-chart-card analysis-chart-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <h3>Evaluation Distribution</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="chart-section">
+                                            <canvas id="evaluationChart" width="400" height="300"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Evaluation Note -->
+                            <div class="evaluation-note-card">
+                                <div class="info-card-v2-header">
+                                    <i class="fas fa-info-circle"></i>
+                                    <h3>Important Note</h3>
+                                </div>
+                                <div class="info-card-v2-content">
+                                    <p><strong>Note:</strong> Please note that this evaluation is for the technical part of the project, it doesn't affect the non-technical part.</p>
+                                    <p>The score given to this project will be calculated along with the other scores of the portfolio.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 9: QA Notes -->
+                        <div class="section" id="section-9">
                             <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
                             <div class="qa-notes-layout">
                                 <div class="qa-notes-card">

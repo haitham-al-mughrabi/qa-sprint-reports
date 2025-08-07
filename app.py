@@ -137,6 +137,9 @@ class Report(db.Model):
     coveredModules = db.Column(db.Text)   # Text area for modules and test suites
     bugsData = db.Column(db.Text, default='[]')  # JSON array for bugs (similar to QA notes)
 
+    # Evaluation Section (for Sprint and Manual reports only)
+    evaluationData = db.Column(db.Text, default='[]')  # JSON array for evaluation criteria scores
+
     # Automation Regression Data
     # Section 1: Test Cases (auto-calculated from existing test cases)
     automationPassedTestCases = db.Column(db.Integer, default=0)
@@ -446,6 +449,9 @@ class Report(db.Model):
             'coveredServices': self.coveredServices,
             'coveredModules': self.coveredModules,
             'bugsData': json.loads(self.bugsData or '[]'),
+
+            # Evaluation Section (Sprint and Manual reports)
+            'evaluationData': json.loads(self.evaluationData or '[]'),
 
             # Metadata
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
@@ -999,6 +1005,9 @@ def create_report():
             # QA Notes
             new_report.qaNotesData = json.dumps(data.get('qaNotesData', []))
             new_report.qaNoteFieldsData = json.dumps(data.get('qaNoteFieldsData', []))
+
+            # Evaluation Data (for Sprint and Manual reports only)
+            new_report.evaluationData = json.dumps(data.get('evaluationData', []))
 
         if report_type in ['sprint', 'automation']:
             # Automation Regression Data (for Sprint and Automation reports)
@@ -1964,6 +1973,9 @@ def update_report(id):
 
         # Update JSON fields
         json_fields = ['requestData', 'buildData', 'testerData', 'teamMemberData', 'qaNotesData', 'qaNoteFieldsData']
+        
+        if report_type in ['sprint', 'manual']:
+            json_fields.append('evaluationData')
         
         if report_type == 'automation':
             json_fields.append('bugsData')

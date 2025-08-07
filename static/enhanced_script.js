@@ -17,20 +17,30 @@ let currentReportType = 'sprint'; // Default to sprint for backward compatibilit
 function ensureSprintReportCompatibility() {
     console.log('Ensuring Sprint Report backward compatibility...');
     
-    // Hide all navigation items first
-    const allNavItems = document.querySelectorAll('#sidebar .nav-item');
-    allNavItems.forEach(item => {
-        item.style.display = 'none';
+    // Hide all navigation groups first
+    const allNavGroups = document.querySelectorAll('.nav-group');
+    allNavGroups.forEach(group => {
+        group.style.display = 'none';
     });
     
-    // Show only sprint navigation items
+    // Show only sprint navigation group
+    const sprintNavGroup = document.querySelector('.sprint-nav-group');
+    if (sprintNavGroup) {
+        sprintNavGroup.style.display = 'block';
+    }
+    
+    // Set active state for first sprint nav item
     const sprintNavItems = document.querySelectorAll('.sprint-nav');
-    sprintNavItems.forEach(item => {
-        item.style.display = 'block';
+    sprintNavItems.forEach((item, index) => {
+        if (index === 0) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
     });
     
-    // Update progress bar for sprint report (9 sections)
-    updateProgressBarForReportType('sprint', 9);
+    // Update progress bar for sprint report (10 sections)
+    updateProgressBarForReportType('sprint', 10);
     
     // Update Testing Metrics for Sprint Report
     updateTestingMetricsForReportType('sprint');
@@ -57,20 +67,30 @@ function ensureSprintReportCompatibility() {
 function configureManualReport() {
     console.log('Configuring Manual Report...');
     
-    // Hide all navigation items first
-    const allNavItems = document.querySelectorAll('#sidebar .nav-item');
-    allNavItems.forEach(item => {
-        item.style.display = 'none';
+    // Hide all navigation groups first
+    const allNavGroups = document.querySelectorAll('.nav-group');
+    allNavGroups.forEach(group => {
+        group.style.display = 'none';
     });
     
-    // Show only manual navigation items
+    // Show only manual navigation group
+    const manualNavGroup = document.querySelector('.manual-nav-group');
+    if (manualNavGroup) {
+        manualNavGroup.style.display = 'block';
+    }
+    
+    // Set active state for first manual nav item
     const manualNavItems = document.querySelectorAll('.manual-nav');
-    manualNavItems.forEach(item => {
-        item.style.display = 'block';
+    manualNavItems.forEach((item, index) => {
+        if (index === 0) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
     });
     
-    // Update progress bar for manual report (8 sections)
-    updateProgressBarForReportType('manual', 8);
+    // Update progress bar for manual report (9 sections)
+    updateProgressBarForReportType('manual', 9);
     
     // Update Testing Metrics for Manual Report
     updateTestingMetricsForReportType('manual');
@@ -90,7 +110,7 @@ function configureManualReport() {
     // Show the first section
     setTimeout(() => showSection(0), 100);
     
-    console.log('✅ Manual Report configured (8 sections, excluding Automation Regression)');
+    console.log('✅ Manual Report configured (9 sections, excluding Automation Regression)');
 }
 
 // Function to configure Automation Reports
@@ -360,7 +380,8 @@ function updateProgressBarForReportType(reportType, totalSections) {
             { step: 5, icon: 'fas fa-bug', label: 'Issues' },
             { step: 6, icon: 'fas fa-bolt', label: 'Enhance' },
             { step: 7, icon: 'fas fa-robot', label: 'Auto' },
-            { step: 8, icon: 'fas fa-note-sticky', label: 'Notes' }
+            { step: 8, icon: 'fas fa-star', label: 'Eval' },
+            { step: 9, icon: 'fas fa-note-sticky', label: 'Notes' }
         ];
     } else if (reportType === 'manual') {
         stepConfigs = [
@@ -371,7 +392,8 @@ function updateProgressBarForReportType(reportType, totalSections) {
             { step: 4, icon: 'fas fa-vial', label: 'Tests' },
             { step: 5, icon: 'fas fa-bug', label: 'Issues' },
             { step: 6, icon: 'fas fa-bolt', label: 'Enhance' },
-            { step: 7, icon: 'fas fa-note-sticky', label: 'Notes' }
+            { step: 7, icon: 'fas fa-star', label: 'Eval' },
+            { step: 8, icon: 'fas fa-note-sticky', label: 'Notes' }
         ];
     } else if (reportType === 'automation') {
         stepConfigs = [
@@ -1803,7 +1825,13 @@ function clearCurrentSection() {
                                 calculateAutomationStabilityPercentages();
                             }
                             break;
-                        case 7: // Section 8: QA Notes (Manual/Sprint)
+                        case 7: // Section 8: Evaluation (Sprint and Manual only)
+                            if (currentReportType === 'sprint' || currentReportType === 'manual') {
+                                evaluationData = [];
+                                updateEvaluationScore();
+                            }
+                            break;
+                        case 8: // Section 9: QA Notes (Manual/Sprint)
                             qaNotesData = [];
                             qaNoteFieldsData = [];
                             renderQANotesList();
@@ -3436,6 +3464,11 @@ async function loadReportForEditing(report) {
     teamMemberData = report.teamMemberData || []; // Assuming this field exists in your report model
     qaNoteFieldsData = report.qaNoteFieldsData || []; // Load custom QA note fields
     qaNotesData = report.qaNotesData || []; // Load QA notes array data
+    
+    // Load evaluation data for sprint and manual reports
+    if (report.evaluationData && Array.isArray(report.evaluationData)) {
+        loadEvaluationData(report.evaluationData);
+    }
     // customFieldsData = report.customFields || {}; // Assuming this is an object in your report model - REMOVED
 
     renderRequestList();
@@ -3541,6 +3574,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.teamMemberData = teamMemberData; // Add team member data
             reportData.qaNoteFieldsData = qaNoteFieldsData; // Add custom QA note fields
             reportData.qaNotesData = qaNotesData; // Add QA notes array data
+            reportData.evaluationData = collectEvaluationData(); // Add evaluation data for sprint and manual reports
             reportData.bugsData = bugsData; // Add bugs data for automation reports
             reportData.performanceScenarios = performanceScenarios; // Add performance scenarios
             reportData.httpRequestsOverview = httpRequestsOverview; // Add HTTP requests overview
@@ -6104,6 +6138,7 @@ function saveFormDataToLocalStorage() {
             teamMemberData: teamMemberData,
             qaNoteFieldsData: qaNoteFieldsData,
             qaNotesData: qaNotesData,
+            evaluationData: collectEvaluationData(),
             bugsData: bugsData,
             performanceScenarios: performanceScenarios,
             httpRequestsOverview: httpRequestsOverview,
@@ -6190,6 +6225,10 @@ function loadFormDataFromLocalStorage() {
                 updateQANotesCount();
             }
             
+            if (arrayObject.evaluationData) {
+                loadEvaluationData(arrayObject.evaluationData);
+            }
+            
             if (arrayObject.bugsData) {
                 bugsData = arrayObject.bugsData;
                 if (typeof renderBugsList === 'function') renderBugsList();
@@ -6272,6 +6311,7 @@ function clearFormDataOnSubmit() {
         teamMemberData = [];
         qaNoteFieldsData = [];
         qaNotesData = [];
+        evaluationData = [];
         bugsData = [];
         performanceScenarios = [];
         httpRequestsOverview = [];
@@ -6372,3 +6412,207 @@ function changeReportType(newType) {
 
 // Make function globally accessible
 window.changeReportType = changeReportType;
+// ========================================
+// EVALUATION SECTION FUNCTIONS
+// ========================================
+
+// Global evaluation data
+let evaluationData = [];
+
+// Function to update evaluation score and chart
+function updateEvaluationScore() {
+    // Get all evaluation scores from the table inputs
+    const criteria = [
+        'Involvement', 'Requirements Quality', 'QA Plan Review', 'UX', 'Cooperation',
+        'Critical Bugs', 'High Bugs', 'Medium Bugs', 'Low Bugs'
+    ];
+    
+    const fieldIds = [
+        'involvementScore', 'requirementsScore', 'qaPlanScore', 'uxScore', 'cooperationScore',
+        'criticalBugsScore', 'highBugsScore', 'mediumBugsScore', 'lowBugsScore'
+    ];
+    
+    const reasonIds = [
+        'involvementReason', 'requirementsReason', 'qaPlanReason', 'uxReason', 'cooperationReason',
+        'criticalBugsReason', 'highBugsReason', 'mediumBugsReason', 'lowBugsReason'
+    ];
+    
+    // Clear existing evaluation data
+    evaluationData = [];
+    
+    let totalScore = 0;
+    let filledCount = 0;
+    
+    // Collect data from form inputs
+    for (let i = 0; i < criteria.length; i++) {
+        const scoreInput = document.getElementById(fieldIds[i]);
+        const reasonInput = document.getElementById(reasonIds[i]);
+        
+        if (scoreInput && reasonInput) {
+            const score = parseInt(scoreInput.value) || 0;
+            const reason = reasonInput.value.trim();
+            
+            if (score > 0) {
+                evaluationData.push({
+                    criteria: criteria[i],
+                    score: score,
+                    reason: reason || 'No reason provided'
+                });
+                totalScore += score;
+                filledCount++;
+            }
+        }
+    }
+    
+    // Calculate final score out of 100 (average of all filled scores)
+    const finalScore = filledCount > 0 ? Math.round(totalScore / filledCount) : 0;
+    
+    // Update final score display
+    const finalScoreElement = document.getElementById('finalScore');
+    if (finalScoreElement) {
+        finalScoreElement.textContent = `${finalScore}/100`;
+    }
+    
+    // Update chart
+    updateEvaluationChart();
+}
+
+// Function to update evaluation chart (pie chart)
+function updateEvaluationChart() {
+    const canvas = document.getElementById('evaluationChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window.evaluationChartInstance) {
+        window.evaluationChartInstance.destroy();
+    }
+    
+    if (evaluationData.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#666';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data to display', canvas.width / 2, canvas.height / 2);
+        return;
+    }
+    
+    // Prepare data for pie chart
+    const labels = evaluationData.map(item => item.criteria);
+    const data = evaluationData.map(item => item.score);
+    const colors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+        '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0'
+    ];
+    
+    // Create new pie chart
+    window.evaluationChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors.slice(0, data.length),
+                borderColor: colors.slice(0, data.length).map(color => color.replace('0.6', '1')),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Evaluation Score Distribution',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value}/100 (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Function to load evaluation data into form
+function loadEvaluationData(data) {
+    if (!data || !Array.isArray(data)) return;
+    
+    // Clear existing data
+    evaluationData = [...data];
+    
+    // Map criteria to field IDs
+    const criteriaToFieldId = {
+        'Involvement': 'involvementScore',
+        'Requirements Quality': 'requirementsScore',
+        'QA Plan Review': 'qaPlanScore',
+        'UX': 'uxScore',
+        'Cooperation': 'cooperationScore',
+        'Critical Bugs': 'criticalBugsScore',
+        'High Bugs': 'highBugsScore',
+        'Medium Bugs': 'mediumBugsScore',
+        'Low Bugs': 'lowBugsScore'
+    };
+    
+    const criteriaToReasonId = {
+        'Involvement': 'involvementReason',
+        'Requirements Quality': 'requirementsReason',
+        'QA Plan Review': 'qaPlanReason',
+        'UX': 'uxReason',
+        'Cooperation': 'cooperationReason',
+        'Critical Bugs': 'criticalBugsReason',
+        'High Bugs': 'highBugsReason',
+        'Medium Bugs': 'mediumBugsReason',
+        'Low Bugs': 'lowBugsReason'
+    };
+    
+    // Load data into form fields
+    data.forEach(item => {
+        const scoreFieldId = criteriaToFieldId[item.criteria];
+        const reasonFieldId = criteriaToReasonId[item.criteria];
+        
+        if (scoreFieldId && reasonFieldId) {
+            const scoreField = document.getElementById(scoreFieldId);
+            const reasonField = document.getElementById(reasonFieldId);
+            
+            if (scoreField) scoreField.value = item.score;
+            if (reasonField) reasonField.value = item.reason;
+        }
+    });
+    
+    // Update final score and chart
+    updateEvaluationScore();
+}
+
+// Function to collect evaluation data from form
+function collectEvaluationData() {
+    updateEvaluationScore(); // This updates the global evaluationData
+    return evaluationData;
+}
+
+// Make evaluation functions globally accessible
+window.updateEvaluationScore = updateEvaluationScore;
+window.loadEvaluationData = loadEvaluationData;
+window.collectEvaluationData = collectEvaluationData;

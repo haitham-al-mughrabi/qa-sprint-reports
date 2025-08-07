@@ -178,18 +178,23 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
     animation: shimmer 2s infinite;
 }
 
 /* Light theme shimmer effect */
 [data-theme="light"] .progress-fill::after {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
 }
 
 @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .progress-steps {
@@ -569,44 +574,44 @@
         gap: 1rem;
         justify-content: center;
     }
-    
+
     .step {
         flex: 0 0 calc(33.333% - 1rem);
         margin-bottom: 1rem;
     }
-    
+
     .step-circle {
         width: 40px;
         height: 40px;
         font-size: 1rem;
     }
-    
+
     .step-label {
         font-size: 0.7rem;
     }
-    
+
     .progress-header {
         flex-wrap: wrap;
         gap: 1rem;
     }
-    
+
     .progress-info {
         flex: 1;
         min-width: 250px;
     }
-    
+
     .progress-text {
         gap: 0.125rem;
     }
-    
+
     .progress-text #progressStep {
         font-size: 0.8rem;
     }
-    
+
     .progress-text #progressTitle {
         font-size: 1rem;
     }
-    
+
     .progress-percentage {
         font-size: 1.25rem;
     }
@@ -616,15 +621,15 @@
     .progress-container {
         padding: 1rem;
     }
-    
+
     .step {
         flex: 0 0 calc(50% - 0.5rem);
     }
-    
+
     .progress-text #progressTitle {
         font-size: 1rem;
     }
-    
+
     .progress-percentage {
         font-size: 1.25rem;
     }
@@ -1148,7 +1153,7 @@
 .modal-form select {
     background-color: rgba(var(--primary-rgb), 0.02) !important;
     border-left: 3px solid rgba(var(--primary-rgb), 0.3) !important;
-    background-image: 
+    background-image:
         linear-gradient(45deg, transparent 25%, rgba(var(--primary-rgb), 0.05) 25%, rgba(var(--primary-rgb), 0.05) 50%, transparent 50%, transparent 75%, rgba(var(--primary-rgb), 0.05) 75%),
         url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e") !important;
     background-size: 8px 8px, 1rem !important;
@@ -1743,7 +1748,7 @@
 .info-card-v2-content select {
     background-color: rgba(var(--primary-rgb), 0.02);
     border-left: 3px solid rgba(var(--primary-rgb), 0.3);
-    background-image: 
+    background-image:
         linear-gradient(45deg, transparent 25%, rgba(var(--primary-rgb), 0.05) 25%, rgba(var(--primary-rgb), 0.05) 50%, transparent 50%, transparent 75%, rgba(var(--primary-rgb), 0.05) 75%),
         url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
     background-size: 8px 8px, 1rem;
@@ -1755,7 +1760,7 @@
 select {
     background-color: rgba(var(--primary-rgb), 0.02) !important;
     border-left: 3px solid rgba(var(--primary-rgb), 0.3) !important;
-    background-image: 
+    background-image:
         linear-gradient(45deg, transparent 25%, rgba(var(--primary-rgb), 0.05) 25%, rgba(var(--primary-rgb), 0.05) 50%, transparent 50%, transparent 75%, rgba(var(--primary-rgb), 0.05) 75%),
         url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e") !important;
     background-size: 8px 8px, 1rem !important;
@@ -1775,7 +1780,7 @@ select {
 /* Enhanced focus state for select elements */
 .info-card-v2-content select:focus {
     border-left-color: var(--primary);
-    background-image: 
+    background-image:
         linear-gradient(45deg, transparent 25%, rgba(var(--primary-rgb), 0.1) 25%, rgba(var(--primary-rgb), 0.1) 50%, transparent 50%, transparent 75%, rgba(var(--primary-rgb), 0.1) 75%),
         url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
 }
@@ -1783,7 +1788,7 @@ select {
 /* Global select focus state */
 select:focus {
     border-left-color: var(--primary) !important;
-    background-image: 
+    background-image:
         linear-gradient(45deg, transparent 25%, rgba(var(--primary-rgb), 0.1) 25%, rgba(var(--primary-rgb), 0.1) 50%, transparent 50%, transparent 75%, rgba(var(--primary-rgb), 0.1) 75%),
         url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e") !important;
 }
@@ -2282,6 +2287,177 @@ select::before {
 }
 
 /* ========================================
+   SECTION 8: EVALUATION - CONSISTENT DESIGN
+   ======================================== */
+
+.evaluation-criteria-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+    margin-bottom: 2rem;
+}
+
+.evaluation-criteria-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.evaluation-criteria-card .info-card-v2-content {
+    padding: 2rem;
+}
+
+.criteria-text h4 {
+    color: var(--primary);
+    margin: 1.5rem 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.criteria-text h4:first-child {
+    margin-top: 0;
+}
+
+.criteria-text p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    padding-left: 1.5rem;
+}
+
+/* Evaluation Analysis Layout - Same as other sections */
+.evaluation-analysis-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.evaluation-table-card,
+.evaluation-chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+}
+
+.evaluation-table-card:hover,
+.evaluation-chart-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.evaluation-table-card .data-table input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5rem;
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 0.875rem;
+}
+
+.evaluation-table-card .data-table input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+.evaluation-table-card .data-table input[type="number"] {
+    text-align: center;
+    max-width: 100px;
+}
+
+.final-score-row {
+    background: rgba(var(--primary-rgb), 0.1);
+    font-weight: 600;
+}
+
+.final-score-row td {
+    border-top: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.evaluation-note-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+    margin-top: 2rem;
+}
+
+.evaluation-note-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.evaluation-note-card .info-card-v2-content p {
+    margin: 0.5rem 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.evaluation-note-card .info-card-v2-content p:first-child {
+    margin-top: 0;
+}
+
+.evaluation-note-card .info-card-v2-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Light theme adjustments for evaluation */
+[data-theme="light"] .evaluation-criteria-card .criteria-text h4 {
+    color: var(--primary);
+}
+
+[data-theme="light"] .evaluation-criteria-card .criteria-text p {
+    color: var(--text-secondary);
+}
+
+[data-theme="light"] .evaluation-table-card .data-table input {
+    background: var(--input-bg);
+    border-color: var(--border);
+}
+
+/* Mobile responsive for evaluation */
+@media (max-width: 768px) {
+    .evaluation-analysis-layout {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .evaluation-criteria-card .info-card-v2-content {
+        padding: 1rem;
+    }
+
+    .criteria-text h4 {
+        font-size: 1rem;
+    }
+
+    .criteria-text p {
+        padding-left: 1rem;
+    }
+
+    .evaluation-table-card .data-table th,
+    .evaluation-table-card .data-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* ========================================
    ENHANCED DYNAMIC ITEMS STYLING
    ======================================== */
 
@@ -2744,7 +2920,8 @@ body.theme-light .info-card-v2-header .btn:hover {
     font-size: 8px;
     padding: 2px 4px;
     z-index: 1000;
-    display: none; /* Hidden by default, enable for debugging */
+    display: none;
+    /* Hidden by default, enable for debugging */
 }
 
 /* QA Notes Light Theme Enhancements */
@@ -3529,7 +3706,9 @@ body {
         padding: 15px 0;
         font-size: 0.8rem;
     }
-}/* En
+}
+
+/* En
 sure all navigation and action buttons have white text in light theme */
 [data-theme="light"] .nav-btn,
 [data-theme="light"] .back-btn,
@@ -3707,7 +3886,8 @@ sure all navigation and action buttons have white text in light theme */
 }
 
 /* Severity and Status Badges */
-.severity-badge, .status-badge {
+.severity-badge,
+.status-badge {
     padding: 0.375rem 0.75rem;
     border-radius: var(--border-radius);
     font-size: 0.75em;
@@ -3848,22 +4028,22 @@ sure all navigation and action buttons have white text in light theme */
         align-items: stretch;
         gap: 1rem;
     }
-    
+
     .item-actions {
         justify-content: flex-start;
         order: -1;
         margin-bottom: 0.5rem;
     }
-    
+
     .item-content {
         padding-left: 0;
         margin-top: 0.75rem;
     }
-    
+
     .item-title {
         margin-bottom: 0;
     }
-    
+
     .item-title i {
         width: 2rem;
         height: 2rem;
@@ -3875,17 +4055,18 @@ sure all navigation and action buttons have white text in light theme */
     .list-item {
         padding: 1rem;
     }
-    
+
     .item-actions {
         flex-direction: column;
         align-items: stretch;
         gap: 0.5rem;
     }
-    
-    .severity-badge, .status-badge {
+
+    .severity-badge,
+    .status-badge {
         text-align: center;
     }
-    
+
     .delete-btn {
         justify-content: center;
     }

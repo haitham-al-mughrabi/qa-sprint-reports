@@ -343,6 +343,74 @@
                 <h2 class="section-title"><i class="fas fa-info"></i> Additional Information</h2>
                 </div>
 
+            <!-- Evaluation Section (Sprint and Manual Reports Only) -->
+            <div class="dashboard-section" id="evaluationSection" style="display: none;">
+                <h2 class="section-title"><i class="fas fa-star"></i> Evaluation</h2>
+                
+                <!-- Evaluation Criteria -->
+                <div class="info-item">
+                    <div class="info-label">Evaluation Criteria</div>
+                    <div class="info-value">
+                        <div class="evaluation-criteria-display">
+                            <div class="criteria-item">
+                                <strong><i class="fas fa-users"></i> Involvement:</strong> The QA team is testing within the sprint and is involved in all the scrum ceremonies.
+                            </div>
+                            <div class="criteria-item">
+                                <strong><i class="fas fa-file-alt"></i> Requirements Quality:</strong> The quality of the user stories and documents.
+                            </div>
+                            <div class="criteria-item">
+                                <strong><i class="fas fa-clipboard-check"></i> QA Plan Review:</strong> Review the QA plan that the vendor will provide.
+                            </div>
+                            <div class="criteria-item">
+                                <strong><i class="fas fa-desktop"></i> UX:</strong> The user flow (it will be checked against the Ministry's evaluation criteria).
+                            </div>
+                            <div class="criteria-item">
+                                <strong><i class="fas fa-handshake"></i> Cooperation:</strong> This will measure the cooperation between QA, Product Owners, and vendors.
+                            </div>
+                            <div class="criteria-item">
+                                <strong><i class="fas fa-exclamation-triangle"></i> Critical Bugs:</strong> 1 cycle (must be fixed on the next cycle of the bug detection).
+                            </div>
+                            <div class="criteria-item">
+                                <strong><i class="fas fa-exclamation-circle"></i> High Bugs:</strong> 1 cycle (must be fixed on the next cycle of the bug detection).
+                            </div>
+                            <div class="criteria-item">
+                                <strong><i class="fas fa-minus-circle"></i> Medium Bugs:</strong> 2 cycles (must be fixed on the second cycle of the bug detection).
+                            </div>
+                            <div class="criteria-item">
+                                <strong><i class="fas fa-info-circle"></i> Low Bugs:</strong> We start counting once the number of detected low bugs => 10.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evaluation Scores Table -->
+                <div class="info-item">
+                    <div class="info-label">Evaluation Scores</div>
+                    <div class="info-value" id="evaluationScoresContent">
+                        <!-- Evaluation scores will be loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Evaluation Chart -->
+                <div class="info-item">
+                    <div class="info-label">Evaluation Chart</div>
+                    <div class="info-value">
+                        <canvas id="evaluationViewChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Evaluation Note -->
+                <div class="info-item">
+                    <div class="info-label">Important Note</div>
+                    <div class="info-value">
+                        <div class="evaluation-note-display">
+                            <p><strong>Note:</strong> Please note that this evaluation is for the technical part of the project, it doesn't affect the non-technical part.</p>
+                            <p>The score given to this project will be calculated along with the other scores of the portfolio.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="dashboard-section" id="qaNotesSection">
                 <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
                 <div class="info-item">
@@ -516,6 +584,11 @@
                 if (report.reportType === 'sprint' || report.reportType === 'automation') {
                     renderAutomationRegressionView(report, isLightMode);
                 }
+            }
+            
+            // Render evaluation section (for Sprint and Manual reports only)
+            if (report.reportType === 'sprint' || report.reportType === 'manual') {
+                renderEvaluationView(report, isLightMode);
             }
             
             // Render additional sections (common to all types)
@@ -1323,6 +1396,12 @@
             renderAutomationTestCasesChart(currentReport, isLightMode);
             renderAutomationStabilityChart(currentReport, isLightMode);
             
+            // Evaluation chart (Sprint and Manual reports only)
+            if ((currentReport.reportType === 'sprint' || currentReport.reportType === 'manual') && 
+                currentReport.evaluationData && currentReport.evaluationData.length > 0) {
+                renderEvaluationChart(currentReport.evaluationData, isLightMode);
+            }
+            
             // Performance report charts
             if (currentReport.reportType === 'performance') {
                 renderPerformanceMetricsChart(currentReport, isLightMode);
@@ -1660,6 +1739,162 @@
                 </div>`;
             }
             
+        }
+
+        function renderEvaluationView(report, isLightMode) {
+            const evaluationSection = document.getElementById('evaluationSection');
+            const evaluationScoresContent = document.getElementById('evaluationScoresContent');
+            const evaluationData = report.evaluationData || [];
+
+            // Show evaluation section for sprint and manual reports
+            if (report.reportType === 'sprint' || report.reportType === 'manual') {
+                evaluationSection.style.display = 'block';
+                
+                if (evaluationData.length > 0) {
+                    // Calculate final score out of 100 (average of all scores)
+                    const totalScore = evaluationData.reduce((sum, item) => sum + item.score, 0);
+                    const finalScore = Math.round(totalScore / evaluationData.length);
+                    
+                    // Create evaluation scores table
+                    let tableHtml = `
+                        <table class="evaluation-scores-table">
+                            <thead>
+                                <tr>
+                                    <th>Criteria</th>
+                                    <th>Score</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    evaluationData.forEach(item => {
+                        const scoreClass = getScoreClass(item.score);
+                        tableHtml += `
+                            <tr>
+                                <td><strong>${item.criteria}</strong></td>
+                                <td><span class="evaluation-score-badge ${scoreClass}">${item.score}/100</span></td>
+                                <td>${item.reason}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    tableHtml += `
+                            </tbody>
+                            <tfoot>
+                                <tr class="evaluation-final-score">
+                                    <td><strong>Final Score</strong></td>
+                                    <td><strong>${finalScore}/100</strong></td>
+                                    <td><em>Auto-calculated total</em></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    `;
+                    
+                    evaluationScoresContent.innerHTML = tableHtml;
+                    
+                    // Render evaluation chart
+                    renderEvaluationChart(evaluationData, isLightMode);
+                } else {
+                    evaluationScoresContent.innerHTML = `
+                        <div class="empty-state" style="border: none; padding: 0; background: none;">
+                            <h3>No Evaluation Scores</h3>
+                            <p>No evaluation scores were provided for this report.</p>
+                        </div>
+                    `;
+                }
+            } else {
+                evaluationSection.style.display = 'none';
+            }
+        }
+
+        function getScoreClass(score) {
+            if (score <= 30) return 'score-low';
+            if (score <= 60) return 'score-medium';
+            if (score <= 80) return 'score-high';
+            return 'score-excellent';
+        }
+
+        function renderEvaluationChart(evaluationData, isLightMode) {
+            const canvas = document.getElementById('evaluationViewChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (viewCharts.evaluationChart) {
+                viewCharts.evaluationChart.destroy();
+            }
+            
+            if (evaluationData.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = isLightMode ? '#64748b' : '#94a3b8';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('No evaluation data to display', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            
+            const textColor = isLightMode ? '#1e293b' : '#f1f5f9';
+            
+            // Prepare data for pie chart
+            const labels = evaluationData.map(item => item.criteria);
+            const data = evaluationData.map(item => item.score);
+            const colors = [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0'
+            ];
+            
+            // Create new pie chart
+            viewCharts.evaluationChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, data.length),
+                        borderColor: colors.slice(0, data.length).map(color => color.replace('0.6', '1')),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                },
+                                color: textColor
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Evaluation Score Distribution',
+                            color: textColor,
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value}/100 (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
                 function getViewChartOptions(isLightMode) {
@@ -2408,7 +2643,61 @@
                 yPos = doc.lastAutoTable.finalY + 30;
             }
 
-            // 12. QA Notes
+            // 12. Evaluation (Sprint and Manual reports only)
+            if ((currentReport.reportType === 'sprint' || currentReport.reportType === 'manual') && 
+                currentReport.evaluationData && currentReport.evaluationData.length > 0) {
+                addSectionTitle('Evaluation');
+                
+                // Add evaluation criteria description
+                addText('Evaluation Criteria:');
+                addText('• Involvement: The QA team is testing within the sprint and is involved in all the scrum ceremonies.');
+                addText('• Requirements Quality: The quality of the user stories and documents.');
+                addText('• QA Plan Review: Review the QA plan that the vendor will provide.');
+                addText('• UX: The user flow (it will be checked against the Ministry\'s evaluation criteria).');
+                addText('• Cooperation: This will measure the cooperation between QA, Product Owners, and vendors.');
+                addText('• Critical Bugs: 1 cycle (must be fixed on the next cycle of the bug detection).');
+                addText('• High Bugs: 1 cycle (must be fixed on the next cycle of the bug detection).');
+                addText('• Medium Bugs: 2 cycles (must be fixed on the second cycle of the bug detection).');
+                addText('• Low Bugs: We start counting once the number of detected low bugs => 10.');
+                
+                yPos += 10;
+                
+                // Add evaluation scores table
+                const evaluationHeaders = ['Criteria', 'Score', 'Reason'];
+                const evaluationRows = currentReport.evaluationData.map(item => [
+                    item.criteria,
+                    `${item.score}/100`,
+                    item.reason
+                ]);
+                
+                // Calculate final score out of 100 (average)
+                const totalScore = currentReport.evaluationData.reduce((sum, item) => sum + item.score, 0);
+                const finalScore = Math.round(totalScore / currentReport.evaluationData.length);
+                evaluationRows.push(['Final Score', `${finalScore}/100`, 'Auto-calculated total']);
+                
+                doc.autoTable({
+                    head: [evaluationHeaders],
+                    body: evaluationRows,
+                    startY: yPos,
+                    styles: { fontSize: 9, cellPadding: 3 },
+                    headStyles: { fillColor: [41, 128, 185] },
+                    columnStyles: {
+                        0: { cellWidth: 40 },
+                        1: { cellWidth: 25, halign: 'center' },
+                        2: { cellWidth: 'auto' }
+                    }
+                });
+                
+                yPos = doc.lastAutoTable.finalY + 15;
+                
+                // Add evaluation note
+                addText('Note: Please note that this evaluation is for the technical part of the project, it doesn\'t affect the non-technical part.');
+                addText('The score given to this project will be calculated along with the other scores of the portfolio.');
+                
+                yPos += 10;
+            }
+
+            // 13. QA Notes
             if (currentReport.qaNotesData && currentReport.qaNotesData.length > 0) {
                 addSectionTitle('QA Notes');
 
@@ -2482,7 +2771,9 @@
                 ["Automation Skipped Test Cases", currentReport.automationSkippedTestCases || 0],
                 ["Automation Stable Tests", currentReport.automationStableTests || 0],
                 ["Automation Flaky Tests", currentReport.automationFlakyTests || 0],
-                ["QA Notes", currentReport.qaNotesData && currentReport.qaNotesData.length > 0 ? `${currentReport.qaNotesData.length} notes` : 'N/A']
+                ["QA Notes", currentReport.qaNotesData && currentReport.qaNotesData.length > 0 ? `${currentReport.qaNotesData.length} notes` : 'N/A'],
+                ["Evaluation Score", (currentReport.reportType === 'sprint' || currentReport.reportType === 'manual') && currentReport.evaluationData && currentReport.evaluationData.length > 0 ? 
+                    `${Math.round(currentReport.evaluationData.reduce((sum, item) => sum + item.score, 0) / currentReport.evaluationData.length)}/100` : 'N/A']
             ];
             const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
             XLSX.utils.book_append_sheet(workbook, wsSummary, "Summary");
@@ -2544,6 +2835,25 @@
             ];
             const wsEnhancements = XLSX.utils.aoa_to_sheet(enhancementsData);
             XLSX.utils.book_append_sheet(workbook, wsEnhancements, "Enhancements");
+
+            // Evaluation Sheet (Sprint and Manual reports only)
+            if ((currentReport.reportType === 'sprint' || currentReport.reportType === 'manual') && 
+                currentReport.evaluationData && currentReport.evaluationData.length > 0) {
+                const evaluationHeaders = ["Criteria", "Score", "Reason"];
+                const evaluationSheetData = currentReport.evaluationData.map(item => [
+                    item.criteria,
+                    `${item.score}/100`,
+                    item.reason
+                ]);
+                
+                // Add final score row
+                const totalScore = currentReport.evaluationData.reduce((sum, item) => sum + item.score, 0);
+                const finalScore = Math.round(totalScore / currentReport.evaluationData.length);
+                evaluationSheetData.push(["Final Score", `${finalScore}/100`, "Auto-calculated total"]);
+                
+                const wsEvaluation = XLSX.utils.aoa_to_sheet([evaluationHeaders, ...evaluationSheetData]);
+                XLSX.utils.book_append_sheet(workbook, wsEvaluation, "Evaluation");
+            }
 
             // Automation Regression Sheets
             const automationTestCasesData = [
