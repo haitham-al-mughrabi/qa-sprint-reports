@@ -111,148 +111,8 @@
 
     <!-- Enhanced QA Form Page -->
     <div id="formPage" class="page active">
-        <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-
-        <div class="form-container">
-            <!-- Sidebar Navigation -->
-            <nav class="sidebar" id="sidebar">
-                <div class="sidebar-header">
-                    <!-- Report Sections Title -->
-                    <div class="sections-title">
-                        <div class="sections-icon">
-                            <i class="fas fa-clipboard"></i>
-                        </div>
-                        <h2>Report Sections</h2>
-                    </div>
-                    <!-- Report Type Selector -->
-                    <div class="report-type-selector">
-                        <select id="reportTypeSelect" class="report-type-dropdown" onchange="changeReportType(this.value)">
-                            <option value="sprint">Sprint Report</option>
-                            <option value="manual">Manual Report</option>
-                            <option value="automation">Automation Report</option>
-                            <option value="performance">Performance Report</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="action-buttons">
-                        <button class="action-btn" onclick="window.location.href='/reports'">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Back To Reports</span>
-                        </button>
-                        <button class="action-btn" onclick="window.location.href='/dashboard'">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Go To Dashboard</span>
-                        </button>
-                    </div>
-                </div>
-                <!-- Navigation Sections -->
-                <div class="nav-sections">
-                    <!-- Sprint Report Navigation Items -->
-                    <div class="nav-group sprint-nav-group">
-                        <a href="#" class="nav-item sprint-nav active" onclick="showSection(0)">
-                            <div class="nav-icon"><i class="fas fa-info-circle"></i></div>
-                            <div class="nav-label">General Details</div>
-                        </a>
-                        <a href="#" class="nav-item sprint-nav" onclick="showSection(1)">
-                            <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
-                            <div class="nav-label">Test Summary</div>
-                        </a>
-                        <a href="#" class="nav-item sprint-nav" onclick="showSection(2)">
-                            <div class="nav-icon"><i class="fas fa-plus-square"></i></div>
-                            <div class="nav-label">Additional Info</div>
-                        </a>
-                        <a href="#" class="nav-item sprint-nav" onclick="showSection(3)">
-                            <div class="nav-icon"><i class="fas fa-user-check"></i></div>
-                            <div class="nav-label">User Stories</div>
-                        </a>
-                        <a href="#" class="nav-item sprint-nav" onclick="showSection(4)">
-                            <div class="nav-icon"><i class="fas fa-vial"></i></div>
-                            <div class="nav-label">Test Cases</div>
-                        </a>
-                        <a href="#" class="nav-item sprint-nav" onclick="showSection(5)">
-                            <div class="nav-icon"><i class="fas fa-bug"></i></div>
-                            <div class="nav-label">Issues Analysis</div>
-                        </a>
-                        <a href="#" class="nav-item sprint-nav" onclick="showSection(6)">
-                            <div class="nav-icon"><i class="fas fa-bolt"></i></div>
-                            <div class="nav-label">Enhancements</div>
-                        </a>
-                        <a href="#" class="nav-item sprint-nav" onclick="showSection(7)">
-                            <div class="nav-icon"><i class="fas fa-robot"></i></div>
-                            <div class="nav-label">Automation Regression</div>
-                        </a>
-                        <a href="#" class="nav-item sprint-nav" onclick="showSection(8)">
-                            <div class="nav-icon"><i class="fas fa-star"></i></div>
-                            <div class="nav-label">Evaluation</div>
-                        </a>
-                        <a href="#" class="nav-item sprint-nav" onclick="showSection(9)">
-                            <div class="nav-icon"><i class="fas fa-note-sticky"></i></div>
-                            <div class="nav-label">QA Notes</div>
-                        </a>
-                    </div>
-                
-                <!-- Manual Report Navigation Items (same as sprint but without automation) -->
-                <div class="nav-group manual-nav-group" style="display: none;">
-                    <a href="#" class="nav-item manual-nav active" onclick="showSection(0)">
-                        <div class="nav-icon"><i class="fas fa-info-circle"></i></div>
-                        <div class="nav-label">General Details</div>
-                    </a>
-                    <a href="#" class="nav-item manual-nav" onclick="showSection(1)">
-                        <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
-                        <div class="nav-label">Test Summary</div>
-                    </a>
-                    <a href="#" class="nav-item manual-nav" onclick="showSection(2)">
-                        <div class="nav-icon"><i class="fas fa-plus-square"></i></div>
-                        <div class="nav-label">Additional Info</div>
-                    </a>
-                    <a href="#" class="nav-item manual-nav" onclick="showSection(3)">
-                        <div class="nav-icon"><i class="fas fa-user-check"></i></div>
-                        <div class="nav-label">User Stories</div>
-                    </a>
-                    <a href="#" class="nav-item manual-nav" onclick="showSection(4)">
-                        <div class="nav-icon"><i class="fas fa-vial"></i></div>
-                        <div class="nav-label">Test Cases</div>
-                    </a>
-                    <a href="#" class="nav-item manual-nav" onclick="showSection(5)">
-                        <div class="nav-icon"><i class="fas fa-bug"></i></div>
-                        <div class="nav-label">Issues Analysis</div>
-                    </a>
-                    <a href="#" class="nav-item manual-nav" onclick="showSection(6)">
-                        <div class="nav-icon"><i class="fas fa-bolt"></i></div>
-                        <div class="nav-label">Enhancements</div>
-                    </a>
-                    <a href="#" class="nav-item manual-nav" onclick="showSection(7)">
-                        <div class="nav-icon"><i class="fas fa-star"></i></div>
-                        <div class="nav-label">Evaluation</div>
-                    </a>
-                    <a href="#" class="nav-item manual-nav" onclick="showSection(8)">
-                        <div class="nav-icon"><i class="fas fa-note-sticky"></i></div>
-                        <div class="nav-label">QA Notes</div>
-                    </a>
-                </div>
-                
-                <!-- Automation Report Navigation Items -->
-                <a href="#" class="nav-item automation-nav" onclick="showSection(0)" style="display: none;"><i class="fas fa-info-circle"></i> General Details</a>
-                <a href="#" class="nav-item automation-nav" onclick="showSection(1)" style="display: none;"><i class="fas fa-file-alt"></i> Test Summary</a>
-                <a href="#" class="nav-item automation-nav" onclick="showSection(2)" style="display: none;"><i class="fas fa-plus-square"></i> Additional Info</a>
-                <a href="#" class="nav-item automation-nav" onclick="showSection(3)" style="display: none;"><i class="fas fa-robot"></i> Regression Test Results</a>
-                <a href="#" class="nav-item automation-nav" onclick="showSection(4)" style="display: none;"><i class="fas fa-note-sticky"></i> QA Automation Notes</a>
-                <a href="#" class="nav-item automation-nav" onclick="showSection(5)" style="display: none;"><i class="fas fa-server"></i> Covered Services</a>
-                <a href="#" class="nav-item automation-nav" onclick="showSection(6)" style="display: none;"><i class="fas fa-puzzle-piece"></i> Covered Modules</a>
-                <a href="#" class="nav-item automation-nav" onclick="showSection(7)" style="display: none;"><i class="fas fa-bug"></i> Bugs</a>
-                
-                <!-- Performance Report Navigation Items -->
-                <a href="#" class="nav-item performance-nav" onclick="showSection(0)" style="display: none;"><i class="fas fa-info-circle"></i> Performance General Details</a>
-                <a href="#" class="nav-item performance-nav" onclick="showSection(1)" style="display: none;"><i class="fas fa-tachometer-alt"></i> Test Summary</a>
-                <a href="#" class="nav-item performance-nav" onclick="showSection(2)" style="display: none;"><i class="fas fa-chart-line"></i> Response Time Analysis</a>
-                <a href="#" class="nav-item performance-nav" onclick="showSection(3)" style="display: none;"><i class="fas fa-table"></i> Performance Criteria Results</a>
-                <a href="#" class="nav-item performance-nav" onclick="showSection(4)" style="display: none;"><i class="fas fa-play-circle"></i> Performance Test Scenarios</a>
-                <a href="#" class="nav-item performance-nav" onclick="showSection(5)" style="display: none;"><i class="fas fa-network-wired"></i> HTTP Requests Overview</a>
-            </nav>
-
-            <!-- Main Content -->
-            <div class="main-content">
+        <!-- Main Content -->
+        <div class="main-content">
                 <div class="dashboard-header">
                     <div class="header-content">
                         <h1 id="formTitle">Create Report</h1>
@@ -260,12 +120,34 @@
                     </div>
                 </div>
 
+                <!-- Navigation Controls Section -->
+                <div class="navigation-controls">
+                    <div class="nav-controls-left">
+                        <div class="report-type-selector">
+                            <label for="reportTypeSelect"><i class="fas fa-clipboard"></i> Report Type:</label>
+                            <select id="reportTypeSelect" class="report-type-dropdown" onchange="changeReportType(this.value)">
+                                <option value="sprint">Sprint Report</option>
+                                <option value="manual">Manual Report</option>
+                                <option value="automation">Automation Report</option>
+                                <option value="performance">Performance Report</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="nav-controls-right">
+                        <button class="nav-control-btn" onclick="window.location.href='/reports'">
+                            <i class="fas fa-list"></i>
+                            <span>Back to Reports List</span>
+                        </button>
+                        <button class="nav-control-btn" onclick="window.location.href='/dashboard'">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Back to Dashboard</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Progress Bar -->
                 <div class="progress-container">
                     <div class="progress-header">
-                        <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
-                            <i class="fas fa-bars"></i>
-                        </button>
                         <div class="progress-info">
                             <div class="progress-text" style="top:15%">
                                 <span id="progressStep">Step 1 of 9</span>
