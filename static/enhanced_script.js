@@ -13,6 +13,42 @@ let autoSaveTimeout = null;
 // Report type management
 let currentReportType = 'sprint'; // Default to sprint for backward compatibility
 
+// Function to manage required attributes based on report type
+function updateRequiredFieldsForReportType(reportType) {
+    // Remove required from all report-type-specific fields first
+    const allTypeSpecificFields = [
+        'autoReportDate', 'autoEnvironment', 'autoSprintNumber', 'autoCycleNumber', 'autoReleaseNumber',
+        'perfReportDate', 'perfEnvironment', 'perfSprintNumber', 'perfCycleNumber', 'perfReleaseNumber'
+    ];
+    
+    allTypeSpecificFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.removeAttribute('required');
+        }
+    });
+    
+    // Add required attribute only to fields for the current report type
+    if (reportType === 'automation') {
+        const requiredAutoFields = ['autoReportDate', 'autoEnvironment'];
+        requiredAutoFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.setAttribute('required', 'required');
+            }
+        });
+    } else if (reportType === 'performance') {
+        const requiredPerfFields = ['perfReportDate', 'perfEnvironment'];
+        requiredPerfFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.setAttribute('required', 'required');
+            }
+        });
+    }
+    // For sprint and manual, the default fields (reportDate, environment) are already required
+}
+
 // Function to ensure Sprint Reports maintain full backward compatibility
 function ensureSprintReportCompatibility() {
     console.log('Ensuring Sprint Report backward compatibility...');
@@ -55,6 +91,9 @@ function ensureSprintReportCompatibility() {
     setTimeout(() => showSection(0), 100);
 
     console.log('✅ Sprint Report compatibility ensured');
+    
+    // Update required fields for sprint report type
+    updateRequiredFieldsForReportType('sprint');
 }
 
 // Function to configure Manual Reports (all sections except Automation Regression)
@@ -99,6 +138,9 @@ function configureManualReport() {
     setTimeout(() => showSection(0), 100);
 
     console.log('✅ Manual Report configured (9 sections, excluding Automation Regression)');
+    
+    // Update required fields for manual report type
+    updateRequiredFieldsForReportType('manual');
 }
 
 // Function to configure Automation Reports
@@ -144,6 +186,9 @@ function configureAutomationReport() {
     setTimeout(() => showSection(0), 100);
 
     console.log('✅ Automation Report configured (8 sections with renamed and new sections)');
+    
+    // Update required fields for automation report type
+    updateRequiredFieldsForReportType('automation');
 }
 
 // Function to configure Performance Reports
@@ -185,6 +230,9 @@ function configurePerformanceReport() {
     setTimeout(() => showSection(0), 100);
 
     console.log('✅ Performance Report configured (6 sections with performance-specific content)');
+    
+    // Update required fields for performance report type
+    updateRequiredFieldsForReportType('performance');
 }
 
 // Function to update Additional Information section for Automation Reports
@@ -3538,6 +3586,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Load form dropdown data for all report types
         loadFormDropdownData();
 
+        // Ensure required fields are set correctly for the current report type
+        setTimeout(() => updateRequiredFieldsForReportType(currentReportType), 200);
+
         // Initialize charts and progress bar after a short delay to ensure DOM is ready
         setTimeout(() => {
             initializeCharts();
@@ -5011,15 +5062,31 @@ let latestProjectData = null;
 
 // Function called when project is selected
 async function onProjectSelection() {
-    console.log('onProjectSelection called');
-    const portfolioSelect = document.getElementById('portfolioName');
-    const projectSelect = document.getElementById('projectName');
+    console.log('onProjectSelection called for report type:', currentReportType);
+    
+    // Get the correct dropdown IDs based on current report type
+    let portfolioSelectId, projectSelectId;
+    
+    if (currentReportType === 'automation') {
+        portfolioSelectId = 'autoPortfolioName';
+        projectSelectId = 'autoProjectName';
+    } else if (currentReportType === 'performance') {
+        portfolioSelectId = 'perfPortfolioName';
+        projectSelectId = 'perfProjectName';
+    } else {
+        // Sprint and Manual reports use the default IDs
+        portfolioSelectId = 'portfolioName';
+        projectSelectId = 'projectName';
+    }
+    
+    const portfolioSelect = document.getElementById(portfolioSelectId);
+    const projectSelect = document.getElementById(projectSelectId);
 
-    console.log('Portfolio value:', portfolioSelect?.value);
-    console.log('Project value:', projectSelect?.value);
+    console.log('Portfolio select ID:', portfolioSelectId, 'Value:', portfolioSelect?.value);
+    console.log('Project select ID:', projectSelectId, 'Value:', projectSelect?.value);
 
-    if (!portfolioSelect.value || !projectSelect.value) {
-        console.log('Missing portfolio or project value, returning');
+    if (!portfolioSelect || !projectSelect || !portfolioSelect.value || !projectSelect.value) {
+        console.log('Missing portfolio or project select elements or values, returning');
         return;
     }
 
@@ -5104,44 +5171,296 @@ function showAutoLoadModal(data) {
     let previewHTML = `<h4>Latest ${currentReportType.charAt(0).toUpperCase() + currentReportType.slice(1)} Report Data:</h4>`;
 
     // Common fields for all report types
-    if (currentReportType === 'sprint' || currentReportType === 'manual') {
-        previewHTML += `
+    previewHTML += `
+        <div class="data-preview-section">
+            <h5><i class="fas fa-info-circle"></i> Basic Information</h5>
             <div class="data-preview-item">
-                <span class="data-preview-label">Sprint Number:</span>
-                <span class="data-preview-value">${latestData.sprintNumber || 'N/A'} → Suggested: ${suggestedValues.sprintNumber || 'N/A'}</span>
+                <span class="data-preview-label">Report Type:</span>
+                <span class="data-preview-value">${(latestData.reportType || currentReportType).toUpperCase()}</span>
             </div>
             <div class="data-preview-item">
-                <span class="data-preview-label">Cycle Number:</span>
-                <span class="data-preview-value">${latestData.cycleNumber || 'N/A'} → Suggested: ${suggestedValues.cycleNumber || 'N/A'}</span>
+                <span class="data-preview-label">Environment:</span>
+                <span class="data-preview-value">${latestData.environment || 'N/A'}</span>
+            </div>
+        </div>
+    `;
+
+    // Sprint/Cycle information for applicable report types
+    if (currentReportType !== 'performance' || latestData.sprintNumber) {
+        previewHTML += `
+            <div class="data-preview-section">
+                <h5><i class="fas fa-running"></i> Sprint & Release</h5>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Sprint Number:</span>
+                    <span class="data-preview-value">${latestData.sprintNumber || 'N/A'} → Suggested: ${suggestedValues.sprintNumber || 'N/A'}</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Cycle Number:</span>
+                    <span class="data-preview-value">${latestData.cycleNumber || 'N/A'} → Suggested: ${suggestedValues.cycleNumber || 'N/A'}</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Release Number:</span>
+                    <span class="data-preview-value">${latestData.releaseNumber || 'N/A'} → Suggested: ${suggestedValues.releaseNumber || 'N/A'}</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Report Version:</span>
+                    <span class="data-preview-value">${latestData.reportVersion || 'N/A'}</span>
+                </div>
             </div>
         `;
     }
 
-    // Common fields for all report types
+    // Team information
     previewHTML += `
-        <div class="data-preview-item">
-            <span class="data-preview-label">Release Number:</span>
-            <span class="data-preview-value">${latestData.releaseNumber || 'N/A'} → Suggested: ${suggestedValues.releaseNumber || 'N/A'}</span>
-        </div>
-        <div class="data-preview-item">
-            <span class="data-preview-label">Report Version:</span>
-            <span class="data-preview-value">${latestData.reportVersion || 'N/A'}</span>
-        </div>
-        <div class="data-preview-item">
-            <span class="data-preview-label">Testers:</span>
-            <span class="data-preview-value">${latestData.testerData ? latestData.testerData.length : 0} tester(s)</span>
-        </div>
-        <div class="data-preview-item">
-            <span class="data-preview-label">Team Members:</span>
-            <span class="data-preview-value">${latestData.teamMembers ? latestData.teamMembers.length : 0} member(s)</span>
+        <div class="data-preview-section">
+            <h5><i class="fas fa-users"></i> Team Information</h5>
+            <div class="data-preview-item">
+                <span class="data-preview-label">Testers:</span>
+                <span class="data-preview-value">${latestData.testerData ? latestData.testerData.length : 0} tester(s)</span>
+            </div>
+            <div class="data-preview-item">
+                <span class="data-preview-label">Team Members:</span>
+                <span class="data-preview-value">${latestData.teamMembers ? latestData.teamMembers.length : 0} member(s)</span>
+            </div>
+            <div class="data-preview-item">
+                <span class="data-preview-label">Request Data:</span>
+                <span class="data-preview-value">${latestData.requestData ? latestData.requestData.length : 0} item(s)</span>
+            </div>
         </div>
     `;
 
+    // Report-type-specific data preview
+    if (currentReportType === 'sprint' || currentReportType === 'manual') {
+        // Sprint/Manual specific data
+        const totalUserStories = (latestData.passedUserStories || 0) + (latestData.failedUserStories || 0) + (latestData.blockedUserStories || 0);
+        const totalTestCases = (latestData.passedTestCases || 0) + (latestData.failedTestCases || 0) + (latestData.blockedTestCases || 0);
+        
+        previewHTML += `
+            <div class="data-preview-section">
+                <h5><i class="fas fa-chart-bar"></i> Testing Metrics</h5>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">User Stories:</span>
+                    <span class="data-preview-value">${totalUserStories} total (${latestData.passedUserStories || 0} passed, ${latestData.failedUserStories || 0} failed)</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Test Cases:</span>
+                    <span class="data-preview-value">${totalTestCases} total (${latestData.passedTestCases || 0} passed, ${latestData.failedTestCases || 0} failed)</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Issues:</span>
+                    <span class="data-preview-value">${latestData.totalIssues || 0} total (${latestData.criticalIssues || 0} critical, ${latestData.highIssues || 0} high)</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Enhancements:</span>
+                    <span class="data-preview-value">${latestData.totalEnhancements || 0} total (${latestData.implementedEnhancements || 0} implemented)</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">QA Notes:</span>
+                    <span class="data-preview-value">${latestData.qaNotesData ? latestData.qaNotesData.length : 0} note(s)</span>
+                </div>
+            </div>
+        `;
+
+        // Sprint-specific automation data
+        if (currentReportType === 'sprint' && latestData.automationPassedTestCases !== undefined) {
+            const totalAutoTests = (latestData.automationPassedTestCases || 0) + (latestData.automationFailedTestCases || 0) + (latestData.automationSkippedTestCases || 0);
+            previewHTML += `
+                <div class="data-preview-section">
+                    <h5><i class="fas fa-robot"></i> Automation Data</h5>
+                    <div class="data-preview-item">
+                        <span class="data-preview-label">Automation Tests:</span>
+                        <span class="data-preview-value">${totalAutoTests} total (${latestData.automationPassedTestCases || 0} passed, ${latestData.automationFailedTestCases || 0} failed)</span>
+                    </div>
+                    <div class="data-preview-item">
+                        <span class="data-preview-label">Test Stability:</span>
+                        <span class="data-preview-value">${latestData.automationStableTests || 0} stable, ${latestData.automationFlakyTests || 0} flaky</span>
+                    </div>
+                </div>
+            `;
+        }
+
+    } else if (currentReportType === 'automation') {
+        // Automation specific data
+        const totalAutoTests = (latestData.automationPassedTestCases || 0) + (latestData.automationFailedTestCases || 0) + (latestData.automationSkippedTestCases || 0);
+        
+        previewHTML += `
+            <div class="data-preview-section">
+                <h5><i class="fas fa-robot"></i> Automation Results</h5>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Test Results:</span>
+                    <span class="data-preview-value">${totalAutoTests} total (${latestData.automationPassedTestCases || 0} passed, ${latestData.automationFailedTestCases || 0} failed, ${latestData.automationSkippedTestCases || 0} skipped)</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Test Stability:</span>
+                    <span class="data-preview-value">${latestData.automationStableTests || 0} stable, ${latestData.automationFlakyTests || 0} flaky</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Covered Services:</span>
+                    <span class="data-preview-value">${latestData.coveredServices ? 'Available' : 'None'}</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Bugs Found:</span>
+                    <span class="data-preview-value">${latestData.bugsData ? latestData.bugsData.length : 0} bug(s)</span>
+                </div>
+            </div>
+        `;
+
+    } else if (currentReportType === 'performance') {
+        // Performance specific data
+        previewHTML += `
+            <div class="data-preview-section">
+                <h5><i class="fas fa-tachometer-alt"></i> Performance Metrics</h5>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Test Type:</span>
+                    <span class="data-preview-value">${latestData.testType || 'N/A'}</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Test Tool:</span>
+                    <span class="data-preview-value">${latestData.testTool || 'N/A'}</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">User Load:</span>
+                    <span class="data-preview-value">${latestData.userLoad || 'N/A'}</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Response Time:</span>
+                    <span class="data-preview-value">${latestData.responseTime || 'N/A'}</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Error Rate:</span>
+                    <span class="data-preview-value">${latestData.errorRate || 'N/A'}</span>
+                </div>
+                <div class="data-preview-item">
+                    <span class="data-preview-label">Performance Scenarios:</span>
+                    <span class="data-preview-value">${latestData.performanceScenarios ? latestData.performanceScenarios.length : 0} scenario(s)</span>
+                </div>
+            </div>
+        `;
+    };
+
     preview.innerHTML = previewHTML;
+    
+    // Update data selection checkboxes based on report type
+    updateDataSelectionCheckboxes(latestData);
+    
     console.log('Preview HTML set, about to show modal');
     console.log('Preview HTML content:', previewHTML);
     showModal('autoLoadDataModal');
     console.log('showModal call completed');
+}
+
+// Function to update data selection checkboxes based on report type
+function updateDataSelectionCheckboxes(latestData) {
+    const dataSelection = document.querySelector('.data-selection .checkbox-grid');
+    if (!dataSelection) return;
+    
+    let checkboxHTML = `
+        <label class="checkbox-item">
+            <input type="checkbox" id="loadBasicData" checked>
+            <span class="checkmark"></span>
+            Basic Information (Environment, Test Summary)
+        </label>
+    `;
+    
+    // Common checkboxes for all report types
+    if (currentReportType !== 'performance' || latestData.sprintNumber) {
+        checkboxHTML += `
+            <label class="checkbox-item">
+                <input type="checkbox" id="loadSprintData" checked>
+                <span class="checkmark"></span>
+                Sprint & Release Information
+            </label>
+        `;
+    }
+    
+    checkboxHTML += `
+        <label class="checkbox-item">
+            <input type="checkbox" id="loadReportData" checked>
+            <span class="checkmark"></span>
+            Report Information (Version, Date)
+        </label>
+        <label class="checkbox-item">
+            <input type="checkbox" id="loadTesters" checked>
+            <span class="checkmark"></span>
+            Tester(s) Information
+        </label>
+        <label class="checkbox-item">
+            <input type="checkbox" id="loadTeamMembers" checked>
+            <span class="checkmark"></span>
+            Team Members
+        </label>
+        <label class="checkbox-item">
+            <input type="checkbox" id="loadRequestData" checked>
+            <span class="checkmark"></span>
+            Request Data & Build Information
+        </label>
+    `;
+    
+    // Report-type-specific checkboxes
+    if (currentReportType === 'sprint' || currentReportType === 'manual') {
+        checkboxHTML += `
+            <label class="checkbox-item">
+                <input type="checkbox" id="loadTestingMetrics" checked>
+                <span class="checkmark"></span>
+                Testing Metrics (User Stories, Test Cases, Issues)
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="loadQANotes" checked>
+                <span class="checkmark"></span>
+                QA Notes & Evaluation Data
+            </label>
+        `;
+        
+        if (currentReportType === 'sprint' && latestData.automationPassedTestCases !== undefined) {
+            checkboxHTML += `
+                <label class="checkbox-item">
+                    <input type="checkbox" id="loadAutomationData" checked>
+                    <span class="checkmark"></span>
+                    Automation Test Results
+                </label>
+            `;
+        }
+        
+    } else if (currentReportType === 'automation') {
+        checkboxHTML += `
+            <label class="checkbox-item">
+                <input type="checkbox" id="loadAutomationData" checked>
+                <span class="checkmark"></span>
+                Automation Test Results
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="loadCoverage" checked>
+                <span class="checkmark"></span>
+                Coverage Information (Services, Modules)
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="loadBugsData" checked>
+                <span class="checkmark"></span>
+                Bugs & QA Notes
+            </label>
+        `;
+        
+    } else if (currentReportType === 'performance') {
+        checkboxHTML += `
+            <label class="checkbox-item">
+                <input type="checkbox" id="loadPerformanceConfig" checked>
+                <span class="checkmark"></span>
+                Test Configuration (Type, Tool, Objectives)
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="loadPerformanceMetrics" checked>
+                <span class="checkmark"></span>
+                Performance Metrics (Load, Response Times)
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="loadPerformanceData" checked>
+                <span class="checkmark"></span>
+                Performance Data (Scenarios, HTTP Overview)
+            </label>
+        `;
+    }
+    
+    dataSelection.innerHTML = checkboxHTML;
 }
 
 // Function to load selected data
@@ -5151,30 +5470,88 @@ function loadSelectedData() {
     const latestData = latestProjectData.latestData;
     const suggestedValues = latestProjectData.suggestedValues;
 
+    // Helper function to safely set field value
+    function setFieldValue(fieldId, value, altFieldId = null) {
+        const field = document.getElementById(fieldId) || (altFieldId ? document.getElementById(altFieldId) : null);
+        if (field && value !== undefined && value !== null) {
+            field.value = value;
+        }
+    }
+
     // Check which data types to load
-    const loadSprintData = document.getElementById('loadSprintData').checked;
-    const loadReportData = document.getElementById('loadReportData').checked;
-    const loadTesters = document.getElementById('loadTesters').checked;
-    const loadTeamMembers = document.getElementById('loadTeamMembers').checked;
+    const loadBasicData = document.getElementById('loadBasicData')?.checked;
+    const loadSprintData = document.getElementById('loadSprintData')?.checked;
+    const loadReportData = document.getElementById('loadReportData')?.checked;
+    const loadTesters = document.getElementById('loadTesters')?.checked;
+    const loadTeamMembers = document.getElementById('loadTeamMembers')?.checked;
+    const loadRequestData = document.getElementById('loadRequestData')?.checked;
+    
+    // Report-type-specific checkboxes
+    const loadTestingMetrics = document.getElementById('loadTestingMetrics')?.checked;
+    const loadQANotes = document.getElementById('loadQANotes')?.checked;
+    const loadAutomationData = document.getElementById('loadAutomationData')?.checked;
+    const loadCoverage = document.getElementById('loadCoverage')?.checked;
+    const loadBugsData = document.getElementById('loadBugsData')?.checked;
+    const loadPerformanceConfig = document.getElementById('loadPerformanceConfig')?.checked;
+    const loadPerformanceMetrics = document.getElementById('loadPerformanceMetrics')?.checked;
+    const loadPerformanceData = document.getElementById('loadPerformanceData')?.checked;
+
+    // Load Basic Information
+    if (loadBasicData) {
+        // Set environment field based on current report type
+        if (currentReportType === 'sprint' || currentReportType === 'manual') {
+            setFieldValue('environment', latestData.environment);
+        } else if (currentReportType === 'automation') {
+            setFieldValue('autoEnvironment', latestData.environment);
+        } else if (currentReportType === 'performance') {
+            setFieldValue('perfEnvironment', latestData.environment);
+        }
+        
+        setFieldValue('testSummary', latestData.testSummary);
+        setFieldValue('testingStatus', latestData.testingStatus);
+    }
 
     // Load Sprint & Release Information with the new logic
     if (loadSprintData) {
-        document.getElementById('sprintNumber').value = suggestedValues.sprintNumber;
-        document.getElementById('cycleNumber').value = suggestedValues.cycleNumber;
-        document.getElementById('releaseNumber').value = suggestedValues.releaseNumber;
+        // Set fields based on current report type
+        if (currentReportType === 'sprint' || currentReportType === 'manual') {
+            setFieldValue('sprintNumber', suggestedValues.sprintNumber);
+            setFieldValue('cycleNumber', suggestedValues.cycleNumber);
+            setFieldValue('releaseNumber', suggestedValues.releaseNumber);
+        } else if (currentReportType === 'automation') {
+            setFieldValue('autoSprintNumber', suggestedValues.sprintNumber);
+            setFieldValue('autoCycleNumber', suggestedValues.cycleNumber);
+            setFieldValue('autoReleaseNumber', suggestedValues.releaseNumber);
+        } else if (currentReportType === 'performance') {
+            setFieldValue('perfSprintNumber', suggestedValues.sprintNumber);
+            setFieldValue('perfCycleNumber', suggestedValues.cycleNumber);
+            setFieldValue('perfReleaseNumber', suggestedValues.releaseNumber);
+        }
     }
 
     // Load Report Information
     if (loadReportData) {
-        document.getElementById('reportVersion').value = latestData.reportVersion;
         // Set today's date
         const today = new Date();
-        const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-        document.getElementById('reportDate').value = formattedDate;
+        const formattedDate = today.getFullYear() + '-' + 
+                              (today.getMonth() + 1).toString().padStart(2, '0') + '-' + 
+                              today.getDate().toString().padStart(2, '0');
+        
+        // Set fields based on current report type
+        if (currentReportType === 'sprint' || currentReportType === 'manual') {
+            setFieldValue('reportVersion', latestData.reportVersion);
+            setFieldValue('reportDate', formattedDate);
+        } else if (currentReportType === 'automation') {
+            setFieldValue('autoReportVersion', latestData.reportVersion);
+            setFieldValue('autoReportDate', formattedDate);
+        } else if (currentReportType === 'performance') {
+            setFieldValue('perfReportVersion', latestData.reportVersion);
+            setFieldValue('perfReportDate', formattedDate);
+        }
     }
 
     // Load Testers
-    if (loadTesters && latestData.testerData.length > 0) {
+    if (loadTesters && latestData.testerData && latestData.testerData.length > 0) {
         // Clear existing testers
         testerData = [];
         latestData.testerData.forEach(tester => {
@@ -5184,13 +5561,159 @@ function loadSelectedData() {
     }
 
     // Load Team Members  
-    if (loadTeamMembers && latestData.teamMembers.length > 0) {
+    if (loadTeamMembers && latestData.teamMembers && latestData.teamMembers.length > 0) {
         teamMemberData = [...latestData.teamMembers];
         renderTeamMemberList();
     }
 
+    // Load Request Data & Build Information
+    if (loadRequestData) {
+        if (latestData.requestData && latestData.requestData.length > 0) {
+            requestData = [...latestData.requestData];
+            renderRequestList();
+        }
+        if (latestData.buildData && latestData.buildData.length > 0) {
+            buildData = [...latestData.buildData];
+            renderBuildList();
+        }
+    }
+
+    // Report-type-specific data loading
+    if (currentReportType === 'sprint' || currentReportType === 'manual') {
+        // Load Testing Metrics
+        if (loadTestingMetrics) {
+            // User Stories
+            setFieldValue('passedStories', latestData.passedUserStories);
+            setFieldValue('passedWithIssuesStories', latestData.passedWithIssuesUserStories);
+            setFieldValue('failedStories', latestData.failedUserStories);
+            setFieldValue('blockedStories', latestData.blockedUserStories);
+            setFieldValue('cancelledStories', latestData.cancelledUserStories);
+            setFieldValue('deferredStories', latestData.deferredUserStories);
+            setFieldValue('notTestableStories', latestData.notTestableUserStories);
+            
+            // Test Cases
+            setFieldValue('passedTests', latestData.passedTestCases);
+            setFieldValue('passedWithIssuesTests', latestData.passedWithIssuesTestCases);
+            setFieldValue('failedTests', latestData.failedTestCases);
+            setFieldValue('blockedTests', latestData.blockedTestCases);
+            setFieldValue('cancelledTests', latestData.cancelledTestCases);
+            setFieldValue('deferredTests', latestData.deferredTestCases);
+            setFieldValue('notTestableTests', latestData.notTestableTestCases);
+            
+            // Issues
+            setFieldValue('criticalIssues', latestData.criticalIssues);
+            setFieldValue('highIssues', latestData.highIssues);
+            setFieldValue('mediumIssues', latestData.mediumIssues);
+            setFieldValue('lowIssues', latestData.lowIssues);
+            setFieldValue('newIssues', latestData.newIssues);
+            setFieldValue('fixedIssues', latestData.fixedIssues);
+            setFieldValue('notFixedIssues', latestData.notFixedIssues);
+            setFieldValue('reopenedIssues', latestData.reopenedIssues);
+            setFieldValue('deferredIssues', latestData.deferredIssues);
+            
+            // Enhancements
+            setFieldValue('newEnhancements', latestData.newEnhancements);
+            setFieldValue('implementedEnhancements', latestData.implementedEnhancements);
+            setFieldValue('existsEnhancements', latestData.existsEnhancements);
+            
+            // Recalculate totals
+            setTimeout(() => {
+                if (typeof calculateUserStoriesPercentages === 'function') calculateUserStoriesPercentages();
+                if (typeof calculateTestCasesPercentages === 'function') calculateTestCasesPercentages();
+                if (typeof calculateIssuesPercentages === 'function') calculateIssuesPercentages();
+                if (typeof calculateEnhancementsPercentages === 'function') calculateEnhancementsPercentages();
+            }, 100);
+        }
+        
+        // Load QA Notes & Evaluation
+        if (loadQANotes) {
+            if (latestData.qaNotesData && latestData.qaNotesData.length > 0) {
+                qaNotesData = [...latestData.qaNotesData];
+                renderQANotesList();
+            }
+            if (latestData.evaluationData && latestData.evaluationData.length > 0) {
+                evaluationData = [...latestData.evaluationData];
+                if (typeof updateEvaluationScore === 'function') updateEvaluationScore();
+            }
+        }
+    }
+
+    // Load Automation Data (for Sprint and Automation reports)
+    if (loadAutomationData && (currentReportType === 'sprint' || currentReportType === 'automation')) {
+        setFieldValue('automationPassedTests', latestData.automationPassedTestCases);
+        setFieldValue('automationFailedTests', latestData.automationFailedTestCases);
+        setFieldValue('automationSkippedTests', latestData.automationSkippedTestCases);
+        setFieldValue('automationStableTests', latestData.automationStableTests);
+        setFieldValue('automationFlakyTests', latestData.automationFlakyTests);
+        
+        // Recalculate automation percentages
+        setTimeout(() => {
+            if (typeof calculateAutomationPercentages === 'function') calculateAutomationPercentages();
+            if (typeof calculateAutomationStabilityPercentages === 'function') calculateAutomationStabilityPercentages();
+        }, 100);
+    }
+
+    // Load Coverage (for Automation reports)
+    if (loadCoverage && currentReportType === 'automation') {
+        setFieldValue('coveredServices', latestData.coveredServices);
+        setFieldValue('coveredModules', latestData.coveredModules);
+    }
+
+    // Load Bugs Data (for Automation reports)
+    if (loadBugsData && currentReportType === 'automation') {
+        if (latestData.bugsData && latestData.bugsData.length > 0) {
+            bugsData = [...latestData.bugsData];
+            renderBugsList();
+        }
+        if (latestData.qaNotesData && latestData.qaNotesData.length > 0) {
+            qaNotesData = [...latestData.qaNotesData];
+            renderQANotesList();
+        }
+    }
+
+    // Load Performance Configuration
+    if (loadPerformanceConfig && currentReportType === 'performance') {
+        setFieldValue('testType', latestData.testType);
+        setFieldValue('testTool', latestData.testTool);
+        setFieldValue('testObjective', latestData.testObjective);
+        setFieldValue('testScope', latestData.testScope);
+    }
+
+    // Load Performance Metrics
+    if (loadPerformanceMetrics && currentReportType === 'performance') {
+        setFieldValue('userLoad', latestData.userLoad);
+        setFieldValue('responseTime', latestData.responseTime);
+        setFieldValue('requestVolume', latestData.requestVolume);
+        setFieldValue('errorRate', latestData.errorRate);
+        setFieldValue('slowestResponse', latestData.slowestResponse);
+        setFieldValue('fastestResponse', latestData.fastestResponse);
+        setFieldValue('numberOfUsers', latestData.numberOfUsers);
+        setFieldValue('executionDuration', latestData.executionDuration);
+        setFieldValue('maxThroughput', latestData.maxThroughput);
+        setFieldValue('httpFailures', latestData.httpFailures);
+        setFieldValue('avgResponseTime', latestData.avgResponseTime);
+        setFieldValue('responseTime95Percent', latestData.responseTime95Percent);
+    }
+
+    // Load Performance Data
+    if (loadPerformanceData && currentReportType === 'performance') {
+        if (latestData.performanceCriteriaResults && latestData.performanceCriteriaResults.length > 0) {
+            performanceCriteriaResults = [...latestData.performanceCriteriaResults];
+            renderPerformanceCriteriaTable();
+        }
+        if (latestData.performanceScenarios && latestData.performanceScenarios.length > 0) {
+            performanceScenarios = [...latestData.performanceScenarios];
+            renderPerformanceScenariosTable();
+        }
+        if (latestData.httpRequestsOverview && latestData.httpRequestsOverview.length > 0) {
+            httpRequestsOverview = [...latestData.httpRequestsOverview];
+            renderHTTPRequestsTable();
+        }
+    }
+
     closeModal('autoLoadDataModal');
-    showToast('Data loaded successfully!', 'success');
+    const reportTypeName = currentReportType.charAt(0).toUpperCase() + currentReportType.slice(1);
+    showToast(reportTypeName + ' report data loaded successfully!', 'success');
 }
 
 // Function to set default values for new projects

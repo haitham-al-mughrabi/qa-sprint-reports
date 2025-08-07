@@ -31,3 +31,6 @@ __pycache__
 */.idea/*
 */.idea/*
 __pycache__/*.*
+*.md
+test*.json
+*tests.*

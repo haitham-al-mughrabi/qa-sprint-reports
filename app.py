@@ -1847,6 +1847,8 @@ def get_latest_project_data(portfolio_name, project_name):
         # Parse existing data
         tester_data = json.loads(latest_report.testerData or '[]')
         team_member_data = json.loads(latest_report.teamMemberData or '[]')
+        request_data = json.loads(latest_report.requestData or '[]')
+        build_data = json.loads(latest_report.buildData or '[]')
 
         # Get project to find assigned testers (merge with existing tester data) (case-insensitive)
         project = Project.query.filter(db.func.lower(Project.name) == project_name.lower()).first()
@@ -1860,17 +1862,118 @@ def get_latest_project_data(portfolio_name, project_name):
                 if assigned_tester['email'] not in existing_emails:
                     tester_data.append(assigned_tester)
 
+        # Build base latest data common to all report types
+        latest_data = {
+            'reportType': latest_report.reportType,
+            'sprintNumber': current_sprint,
+            'cycleNumber': current_cycle,
+            'releaseNumber': current_release,
+            'reportVersion': latest_report.reportVersion or '1.0',
+            'reportDate': latest_report.reportDate,
+            'environment': latest_report.environment,
+            'testSummary': latest_report.testSummary,
+            'testingStatus': latest_report.testingStatus,
+            'testerData': tester_data,
+            'teamMembers': team_member_data,
+            'requestData': request_data,
+            'buildData': build_data
+        }
+
+        # Add report-type-specific fields
+        if report_type.lower() in ['sprint', 'manual']:
+            # Add Sprint/Manual specific fields
+            latest_data.update({
+                'passedUserStories': latest_report.passedUserStories or 0,
+                'passedWithIssuesUserStories': latest_report.passedWithIssuesUserStories or 0,
+                'failedUserStories': latest_report.failedUserStories or 0,
+                'blockedUserStories': latest_report.blockedUserStories or 0,
+                'cancelledUserStories': latest_report.cancelledUserStories or 0,
+                'deferredUserStories': latest_report.deferredUserStories or 0,
+                'notTestableUserStories': latest_report.notTestableUserStories or 0,
+                
+                'passedTestCases': latest_report.passedTestCases or 0,
+                'passedWithIssuesTestCases': latest_report.passedWithIssuesTestCases or 0,
+                'failedTestCases': latest_report.failedTestCases or 0,
+                'blockedTestCases': latest_report.blockedTestCases or 0,
+                'cancelledTestCases': latest_report.cancelledTestCases or 0,
+                'deferredTestCases': latest_report.deferredTestCases or 0,
+                'notTestableTestCases': latest_report.notTestableTestCases or 0,
+                
+                'totalIssues': latest_report.totalIssues or 0,
+                'criticalIssues': latest_report.criticalIssues or 0,
+                'highIssues': latest_report.highIssues or 0,
+                'mediumIssues': latest_report.mediumIssues or 0,
+                'lowIssues': latest_report.lowIssues or 0,
+                'newIssues': latest_report.newIssues or 0,
+                'fixedIssues': latest_report.fixedIssues or 0,
+                'notFixedIssues': latest_report.notFixedIssues or 0,
+                'reopenedIssues': latest_report.reopenedIssues or 0,
+                'deferredIssues': latest_report.deferredIssues or 0,
+                
+                'totalEnhancements': latest_report.totalEnhancements or 0,
+                'newEnhancements': latest_report.newEnhancements or 0,
+                'implementedEnhancements': latest_report.implementedEnhancements or 0,
+                'existsEnhancements': latest_report.existsEnhancements or 0,
+                
+                'evaluationData': json.loads(latest_report.evaluationData or '[]'),
+                'qaNotesData': json.loads(latest_report.qaNotesData or '[]')
+            })
+            
+            # Add automation fields for Sprint reports
+            if report_type.lower() == 'sprint':
+                latest_data.update({
+                    'automationPassedTestCases': latest_report.automationPassedTestCases or 0,
+                    'automationFailedTestCases': latest_report.automationFailedTestCases or 0,
+                    'automationSkippedTestCases': latest_report.automationSkippedTestCases or 0,
+                    'automationStableTests': latest_report.automationStableTests or 0,
+                    'automationFlakyTests': latest_report.automationFlakyTests or 0
+                })
+
+        elif report_type.lower() == 'automation':
+            # Add Automation specific fields
+            latest_data.update({
+                'automationPassedTestCases': latest_report.automationPassedTestCases or 0,
+                'automationFailedTestCases': latest_report.automationFailedTestCases or 0,
+                'automationSkippedTestCases': latest_report.automationSkippedTestCases or 0,
+                'automationStableTests': latest_report.automationStableTests or 0,
+                'automationFlakyTests': latest_report.automationFlakyTests or 0,
+                'coveredServices': latest_report.coveredServices or '',
+                'coveredModules': latest_report.coveredModules or '',
+                'bugsData': json.loads(latest_report.bugsData or '[]'),
+                'qaNotesData': json.loads(latest_report.qaNotesData or '[]')
+            })
+
+        elif report_type.lower() == 'performance':
+            # Add Performance specific fields
+            latest_data.update({
+                'testType': latest_report.testType or '',
+                'testTool': latest_report.testTool or '',
+                'testObjective': latest_report.testObjective or '',
+                'testScope': latest_report.testScope or '',
+                
+                'userLoad': latest_report.userLoad or '',
+                'responseTime': latest_report.responseTime or '',
+                'requestVolume': latest_report.requestVolume or '',
+                'errorRate': latest_report.errorRate or '',
+                'slowestResponse': latest_report.slowestResponse or '',
+                'fastestResponse': latest_report.fastestResponse or '',
+                'numberOfUsers': latest_report.numberOfUsers or '',
+                'executionDuration': latest_report.executionDuration or '',
+                
+                'maxThroughput': latest_report.maxThroughput or '',
+                'httpFailures': latest_report.httpFailures or '',
+                'avgResponseTime': latest_report.avgResponseTime or '',
+                'responseTime95Percent': latest_report.responseTime95Percent or '',
+                
+                'performanceCriteriaResults': json.loads(latest_report.performanceCriteriaResults or '[]'),
+                'performanceScenarios': json.loads(latest_report.performanceScenarios or '[]'),
+                'httpRequestsOverview': json.loads(latest_report.httpRequestsOverview or '[]')
+            })
+
         return jsonify({
             'hasData': True,
-            'latestData': {
-                'sprintNumber': current_sprint,
-                'cycleNumber': current_cycle,
-                'releaseNumber': current_release,
-                'reportVersion': latest_report.reportVersion or '1.0',
-                'reportDate': latest_report.reportDate,
-                'testerData': tester_data,
-                'teamMembers': team_member_data
-            },
+            'reportType': report_type.lower(),
+            'latestData': latest_data,
             'suggestedValues': {
                 'sprintNumber': suggested_sprint,
                 'cycleNumber': suggested_cycle,
