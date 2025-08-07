@@ -3399,7 +3399,34 @@ async function loadReportForEditing(report) {
     basicFields.forEach(field => {
         const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
-            element.value = report[field];
+            let value = report[field];
+            // Convert date from dd-mm-yyyy to yyyy-mm-dd for HTML5 date inputs
+            if (field === 'reportDate' && value && element.type === 'date') {
+                value = convertDateFormat(value);
+            }
+            element.value = value;
+        }
+    });
+
+    // Handle report-type-specific fields
+    const reportTypeSpecificFields = [
+        { id: 'autoReportDate', field: 'reportDate', convert: true },
+        { id: 'perfReportDate', field: 'reportDate', convert: true },
+        { id: 'autoEnvironment', field: 'environment' },
+        { id: 'perfEnvironment', field: 'environment' },
+        { id: 'perfSprintNumber', field: 'sprintNumber' },
+        { id: 'perfCycleNumber', field: 'cycleNumber' },
+        { id: 'perfReleaseNumber', field: 'releaseNumber' }
+    ];
+    
+    reportTypeSpecificFields.forEach(fieldInfo => {
+        const element = document.getElementById(fieldInfo.id);
+        if (element && report[fieldInfo.field] !== undefined) {
+            let value = report[fieldInfo.field];
+            if (fieldInfo.convert && fieldInfo.field === 'reportDate') {
+                value = convertDateFormat(value);
+            }
+            element.value = value;
         }
     });
 
@@ -4101,6 +4128,23 @@ function getCurrentDate() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
+function convertDateFormat(dateString) {
+    if (!dateString) return '';
+    
+    // If already in yyyy-mm-dd format, return as-is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        return dateString;
+    }
+    
+    // Convert dd-mm-yyyy to yyyy-mm-dd
+    if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
+        const parts = dateString.split('-');
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    
+    return dateString; // Return original if no pattern matches
+}
+
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     // Handles both 'dd-mm-yyyy' and ISO strings
@@ -4151,20 +4195,7 @@ window.showAddQANoteFieldModal = showAddQANoteFieldModal;
 window.updateQAFieldOptions = updateQAFieldOptions;
 window.addQANoteField = addQANoteField;
 
-// Date format validation
-document.addEventListener('DOMContentLoaded', function () {
-    const reportDateField = document.getElementById('reportDate');
-    if (reportDateField) {
-        reportDateField.addEventListener('input', function (e) {
-            const datePattern = /^\d{2}-\d{2}-\d{4}$/;
-            if (this.value && !datePattern.test(this.value)) {
-                this.setCustomValidity('Please enter date in dd-mm-yyyy format');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-    }
-});
+// Date format validation - removed as HTML5 date inputs handle validation automatically
 
 function toggleWeightColumn() {
     const columns = document.querySelectorAll('.weight-column');
@@ -5184,6 +5215,11 @@ function setDefaultValues(defaults) {
         setValue('reportDate', defaults.reportDate);
         setValue('autoReportDate', defaults.reportDate); // for automation reports
         setValue('perfReportDate', defaults.reportDate); // for performance reports
+        setValue('autoEnvironment', defaults.environment); // for automation reports
+        setValue('perfEnvironment', defaults.environment); // for performance reports
+        setValue('perfSprintNumber', defaults.sprintNumber); // for performance reports
+        setValue('perfCycleNumber', defaults.cycleNumber); // for performance reports
+        setValue('perfReleaseNumber', defaults.releaseNumber); // for performance reports
     } else {
         // Fallback defaults
         setValue('sprintNumber', 1);
@@ -5194,6 +5230,11 @@ function setDefaultValues(defaults) {
         setValue('reportDate', formattedDate);
         setValue('autoReportDate', formattedDate); // for automation reports
         setValue('perfReportDate', formattedDate); // for performance reports
+        setValue('autoEnvironment', ''); // for automation reports
+        setValue('perfEnvironment', ''); // for performance reports
+        setValue('perfSprintNumber', 1); // for performance reports
+        setValue('perfCycleNumber', 1); // for performance reports
+        setValue('perfReleaseNumber', '1.0'); // for performance reports
     }
 }
 
@@ -6089,7 +6130,8 @@ function saveFormDataToLocalStorage() {
         const additionalFields = [
             'reportDate', 'portfolioName', 'projectName', 'sprintNumber',
             'reportVersion', 'cycleNumber', 'releaseNumber', 'testSummary',
-            'testingStatus', 'environment'
+            'testingStatus', 'environment', 'autoEnvironment', 'perfEnvironment',
+            'perfSprintNumber', 'perfCycleNumber', 'perfReleaseNumber'
         ];
 
         additionalFields.forEach(fieldId => {

@@ -242,9 +242,8 @@
                                                     placeholder="e.g., 1.0, 2.1">
                                             </div>
                                             <div class="form-group">
-                                                <label for="reportDate">Report Date (dd-mm-yyyy)</label>
-                                                <input type="text" id="reportDate" name="reportDate"
-                                                    pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy">
+                                                <label for="reportDate">Report Date</label>
+                                                <input type="date" id="reportDate" name="reportDate" required>
                                             </div>
                                             <div class="form-group">
                                                 <label for="environment">Test Environment</label>
@@ -1198,6 +1197,17 @@
                                                 <label for="autoReportDate">Report Date</label>
                                                 <input type="date" id="autoReportDate" name="reportDate" required>
                                             </div>
+                                            <div class="form-group">
+                                                <label for="autoEnvironment">Test Environment</label>
+                                                <select id="autoEnvironment" name="environment" required>
+                                                    <option value="">Select Environment</option>
+                                                    <option value="Development">Development</option>
+                                                    <option value="Testing">Testing</option>
+                                                    <option value="Staging">Staging</option>
+                                                    <option value="Pre-Production">Pre-Production</option>
+                                                    <option value="Production">Production</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1519,6 +1529,18 @@
                                         </div>
                                         <div class="info-card-v2-content form-row-fields">
                                             <div class="form-group">
+                                                <label for="perfSprintNumber">Sprint Number</label>
+                                                <input type="number" id="perfSprintNumber" name="sprintNumber" min="1" placeholder="Enter sprint number">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="perfCycleNumber">Cycle Number</label>
+                                                <input type="number" id="perfCycleNumber" name="cycleNumber" min="1" placeholder="Enter cycle number">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="perfReleaseNumber">Release Number</label>
+                                                <input type="text" id="perfReleaseNumber" name="releaseNumber" placeholder="e.g., R1.0, R2.1">
+                                            </div>
+                                            <div class="form-group">
                                                 <label for="perfReportName">Report Name</label>
                                                 <input type="text" id="perfReportName" name="reportName" placeholder="Performance Test Report - Sprint X">
                                             </div>
@@ -1553,6 +1575,17 @@
                                             <div class="form-group">
                                                 <label for="perfTestTool">Testing Tool</label>
                                                 <input type="text" id="perfTestTool" name="testTool" placeholder="e.g., JMeter, LoadRunner, K6">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="perfEnvironment">Test Environment</label>
+                                                <select id="perfEnvironment" name="environment" required>
+                                                    <option value="">Select Environment</option>
+                                                    <option value="Development">Development</option>
+                                                    <option value="Testing">Testing</option>
+                                                    <option value="Staging">Staging</option>
+                                                    <option value="Pre-Production">Pre-Production</option>
+                                                    <option value="Production">Production</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>

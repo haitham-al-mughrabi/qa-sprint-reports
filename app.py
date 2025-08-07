@@ -28,6 +28,22 @@ db = SQLAlchemy(app)
 # Initialize email service
 email_service.init_app(app)
 
+def convert_date_to_storage_format(date_string):
+    """Convert date from yyyy-mm-dd (HTML5 format) to dd-mm-yyyy (storage format)"""
+    if not date_string:
+        return date_string
+    
+    # If already in dd-mm-yyyy format, return as-is
+    if re.match(r'^\d{2}-\d{2}-\d{4}$', date_string):
+        return date_string
+    
+    # Convert yyyy-mm-dd to dd-mm-yyyy
+    if re.match(r'^\d{4}-\d{2}-\d{2}$', date_string):
+        parts = date_string.split('-')
+        return f"{parts[2]}-{parts[1]}-{parts[0]}"
+    
+    return date_string
+
 # --- Database Model Definition ---
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -950,7 +966,7 @@ def create_report():
             reportName=data.get('reportName'),
             cycleNumber=int(data.get('cycleNumber') or 0) if data.get('cycleNumber') else None,
             releaseNumber=data.get('releaseNumber'),
-            reportDate=data.get('reportDate'),
+            reportDate=convert_date_to_storage_format(data.get('reportDate')),
             environment=data.get('environment'),  # For all report types
             testType=data.get('testType'),  # For performance reports
             testTool=data.get('testTool'),  # For performance reports
@@ -1915,6 +1931,8 @@ def update_report(id):
                     setattr(report, field, int(data[field]) if data[field] else None)
                 elif field == 'cycleNumber' and data[field] is not None:
                     setattr(report, field, int(data[field]) if data[field] else None)
+                elif field == 'reportDate':
+                    setattr(report, field, convert_date_to_storage_format(data[field]))
                 else:
                     setattr(report, field, data[field])
 
