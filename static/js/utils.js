@@ -45,18 +45,18 @@ function getCurrentDate() {
 
 function convertDateFormat(dateString) {
     if (!dateString) return '';
-    
+
     // If already in yyyy-mm-dd format, return as-is
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
         return dateString;
     }
-    
+
     // Convert dd-mm-yyyy to yyyy-mm-dd
     if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
         const parts = dateString.split('-');
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
-    
+
     return dateString; // Return original if no pattern matches
 }
 

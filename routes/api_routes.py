@@ -393,6 +393,8 @@ def init_api_routes(app):
             return jsonify({'success': False, 'message': f'Error updating report: {str(e)}'}), 500
 
     @app.route('/api/reports/<int:id>', methods=['DELETE'])
+    @login_required
+    @approved_user_required
     def delete_report(id):
         report = Report.query.get_or_404(id)
         db.session.delete(report)

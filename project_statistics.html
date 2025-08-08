@@ -27,6 +27,27 @@
     <!-- Load non-critical CSS asynchronously -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"></noscript>
+    
+    <style>
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb-nav a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: var(--secondary);
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Header -->
@@ -103,6 +124,13 @@
     <!-- Project Statistics Page -->
     <div class="main-wrapper">
         <div class="dashboard-container">
+        <!-- Breadcrumb Navigation -->
+        <div class="breadcrumb-nav">
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Project Statistics</span>
+        </div>
+
         <div class="dashboard-header">
             <div class="header-content">
                 <h1>Project Statistics</h1>
