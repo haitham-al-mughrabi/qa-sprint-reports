@@ -11,13 +11,24 @@ function showAddQANoteModal() {
 }
 
 function addQANote() {
+    console.log('addQANote called');
     const noteText = document.getElementById('newQANoteText').value.trim();
+    console.log('Note text:', noteText);
+    
     if (noteText) {
         window.qaNotesData = window.qaNotesData || [];
         window.qaNotesData.push({ note: noteText });
+        console.log('QA notes data after adding:', window.qaNotesData);
+        
         renderQANotesList();
         updateQANotesCount();
-        closeModal('addQANoteModal');
+        
+        if (typeof closeModal === 'function') {
+            closeModal('addQANoteModal');
+        } else {
+            console.warn('closeModal function not found');
+        }
+        
         if (typeof showToast === 'function') {
             showToast('QA note added successfully!', 'success');
         }
@@ -36,20 +47,28 @@ function removeQANote(index) {
 }
 
 function renderQANotesList() {
-    const container = document.getElementById('qaNotesList');
-    if (!container) return;
-
     const qaNotesData = window.qaNotesData || [];
-    if (qaNotesData.length === 0) {
-        container.innerHTML = '<div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>';
-    } else {
-        container.innerHTML = qaNotesData.map((item, index) => `
-            <div class="dynamic-item">
-                <div>${item.note}</div>
-                <button type="button" class="btn-delete" onclick="removeQANote(${index})">Remove</button>
-            </div>
-        `).join('');
-    }
+    console.log('Rendering QA notes list, data:', qaNotesData);
+    
+    const emptyState = '<div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>';
+    const notesHTML = qaNotesData.length === 0 ? emptyState : qaNotesData.map((item, index) => `
+        <div class="dynamic-item">
+            <div>${item.note}</div>
+            <button type="button" class="btn-delete" onclick="removeQANote(${index})">Remove</button>
+        </div>
+    `).join('');
+
+    // Update both QA notes containers
+    const containers = ['qaNotesList', 'autoQANotesList'];
+    containers.forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (container) {
+            console.log(`Updating container ${containerId} with:`, notesHTML);
+            container.innerHTML = notesHTML;
+        } else {
+            console.log(`Container ${containerId} not found`);
+        }
+    });
 }
 
 function updateQANotesCount() {

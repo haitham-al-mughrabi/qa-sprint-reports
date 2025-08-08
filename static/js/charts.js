@@ -63,21 +63,38 @@ function getChartOptions() {
 
 function initializeDoughnutChart(canvasId, labels, backgroundColors) {
     const ctx = document.getElementById(canvasId)?.getContext('2d');
-    if (!ctx) return null;
+    if (!ctx) {
+        console.warn(`Canvas context not found for ${canvasId}`);
+        return null;
+    }
 
-    return new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: [0, 0, 0, 0, 0, 0, 0],
-                backgroundColor: backgroundColors,
-                borderColor: backgroundColors.map(color => color.replace('0.6', '1')),
-                borderWidth: 2
-            }]
-        },
-        options: getChartOptions()
-    });
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded yet, retrying in 500ms...');
+        setTimeout(() => initializeDoughnutChart(canvasId, labels, backgroundColors), 500);
+        return null;
+    }
+
+    try {
+        const chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: labels.map(() => 0), // Initialize with zeros for each label
+                    backgroundColor: backgroundColors,
+                    borderColor: backgroundColors.map(color => color.replace('0.6', '1')),
+                    borderWidth: 2
+                }]
+            },
+            options: getChartOptions()
+        });
+        console.log(`Chart initialized successfully for ${canvasId}`);
+        return chart;
+    } catch (error) {
+        console.error(`Error initializing chart for ${canvasId}:`, error);
+        return null;
+    }
 }
 
 function initializeUserStoriesChart() {
@@ -111,9 +128,20 @@ function initializeEnhancementsChart() {
 }
 
 function initializeAutomationTestCasesChart() {
+    const canvasId = 'automationTestCasesChart';
+    const canvas = document.getElementById(canvasId);
+    console.log('Initializing automation test cases chart, canvas found:', !!canvas);
+    
+    if (!canvas) {
+        console.warn(`Canvas element '${canvasId}' not found, retrying in 500ms...`);
+        setTimeout(() => initializeAutomationTestCasesChart(), 500);
+        return;
+    }
+    
     const labels = ['Passed', 'Failed', 'Skipped'];
     const colors = ['#28a745', '#dc3545', '#ffc107'];
-    window.automationTestCasesChart = initializeDoughnutChart('automationTestCasesChart', labels, colors);
+    window.automationTestCasesChart = initializeDoughnutChart(canvasId, labels, colors);
+    console.log('Automation test cases chart initialized:', !!window.automationTestCasesChart);
 }
 
 function initializeAutomationPercentageChart() {
@@ -123,9 +151,59 @@ function initializeAutomationPercentageChart() {
 }
 
 function initializeAutomationStabilityChart() {
+    const canvasId = 'automationStabilityChart';
+    const canvas = document.getElementById(canvasId);
+    console.log('Initializing automation stability chart, canvas found:', !!canvas);
+    
+    if (!canvas) {
+        console.warn(`Canvas element '${canvasId}' not found, retrying in 500ms...`);
+        setTimeout(() => initializeAutomationStabilityChart(), 500);
+        return;
+    }
+    
     const labels = ['Stable', 'Flaky'];
     const colors = ['#28a745', '#fd7e14'];
-    window.automationStabilityChart = initializeDoughnutChart('automationStabilityChart', labels, colors);
+    window.automationStabilityChart = initializeDoughnutChart(canvasId, labels, colors);
+    console.log('Automation stability chart initialized:', !!window.automationStabilityChart);
+}
+
+// --- Automation chart update functions ---
+function calculateAutomationPercentages() {
+    const passed = parseInt(document.getElementById('automationPassedTestCases')?.value || '0');
+    const failed = parseInt(document.getElementById('automationFailedTestCases')?.value || '0');
+    const skipped = parseInt(document.getElementById('automationSkippedTestCases')?.value || '0');
+    
+    const total = passed + failed + skipped;
+    document.getElementById('automationTotalTestCases').value = total;
+    
+    if (total > 0) {
+        document.getElementById('automationPassedPercentage').textContent = Math.round((passed / total) * 100) + '%';
+        document.getElementById('automationFailedPercentage').textContent = Math.round((failed / total) * 100) + '%';
+        document.getElementById('automationSkippedPercentage').textContent = Math.round((skipped / total) * 100) + '%';
+        
+        // Update chart
+        if (window.automationTestCasesChart) {
+            updateChartData(window.automationTestCasesChart, [passed, failed, skipped]);
+        }
+    }
+}
+
+function calculateAutomationStabilityPercentages() {
+    const stable = parseInt(document.getElementById('automationStableTests')?.value || '0');
+    const flaky = parseInt(document.getElementById('automationFlakyTests')?.value || '0');
+    
+    const total = stable + flaky;
+    document.getElementById('automationStabilityTotal').value = total;
+    
+    if (total > 0) {
+        document.getElementById('automationStablePercentage').textContent = Math.round((stable / total) * 100) + '%';
+        document.getElementById('automationFlakyPercentage').textContent = Math.round((flaky / total) * 100) + '%';
+        
+        // Update chart
+        if (window.automationStabilityChart) {
+            updateChartData(window.automationStabilityChart, [stable, flaky]);
+        }
+    }
 }
 
 // --- Calculation and Chart Update Functions ---
@@ -412,4 +490,6 @@ window.resetAllCharts = resetAllCharts;
 window.resetAllCalculations = resetAllCalculations;
 window.updateBugsCount = updateBugsCount;
 window.updateScenariosCount = updateScenariosCount;
+window.initializeAutomationTestCasesChart = initializeAutomationTestCasesChart;
+window.initializeAutomationStabilityChart = initializeAutomationStabilityChart;
 window.updateHttpRequestsCount = updateHttpRequestsCount;

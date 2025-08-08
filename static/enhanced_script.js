@@ -683,6 +683,18 @@ async function saveReport(reportData) {
     showToast(`${actionText === 'creating' ? 'Creating' : 'Updating'} report...`, 'info', 2000);
 
     try {
+        console.log('Sending report data:', reportData);
+        
+        // Log critical fields for debugging
+        console.log('Critical validation fields:', {
+            reportType: reportData.reportType,
+            portfolioName: reportData.portfolioName,
+            projectName: reportData.projectName,
+            reportDate: reportData.reportDate,
+            sprintNumber: reportData.sprintNumber,
+            environment: reportData.environment
+        });
+        
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
@@ -691,7 +703,20 @@ async function saveReport(reportData) {
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            const errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+            console.error('Server error response:', errorData);
+            
+            let errorMessage = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
+            
+            // If there are validation errors, include them in the message
+            if (errorData.errors) {
+                console.error('Validation errors:', errorData.errors);
+                if (Array.isArray(errorData.errors)) {
+                    errorMessage = 'Validation failed:\n• ' + errorData.errors.join('\n• ');
+                } else {
+                    errorMessage += '\nValidation errors: ' + JSON.stringify(errorData.errors);
+                }
+            }
+            
             throw new Error(errorMessage);
         }
 
@@ -1742,7 +1767,7 @@ function renderDynamicList(containerId, data, renderItemFn, removeFn) {
         // Check if the container is for team members, as it has a slightly different empty state message
         if (containerId === 'teamMemberList') {
             container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No team members added yet.</div>`;
-        } else if (containerId === 'testerList') {
+        } else if (containerId === 'testerList' || containerId === 'autoTesterList') {
             container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No testers added yet. Click "Add/Select Tester" to get started.</div>`;
         } else {
             container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No items added yet. Click "Add Request" to get started.</div>`;
@@ -1769,10 +1794,11 @@ function renderBuildList() {
 }
 
 function renderTesterList() {
-    renderDynamicList('testerList', testerData, (item, index, removeFn) => {
+    const renderTesterItem = (item, index, removeFn) => {
         const roles = [];
         if (item.is_automation_engineer) roles.push('Automation Engineer');
         if (item.is_manual_engineer) roles.push('Manual Engineer');
+        if (item.is_performance_tester) roles.push('Performance Tester');
         const roleText = roles.length > 0 ? `<br><strong>Roles:</strong> ${roles.join(', ')}` : '<br><em style="color: #6c757d;">No roles assigned</em>';
 
         return `
@@ -1780,7 +1806,11 @@ function renderTesterList() {
             <div><strong>Name:</strong> ${item.name}<br><strong>Email:</strong> ${item.email}${roleText}</div>
             <button type="button" class="btn-sm btn-delete" onclick="removeTester(${index})">Remove</button>
         </div>`;
-    }, removeTester);
+    };
+
+    // Update both tester lists
+    renderDynamicList('testerList', testerData, renderTesterItem, removeTester);
+    renderDynamicList('autoTesterList', testerData, renderTesterItem, removeTester);
 }
 
 function removeRequest(index) { requestData.splice(index, 1); renderRequestList(); showToast('Request removed', 'info'); }
@@ -3598,6 +3628,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const qaReportForm = document.getElementById('qaReportForm');
     if (qaReportForm) {
+        // DISABLED: This old form handler conflicts with the new modular form-handling.js
+        // Use submitForm() from form-handling.js instead
+        /*
         qaReportForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
@@ -3622,6 +3655,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     reportData[arrayKey].push(value);
                 } else {
                     reportData[key] = value;
+                }
+            }
+            
+            // Debug: Log what FormData collected
+            console.log('FormData collected fields:', Object.keys(reportData));
+            
+            // Manually collect critical fields that might be disabled
+            const criticalFields = [
+                'portfolioName', 'projectName', 'reportDate', 'sprintNumber', 
+                'environment', 'testingStatus', 'reportName', 'reportVersion'
+            ];
+            
+            for (const fieldName of criticalFields) {
+                const element = document.querySelector(`[name="${fieldName}"]`);
+                if (element && element.value && !reportData[fieldName]) {
+                    console.log(`Manually collecting disabled field ${fieldName}:`, element.value);
+                    reportData[fieldName] = element.value;
                 }
             }
 
@@ -3663,6 +3713,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     window.location.href = '/reports';
                 }, 1500);
+            }
+        });
+        */
+        
+        // NEW: Use the modular form submission handler
+        qaReportForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            
+            // Use the new modular submitForm function
+            if (typeof submitForm === 'function') {
+                await submitForm();
+            } else {
+                console.error('submitForm function not found - form-handling.js not loaded?');
             }
         });
     }

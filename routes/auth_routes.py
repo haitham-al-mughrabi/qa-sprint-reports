@@ -39,7 +39,7 @@ def approved_user_required(f):
         user = User.query.get(session['user_id'])
         if not user or not user.is_approved:
             flash('Your account is pending approval', 'warning')
-            return redirect(url_for('login'))
+            return redirect(url_for('pending_approval'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -66,17 +66,21 @@ def init_auth_routes(app):
         
         try:
             data = request.get_json()
-            email = data.get('email')
+            identifier = data.get('email') or data.get('identifier')  # Support both field names
             password = data.get('password')
             
-            if not email or not password:
-                return jsonify({'success': False, 'message': 'Email and password are required'}), 400
+            if not identifier or not password:
+                return jsonify({'success': False, 'message': 'Email/Username/Phone and password are required'}), 400
             
-            # Find user by email
-            user = User.query.filter_by(email=email).first()
+            # Find user by email, username, or phone number
+            user = User.query.filter(
+                (User.email == identifier) |
+                (User.username == identifier) |
+                (User.phone_number == identifier)
+            ).first()
             
             if not user:
-                return jsonify({'success': False, 'message': 'Invalid email or password'}), 401
+                return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
             
             # Check if user account is active
             if not user.is_active:
@@ -84,7 +88,7 @@ def init_auth_routes(app):
             
             # Check password
             if not user.check_password(password):
-                return jsonify({'success': False, 'message': 'Invalid email or password'}), 401
+                return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
             
             # Check if user is approved
             if not user.is_approved:
@@ -316,7 +320,8 @@ def init_auth_routes(app):
     @approved_user_required
     def profile():
         if request.method == 'GET':
-            return render_template('profile.html')
+            user = User.query.get(session['user_id'])
+            return render_template('profile.html', user=user)
         
         try:
             user = User.query.get(session['user_id'])

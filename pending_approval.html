@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Pending Approval - QA Reports System</title>
+
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="preload"
+        as="style" onload="this.rel='stylesheet'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Main styles -->
+    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--background), var(--surface));
+            min-height: 100vh;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pending-container {
+            text-align: center;
+            max-width: 600px;
+            background: var(--surface);
+            border-radius: var(--border-radius-large);
+            padding: 3rem 2rem;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid var(--border);
+            margin: 2rem;
+        }
+
+        .pending-icon {
+            font-size: 6rem;
+            color: var(--warning);
+            margin-bottom: 1.5rem;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+
+        .pending-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .pending-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .pending-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .pending-status {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .pending-status h3 {
+            color: var(--warning);
+            margin: 0 0 1rem 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .pending-status p {
+            margin: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .pending-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .pending-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .pending-btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .pending-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .pending-btn-secondary {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .pending-btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .pending-steps {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .pending-steps h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .steps-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .steps-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            color: var(--text-secondary);
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .pending-contact {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .pending-contact h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .pending-contact p {
+            color: var(--text-secondary);
+            margin: 0.5rem 0;
+        }
+
+        .user-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .user-info h4 {
+            color: var(--primary);
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+        }
+
+        .user-info p {
+            margin: 0.25rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+
+        .pending-container {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .pending-container {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+
+            .pending-title {
+                font-size: 1.8rem;
+            }
+
+            .pending-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .pending-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .pending-btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+        }
+
+        /* Dark theme support */
+        :root {
+            --primary: #3b82f6;
+            --secondary: #60a5fa;
+            --accent: #8b5cf6;
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-heavy: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --border-radius-large: 12px;
+        }
+
+        /* Light theme */
+        [data-theme="light"] {
+            --background: #ffffff;
+            --surface: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pending-container">
+        <div class="pending-icon">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+
+        <h1 class="pending-title">Account Pending Approval</h1>
+
+        <p class="pending-subtitle">
+            Your account has been created successfully and is currently awaiting administrator approval.
+        </p>
+
+        <p class="pending-description">
+            Thank you for registering with the QA Reports System. Your account is being reviewed by our administrators
+            and you will receive access once approved.
+        </p>
+
+        <div class="pending-status">
+            <h3><i class="fas fa-clock"></i> Current Status</h3>
+            <p><strong>Account Status:</strong> Pending Approval</p>
+            <p><strong>Submitted:</strong> <span id="submissionDate">Recently</span></p>
+            <p><strong>Expected Response:</strong> Within 24-48 hours</p>
+        </div>
+
+        <div class="user-info">
+            <h4><i class="fas fa-user"></i> Your Account Information</h4>
+            <p><strong>Name:</strong> <span id="userName">Loading...</span></p>
+            <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+            <p><strong>Registration Date:</strong> <span id="registrationDate">Loading...</span></p>
+        </div>
+
+        <div class="pending-steps">
+            <h3>What happens next?</h3>
+            <ol class="steps-list">
+                <li>
+                    <div class="step-number">1</div>
+                    <div>
+                        <strong>Review Process:</strong> An administrator will review your account details and verify
+                        your information.
+                    </div>
+                </li>
+                <li>
+                    <div class="step-number">2</div>
+                    <div>
+                        <strong>Approval Decision:</strong> You will receive an email notification once your account has
+                        been approved or if additional information is needed.
+                    </div>
+                </li>
+                <li>
+                    <div class="step-number">3</div>
+                    <div>
+                        <strong>Access Granted:</strong> Once approved, you can log in and start using all features of
+                        the QA Reports System.
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <div class="pending-actions">
+            <button onclick="location.reload()" class="pending-btn pending-btn-primary">
+                <i class="fas fa-redo"></i>
+                Check Status
+            </button>
+            <a href="/logout" class="pending-btn pending-btn-secondary">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </div>
+
+        <div class="pending-contact">
+            <h3>Need Help?</h3>
+            <p><i class="fas fa-envelope"></i> Email: admin@company.com</p>
+            <p><i class="fas fa-phone"></i> Phone: +1 (555) 123-4567</p>
+            <p><i class="fas fa-clock"></i> Support Hours: Monday - Friday, 9 AM - 5 PM</p>
+        </div>
+    </div>
+
+    <script>
+        // Load user information if available
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/auth/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        document.getElementById('userName').textContent = data.user.first_name + ' ' + data.user.last_name;
+                        document.getElementById('userEmail').textContent = data.user.email;
+
+                        if (data.user.created_at) {
+                            const createdDate = new Date(data.user.created_at);
+                            document.getElementById('registrationDate').textContent = createdDate.toLocaleDateString();
+                            document.getElementById('submissionDate').textContent = createdDate.toLocaleDateString();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        });
+
+        // Auto-refresh every 5 minutes to check for approval
+        setTimeout(() => {
+            location.reload();
+        }, 300000); // 5 minutes
+    </script>
+</body>
+
+</html>

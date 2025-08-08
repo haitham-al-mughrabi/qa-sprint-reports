@@ -173,6 +173,23 @@ function configureAutomationReport() {
     // Show the first section
     setTimeout(() => showSection(0), 100);
 
+    // Initialize automation charts after sections are configured
+    setTimeout(() => {
+        console.log('Attempting to initialize automation charts...');
+        if (typeof initializeAutomationTestCasesChart === 'function') {
+            console.log('Calling initializeAutomationTestCasesChart...');
+            initializeAutomationTestCasesChart();
+        } else {
+            console.warn('initializeAutomationTestCasesChart function not found');
+        }
+        if (typeof initializeAutomationStabilityChart === 'function') {
+            console.log('Calling initializeAutomationStabilityChart...');
+            initializeAutomationStabilityChart();
+        } else {
+            console.warn('initializeAutomationStabilityChart function not found');
+        }
+    }, 600);
+
     console.log('✅ Automation Report configured (8 sections with renamed and new sections)');
     
     // Update required fields for automation report type

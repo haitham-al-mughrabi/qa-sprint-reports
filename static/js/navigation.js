@@ -33,6 +33,22 @@ function showSection(sectionIndex) {
 
     // Update sidebar navigation
     updateSidebarNavigation(sectionIndex);
+    
+    // Initialize automation charts when showing the automation test results section
+    if (window.currentReportType === 'automation') {
+        // Check if this is the automation regression test results section (section-a3)
+        if (targetSection && targetSection.id === 'section-a3') {
+            console.log('Showing automation test results section, initializing charts...');
+            setTimeout(() => {
+                if (typeof initializeAutomationTestCasesChart === 'function') {
+                    initializeAutomationTestCasesChart();
+                }
+                if (typeof initializeAutomationStabilityChart === 'function') {
+                    initializeAutomationStabilityChart();
+                }
+            }, 200);
+        }
+    }
 }
 
 function nextSection() {

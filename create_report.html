@@ -1448,7 +1448,7 @@
                                     <div class="info-card-v2-header">
                                         <i class="fas fa-sticky-note"></i>
                                         <h3>QA Automation Notes</h3>
-                                        <button type="button" class="card-btn" onclick="showQANoteModal()">
+                                        <button type="button" class="card-btn" onclick="showAddQANoteModal()">
                                             <i class="fas fa-plus"></i> Add Note
                                         </button>
                                     </div>
@@ -2024,7 +2024,7 @@
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('addQANoteModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addQANote()">Add Note</button>
+                <button type="button" class="btn btn-primary" onclick="if(typeof addQANote === 'function') { addQANote(); } else { addQANoteDirect(); }">Add Note</button>
             </div>
         </div>
     </div>
@@ -2385,10 +2385,173 @@
             
             updatePageForReportType();
             console.log('Report type initialized:', reportType);
+            
+            // Initialize charts after page loads
+            setTimeout(() => {
+                if (typeof initializeCharts === 'function') {
+                    initializeCharts();
+                }
+                
+                // For automation reports, also try direct chart initialization
+                if (reportType === 'automation') {
+                    console.log('Attempting direct automation chart initialization...');
+                    setTimeout(() => {
+                        // Direct chart creation for automation
+                        const testCanvas = document.getElementById('automationTestCasesChart');
+                        const stabilityCanvas = document.getElementById('automationStabilityChart');
+                        
+                        if (testCanvas && typeof Chart !== 'undefined') {
+                            console.log('Creating automation test cases chart directly...');
+                            try {
+                                const ctx = testCanvas.getContext('2d');
+                                window.automationTestCasesChart = new Chart(ctx, {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: ['Passed', 'Failed', 'Skipped'],
+                                        datasets: [{
+                                            data: [0, 0, 0],
+                                            backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                                            borderColor: ['#28a745', '#dc3545', '#ffc107'],
+                                            borderWidth: 2
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: {
+                                                position: 'bottom'
+                                            }
+                                        }
+                                    }
+                                });
+                                console.log('✅ Automation test cases chart created successfully');
+                            } catch (error) {
+                                console.error('❌ Error creating automation test cases chart:', error);
+                            }
+                        }
+                        
+                        if (stabilityCanvas && typeof Chart !== 'undefined') {
+                            console.log('Creating automation stability chart directly...');
+                            try {
+                                const ctx = stabilityCanvas.getContext('2d');
+                                window.automationStabilityChart = new Chart(ctx, {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: ['Stable', 'Flaky'],
+                                        datasets: [{
+                                            data: [0, 0],
+                                            backgroundColor: ['#28a745', '#fd7e14'],
+                                            borderColor: ['#28a745', '#fd7e14'],
+                                            borderWidth: 2
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: {
+                                                position: 'bottom'
+                                            }
+                                        }
+                                    }
+                                });
+                                console.log('✅ Automation stability chart created successfully');
+                            } catch (error) {
+                                console.error('❌ Error creating stability chart:', error);
+                            }
+                        }
+                    }, 1000);
+                }
+            }, 500);
         });
+
+        // Fallback QA Notes functionality for automation reports
+        window.testQANotes = function() {
+            console.log('Testing QA Notes functionality...');
+            
+            // Test if elements exist
+            const addButton = document.querySelector('button[onclick="showAddQANoteModal()"]');
+            const modal = document.getElementById('addQANoteModal');
+            const textarea = document.getElementById('newQANoteText');
+            const container = document.getElementById('autoQANotesList');
+            
+            console.log('Add button:', addButton);
+            console.log('Modal:', modal);
+            console.log('Textarea:', textarea);
+            console.log('Container:', container);
+        };
+
+        // Enhanced QA Notes functionality
+        window.addQANoteDirect = function() {
+            const textarea = document.getElementById('newQANoteText');
+            const noteText = textarea ? textarea.value.trim() : '';
+            
+            if (noteText) {
+                // Initialize global notes array
+                window.qaNotesData = window.qaNotesData || [];
+                window.qaNotesData.push({ note: noteText });
+                
+                // Update both containers
+                const containers = ['qaNotesList', 'autoQANotesList'];
+                containers.forEach(containerId => {
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        const notesHTML = window.qaNotesData.map((item, index) => `
+                            <div class="dynamic-item" style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 4px;">
+                                <div style="margin-bottom: 5px;">${item.note}</div>
+                                <button type="button" onclick="removeQANoteDirect(${index})" style="background: #dc3545; color: white; border: none; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Remove</button>
+                            </div>
+                        `).join('');
+                        container.innerHTML = notesHTML;
+                    }
+                });
+                
+                // Clear textarea
+                if (textarea) textarea.value = '';
+                
+                // Close modal
+                const modal = document.getElementById('addQANoteModal');
+                if (modal) modal.style.display = 'none';
+                
+                console.log('QA note added successfully!');
+            } else {
+                alert('Please enter a note.');
+            }
+        };
+
+        window.removeQANoteDirect = function(index) {
+            window.qaNotesData = window.qaNotesData || [];
+            window.qaNotesData.splice(index, 1);
+            
+            // Update both containers
+            const containers = ['qaNotesList', 'autoQANotesList'];
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    if (window.qaNotesData.length === 0) {
+                        container.innerHTML = '<div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>';
+                    } else {
+                        const notesHTML = window.qaNotesData.map((item, idx) => `
+                            <div class="dynamic-item" style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 4px;">
+                                <div style="margin-bottom: 5px;">${item.note}</div>
+                                <button type="button" onclick="removeQANoteDirect(${idx})" style="background: #dc3545; color: white; border: none; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Remove</button>
+                            </div>
+                        `).join('');
+                        container.innerHTML = notesHTML;
+                    }
+                }
+            });
+        };
     </script>
 
     <!-- Link to the external JavaScript files -->
+    <script src="/static/js/modals.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/qa-notes.js"></script>
+    <script src="/static/js/form-handling.js"></script>
+    <script src="/static/js/charts.js"></script>
+    <script src="/static/js/api.js"></script>
     <script src="/static/enhanced_script.js"></script>
     <script src="/static/Charts.js"></script>
     

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found - QA Reports System</title>
+
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="preload"
+        as="style" onload="this.rel='stylesheet'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Main styles -->
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/unified-nav.css">
+
+    <!-- Theme manager (loads early) -->
+    <script src="/static/theme-manager.js" defer></script>
+    
+    <!-- Navigation script -->
+    <script src="/static/nav.js" defer></script>
+
+    <style>
+        .error-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .error-content {
+            text-align: center;
+            max-width: 600px;
+            background: var(--surface);
+            border-radius: var(--border-radius-large);
+            padding: 3rem 2rem;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid var(--border);
+        }
+
+        .error-icon {
+            font-size: 6rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            opacity: 0.8;
+        }
+
+        .error-code {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .error-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .error-description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .error-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .error-btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .error-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .error-btn-secondary {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .error-btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .error-suggestions {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .error-suggestions h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .error-suggestions ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .error-suggestions li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .error-suggestions li i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb-nav a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: var(--secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .error-content {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+
+            .error-code {
+                font-size: 3rem;
+            }
+
+            .error-title {
+                font-size: 1.5rem;
+            }
+
+            .error-description {
+                font-size: 1rem;
+            }
+
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .error-btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+        }
+
+        /* Animation */
+        .error-content {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-rocket"></i> QA Reports System
+            </div>
+            
+            <button class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="/reports" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-text">Reports</span>
+                </a>
+                <a href="/reports_type" class="nav-link">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="nav-text">New Report</span>
+                </a>
+                <a href="/manage" class="nav-link">
+                    <i class="fas fa-cogs"></i>
+                    <span class="nav-text">Manage Data</span>
+                </a>
+                <a href="/project-statistics" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span class="nav-text">Statistics</span>
+                </a>
+            </div>
+            
+            <div class="nav-controls">
+                <div class="nav-user">
+                    <div class="nav-dropdown">
+                        <button class="nav-dropdown-btn">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="user-name">User</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="nav-dropdown-content">
+                            <a href="/profile">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </a>
+                            <a href="/user-management" class="admin-only">
+                                <i class="fas fa-users-cog"></i>
+                                User Management
+                            </a>
+                            <a href="/logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <div class="dashboard-container">
+            <!-- Breadcrumb Navigation -->
+            <div class="breadcrumb-nav">
+                <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Page Not Found</span>
+            </div>
+
+            <div class="error-container">
+                <div class="error-content">
+                    <div class="error-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    
+                    <div class="error-code">404</div>
+                    
+                    <h1 class="error-title">Page Not Found</h1>
+                    
+                    <p class="error-description">
+                        Oops! The page you're looking for doesn't exist. It might have been moved, deleted, or you entered the wrong URL.
+                    </p>
+                    
+                    <div class="error-actions">
+                        <a href="/dashboard" class="error-btn error-btn-primary">
+                            <i class="fas fa-home"></i>
+                            Go to Dashboard
+                        </a>
+                        <button onclick="history.back()" class="error-btn error-btn-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                            Go Back
+                        </button>
+                    </div>
+
+                    <div class="error-suggestions">
+                        <h3>What you can do:</h3>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Check the URL for typos</li>
+                            <li><i class="fas fa-check"></i> Use the navigation menu above</li>
+                            <li><i class="fas fa-check"></i> Visit our <a href="/dashboard" style="color: var(--primary);">Dashboard</a></li>
+                            <li><i class="fas fa-check"></i> Create a <a href="/reports_type" style="color: var(--primary);">New Report</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load user info
+            await loadUserInfo();
+            
+            // Initialize theme
+            if (window.themeManager) {
+                window.themeManager.init();
+            }
+        });
+
+        // Load user info function
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/auth/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        document.querySelector('.user-name').textContent = data.user.first_name + ' ' + data.user.last_name;
+                        
+                        // Show/hide admin-only elements
+                        const adminElements = document.querySelectorAll('.admin-only');
+                        adminElements.forEach(element => {
+                            element.style.display = data.user.is_admin ? 'block' : 'none';
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
