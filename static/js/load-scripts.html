@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Reports System - Script Loading Example</title>
+</head>
+<body>
+    <!-- 
+    This is an example of how to load all the split JavaScript files in the correct order.
+    Copy these script tags to your HTML files where you need the functionality.
+    -->
+
+    <!-- Core dependencies (load first) -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+
+    <!-- UI and interaction modules -->
+    <script src="js/modals.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/dashboard.js"></script>
+
+    <!-- Report type management -->
+    <script src="js/report-types.js"></script>
+
+    <!-- Feature-specific modules -->
+    <script src="js/qa-notes.js"></script>
+    <script src="js/automation-bugs.js"></script>
+    <script src="js/performance-reports.js"></script>
+    <script src="js/evaluation.js"></script>
+
+    <!-- Data management -->
+    <script src="js/local-storage.js"></script>
+    <script src="js/form-handling.js"></script>
+    <script src="js/reports-table.js"></script>
+    <script src="js/export.js"></script>
+
+    <!-- Main initialization (load last) -->
+    <script src="js/main.js"></script>
+
+    <!-- Example usage -->
+    <script>
+        // All functions are now available globally
+        console.log('All modules loaded successfully!');
+        
+        // Example: Show a toast notification
+        // showToast('All modules loaded!', 'success');
+        
+        // Example: Initialize charts
+        // initializeCharts();
+        
+        // Example: Change report type
+        // changeReportType('automation');
+    </script>
+</body>
+</html>
