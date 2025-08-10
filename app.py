@@ -41,6 +41,7 @@ class Report(db.Model):
     cycleNumber = db.Column(db.Integer)
     releaseNumber = db.Column(db.String(50)) # Add missing releaseNumber field
     reportDate = db.Column(db.String(50))
+    testEnvironment = db.Column(db.String(50)) # Add testEnvironment field
 
     # Test Summary
     testSummary = db.Column(db.Text)
@@ -120,6 +121,27 @@ class Report(db.Model):
     automationStablePercentage = db.Column(db.Float, default=0.0)
     automationFlakyPercentage = db.Column(db.Float, default=0.0)
 
+    # Evaluation Data
+    involvementScore = db.Column(db.Integer, default=0)
+    involvementReason = db.Column(db.Text)
+    requirementsQualityScore = db.Column(db.Integer, default=0)
+    requirementsQualityReason = db.Column(db.Text)
+    qaPlanReviewScore = db.Column(db.Integer, default=0)
+    qaPlanReviewReason = db.Column(db.Text)
+    uxScore = db.Column(db.Integer, default=0)
+    uxReason = db.Column(db.Text)
+    cooperationScore = db.Column(db.Integer, default=0)
+    cooperationReason = db.Column(db.Text)
+    criticalBugsScore = db.Column(db.Integer, default=0)
+    criticalBugsReason = db.Column(db.Text)
+    highBugsScore = db.Column(db.Integer, default=0)
+    highBugsReason = db.Column(db.Text)
+    mediumBugsScore = db.Column(db.Integer, default=0)
+    mediumBugsReason = db.Column(db.Text)
+    lowBugsScore = db.Column(db.Integer, default=0)
+    lowBugsReason = db.Column(db.Text)
+    finalEvaluationScore = db.Column(db.Integer, default=0)
+
     # Metadata
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
     updatedAt = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -196,6 +218,19 @@ class Report(db.Model):
         else:
             self.automationStablePercentage = 0.0
             self.automationFlakyPercentage = 0.0
+        
+        # Calculate final evaluation score
+        self.finalEvaluationScore = (
+            (self.involvementScore or 0) +
+            (self.requirementsQualityScore or 0) +
+            (self.qaPlanReviewScore or 0) +
+            (self.uxScore or 0) +
+            (self.cooperationScore or 0) +
+            (self.criticalBugsScore or 0) +
+            (self.highBugsScore or 0) +
+            (self.mediumBugsScore or 0) +
+            (self.lowBugsScore or 0)
+        )
 
     def to_dict(self):
         """Converts the Report object to a dictionary for JSON serialization."""
@@ -209,6 +244,7 @@ class Report(db.Model):
             'cycleNumber': self.cycleNumber,
             'releaseNumber': self.releaseNumber,
             'reportDate': self.reportDate,
+            'testEnvironment': self.testEnvironment,
             'testSummary': self.testSummary,
             'testingStatus': self.testingStatus,
 
@@ -277,6 +313,27 @@ class Report(db.Model):
             'automationStabilityTotal': self.automationStabilityTotal,
             'automationStablePercentage': self.automationStablePercentage,
             'automationFlakyPercentage': self.automationFlakyPercentage,
+
+            # Evaluation Data
+            'involvementScore': self.involvementScore,
+            'involvementReason': self.involvementReason,
+            'requirementsQualityScore': self.requirementsQualityScore,
+            'requirementsQualityReason': self.requirementsQualityReason,
+            'qaPlanReviewScore': self.qaPlanReviewScore,
+            'qaPlanReviewReason': self.qaPlanReviewReason,
+            'uxScore': self.uxScore,
+            'uxReason': self.uxReason,
+            'cooperationScore': self.cooperationScore,
+            'cooperationReason': self.cooperationReason,
+            'criticalBugsScore': self.criticalBugsScore,
+            'criticalBugsReason': self.criticalBugsReason,
+            'highBugsScore': self.highBugsScore,
+            'highBugsReason': self.highBugsReason,
+            'mediumBugsScore': self.mediumBugsScore,
+            'mediumBugsReason': self.mediumBugsReason,
+            'lowBugsScore': self.lowBugsScore,
+            'lowBugsReason': self.lowBugsReason,
+            'finalEvaluationScore': self.finalEvaluationScore,
 
             # Metadata
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
@@ -754,6 +811,7 @@ def create_report():
             cycleNumber=int(data.get('cycleNumber') or 0),
             releaseNumber=data.get('releaseNumber'), # Add releaseNumber field
             reportDate=data.get('reportDate'),
+            testEnvironment=data.get('testEnvironment'), # Add testEnvironment field
             testSummary=data.get('testSummary'),
             testingStatus=data.get('testingStatus'),
 
@@ -807,6 +865,26 @@ def create_report():
             automationSkippedTestCases=int(data.get('automationSkippedTestCases') or 0),
             automationStableTests=int(data.get('automationStableTests') or 0),
             automationFlakyTests=int(data.get('automationFlakyTests') or 0),
+
+            # Evaluation Data
+            involvementScore=int(data.get('involvementScore') or 0),
+            involvementReason=data.get('involvementReason'),
+            requirementsQualityScore=int(data.get('requirementsQualityScore') or 0),
+            requirementsQualityReason=data.get('requirementsQualityReason'),
+            qaPlanReviewScore=int(data.get('qaPlanReviewScore') or 0),
+            qaPlanReviewReason=data.get('qaPlanReviewReason'),
+            uxScore=int(data.get('uxScore') or 0),
+            uxReason=data.get('uxReason'),
+            cooperationScore=int(data.get('cooperationScore') or 0),
+            cooperationReason=data.get('cooperationReason'),
+            criticalBugsScore=int(data.get('criticalBugsScore') or 0),
+            criticalBugsReason=data.get('criticalBugsReason'),
+            highBugsScore=int(data.get('highBugsScore') or 0),
+            highBugsReason=data.get('highBugsReason'),
+            mediumBugsScore=int(data.get('mediumBugsScore') or 0),
+            mediumBugsReason=data.get('mediumBugsReason'),
+            lowBugsScore=int(data.get('lowBugsScore') or 0),
+            lowBugsReason=data.get('lowBugsReason'),
 
         )
 
@@ -1644,7 +1722,7 @@ def update_report(id):
 
     # Update fields
     for field in ['portfolioName', 'projectName', 'sprintNumber', 'reportVersion',
-                  'reportName', 'cycleNumber', 'releaseNumber', 'reportDate', 'testSummary', 'testingStatus',
+                  'reportName', 'cycleNumber', 'releaseNumber', 'reportDate', 'testEnvironment', 'testSummary', 'testingStatus',
                   'passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories',
                   'blockedUserStories', 'cancelledUserStories', 'deferredUserStories',
                   'notTestableUserStories', 'passedTestCases', 'passedWithIssuesTestCases',
@@ -1654,7 +1732,11 @@ def update_report(id):
                   'notFixedIssues', 'reopenedIssues', 'deferredIssues', 'newEnhancements',
                   'implementedEnhancements', 'existsEnhancements', 'automationPassedTestCases',
                   'automationFailedTestCases', 'automationSkippedTestCases', 'automationStableTests',
-                  'automationFlakyTests']:
+                  'automationFlakyTests', 'involvementScore', 'involvementReason',
+                  'requirementsQualityScore', 'requirementsQualityReason', 'qaPlanReviewScore', 'qaPlanReviewReason',
+                  'uxScore', 'uxReason', 'cooperationScore', 'cooperationReason',
+                  'criticalBugsScore', 'criticalBugsReason', 'highBugsScore', 'highBugsReason',
+                  'mediumBugsScore', 'mediumBugsReason', 'lowBugsScore', 'lowBugsReason']:
         if field in data:
             setattr(report, field, data[field])
 

@@ -29,6 +29,7 @@ let enhancementsChart = null;
 let automationTestCasesChart = null;
 let automationPercentageChart = null;
 let automationStabilityChart = null;
+let evaluationChart = null;
 let scoreColumnCount = 0; // Not directly used in this version but kept for consistency
 let weightReasonVisible = false; // Not directly used in this version but kept for consistency
 
@@ -1375,7 +1376,7 @@ function updateNavigationButtons() {
 }
 
 function updateProgressBar() {
-    const totalSections = 9;
+    const totalSections = 10;
     const sectionTitles = [
         'General Details',
         'Test Summary',
@@ -1385,7 +1386,8 @@ function updateProgressBar() {
         'Issues Analysis',
         'Enhancements',
         'QA Notes',
-        'Automation Regression'
+        'Automation Regression',
+        'Evaluation'
     ];
 
     // Calculate progress - show completion based on current section
@@ -2615,7 +2617,11 @@ function resetFormData() {
     const form = document.getElementById('qaReportForm');
     if (form) {
         form.reset();
+        
+        // Set default values
         document.getElementById('reportDate').value = getCurrentDate();
+        document.getElementById('reportVersion').value = '3';
+        
         requestData = [];
         buildData = [];
         testerData = [];
@@ -2645,6 +2651,10 @@ function resetAllCharts() {
     if (issuesPriorityChart) issuesPriorityChart.destroy();
     if (issuesStatusChart) issuesStatusChart.destroy();
     if (enhancementsChart) enhancementsChart.destroy();
+    if (automationTestCasesChart) automationTestCasesChart.destroy();
+    if (automationPercentageChart) automationPercentageChart.destroy();
+    if (automationStabilityChart) automationStabilityChart.destroy();
+    if (evaluationChart) evaluationChart.destroy();
 
     initializeCharts(); // Re-initialize all charts to their default empty state
 }
@@ -2676,13 +2686,37 @@ async function loadReportForEditing(report) {
     }
 
     // Basic fields (excluding portfolioName and projectName as they're handled above)
-    const basicFields = ['sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber'];
+    const basicFields = ['sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber', 'testEnvironment'];
+    
+    // Evaluation fields
+    const evaluationFields = [
+        'involvementScore', 'involvementReason',
+        'requirementsQualityScore', 'requirementsQualityReason', 
+        'qaPlanReviewScore', 'qaPlanReviewReason',
+        'uxScore', 'uxReason',
+        'cooperationScore', 'cooperationReason',
+        'criticalBugsScore', 'criticalBugsReason',
+        'highBugsScore', 'highBugsReason',
+        'mediumBugsScore', 'mediumBugsReason',
+        'lowBugsScore', 'lowBugsReason'
+    ];
     basicFields.forEach(field => {
         const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
     });
+    
+    // Load evaluation fields
+    evaluationFields.forEach(field => {
+        const element = document.getElementById(field);
+        if (element && report[field] !== undefined) {
+            element.value = report[field];
+        }
+    });
+    
+    // Calculate final score after loading evaluation data
+    calculateFinalScore();
 
     // User Stories
     const userStoryFields = ['passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories', 'blockedUserStories', 'cancelledUserStories', 'deferredUserStories', 'notTestableUserStories'];
@@ -3294,6 +3328,152 @@ function getCurrentDate() {
     return `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
 }
 
+function generateDefaultReportName() {
+    const portfolioSelect = document.getElementById('portfolioName');
+    const projectSelect = document.getElementById('projectName');
+    const sprintNumber = document.getElementById('sprintNumber');
+    const cycleNumber = document.getElementById('cycleNumber');
+    
+    if (portfolioSelect?.value && projectSelect?.value && sprintNumber?.value && cycleNumber?.value) {
+        const portfolio = portfolioSelect.options[portfolioSelect.selectedIndex].text;
+        const project = projectSelect.options[projectSelect.selectedIndex].text;
+        const today = getCurrentDate();
+        
+        return `Sprint-${portfolio}-${project}-${today}-${sprintNumber.value}-${cycleNumber.value}`;
+    }
+    
+    return '';
+}
+
+// Evaluation Section Functions
+function toggleEvaluationCriteria() {
+    const content = document.getElementById('criteriaContent');
+    const icon = document.getElementById('criteriaToggleIcon');
+    
+    if (content.classList.contains('expanded')) {
+        content.classList.remove('expanded');
+        icon.classList.remove('expanded');
+    } else {
+        content.classList.add('expanded');
+        icon.classList.add('expanded');
+    }
+}
+
+function calculateFinalScore() {
+    const scoreFields = [
+        'involvementScore',
+        'requirementsQualityScore', 
+        'qaPlanReviewScore',
+        'uxScore',
+        'cooperationScore',
+        'highBugsScore',
+        'mediumBugsScore',
+        'lowBugsScore'
+    ];
+    
+    let totalScore = 0;
+    scoreFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && field.value) {
+            totalScore += parseInt(field.value) || 0;
+        }
+    });
+    
+    document.getElementById('finalScore').textContent = totalScore;
+    
+    // Update the evaluation chart
+    updateEvaluationChart();
+}
+
+function updateEvaluationChart() {
+    const ctx = document.getElementById('evaluationChart');
+    if (!ctx) return;
+
+    const scores = {
+        'Involvement': parseInt(document.getElementById('involvementScore')?.value) || 0,
+        'Requirements Quality': parseInt(document.getElementById('requirementsQualityScore')?.value) || 0,
+        'QA Plan Review': parseInt(document.getElementById('qaPlanReviewScore')?.value) || 0,
+        'UX': parseInt(document.getElementById('uxScore')?.value) || 0,
+        'Cooperation': parseInt(document.getElementById('cooperationScore')?.value) || 0,
+        'Critical Bugs': parseInt(document.getElementById('criticalBugsScore')?.value) || 0,
+        'High Bugs': parseInt(document.getElementById('highBugsScore')?.value) || 0,
+        'Medium Bugs': parseInt(document.getElementById('mediumBugsScore')?.value) || 0,
+        'Low Bugs': parseInt(document.getElementById('lowBugsScore')?.value) || 0
+    };
+
+    const maxScores = {
+        'Involvement': 20,
+        'Requirements Quality': 10,
+        'QA Plan Review': 5,
+        'UX': 5,
+        'Cooperation': 10,
+        'Critical Bugs': 0,
+        'High Bugs': 15,
+        'Medium Bugs': 10,
+        'Low Bugs': 5
+    };
+
+    const labels = Object.keys(scores);
+    const data = Object.values(scores);
+    const maxData = Object.values(maxScores);
+
+    const colors = [
+        '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
+        '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899'
+    ];
+
+    if (evaluationChart) {
+        evaluationChart.destroy();
+    }
+
+    evaluationChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderColor: colors.map(color => color + '80'),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: `Total Score: ${data.reduce((a, b) => a + b, 0)}/100`,
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label;
+                            const value = context.parsed;
+                            const maxValue = maxData[context.dataIndex];
+                            return `${label}: ${value}/${maxValue}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     // Handles both 'dd-mm-yyyy' and ISO strings
@@ -3344,7 +3524,7 @@ window.showAddQANoteFieldModal = showAddQANoteFieldModal;
 window.updateQAFieldOptions = updateQAFieldOptions;
 window.addQANoteField = addQANoteField;
 
-// Date format validation
+// Date format validation and auto-generate report name
 document.addEventListener('DOMContentLoaded', function () {
     const reportDateField = document.getElementById('reportDate');
     if (reportDateField) {
@@ -3357,6 +3537,23 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // Add event listeners for auto-generating report name
+    const fieldsForReportName = ['portfolioName', 'projectName', 'sprintNumber', 'cycleNumber'];
+    fieldsForReportName.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('change', function() {
+                const reportNameField = document.getElementById('reportName');
+                if (reportNameField && !reportNameField.value.trim()) {
+                    const defaultName = generateDefaultReportName();
+                    if (defaultName) {
+                        reportNameField.placeholder = defaultName;
+                    }
+                }
+            });
+        }
+    });
 });
 
 function toggleWeightColumn() {
@@ -4524,6 +4721,11 @@ window.fetchReport = fetchReport; // Make it globally accessible for editing
 window.loadReportForEditing = loadReportForEditing; // Make it globally accessible for editing
 window.onProjectSelection = onProjectSelection; // Make project selection handler globally accessible
 window.onPortfolioSelection = onPortfolioSelection; // Make portfolio selection handler globally accessible
+
+// Make evaluation functions globally accessible
+window.toggleEvaluationCriteria = toggleEvaluationCriteria;
+window.calculateFinalScore = calculateFinalScore;
+window.updateEvaluationChart = updateEvaluationChart;
 window.loadSelectedData = loadSelectedData; // Make data loading function globally accessible
 window.editingReportId = editingReportId; // Make global variable accessible
 window.allReportsCache = allReportsCache; // Make global variable accessible
@@ -4548,10 +4750,31 @@ function saveFormDataToLocalStorage() {
         const additionalFields = [
             'reportDate', 'portfolioName', 'projectName', 'sprintNumber',
             'reportVersion', 'cycleNumber', 'releaseNumber', 'testSummary',
-            'testingStatus'
+            'testingStatus', 'testEnvironment'
+        ];
+        
+        // Evaluation fields
+        const evaluationFields = [
+            'involvementScore', 'involvementReason',
+            'requirementsQualityScore', 'requirementsQualityReason', 
+            'qaPlanReviewScore', 'qaPlanReviewReason',
+            'uxScore', 'uxReason',
+            'cooperationScore', 'cooperationReason',
+            'criticalBugsScore', 'criticalBugsReason',
+            'highBugsScore', 'highBugsReason',
+            'mediumBugsScore', 'mediumBugsReason',
+            'lowBugsScore', 'lowBugsReason'
         ];
 
         additionalFields.forEach(fieldId => {
+            const element = document.getElementById(fieldId);
+            if (element) {
+                formObject[fieldId] = element.value;
+            }
+        });
+        
+        // Add evaluation fields to form data
+        evaluationFields.forEach(fieldId => {
             const element = document.getElementById(fieldId);
             if (element) {
                 formObject[fieldId] = element.value;

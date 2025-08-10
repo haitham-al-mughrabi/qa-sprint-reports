@@ -133,6 +133,7 @@
                 <a href="#" class="nav-item" onclick="showSection(7)"><i class="fas fa-note-sticky"></i> QA Notes</a>
                 <a href="#" class="nav-item" onclick="showSection(8)"><i class="fas fa-robot"></i> Automation
                     Regression</a>
+                <a href="#" class="nav-item" onclick="showSection(9)"><i class="fas fa-star"></i> Evaluation</a>
             </nav>
 
             <!-- Main Content -->
@@ -152,7 +153,7 @@
                         </button>
                         <div class="progress-info">
                             <div class="progress-text" style="top:15%">
-                                <span id="progressStep">Step 1 of 9</span>
+                                <span id="progressStep">Step 1 of 10</span>
                                 <span id="progressTitle">General Details</span>
                             </div>
                             <div class="progress-percentage">
@@ -219,6 +220,12 @@
                                 </div>
                                 <span class="step-label">Auto</span>
                             </div>
+                            <div class="step" data-step="9">
+                                <div class="step-circle">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span class="step-label">Evaluation</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -227,82 +234,74 @@
                     <form id="qaReportForm">
                         <!-- Section 1: General Details -->
                         <div class="section active" id="section-0">
-                            <h2 class="section-title"><i class="fas fa-file-alt"></i> General Details</h2>
-                            <div class="general-details-layout">
-                                <!-- Project Details Card (Top, Full Width) -->
-                                <div class="info-card-v2 project-details-card">
-                                    <div class="info-card-v2-header">
-                                        <i class="fas fa-folder-open"></i>
-                                        <h3>Project Details</h3>
-                                    </div>
-                                    <div class="info-card-v2-content form-row-fields">
-                                        <div class="form-group">
-                                            <label for="portfolioName">Portfolio Name</label>
-                                            <select id="portfolioName" name="portfolioName"
-                                                onchange="onPortfolioSelection()">
-                                                <option value="">Select Portfolio</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="projectName">Project Name</label>
-                                            <select id="projectName" name="projectName" onchange="onProjectSelection()">
-                                                <option value="">Select Project</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                            <h2 class="section-title"><i class="fas fa-info-circle"></i> General Details</h2>
+                            <div class="general-details-grid">
+                                <!-- Row 1: Report Name -->
+                                <div class="form-group full-width">
+                                    <label for="reportName">Report Name</label>
+                                    <input type="text" id="reportName" name="reportName"
+                                        placeholder="Enter custom report name"
+                                        oninput="updateReportTitle()">
+                                    <small class="field-hint">Leave blank to use default name [reporttype-Portfolio-project-date-sprint-cyclenumber]</small>
                                 </div>
 
-                                <!-- Sprint & Release and Report Info Cards (Second Row, Side-by-Side) -->
-                                <div class="bottom-cards-row">
-                                    <div class="info-card-v2">
-                                        <div class="info-card-v2-header">
-                                            <i class="fas fa-running"></i>
-                                            <h3>Sprint & Release Information</h3>
-                                        </div>
-                                        <div class="info-card-v2-content">
-                                            <div class="form-group">
-                                                <label for="sprintNumber">Sprint Number</label>
-                                                <input type="number" id="sprintNumber" name="sprintNumber" min="1"
-                                                    placeholder="Enter sprint number">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="cycleNumber">Cycle Number</label>
-                                                <input type="number" id="cycleNumber" name="cycleNumber" min="1"
-                                                    placeholder="Enter cycle number">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="releaseNumber">Release Number</label>
-                                                <input type="text" id="releaseNumber" name="releaseNumber"
-                                                    placeholder="e.g., R1.0, R2.1">
-                                            </div>
-                                        </div>
-                                    </div>
+                                <!-- Row 2: Portfolio and Project -->
+                                <div class="form-group">
+                                    <label for="portfolioName">Portfolio Name</label>
+                                    <select id="portfolioName" name="portfolioName"
+                                        onchange="onPortfolioSelection()">
+                                        <option value="">Select Portfolio</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="projectName">Project Name</label>
+                                    <select id="projectName" name="projectName" onchange="onProjectSelection()">
+                                        <option value="">Select Project</option>
+                                    </select>
+                                </div>
 
-                                    <div class="info-card-v2">
-                                        <div class="info-card-v2-header">
-                                            <i class="fas fa-file-text"></i>
-                                            <h3>Report Information</h3>
-                                        </div>
-                                        <div class="info-card-v2-content">
-                                            <div class="form-group">
-                                                <label for="reportName">Report Name</label>
-                                                <input type="text" id="reportName" name="reportName"
-                                                    placeholder="Enter custom report name"
-                                                    oninput="updateReportTitle()">
-                                                <small class="field-hint">Leave blank to use default name</small>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="reportVersion">Report Version</label>
-                                                <input type="text" id="reportVersion" name="reportVersion"
-                                                    placeholder="e.g., 1.0, 2.1">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="reportDate">Report Date (dd-mm-yyyy)</label>
-                                                <input type="text" id="reportDate" name="reportDate"
-                                                    pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy">
-                                            </div>
-                                        </div>
-                                    </div>
+                                <!-- Row 3: Report Date and Test Environment -->
+                                <div class="form-group">
+                                    <label for="reportDate">Report Date</label>
+                                    <input type="text" id="reportDate" name="reportDate"
+                                        pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy">
+                                </div>
+                                <div class="form-group">
+                                    <label for="testEnvironment">Test Environment</label>
+                                    <select id="testEnvironment" name="testEnvironment">
+                                        <option value="">Select Environment</option>
+                                        <option value="local">Local</option>
+                                        <option value="demo">Demo</option>
+                                        <option value="dev">Dev</option>
+                                        <option value="stage">Stage</option>
+                                        <option value="uat">UAT</option>
+                                        <option value="pre-production">Pre-production</option>
+                                        <option value="production">Production</option>
+                                    </select>
+                                </div>
+
+                                <!-- Row 4: Sprint Number and Cycle Number -->
+                                <div class="form-group">
+                                    <label for="sprintNumber">Sprint Number</label>
+                                    <input type="number" id="sprintNumber" name="sprintNumber" min="1"
+                                        placeholder="Enter sprint number">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cycleNumber">Cycle Number</label>
+                                    <input type="number" id="cycleNumber" name="cycleNumber" min="1"
+                                        placeholder="Enter cycle number">
+                                </div>
+
+                                <!-- Row 5: Release Number and Report Version -->
+                                <div class="form-group">
+                                    <label for="releaseNumber">Release Number</label>
+                                    <input type="text" id="releaseNumber" name="releaseNumber"
+                                        placeholder="e.g., R1.0, R2.1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="reportVersion">Report Version</label>
+                                    <input type="number" id="reportVersion" name="reportVersion"
+                                        placeholder="3" value="3" min="1" step="1">
                                 </div>
                             </div>
                         </div>
@@ -1079,6 +1078,184 @@
                                             <div class="chart-container">
                                                 <canvas id="automationStabilityChart" width="400" height="400"></canvas>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 10: Evaluation -->
+                        <div class="section" id="section-9">
+                            <h2 class="section-title"><i class="fas fa-star"></i> Evaluation</h2>
+                            
+                            <!-- Part 1: Evaluation Criteria (Expandable) -->
+                            <div class="evaluation-criteria-card">
+                                <div class="criteria-header" onclick="toggleEvaluationCriteria()">
+                                    <div class="criteria-header-content">
+                                        <i class="fas fa-list-check"></i>
+                                        <h3>Evaluation Criteria</h3>
+                                    </div>
+                                    <i class="fas fa-chevron-down criteria-toggle-icon" id="criteriaToggleIcon"></i>
+                                </div>
+                                <div class="criteria-content" id="criteriaContent">
+                                    <div class="criteria-text-section">
+                                        <div class="criteria-item">
+                                            <h4>Involvement</h4>
+                                            <p>The QA team is testing within the sprint and is involved in all the scrum ceremonies.</p>
+                                        </div>
+                                        <div class="criteria-item">
+                                            <h4>Requirements Quality</h4>
+                                            <p>The quality of the user stories and documents.</p>
+                                        </div>
+                                        <div class="criteria-item">
+                                            <h4>QA Plan Review</h4>
+                                            <p>Review the QA plan that the vendor will provide.</p>
+                                        </div>
+                                        <div class="criteria-item">
+                                            <h4>UX</h4>
+                                            <p>The user flow (it will be checked against the Ministry's evaluation criteria).</p>
+                                        </div>
+                                        <div class="criteria-item">
+                                            <h4>Cooperation</h4>
+                                            <p>This will measure the cooperation between QA, Product Owners, and vendors.</p>
+                                        </div>
+                                        <div class="criteria-item">
+                                            <h4>Critical Bugs</h4>
+                                            <p>1 cycle (must be fixed on the next cycle of the bug detection).</p>
+                                        </div>
+                                        <div class="criteria-item">
+                                            <h4>High Bugs</h4>
+                                            <p>1 cycle (must be fixed on the next cycle of the bug detection).</p>
+                                        </div>
+                                        <div class="criteria-item">
+                                            <h4>Medium Bugs</h4>
+                                            <p>2 cycles (must be fixed on the second cycle of the bug detection).</p>
+                                        </div>
+                                        <div class="criteria-item">
+                                            <h4>Low Bugs</h4>
+                                            <p>We start counting once the number of detected low bugs => 10.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Criteria Weight Table -->
+                                    <div class="criteria-weight-table">
+                                        <h4>Evaluation Criteria & Weights</h4>
+                                        <table class="data-table criteria-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Criteria</th>
+                                                    <th>Weight</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td>Involvement</td><td>20%</td></tr>
+                                                <tr><td>Requirements Quality</td><td>10%</td></tr>
+                                                <tr><td>QA Plan Review</td><td>5%</td></tr>
+                                                <tr><td>UX</td><td>5%</td></tr>
+                                                <tr><td>Cooperation</td><td>10%</td></tr>
+                                                <tr><td>Critical Bugs</td><td>0%</td></tr>
+                                                <tr><td>High Bugs</td><td>15%</td></tr>
+                                                <tr><td>Medium Bugs</td><td>10%</td></tr>
+                                                <tr><td>Low Bugs</td><td>5%</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Part 2: Evaluation Scores -->
+                            <div class="evaluation-scores-layout">
+                                <div class="evaluation-scores-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-line"></i>
+                                        <h3>Evaluation Scores</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <table class="data-table evaluation-scores-table" id="evaluationScoresTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Criteria</th>
+                                                    <th>Max Score</th>
+                                                    <th>Score</th>
+                                                    <th>Reason</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Involvement</strong></td>
+                                                    <td>20</td>
+                                                    <td><input type="number" id="involvementScore" name="involvementScore" min="0" max="20" placeholder="0" oninput="calculateFinalScore()"></td>
+                                                    <td><input type="text" id="involvementReason" name="involvementReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Requirements Quality</strong></td>
+                                                    <td>10</td>
+                                                    <td><input type="number" id="requirementsQualityScore" name="requirementsQualityScore" min="0" max="10" placeholder="0" oninput="calculateFinalScore()"></td>
+                                                    <td><input type="text" id="requirementsQualityReason" name="requirementsQualityReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>QA Plan Review</strong></td>
+                                                    <td>5</td>
+                                                    <td><input type="number" id="qaPlanReviewScore" name="qaPlanReviewScore" min="0" max="5" placeholder="0" oninput="calculateFinalScore()"></td>
+                                                    <td><input type="text" id="qaPlanReviewReason" name="qaPlanReviewReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>UX</strong></td>
+                                                    <td>5</td>
+                                                    <td><input type="number" id="uxScore" name="uxScore" min="0" max="5" placeholder="0" oninput="calculateFinalScore()"></td>
+                                                    <td><input type="text" id="uxReason" name="uxReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Cooperation</strong></td>
+                                                    <td>10</td>
+                                                    <td><input type="number" id="cooperationScore" name="cooperationScore" min="0" max="10" placeholder="0" oninput="calculateFinalScore()"></td>
+                                                    <td><input type="text" id="cooperationReason" name="cooperationReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Critical Bugs</strong></td>
+                                                    <td>0</td>
+                                                    <td><input type="number" id="criticalBugsScore" name="criticalBugsScore" min="0" max="0" value="0" readonly class="readonly-field"></td>
+                                                    <td><input type="text" id="criticalBugsReason" name="criticalBugsReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>High Bugs</strong></td>
+                                                    <td>15</td>
+                                                    <td><input type="number" id="highBugsScore" name="highBugsScore" min="0" max="15" placeholder="0" oninput="calculateFinalScore()"></td>
+                                                    <td><input type="text" id="highBugsReason" name="highBugsReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Medium Bugs</strong></td>
+                                                    <td>10</td>
+                                                    <td><input type="number" id="mediumBugsScore" name="mediumBugsScore" min="0" max="10" placeholder="0" oninput="calculateFinalScore()"></td>
+                                                    <td><input type="text" id="mediumBugsReason" name="mediumBugsReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Low Bugs</strong></td>
+                                                    <td>5</td>
+                                                    <td><input type="number" id="lowBugsScore" name="lowBugsScore" min="0" max="5" placeholder="0" oninput="calculateFinalScore()"></td>
+                                                    <td><input type="text" id="lowBugsReason" name="lowBugsReason" placeholder="Enter reason"></td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="final-score-row">
+                                                    <td><strong>Final Score</strong></td>
+                                                    <td><strong>100</strong></td>
+                                                    <td><strong><span id="finalScore">0</span></strong></td>
+                                                    <td><strong>out of 100%</strong></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="evaluation-chart-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <h3>Evaluation Scores Chart</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="chart-container">
+                                            <canvas id="evaluationChart" width="400" height="400"></canvas>
                                         </div>
                                     </div>
                                 </div>
