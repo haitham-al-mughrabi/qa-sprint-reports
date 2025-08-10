@@ -1358,7 +1358,7 @@ function showSection(sectionIndex) {
 }
 
 function nextSection() {
-    if (currentSection < 8) { // Max section index is 8 (Automation Regression)
+    if (currentSection < 9) { // Max section index is 9 (QA Notes)
         showSection(currentSection + 1);
     }
 }
@@ -1370,7 +1370,7 @@ function previousSection() {
 
 function updateNavigationButtons() {
     document.getElementById('prevBtn').disabled = currentSection === 0;
-    const isLastSection = currentSection === 8;
+    const isLastSection = currentSection === 9;
     document.getElementById('nextBtn').style.display = isLastSection ? 'none' : 'inline-block';
     document.getElementById('submitBtn').style.display = isLastSection ? 'inline-block' : 'none';
 }
@@ -1385,9 +1385,9 @@ function updateProgressBar() {
         'Test Cases',
         'Issues Analysis',
         'Enhancements',
-        'QA Notes',
+        'Evaluation',
         'Automation Regression',
-        'Evaluation'
+        'QA Notes'
     ];
 
     // Calculate progress - show completion based on current section

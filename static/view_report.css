@@ -847,3 +847,36 @@ ight theme background adjustment */
     border-color: var(--border);
     border-top-color: var(--primary);
 }
+
+/* ========================================
+   EVALUATION SECTION STYLES
+   ======================================== */
+
+#evaluationSection .final-score-row {
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(var(--accent-rgb), 0.1));
+    font-weight: 600;
+}
+
+#evaluationSection .final-score-row td {
+    color: var(--primary);
+    border-bottom: none;
+}
+
+#evaluationSection #finalScoreDisplay {
+    color: var(--accent);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* Light theme specific styles for evaluation */
+[data-theme="light"] #evaluationSection .final-score-row {
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.15), rgba(var(--accent-rgb), 0.15));
+}
+
+[data-theme="light"] #evaluationSection .final-score-row td {
+    color: var(--primary);
+}
+
+[data-theme="light"] #evaluationSection #finalScoreDisplay {
+    color: var(--accent);
+}
