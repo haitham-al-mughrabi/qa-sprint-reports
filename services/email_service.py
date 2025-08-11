@@ -67,7 +67,7 @@ class EmailService:
                 </div>
                 <p style="color: #94a3b8; line-height: 1.6;">Please log in to the admin panel to approve or reject this registration.</p>
                 <div style="text-align: center; margin-top: 30px;">
-                    <a href="{{ url_for('user_management', _external=True) }}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
+                    <a href="{{ url_for('admin_routes.user_management_page', _external=True) }}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
                         Go to User Management
                     </a>
                 </div>
@@ -138,7 +138,7 @@ class EmailService:
                 </div>
                 <p style="color: #94a3b8; line-height: 1.6;">Please log in to the admin panel to approve or reject this password reset request.</p>
                 <div style="text-align: center; margin-top: 30px;">
-                    <a href="{{ url_for('user_management', _external=True) }}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
+                    <a href="{{ url_for('admin_routes.user_management_page', _external=True) }}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
                         Go to User Management
                     </a>
                 </div>
