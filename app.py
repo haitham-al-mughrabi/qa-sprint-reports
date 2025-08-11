@@ -100,6 +100,14 @@ def test_dashboard_fix_page():
     except:
         return "Test dashboard fix template not found", 404
 
+@app.route('/report-types')
+def report_types_page():
+    """Serves the report types selection page."""
+    try:
+        return render_template('report_types.html')
+    except:
+        return "Report types template not found", 404
+
 # Email configuration route
 @app.route('/api/email/config', methods=['GET'])
 def email_config():

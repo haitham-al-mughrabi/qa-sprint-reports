@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Report Type - QA Reports System</title>
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload" as="style" onload="this.rel='stylesheet'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Main styles -->
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/unified-nav.css">
+    
+    <!-- Ensure Font Awesome icons display properly -->
+    <style>
+        /* Force Font Awesome icons to display */
+        .fas, .far, .fab, .fal, .fad, .fa {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+            font-weight: 900 !important;
+            font-style: normal !important;
+            font-variant: normal !important;
+            text-transform: none !important;
+            line-height: 1 !important;
+            -webkit-font-smoothing: antialiased !important;
+            -moz-osx-font-smoothing: grayscale !important;
+        }
+        
+        /* Report Type Selection Styles */
+        .report-types-page {
+            min-height: 100vh;
+            background: var(--bg-primary);
+            padding-top: var(--nav-height, 70px);
+            transition: background-color 0.3s ease;
+        }
+
+        .report-types-container {
+            padding: 2rem;
+            max-width: var(--max-width, 1400px);
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-header h1 i {
+            color: var(--primary);
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .report-types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .report-type-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-type-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-heavy);
+            border-color: var(--primary);
+        }
+
+        .report-type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .report-type-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.25);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+        }
+
+        .card-features li {
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .card-features li i {
+            color: var(--success);
+            margin-right: 0.75rem;
+            width: 16px;
+        }
+
+        .select-button {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-large);
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .select-button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.3);
+        }
+
+        .select-button i {
+            font-size: 1.1rem;
+        }
+
+        /* Specific card colors */
+        .sprint-card .card-icon {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .manual-card .card-icon {
+            background: linear-gradient(135deg, #10b981, #047857);
+        }
+
+        .automation-card .card-icon {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+        }
+
+        .performance-card .card-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .report-types-container {
+                padding: 1rem;
+            }
+
+            .page-header {
+                padding: 1rem 0;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .report-types-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .report-type-card {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .report-types-container {
+                padding: 0.5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .card-title {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Theme transitions */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+    </style>
+
+    <!-- Theme manager (loads early) -->
+    <script src="/static/theme-manager.js"></script>
+    
+    <!-- Navigation script -->
+    <script src="/static/nav.js" defer></script>
+
+    <!-- External libraries (defer non-critical) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
+    <!-- Load non-critical CSS asynchronously -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"></noscript>
+</head>
+
+<body>
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-rocket"></i> QA Reports System
+            </div>
+            
+            <button class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="/reports" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-text">Reports</span>
+                </a>
+                <a href="/create-report" class="nav-link active">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="nav-text">New Report</span>
+                </a>
+                <a href="/manage" class="nav-link">
+                    <i class="fas fa-cogs"></i>
+                    <span class="nav-text">Manage Data</span>
+                </a>
+                <a href="/project-statistics" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span class="nav-text">Statistics</span>
+                </a>
+            </div>
+            
+            <div class="nav-controls">
+                <div class="nav-user">
+                    <div class="nav-dropdown">
+                        <button class="nav-dropdown-btn">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="user-name">User</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="nav-dropdown-content">
+                            <a href="/profile">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </a>
+                            <a href="/user-management" class="admin-only">
+                                <i class="fas fa-users-cog"></i>
+                                User Management
+                            </a>
+                            <a href="/logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Enhanced Report Types Page -->
+    <div id="reportTypesPage" class="page active">
+        <div class="report-types-container">
+            <div class="dashboard-header">
+                <h1><i class="fas fa-file-plus"></i> Select Report Type</h1>
+                <p>Choose the type of QA report you want to create</p>
+            </div>
+
+        <div class="report-types-grid">
+            <!-- Sprint Report Card -->
+            <div class="report-type-card sprint-card" onclick="selectReportType('sprint')">
+                <div class="card-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h3 class="card-title">Sprint Report</h3>
+                <p class="card-description">
+                    Comprehensive testing report for sprint cycles including user stories, test cases, and team evaluation.
+                </p>
+                <ul class="card-features">
+                    <li><i class="fas fa-check"></i> User Stories Analysis</li>
+                    <li><i class="fas fa-check"></i> Test Cases Tracking</li>
+                    <li><i class="fas fa-check"></i> Issues Management</li>
+                    <li><i class="fas fa-check"></i> Team Performance</li>
+                    <li><i class="fas fa-check"></i> Automation Integration</li>
+                </ul>
+                <button class="select-button">
+                    <i class="fas fa-arrow-right"></i>
+                    Create Sprint Report
+                </button>
+            </div>
+
+            <!-- Manual Report Card -->
+            <div class="report-type-card manual-card" onclick="selectReportType('manual')">
+                <div class="card-icon">
+                    <i class="fas fa-hand-paper"></i>
+                </div>
+                <h3 class="card-title">Manual Report</h3>
+                <p class="card-description">
+                    Focused manual testing report for detailed exploratory and functional testing documentation.
+                </p>
+                <ul class="card-features">
+                    <li><i class="fas fa-check"></i> Manual Test Execution</li>
+                    <li><i class="fas fa-check"></i> Exploratory Testing</li>
+                    <li><i class="fas fa-check"></i> User Experience Review</li>
+                    <li><i class="fas fa-check"></i> Edge Case Testing</li>
+                    <li><i class="fas fa-check"></i> Detailed Bug Reports</li>
+                </ul>
+                <button class="select-button">
+                    <i class="fas fa-arrow-right"></i>
+                    Create Manual Report
+                </button>
+            </div>
+
+            <!-- Automation Report Card -->
+            <div class="report-type-card automation-card" onclick="selectReportType('automation')">
+                <div class="card-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3 class="card-title">Automation Report</h3>
+                <p class="card-description">
+                    Comprehensive automation testing report with test results, stability metrics, and CI/CD integration.
+                </p>
+                <ul class="card-features">
+                    <li><i class="fas fa-check"></i> Test Results Analysis</li>
+                    <li><i class="fas fa-check"></i> Test Stability Metrics</li>
+                    <li><i class="fas fa-check"></i> CI/CD Integration</li>
+                    <li><i class="fas fa-check"></i> Flaky Test Detection</li>
+                    <li><i class="fas fa-check"></i> Coverage Reports</li>
+                </ul>
+                <button class="select-button">
+                    <i class="fas fa-arrow-right"></i>
+                    Create Automation Report
+                </button>
+            </div>
+
+            <!-- Performance Report Card -->
+            <div class="report-type-card performance-card" onclick="selectReportType('performance')">
+                <div class="card-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <h3 class="card-title">Performance Report</h3>
+                <p class="card-description">
+                    Performance and load testing report with metrics, benchmarks, and optimization recommendations.
+                </p>
+                <ul class="card-features">
+                    <li><i class="fas fa-check"></i> Load Testing Results</li>
+                    <li><i class="fas fa-check"></i> Response Time Analysis</li>
+                    <li><i class="fas fa-check"></i> Resource Utilization</li>
+                    <li><i class="fas fa-check"></i> Bottleneck Identification</li>
+                    <li><i class="fas fa-check"></i> Scalability Assessment</li>
+                </ul>
+                <button class="select-button">
+                    <i class="fas fa-arrow-right"></i>
+                    Create Performance Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Font Awesome Loading Check -->
+    <script>
+        // Check if Font Awesome is loaded and force reload if needed
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                // Check if Font Awesome icons are loaded by testing a known icon
+                const testIcon = document.createElement('i');
+                testIcon.className = 'fas fa-info-circle';
+                testIcon.style.position = 'absolute';
+                testIcon.style.left = '-9999px';
+                document.body.appendChild(testIcon);
+                
+                const computedStyle = window.getComputedStyle(testIcon, ':before');
+                const content = computedStyle.getPropertyValue('content');
+                
+                // If Font Awesome isn't loaded, the content will be 'none' or empty
+                if (!content || content === 'none' || content === '""') {
+                    console.warn('Font Awesome icons not loaded, attempting to reload...');
+                    
+                    // Try to reload Font Awesome
+                    const faLink = document.createElement('link');
+                    faLink.rel = 'stylesheet';
+                    faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+                    faLink.crossOrigin = 'anonymous';
+                    document.head.appendChild(faLink);
+                }
+                
+                document.body.removeChild(testIcon);
+            }, 1000);
+        });
+
+        // Global theme toggle function for compatibility
+        function toggleTheme() {
+            if (window.themeManager && typeof window.themeManager.toggleTheme === 'function') {
+                window.themeManager.toggleTheme();
+            } else {
+                // Fallback theme toggle implementation
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('sprint-reports-theme', newTheme);
+                
+                // Update button text and icon
+                const themeIcon = document.getElementById('theme-icon');
+                const themeText = document.getElementById('theme-text');
+                if (themeIcon && themeText) {
+                    if (newTheme === 'dark') {
+                        themeIcon.className = 'fas fa-moon';
+                        themeText.textContent = 'Dark';
+                    } else {
+                        themeIcon.className = 'fas fa-sun';
+                        themeText.textContent = 'Light';
+                    }
+                }
+            }
+        }
+
+        // Initialize theme when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize theme - try theme manager first, fallback to manual
+            if (window.themeManager && typeof window.themeManager.init === 'function') {
+                window.themeManager.init();
+            } else {
+                // Fallback theme initialization
+                const savedTheme = localStorage.getItem('sprint-reports-theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                
+                // Update button to match current theme
+                const themeIcon = document.getElementById('theme-icon');
+                const themeText = document.getElementById('theme-text');
+                if (themeIcon && themeText) {
+                    if (savedTheme === 'dark') {
+                        themeIcon.className = 'fas fa-moon';
+                        themeText.textContent = 'Dark';
+                    } else {
+                        themeIcon.className = 'fas fa-sun';
+                        themeText.textContent = 'Light';
+                    }
+                }
+            }
+            
+            // Set active class for navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === window.location.pathname) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        });
+
+        // Report type selection function
+        function selectReportType(type) {
+            console.log(`Selected report type: ${type}`);
+            
+            // Add visual feedback
+            const card = event.currentTarget;
+            card.style.transform = 'scale(0.98)';
+            
+            setTimeout(() => {
+                card.style.transform = '';
+                
+                // Here you would typically redirect to the appropriate form
+                // For now, we'll just show an alert
+                switch(type) {
+                    case 'sprint':
+                        alert('Redirecting to Sprint Report form...');
+                        // window.location.href = '/create-report?type=sprint';
+                        break;
+                    case 'manual':
+                        alert('Manual Report form coming soon...');
+                        // window.location.href = '/create-report?type=manual';
+                        break;
+                    case 'automation':
+                        alert('Automation Report form coming soon...');
+                        // window.location.href = '/create-report?type=automation';
+                        break;
+                    case 'performance':
+                        alert('Performance Report form coming soon...');
+                        // window.location.href = '/create-report?type=performance';
+                        break;
+                    default:
+                        alert('Unknown report type');
+                }
+            }, 150);
+        }
+    </script>
+
+</body>
+
+</html>
