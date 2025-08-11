@@ -1358,7 +1358,7 @@ function showSection(sectionIndex) {
 }
 
 function nextSection() {
-    if (currentSection < 9) { // Max section index is 9 (QA Notes)
+    if (currentSection < 12) { // Max section index is 12 (QA Notes)
         showSection(currentSection + 1);
     }
 }
@@ -1370,23 +1370,26 @@ function previousSection() {
 
 function updateNavigationButtons() {
     document.getElementById('prevBtn').disabled = currentSection === 0;
-    const isLastSection = currentSection === 9;
+    const isLastSection = currentSection === 12;
     document.getElementById('nextBtn').style.display = isLastSection ? 'none' : 'inline-block';
     document.getElementById('submitBtn').style.display = isLastSection ? 'inline-block' : 'none';
 }
 
 function updateProgressBar() {
-    const totalSections = 10;
+    const totalSections = 13;
     const sectionTitles = [
         'General Details',
         'Test Summary',
-        'Additional Info',
+        'Request & Build Info',
+        'Team Information',
         'User Stories',
         'Test Cases',
-        'Issues Analysis',
+        'Issues by Priority',
+        'Issues by Status',
         'Enhancements',
         'Evaluation',
         'Automation Regression',
+        'Automation Test Stability',
         'QA Notes'
     ];
 

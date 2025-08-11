@@ -93,10 +93,10 @@ def create_report():
         # Set basic fields
         report.portfolioName = data.get('portfolioName', '')
         report.projectName = data.get('projectName', '')
-        report.sprintNumber = data.get('sprintNumber', 1)
+        report.sprintNumber = int(data.get('sprintNumber', 1)) if data.get('sprintNumber') else 1
         report.reportVersion = data.get('reportVersion', '1.0')
         report.reportName = data.get('reportName', '')
-        report.cycleNumber = data.get('cycleNumber', 1)
+        report.cycleNumber = int(data.get('cycleNumber', 1)) if data.get('cycleNumber') else 1
         report.releaseNumber = data.get('releaseNumber', '1.0')
         report.reportDate = data.get('reportDate', '')
         report.testEnvironment = data.get('testEnvironment', '')
@@ -202,10 +202,10 @@ def update_report(report_id):
         # Update basic fields
         report.portfolioName = data.get('portfolioName', report.portfolioName)
         report.projectName = data.get('projectName', report.projectName)
-        report.sprintNumber = data.get('sprintNumber', report.sprintNumber)
+        report.sprintNumber = int(data.get('sprintNumber', report.sprintNumber)) if data.get('sprintNumber') else report.sprintNumber
         report.reportVersion = data.get('reportVersion', report.reportVersion)
         report.reportName = data.get('reportName', report.reportName)
-        report.cycleNumber = data.get('cycleNumber', report.cycleNumber)
+        report.cycleNumber = int(data.get('cycleNumber', report.cycleNumber)) if data.get('cycleNumber') else report.cycleNumber
         report.releaseNumber = data.get('releaseNumber', report.releaseNumber)
         report.reportDate = data.get('reportDate', report.reportDate)
         report.testEnvironment = data.get('testEnvironment', report.testEnvironment)
@@ -391,8 +391,8 @@ def get_latest_project_data(portfolio_name, project_name):
             latest_max_report = latest_report
 
         # Current values from the latest report with highest sprint/cycle
-        current_sprint = latest_max_report.sprintNumber or 1
-        current_cycle = latest_max_report.cycleNumber or 1
+        current_sprint = int(latest_max_report.sprintNumber or 1)
+        current_cycle = int(latest_max_report.cycleNumber or 1)
         current_release = latest_max_report.releaseNumber or '1.0'
         
         # Parse release numbers for comparison
@@ -415,8 +415,8 @@ def get_latest_project_data(portfolio_name, project_name):
         # Calculate suggested values based on the requirements
         if second_latest:
             # Use chronological order for comparison
-            prev_sprint = second_latest.sprintNumber or 1
-            prev_cycle = second_latest.cycleNumber or 1
+            prev_sprint = int(second_latest.sprintNumber or 1)
+            prev_cycle = int(second_latest.cycleNumber or 1)
             prev_release = second_latest.releaseNumber or '1.0'
             
             current_rel_parsed = parse_release(current_release)
