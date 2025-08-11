@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Report - QA Reports System</title>
+    <title>Sprint Report - QA Reports System</title>
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1543,13 +1543,13 @@
                 const report = await fetchReport(reportId);
                 if (report) {
                     loadReportForEditing(report);
-                    document.getElementById('formTitle').textContent = 'Edit QA Report';
+                    document.getElementById('formTitle').textContent = 'Edit Sprint Report';
                 } else {
                     showToast('Report not found for editing.', 'error');
                     editingReportId = null; // Reset if not found
                 }
             } else {
-                document.getElementById('formTitle').textContent = 'Create Enhanced QA Report';
+                document.getElementById('formTitle').textContent = 'Create Sprint Report';
 
             }
 
@@ -1576,9 +1576,9 @@
             } else {
                 // Use default based on editing state
                 if (editingReportId) {
-                    formTitle.textContent = 'Edit QA Report';
+                    formTitle.textContent = 'Edit Sprint Report';
                 } else {
-                    formTitle.textContent = 'Create Enhanced QA Report';
+                    formTitle.textContent = 'Create Sprint Report';
                 }
             }
         }

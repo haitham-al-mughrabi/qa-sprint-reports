@@ -7,6 +7,7 @@ from flask import Blueprint, request, jsonify, render_template, session
 from models import db, User, PasswordResetRequest
 from auth import login_required, admin_required, approved_user_required
 from services.email_service import email_service
+from utils.email_config import get_email_config
 
 admin_bp = Blueprint('admin_routes', __name__)
 
@@ -97,6 +98,7 @@ def get_users():
         users = pagination.items
 
         return jsonify({
+            'success': True,
             'users': [user.to_dict() for user in users],
             'total': pagination.total,
             'page': page,
@@ -478,3 +480,11 @@ def change_password():
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': f'Failed to change password: {str(e)}'}), 500
+
+
+@admin_bp.route('/api/email/config', methods=['GET'])
+@login_required
+@admin_required
+def email_config():
+    """Get email configuration status"""
+    return get_email_config()

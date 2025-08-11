@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Report - QA Reports System</title>
+    <title>Manual Report - QA Reports System</title>
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,6 +59,11 @@
             font-size: 1.5rem !important;
             margin-right: 0.75rem !important;
             display: inline-block !important;
+        }
+        
+        /* Hide extra progress steps for manual report (only show first 11) */
+        .step:nth-child(n+12) {
+            display: none !important;
         }
     </style>
 
@@ -175,18 +180,15 @@
                 <a href="#" class="nav-item" onclick="showSection(7)"><i class="fas fa-tasks"></i> Issues by Status</a>
                 <a href="#" class="nav-item" onclick="showSection(8)"><i class="fas fa-lightbulb"></i> Enhancements</a>
                 <a href="#" class="nav-item" onclick="showSection(9)"><i class="fas fa-star"></i> Evaluation</a>
-                <a href="#" class="nav-item" onclick="showSection(10)"><i class="fas fa-robot"></i> Automation
-                    Regression</a>
-                <a href="#" class="nav-item" onclick="showSection(11)"><i class="fas fa-balance-scale"></i> Automation Test Stability</a>
-                <a href="#" class="nav-item" onclick="showSection(12)"><i class="fas fa-sticky-note"></i> QA Notes</a>
+                <a href="#" class="nav-item" onclick="showSection(10)"><i class="fas fa-sticky-note"></i> QA Notes</a>
             </nav>
 
             <!-- Main Content -->
             <div class="main-content">
                 <div class="dashboard-header">
                     <div class="header-content">
-                        <h1 id="formTitle">Create Sprint Report</h1>
-                        <p>Complete all sections to generate your comprehensive QA testing report</p>
+                        <h1 id="formTitle">Create Manual Report</h1>
+                        <p>Complete all sections to generate your comprehensive manual testing report</p>
                     </div>
                 </div>
 
@@ -198,7 +200,7 @@
                         </button>
                         <div class="progress-info">
                             <div class="progress-text" style="top:15%">
-                                <span id="progressStep">Step 1 of 13</span>
+                                <span id="progressStep">Step 1 of 11</span>
                                 <span id="progressTitle">General Details</span>
                             </div>
                             <div class="progress-percentage">
@@ -272,18 +274,6 @@
                                 <span class="step-label">Evaluation</span>
                             </div>
                             <div class="step" data-step="10">
-                                <div class="step-circle">
-                                    <i class="fas fa-robot"></i>
-                                </div>
-                                <span class="step-label">Automation</span>
-                            </div>
-                            <div class="step" data-step="11">
-                                <div class="step-circle">
-                                    <i class="fas fa-balance-scale"></i>
-                                </div>
-                                <span class="step-label">Stability</span>
-                            </div>
-                            <div class="step" data-step="12">
                                 <div class="step-circle">
                                     <i class="fas fa-sticky-note"></i>
                                 </div>
@@ -450,7 +440,7 @@
                                                 <tr>
                                                     <td><strong><i class="fas fa-bolt"></i>
                                                             Enhancements</strong><br><small>Auto-calculated from section
-                                                            7</small></td>
+                                                            8</small></td>
                                                     <td><input type="number" id="enhancementsMetric"
                                                             name="enhancementsMetric" readonly class="readonly-field">
                                                     </td>
@@ -459,7 +449,7 @@
                                                 <tr>
                                                     <td><strong><i class="fas fa-chart-bar"></i> QA Notes
                                                             Count</strong><br><small>Auto-calculated from section
-                                                            8</small></td>
+                                                            10</small></td>
                                                     <td><input type="number" name="qaNotesMetric" id="qaNotesMetric"
                                                             min="0" placeholder="0" readonly class="readonly-field">
                                                     </td>
@@ -1122,123 +1112,8 @@
                             </div>
                         </div>
 
-                        <!-- Section 10: Automation Regression -->
+                        <!-- Section 10: QA Notes -->
                         <div class="section" id="section-10">
-                            <h2 class="section-title"><i class="fas fa-robot"></i> Automation Regression</h2>
-
-                            <div class="automation-layout">
-                                <!-- Section 1: Test Cases Summary -->
-                                <div class="automation-section-card automation-test-cases-card">
-                                    <div class="info-card-v2-header">
-                                        <i class="fas fa-chart-bar"></i>
-                                        <h3>Test Cases Summary</h3>
-                                    </div>
-                                    <div class="automation-content-layout">
-                                        <div class="automation-table-section">
-                                            <table class="data-table" id="automationTestCasesTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Status</th>
-                                                        <th>Count</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td><strong>Total Test Cases</strong></td>
-                                                        <td><input type="number" id="automationTotalTestCases" min="0"
-                                                                placeholder="0" readonly
-                                                                class="readonly-field calculated-total"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><i class="fas fa-check-circle text-success"></i> Passed</td>
-                                                        <td><input type="number" id="automationPassedTestCases"
-                                                                name="automationPassedTestCases" min="0" placeholder="0"
-                                                                oninput="calculateAutomationPercentages()"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><i class="fas fa-times-circle text-danger"></i> Failed</td>
-                                                        <td><input type="number" id="automationFailedTestCases"
-                                                                name="automationFailedTestCases" min="0" placeholder="0"
-                                                                oninput="calculateAutomationPercentages()"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><i class="fas fa-forward text-warning"></i> Skipped</td>
-                                                        <td><input type="number" id="automationSkippedTestCases"
-                                                                name="automationSkippedTestCases" min="0"
-                                                                placeholder="0"
-                                                                oninput="calculateAutomationPercentages()"></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="automation-chart-section">
-                                            <div class="chart-container">
-                                                <canvas id="automationTestCasesChart" width="400" height="400"></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                            </div>
-                        </div>
-
-                        <!-- Section 11: Automation Test Stability -->
-                        <div class="section" id="section-11">
-                            <h2 class="section-title"><i class="fas fa-balance-scale"></i> Automation Test Stability</h2>
-
-                            <div class="automation-layout">
-                                <div class="automation-section-card automation-stability-card">
-                                    <div class="info-card-v2-header">
-                                        <i class="fas fa-balance-scale"></i>
-                                        <h3>Automation Test Stability Analysis</h3>
-                                    </div>
-                                    <div class="automation-content-layout">
-                                        <div class="automation-table-section">
-                                            <table class="data-table" id="automationStabilityTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Stability</th>
-                                                        <th>Count</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td><strong>Total Tests</strong></td>
-                                                        <td><input type="number" id="automationStabilityTotal" min="0"
-                                                                placeholder="0" readonly
-                                                                class="readonly-field calculated-total"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><i class="fas fa-shield-alt text-success"></i> Stable</td>
-                                                        <td><input type="number" id="automationStableTests"
-                                                                name="automationStableTests" min="0" placeholder="0"
-                                                                oninput="calculateAutomationStabilityPercentages()">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><i class="fas fa-exclamation-triangle text-warning"></i>
-                                                            Flaky</td>
-                                                        <td><input type="number" id="automationFlakyTests"
-                                                                name="automationFlakyTests" min="0" placeholder="0"
-                                                                oninput="calculateAutomationStabilityPercentages()">
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="automation-chart-section">
-                                            <div class="chart-container">
-                                                <canvas id="automationStabilityChart" width="400" height="400"></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Section 12: QA Notes -->
-                        <div class="section" id="section-12">
                             <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
                             
                             <div class="qa-notes-container">
@@ -1507,6 +1382,142 @@
     </script>
     
     <script>
+        // Override navigation functions for manual report (11 sections)
+        let currentSection = 0;
+        const totalSections = 11;
+        
+        // Section titles for manual report
+        const sectionTitles = [
+            'General Details',
+            'Test Summary',
+            'Request & Build Info', 
+            'Team Information',
+            'User Stories',
+            'Test Cases',
+            'Issues by Priority',
+            'Issues by Status',
+            'Enhancements',
+            'Evaluation',
+            'QA Notes'
+        ];
+        
+        // Override showSection function
+        function showSection(sectionIndex) {
+            if (sectionIndex < 0 || sectionIndex >= totalSections) {
+                console.warn('Invalid section index:', sectionIndex);
+                return;
+            }
+            
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(navItem => {
+                navItem.classList.remove('active');
+            });
+            
+            // Show the selected section
+            const targetSection = document.getElementById(`section-${sectionIndex}`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // Highlight the corresponding nav item
+            const navItems = document.querySelectorAll('.nav-item');
+            if (navItems[sectionIndex]) {
+                navItems[sectionIndex].classList.add('active');
+            }
+            
+            // Update current section
+            currentSection = sectionIndex;
+            
+            // Update progress bar
+            updateProgressBar();
+            
+            // Update navigation buttons
+            updateNavigationButtons();
+            
+            // Scroll to top of content area
+            document.querySelector('.content-area').scrollTop = 0;
+        }
+        
+        // Override nextSection function
+        function nextSection() {
+            if (currentSection < totalSections - 1) {
+                showSection(currentSection + 1);
+            }
+        }
+        
+        // Override previousSection function  
+        function previousSection() {
+            if (currentSection > 0) {
+                showSection(currentSection - 1);
+            }
+        }
+        
+        // Override updateProgressBar function
+        function updateProgressBar() {
+            const progressPercent = Math.round((currentSection / (totalSections - 1)) * 100);
+            const progressFill = document.getElementById('progressFill');
+            const progressPercentSpan = document.getElementById('progressPercent');
+            const progressStep = document.getElementById('progressStep');
+            const progressTitle = document.getElementById('progressTitle');
+            
+            if (progressFill) {
+                progressFill.style.width = progressPercent + '%';
+            }
+            
+            if (progressPercentSpan) {
+                progressPercentSpan.textContent = progressPercent + '%';
+            }
+            
+            if (progressStep) {
+                progressStep.textContent = `Step ${currentSection + 1} of ${totalSections}`;
+            }
+            
+            if (progressTitle) {
+                progressTitle.textContent = sectionTitles[currentSection] || '';
+            }
+            
+            // Update step indicators
+            document.querySelectorAll('.step').forEach((step, index) => {
+                if (index === currentSection) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+                
+                if (index < currentSection) {
+                    step.classList.add('completed');
+                } else {
+                    step.classList.remove('completed');
+                }
+            });
+        }
+        
+        // Override updateNavigationButtons function
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (prevBtn) {
+                prevBtn.disabled = currentSection === 0;
+            }
+            
+            if (nextBtn && submitBtn) {
+                if (currentSection === totalSections - 1) {
+                    nextBtn.style.display = 'none';
+                    submitBtn.style.display = 'inline-block';
+                } else {
+                    nextBtn.style.display = 'inline-block';
+                    submitBtn.style.display = 'none';
+                }
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize theme first
             if (window.themeManager) {
@@ -1521,13 +1532,14 @@
                 }
             });
             // Initialize form for new report
-            resetFormData();
-            loadFormDropdownData();
-            initializeCharts(); // Ensure charts are initialized when the form page loads
+            if (typeof resetFormData === 'function') resetFormData();
+            if (typeof loadFormDropdownData === 'function') loadFormDropdownData();
+            if (typeof initializeCharts === 'function') initializeCharts(); // Ensure charts are initialized when the form page loads
 
-            // Initialize progress bar and steps
-            initializeProgressSteps();
+            // Initialize progress bar and navigation for manual report
+            currentSection = 0;
             updateProgressBar();
+            updateNavigationButtons();
 
             // Remove hardcoded width/height from chart canvases after initialization
             document.querySelectorAll('.chart-container canvas').forEach(canvas => {
@@ -1543,13 +1555,13 @@
                 const report = await fetchReport(reportId);
                 if (report) {
                     loadReportForEditing(report);
-                    document.getElementById('formTitle').textContent = 'Edit QA Report';
+                    document.getElementById('formTitle').textContent = 'Edit Manual Report';
                 } else {
                     showToast('Report not found for editing.', 'error');
                     editingReportId = null; // Reset if not found
                 }
             } else {
-                document.getElementById('formTitle').textContent = 'Create Enhanced QA Report';
+                document.getElementById('formTitle').textContent = 'Create Manual Report';
 
             }
 
@@ -1576,9 +1588,9 @@
             } else {
                 // Use default based on editing state
                 if (editingReportId) {
-                    formTitle.textContent = 'Edit QA Report';
+                    formTitle.textContent = 'Edit Manual Report';
                 } else {
-                    formTitle.textContent = 'Create Enhanced QA Report';
+                    formTitle.textContent = 'Create Manual Report';
                 }
             }
         }

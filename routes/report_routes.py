@@ -19,6 +19,39 @@ def reports_page():
     return render_template('reports.html')
 
 
+@report_bp.route('/report-types')
+@login_required
+@approved_user_required
+def report_types_page():
+    """Serves the report types selection page."""
+    try:
+        return render_template('report_types.html')
+    except:
+        return "Report types template not found", 404
+
+
+@report_bp.route('/sprint-report')
+@login_required
+@approved_user_required
+def sprint_report_page():
+    """Serves the sprint report creation page."""
+    try:
+        return render_template('sprint_report.html')
+    except:
+        return "Sprint report template not found", 404
+
+
+@report_bp.route('/manual-report')
+@login_required
+@approved_user_required
+def manual_report_page():
+    """Serves the manual report creation page."""
+    try:
+        return render_template('manual_report.html')
+    except:
+        return "Manual report template not found", 404
+
+
 @report_bp.route('/create-report')
 @login_required
 @approved_user_required
