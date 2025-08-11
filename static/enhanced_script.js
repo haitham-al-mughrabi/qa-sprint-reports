@@ -1420,21 +1420,29 @@ function updateProgressBar() {
                 icon.className = 'fas fa-check';
             }
         } else {
-            // Reset icon for future steps
+            // For future steps, ensure they have the correct icon (but don't force reset on initial load)
             const icon = step.querySelector('.step-circle i');
             const stepIcons = [
                 'fas fa-info-circle',
                 'fas fa-chart-bar',
-                'fas fa-plus-square',
+                'fas fa-clipboard-list',
+                'fas fa-users',
                 'fas fa-user-check',
-                'fas fa-vial',
-                'fas fa-bug',
-                'fas fa-bolt',
-                'fas fa-note-sticky',
-                'fas fa-robot'
+                'fas fa-flask',
+                'fas fa-exclamation-triangle',
+                'fas fa-tasks',
+                'fas fa-lightbulb',
+                'fas fa-star',
+                'fas fa-robot',
+                'fas fa-balance-scale',
+                'fas fa-sticky-note'
             ];
             if (icon) {
-                icon.className = stepIcons[index] || 'fas fa-circle';
+                // Only reset icon if it's currently a checkmark (from previous completion)
+                if (icon.classList.contains('fa-check')) {
+                    icon.className = stepIcons[index] || 'fas fa-circle';
+                }
+                // Otherwise, leave the icon as it is (preserves initial HTML icons)
             }
         }
     });

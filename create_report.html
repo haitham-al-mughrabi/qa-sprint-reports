@@ -8,16 +8,59 @@
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload"
-        as="style" onload="this.rel='stylesheet'">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Font Awesome - Load first and preload for better performance -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Fallback Font Awesome from different CDN -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css" 
+        onerror="this.onerror=null;this.href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css';" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload"
+        as="style" onload="this.rel='stylesheet'">
 
     <!-- Main styles -->
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/unified-nav.css">
     <link rel="stylesheet" href="/static/new_report.css">
+    
+    <!-- Ensure Font Awesome icons display properly -->
+    <style>
+        /* Force Font Awesome icons to display */
+        .fas, .far, .fab, .fal, .fad, .fa {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+            font-weight: 900 !important;
+            font-style: normal !important;
+            font-variant: normal !important;
+            text-transform: none !important;
+            line-height: 1 !important;
+            -webkit-font-smoothing: antialiased !important;
+            -moz-osx-font-smoothing: grayscale !important;
+        }
+        
+        /* Ensure step circle icons are visible */
+        .step-circle i {
+            font-size: 1.2rem !important;
+            display: inline-block !important;
+        }
+        
+        /* Navigation icons */
+        .nav-item i {
+            font-size: 1rem !important;
+            margin-right: 0.5rem !important;
+            display: inline-block !important;
+        }
+        
+        /* Section title icons */
+        .section-title i {
+            font-size: 1.5rem !important;
+            margin-right: 0.75rem !important;
+            display: inline-block !important;
+        }
+    </style>
 
     <!-- Theme manager (loads early) -->
     <script src="/static/theme-manager.js"></script>
@@ -123,19 +166,19 @@
                 </div>
                 <a href="#" class="nav-item active" onclick="showSection(0)"><i class="fas fa-info-circle"></i> General
                     Details</a>
-                <a href="#" class="nav-item" onclick="showSection(1)"><i class="fas fa-file-alt"></i> Test Summary</a>
+                <a href="#" class="nav-item" onclick="showSection(1)"><i class="fas fa-chart-bar"></i> Test Summary</a>
                 <a href="#" class="nav-item" onclick="showSection(2)"><i class="fas fa-clipboard-list"></i> Request & Build Info</a>
                 <a href="#" class="nav-item" onclick="showSection(3)"><i class="fas fa-users"></i> Team Information</a>
                 <a href="#" class="nav-item" onclick="showSection(4)"><i class="fas fa-user-check"></i> User Stories</a>
-                <a href="#" class="nav-item" onclick="showSection(5)"><i class="fas fa-vial"></i> Test Cases</a>
-                <a href="#" class="nav-item" onclick="showSection(6)"><i class="fas fa-bug"></i> Issues by Priority</a>
-                <a href="#" class="nav-item" onclick="showSection(7)"><i class="fas fa-chart-bar"></i> Issues by Status</a>
-                <a href="#" class="nav-item" onclick="showSection(8)"><i class="fas fa-bolt"></i> Enhancements</a>
+                <a href="#" class="nav-item" onclick="showSection(5)"><i class="fas fa-flask"></i> Test Cases</a>
+                <a href="#" class="nav-item" onclick="showSection(6)"><i class="fas fa-exclamation-triangle"></i> Issues by Priority</a>
+                <a href="#" class="nav-item" onclick="showSection(7)"><i class="fas fa-tasks"></i> Issues by Status</a>
+                <a href="#" class="nav-item" onclick="showSection(8)"><i class="fas fa-lightbulb"></i> Enhancements</a>
                 <a href="#" class="nav-item" onclick="showSection(9)"><i class="fas fa-star"></i> Evaluation</a>
                 <a href="#" class="nav-item" onclick="showSection(10)"><i class="fas fa-robot"></i> Automation
                     Regression</a>
                 <a href="#" class="nav-item" onclick="showSection(11)"><i class="fas fa-balance-scale"></i> Automation Test Stability</a>
-                <a href="#" class="nav-item" onclick="showSection(12)"><i class="fas fa-note-sticky"></i> QA Notes</a>
+                <a href="#" class="nav-item" onclick="showSection(12)"><i class="fas fa-sticky-note"></i> QA Notes</a>
             </nav>
 
             <!-- Main Content -->
@@ -200,25 +243,25 @@
                             </div>
                             <div class="step" data-step="5">
                                 <div class="step-circle">
-                                    <i class="fas fa-vial"></i>
+                                    <i class="fas fa-flask"></i>
                                 </div>
                                 <span class="step-label">Tests</span>
                             </div>
                             <div class="step" data-step="6">
                                 <div class="step-circle">
-                                    <i class="fas fa-bug"></i>
+                                    <i class="fas fa-exclamation-triangle"></i>
                                 </div>
                                 <span class="step-label">Priority</span>
                             </div>
                             <div class="step" data-step="7">
                                 <div class="step-circle">
-                                    <i class="fas fa-chart-bar"></i>
+                                    <i class="fas fa-tasks"></i>
                                 </div>
                                 <span class="step-label">Status</span>
                             </div>
                             <div class="step" data-step="8">
                                 <div class="step-circle">
-                                    <i class="fas fa-bolt"></i>
+                                    <i class="fas fa-lightbulb"></i>
                                 </div>
                                 <span class="step-label">Enhance</span>
                             </div>
@@ -242,7 +285,7 @@
                             </div>
                             <div class="step" data-step="12">
                                 <div class="step-circle">
-                                    <i class="fas fa-note-sticky"></i>
+                                    <i class="fas fa-sticky-note"></i>
                                 </div>
                                 <span class="step-label">Notes</span>
                             </div>
@@ -703,9 +746,9 @@
                             </div>
                         </div>
 
-                        <!-- Section 5: Issues by Priority -->
-                        <div class="section" id="section-5">
-                            <h2 class="section-title"><i class="fas fa-bug"></i> Issues by Priority</h2>
+                        <!-- Section 6: Issues by Priority -->
+                        <div class="section" id="section-6">
+                            <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> Issues by Priority</h2>
 
                             <div class="issues-analysis-layout">
                                 <div class="issues-priority-card">
@@ -767,9 +810,9 @@
                             </div>
                         </div>
 
-                        <!-- Section 6: Issues by Status -->
-                        <div class="section" id="section-6">
-                            <h2 class="section-title"><i class="fas fa-chart-bar"></i> Issues by Status</h2>
+                        <!-- Section 7: Issues by Status -->
+                        <div class="section" id="section-7">
+                            <h2 class="section-title"><i class="fas fa-tasks"></i> Issues by Status</h2>
 
                             <div class="issues-analysis-layout">
                                 <div class="issues-status-card">
@@ -840,7 +883,7 @@
 
                         <!-- Section 8: Enhancements -->
                         <div class="section" id="section-8">
-                            <h2 class="section-title"><i class="fas fa-bolt"></i> Enhancements Analysis</h2>
+                            <h2 class="section-title"><i class="fas fa-lightbulb"></i> Enhancements Analysis</h2>
 
                             <div class="enhancements-layout">
                                 <div class="enhancements-table-card">
@@ -1196,7 +1239,7 @@
 
                         <!-- Section 12: QA Notes -->
                         <div class="section" id="section-12">
-                            <h2 class="section-title"><i class="fas fa-note-sticky"></i> QA Notes</h2>
+                            <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
                             
                             <div class="qa-notes-container">
                                 <div class="dynamic-list" id="qaNotesContainer">
@@ -1430,6 +1473,39 @@
     <!-- Link to the external JavaScript files -->
     <script src="/static/enhanced_script.js"></script>
     <script src="/static/Charts.js"></script>
+    
+    <!-- Font Awesome Loading Check -->
+    <script>
+        // Check if Font Awesome is loaded and force reload if needed
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                // Check if Font Awesome icons are loaded by testing a known icon
+                const testIcon = document.createElement('i');
+                testIcon.className = 'fas fa-info-circle';
+                testIcon.style.position = 'absolute';
+                testIcon.style.left = '-9999px';
+                document.body.appendChild(testIcon);
+                
+                const computedStyle = window.getComputedStyle(testIcon, ':before');
+                const content = computedStyle.getPropertyValue('content');
+                
+                // If Font Awesome isn't loaded, the content will be 'none' or empty
+                if (!content || content === 'none' || content === '""') {
+                    console.warn('Font Awesome icons not loaded, attempting to reload...');
+                    
+                    // Try to reload Font Awesome
+                    const faLink = document.createElement('link');
+                    faLink.rel = 'stylesheet';
+                    faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+                    faLink.crossOrigin = 'anonymous';
+                    document.head.appendChild(faLink);
+                }
+                
+                document.body.removeChild(testIcon);
+            }, 1000);
+        });
+    </script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize theme first
