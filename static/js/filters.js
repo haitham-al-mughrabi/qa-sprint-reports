@@ -1,1515 +1,5 @@
-// static/enhanced_script.js
-
-// --- Global variables ---
-let currentSection = 0;
-let editingReportId = null;
-let currentPage = 1;
-const reportsPerPage = 10;
-let allReportsCache = []; // Cache for all reports to avoid re-fetching
-let dashboardStatsCache = null; // Cache for dashboard statistics with structure: {data: object, cacheTime: number}
-// Auto-save functionality
-let autoSaveTimeout = null;
-
-// Constants for localStorage keys
-const FORM_DATA_KEY = 'qaReportFormData';
-const FORM_ARRAYS_KEY = 'qaReportArrayData';
-const CACHE_DURATION = 300000; // 5 minutes in milliseconds
-
-// Form-specific variables
-let requestData = [];
-let buildData = [];
-let testerData = [];
-let qaNoteFieldsData = []; // New: for custom QA note fields
-// let customFieldsData = []; // This will be used if custom fields are implemented - REMOVED
-let userStoriesChart = null;
-let testCasesChart = null;
-let issuesPriorityChart = null;
-let issuesStatusChart = null;
-let enhancementsChart = null;
-let automationTestCasesChart = null;
-let automationPercentageChart = null;
-let automationStabilityChart = null;
-let evaluationChart = null;
-let scoreColumnCount = 0; // Not directly used in this version but kept for consistency
-let weightReasonVisible = false; // Not directly used in this version but kept for consistency
-
-// --- API Communication ---
-const API_URL = '/api/reports';
-const DASHBOARD_API_URL = '/api/dashboard/stats';
-
-
-
-async function fetchReports(page = 1, search = '', limit = reportsPerPage) {
-    try {
-        const params = new URLSearchParams({
-            page: page.toString(),
-            limit: limit.toString()
-        });
-
-        if (search) {
-            params.append('search', search);
-        }
-
-        const response = await fetch(`${API_URL}?${params}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Ensure consistent data structure
-        if (Array.isArray(data)) {
-            // If API returns array directly, wrap it in expected structure
-            return {
-                reports: data,
-                total: data.length,
-                page: page,
-                totalPages: Math.ceil(data.length / limit)
-            };
-        }
-
-        // If API returns structured data, use it as is
-        return data;
-    } catch (error) {
-        console.error("Failed to fetch reports:", error);
-        return {
-            reports: [],
-            total: 0,
-            page: 1,
-            totalPages: 1
-        };
-    }
-}
-
-async function fetchDashboardStats() {
-    try {
-        // Use existing cache if available and still valid
-        if (dashboardStatsCache && dashboardStatsCache.cacheTime &&
-            (Date.now() - dashboardStatsCache.cacheTime) < CACHE_DURATION) {
-            return dashboardStatsCache.data;
-        }
-
-        console.log('Fetching dashboard stats from API...');
-
-        // Try cached endpoint first (has detailed breakdown data), fallback to regular endpoint
-        let response;
-        let data;
-
-        try {
-            console.log('Attempting to fetch from cached endpoint...');
-            response = await fetch('/api/dashboard/stats/cached', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Cache-Control': 'no-cache'
-                }
-            });
-
-            console.log('Cached endpoint response status:', response.status);
-
-            if (response.ok) {
-                data = await response.json();
-                console.log('Successfully fetched from cached endpoint, projects:', data.projects?.length || 0);
-
-                // Validate that we have the detailed breakdown data
-                if (data.projects && data.projects.length > 0) {
-                    const firstProject = data.projects[0];
-                    if (firstProject.passedUserStories !== undefined || firstProject.passedTestCases !== undefined) {
-                        console.log('Cached endpoint has detailed breakdown data - using it');
-                    } else {
-                        console.log('Cached endpoint missing detailed breakdown data');
-                    }
-                }
-            } else {
-                const errorText = await response.text();
-                throw new Error(`Cached endpoint failed: ${response.status} - ${errorText}`);
-            }
-        } catch (cachedError) {
-            console.log('Cached endpoint failed, trying regular endpoint:', cachedError.message);
-
-            // Fallback to regular endpoint (but it has limited data)
-            try {
-                console.log('Attempting to fetch from regular endpoint...');
-                response = await fetch('/api/dashboard/stats', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Cache-Control': 'no-cache'
-                    }
-                });
-
-                console.log('Regular endpoint response status:', response.status);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Regular endpoint failed: ${response.status} - ${errorText}`);
-                }
-                data = await response.json();
-                console.log('Successfully fetched from regular endpoint, projects:', data.projects?.length || 0);
-                console.log('Warning: Regular endpoint has limited project data - some metrics may not display');
-            } catch (regularError) {
-                console.error('Both endpoints failed:', regularError.message);
-                throw regularError;
-            }
-        }
-
-        // Ensure we have the expected data structure
-        if (!data || !data.overall) {
-            throw new Error('Invalid data structure received from API');
-        }
-
-        // Cache the dashboard stats
-        dashboardStatsCache = {
-            data: data,
-            cacheTime: Date.now()
-        };
-
-        console.log('Dashboard stats cached successfully:', {
-            overall: data.overall ? 'present' : 'missing',
-            projects: data.projects ? data.projects.length : 0
-        });
-
-        return data;
-    } catch (error) {
-        console.error("Failed to fetch dashboard stats:", error);
-
-        // Return empty structure to prevent crashes
-        return {
-            overall: {
-                totalReports: 0,
-                completedReports: 0,
-                inProgressReports: 0,
-                pendingReports: 0,
-                totalUserStories: 0,
-                totalTestCases: 0,
-                totalIssues: 0,
-                totalEnhancements: 0,
-                automationTotalTestCases: 0,
-                automationPassedTestCases: 0
-            },
-            projects: []
-        };
-    }
-}
-
-async function fetchReport(id) {
-    try {
-        const response = await fetch(`${API_URL}/${id}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Failed to fetch report:", error);
-        return null;
-    }
-}
-
-async function saveReport(reportData) {
-    const url = editingReportId ? `${API_URL}/${editingReportId}` : API_URL;
-    const method = editingReportId ? 'PUT' : 'POST';
-
-    try {
-        const response = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportData),
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Failed to save report:", error);
-        return null;
-    }
-}
-
-async function deleteReportDB(id) {
-    try {
-        const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Failed to delete report:", error);
-        return null;
-    }
-}
-
-// --- Initialize App (for pages that need it) ---
-// This block will now be called by specific page scripts if needed
-// document.addEventListener('DOMContentLoaded', async () => {
-//     // Initial data load
-//     allReportsCache = await fetchReports();
-//     dashboardStatsCache = await fetchDashboardStats();
-
-//     updateDashboardStats(dashboardStatsCache);
-//     searchReports();
-
-//     document.getElementById('reportDate').value = getCurrentDate();
-//     updateNavigationButtons();
-//     initializeCharts();
-
-//     // Load dropdown data for portfolios and projects
-//     await loadFormDropdownData();
-// });
-
-// Toast notification system
-function showToast(message, type = 'info', duration = 5000) {
-    // Create toast container if it doesn't exist
-    let container = document.querySelector('.toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-    }
-
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <div class="toast-icon"></div>
-        <div class="toast-message">${message}</div>
-        <button class="toast-close" onclick="removeToast(this.parentElement)">×</button>
-    `;
-
-    container.appendChild(toast);
-
-    // Auto remove after duration
-    setTimeout(() => {
-        removeToast(toast);
-    }, duration);
-}
-
-function removeToast(toast) {
-    if (toast && toast.parentElement) {
-        toast.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => {
-            if (toast.parentElement) {
-                toast.parentElement.removeChild(toast);
-            }
-        }, 300);
-    }
-}
-
-
-// --- Dashboard Functions ---
-function updateDashboardStats(stats) {
-    console.log('Dashboard stats received:', stats); // Debug log
-    if (!stats) {
-        console.error('No stats data received');
-        return;
-    }
-
-    // Check if we are on the dashboard page by looking for a key element
-    const totalReportsEl = document.getElementById('totalReports');
-    if (!totalReportsEl) {
-        console.error('Not on dashboard page or totalReports element not found');
-        return; // Exit if not on the dashboard page
-    }
-
-    // Update overall statistics
-    const overall = stats.overall || {};
-    totalReportsEl.textContent = overall.totalReports || 0;
-    document.getElementById('completedReports').textContent = overall.completedReports || 0;
-    document.getElementById('inProgressReports').textContent = overall.inProgressReports || 0;
-    document.getElementById('pendingReports').textContent = overall.pendingReports || 0;
-
-    // Update aggregate metrics
-    document.getElementById('totalUserStories').textContent = overall.totalUserStories || 0;
-    document.getElementById('totalTestCases').textContent = overall.totalTestCases || 0;
-    document.getElementById('totalIssues').textContent = overall.totalIssues || 0;
-    document.getElementById('totalEnhancements').textContent = overall.totalEnhancements || 0;
-
-    // Update automation regression metrics
-    document.getElementById('totalAutomationTests').textContent = overall.automationTotalTestCases || 0;
-    const automationTotal = overall.automationTotalTestCases || 0;
-    const automationPassed = overall.automationPassedTestCases || 0;
-    const automationPassRate = automationTotal > 0 ? Math.round((automationPassed / automationTotal) * 100) : 0;
-    document.getElementById('automationPassRate').textContent = `${automationPassRate}%`;
-
-    // Debug log projects data
-    console.log('Projects data in updateDashboardStats:', stats.projects);
-
-    // Update project-specific metrics
-    renderProjectMetrics(stats.projects || []);
-}
-
-function renderProjectMetrics(projects) {
-    const container = document.getElementById('projectMetrics');
-    if (!container) {
-        console.error('Project metrics container not found');
-        return;
-    }
-
-    // Debug log the projects data being rendered
-    console.log('Rendering projects:', projects);
-
-    if (!projects || projects.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state" style="text-align: center; color: #6c757d; padding: 40px 0; grid-column: 1 / -1;">
-                <div style="font-size: 3em; margin-bottom: 20px;"><i class="fas fa-chart-bar"></i></div>
-                <h3>No Project Data Available</h3>
-                <p>No project metrics data was found. Create some reports to see metrics here.</p>
-            </div>
-        `;
-        return;
-    }
-
-    // Check if we have detailed breakdown data
-    const hasDetailedData = projects.length > 0 &&
-        (projects[0].passedUserStories !== undefined ||
-            projects[0].passedTestCases !== undefined ||
-            projects[0].criticalIssues !== undefined);
-
-    console.log('Has detailed breakdown data:', hasDetailedData);
-
-    if (hasDetailedData) {
-        // Render full detailed project cards
-        container.innerHTML = projects.map(project => `
-            <div class="project-metric-card">
-                <div class="project-header">
-                    <div class="project-title-section">
-                        <div class="project-icon">
-                            <i class="fas fa-rocket"></i>
-                        </div>
-                        <div class="project-info">
-                            <h3>${project.projectName}</h3>
-                            <p class="portfolio-name">${project.portfolioName}</p>
-                        </div>
-                    </div>
-                    <div class="status-badges">
-                        <span class="status-badge status-${getStatusClass(project.testingStatus)}">${getStatusText(project.testingStatus)}</span>
-                        <span class="risk-badge risk-${project.riskLevel?.toLowerCase() || 'low'}">${project.riskLevel || 'Low'} Risk</span>
-                    </div>
-                </div>
-
-            <!-- Project Summary Stats -->
-            <div class="project-summary">
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <div class="summary-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <div class="summary-content">
-                            <span class="summary-value">${project.totalReports || 0}</span>
-                            <span class="summary-label">Reports</span>
-                        </div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-icon">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
-                        <div class="summary-content">
-                            <span class="summary-value">${formatDate(project.lastReportDate)}</span>
-                            <span class="summary-label">Last Report</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Complete Project Metrics - ALL DATA -->
-            <div class="project-metrics">
-                <!-- User Stories - COMPLETE -->
-                <div class="metrics-section">
-                    <h4 class="metrics-title">
-                        <i class="fas fa-user-check"></i> User Stories (${project.totalUserStories || 0} Total)
-                    </h4>
-                    <div class="metrics-content">
-                        <div class="complete-breakdown">
-                            <div class="breakdown-grid">
-                                <div class="breakdown-item success">
-                                    <span class="breakdown-label">Passed</span>
-                                    <span class="breakdown-value">${project.passedUserStories || 0}</span>
-                                </div>
-                                <div class="breakdown-item warning">
-                                    <span class="breakdown-label">Passed w/ Issues</span>
-                                    <span class="breakdown-value">${project.passedWithIssuesUserStories || 0}</span>
-                                </div>
-                                <div class="breakdown-item error">
-                                    <span class="breakdown-label">Failed</span>
-                                    <span class="breakdown-value">${project.failedUserStories || 0}</span>
-                                </div>
-                                <div class="breakdown-item blocked">
-                                    <span class="breakdown-label">Blocked</span>
-                                    <span class="breakdown-value">${project.blockedUserStories || 0}</span>
-                                </div>
-                                <div class="breakdown-item cancelled">
-                                    <span class="breakdown-label">Cancelled</span>
-                                    <span class="breakdown-value">${project.cancelledUserStories || 0}</span>
-                                </div>
-                                <div class="breakdown-item deferred">
-                                    <span class="breakdown-label">Deferred</span>
-                                    <span class="breakdown-value">${project.deferredUserStories || 0}</span>
-                                </div>
-                                <div class="breakdown-item not-testable">
-                                    <span class="breakdown-label">Not Testable</span>
-                                    <span class="breakdown-value">${project.notTestableUserStories || 0}</span>
-                                </div>
-                            </div>
-                            <div class="success-rate">
-                                <span class="rate-label">Success Rate:</span>
-                                <span class="rate-value rate-${getRateClass(project.userStoriesSuccessRate || 0)}">${project.userStoriesSuccessRate || 0}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Test Cases - COMPLETE -->
-                <div class="metrics-section">
-                    <h4 class="metrics-title">
-                        <i class="fas fa-flask"></i> Test Cases (${project.totalTestCases || 0} Total)
-                    </h4>
-                    <div class="metrics-content">
-                        <div class="complete-breakdown">
-                            <div class="breakdown-grid">
-                                <div class="breakdown-item success">
-                                    <span class="breakdown-label">Passed</span>
-                                    <span class="breakdown-value">${project.passedTestCases || 0}</span>
-                                </div>
-                                <div class="breakdown-item warning">
-                                    <span class="breakdown-label">Passed w/ Issues</span>
-                                    <span class="breakdown-value">${project.passedWithIssuesTestCases || 0}</span>
-                                </div>
-                                <div class="breakdown-item error">
-                                    <span class="breakdown-label">Failed</span>
-                                    <span class="breakdown-value">${project.failedTestCases || 0}</span>
-                                </div>
-                                <div class="breakdown-item blocked">
-                                    <span class="breakdown-label">Blocked</span>
-                                    <span class="breakdown-value">${project.blockedTestCases || 0}</span>
-                                </div>
-                                <div class="breakdown-item cancelled">
-                                    <span class="breakdown-label">Cancelled</span>
-                                    <span class="breakdown-value">${project.cancelledTestCases || 0}</span>
-                                </div>
-                                <div class="breakdown-item deferred">
-                                    <span class="breakdown-label">Deferred</span>
-                                    <span class="breakdown-value">${project.deferredTestCases || 0}</span>
-                                </div>
-                                <div class="breakdown-item not-testable">
-                                    <span class="breakdown-label">Not Testable</span>
-                                    <span class="breakdown-value">${project.notTestableTestCases || 0}</span>
-                                </div>
-                            </div>
-                            <div class="success-rate">
-                                <span class="rate-label">Success Rate:</span>
-                                <span class="rate-value rate-${getRateClass(project.testCasesSuccessRate || 0)}">${project.testCasesSuccessRate || 0}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Issues - COMPLETE BY PRIORITY & STATUS -->
-                <div class="metrics-section">
-                    <h4 class="metrics-title">
-                        <i class="fas fa-bug"></i> Issues (${project.totalIssues || 0} Total)
-                    </h4>
-                    <div class="metrics-content">
-                        <div class="issues-breakdown">
-                            <div class="issues-section">
-                                <h5 class="breakdown-title">By Priority</h5>
-                                <div class="breakdown-grid priority-grid">
-                                    <div class="breakdown-item critical">
-                                        <span class="breakdown-label">Critical</span>
-                                        <span class="breakdown-value">${project.criticalIssues || 0}</span>
-                                    </div>
-                                    <div class="breakdown-item high-priority">
-                                        <span class="breakdown-label">High</span>
-                                        <span class="breakdown-value">${project.highIssues || 0}</span>
-                                    </div>
-                                    <div class="breakdown-item medium">
-                                        <span class="breakdown-label">Medium</span>
-                                        <span class="breakdown-value">${project.mediumIssues || 0}</span>
-                                    </div>
-                                    <div class="breakdown-item low">
-                                        <span class="breakdown-label">Low</span>
-                                        <span class="breakdown-value">${project.lowIssues || 0}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="issues-section">
-                                <h5 class="breakdown-title">By Status</h5>
-                                <div class="breakdown-grid status-grid">
-                                    <div class="breakdown-item new">
-                                        <span class="breakdown-label">New</span>
-                                        <span class="breakdown-value">${project.newIssues || 0}</span>
-                                    </div>
-                                    <div class="breakdown-item success">
-                                        <span class="breakdown-label">Fixed</span>
-                                        <span class="breakdown-value">${project.fixedIssues || 0}</span>
-                                    </div>
-                                    <div class="breakdown-item error">
-                                        <span class="breakdown-label">Not Fixed</span>
-                                        <span class="breakdown-value">${project.notFixedIssues || 0}</span>
-                                    </div>
-                                    <div class="breakdown-item reopened">
-                                        <span class="breakdown-label">Reopened</span>
-                                        <span class="breakdown-value">${project.reopenedIssues || 0}</span>
-                                    </div>
-                                    <div class="breakdown-item deferred">
-                                        <span class="breakdown-label">Deferred</span>
-                                        <span class="breakdown-value">${project.deferredIssues || 0}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="success-rate">
-                                <span class="rate-label">Resolution Rate:</span>
-                                <span class="rate-value rate-${getRateClass(project.issuesResolutionRate || 0)}">${project.issuesResolutionRate || 0}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Enhancements - COMPLETE -->
-                ${(project.totalEnhancements || 0) > 0 ? `
-                <div class="metrics-section">
-                    <h4 class="metrics-title">
-                        <i class="fas fa-magic"></i> Enhancements (${project.totalEnhancements || 0} Total)
-                    </h4>
-                    <div class="metrics-content">
-                        <div class="complete-breakdown">
-                            <div class="breakdown-grid">
-                                <div class="breakdown-item new">
-                                    <span class="breakdown-label">New</span>
-                                    <span class="breakdown-value">${project.newEnhancements || 0}</span>
-                                </div>
-                                <div class="breakdown-item success">
-                                    <span class="breakdown-label">Implemented</span>
-                                    <span class="breakdown-value">${project.implementedEnhancements || 0}</span>
-                                </div>
-                                <div class="breakdown-item exists">
-                                    <span class="breakdown-label">Already Exists</span>
-                                    <span class="breakdown-value">${project.existsEnhancements || 0}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
-
-                <!-- Automation - COMPLETE -->
-                ${(project.automationTotalTests || 0) > 0 ? `
-                <div class="metrics-section">
-                    <h4 class="metrics-title">
-                        <i class="fas fa-robot"></i> Automation (${project.automationTotalTests || 0} Total Tests)
-                    </h4>
-                    <div class="metrics-content">
-                        <div class="automation-breakdown">
-                            <div class="automation-section">
-                                <h5 class="breakdown-title">Test Results</h5>
-                                <div class="breakdown-grid">
-                                    <div class="breakdown-item success">
-                                        <span class="breakdown-label">Passed</span>
-                                        <span class="breakdown-value">${project.automationPassedTests || 0}</span>
-                                    </div>
-                                    <div class="breakdown-item error">
-                                        <span class="breakdown-label">Failed</span>
-                                        <span class="breakdown-value">${project.automationFailedTests || 0}</span>
-                                    </div>
-                                    <div class="breakdown-item warning">
-                                        <span class="breakdown-label">Skipped</span>
-                                        <span class="breakdown-value">${project.automationSkippedTests || 0}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="automation-section">
-                                <h5 class="breakdown-title">Test Stability</h5>
-                                <div class="breakdown-grid">
-                                    <div class="breakdown-item success">
-                                        <span class="breakdown-label">Stable</span>
-                                        <span class="breakdown-value">${project.automationStableTests || 0}</span>
-                                    </div>
-                                    <div class="breakdown-item flaky">
-                                        <span class="breakdown-label">Flaky</span>
-                                        <span class="breakdown-value">${project.automationFlakyTests || 0}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="success-rate">
-                                <span class="rate-label">Pass Rate:</span>
-                                <span class="rate-value rate-${getRateClass(project.automationPassRate || 0)}">${project.automationPassRate || 0}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
-
-                <!-- Evaluation Scores have been removed as per user request -->
-            </div>
-        </div>
-        `).join('');
-    } else {
-        // Render simplified project cards when detailed data is not available
-        console.log('Rendering simplified project cards due to missing detailed data');
-        container.innerHTML = projects.map(project => `
-            <div class="project-metric-card">
-                <div class="project-header">
-                    <div class="project-title-section">
-                        <div class="project-icon">
-                            <i class="fas fa-rocket"></i>
-                        </div>
-                        <div class="project-info">
-                            <h3>${project.projectName}</h3>
-                            <p class="portfolio-name">${project.portfolioName}</p>
-                        </div>
-                    </div>
-                    <div class="status-badges">
-                        <span class="status-badge status-${getStatusClass(project.testingStatus)}">${getStatusText(project.testingStatus)}</span>
-                        <span class="risk-badge risk-low">Low Risk</span>
-                    </div>
-                </div>
-
-                <!-- Project Summary Stats -->
-                <div class="project-summary">
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <div class="summary-icon">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <div class="summary-content">
-                                <span class="summary-value">${project.totalReports || 0}</span>
-                                <span class="summary-label">Reports</span>
-                            </div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="summary-icon">
-                                <i class="fas fa-calendar-alt"></i>
-                            </div>
-                            <div class="summary-content">
-                                <span class="summary-value">${formatDate(project.lastReportDate)}</span>
-                                <span class="summary-label">Last Report</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Simplified Project Metrics -->
-                <div class="project-metrics">
-                    <div class="metrics-section">
-                        <h4 class="metrics-title">
-                            <i class="fas fa-chart-bar"></i> Summary Metrics
-                        </h4>
-                        <div class="metrics-content">
-                            <div class="simple-metrics-grid">
-                                <div class="simple-metric">
-                                    <div class="metric-icon"><i class="fas fa-user-check"></i></div>
-                                    <div class="metric-content">
-                                        <span class="metric-value">${project.totalUserStories || 0}</span>
-                                        <span class="metric-label">User Stories</span>
-                                    </div>
-                                </div>
-                                <div class="simple-metric">
-                                    <div class="metric-icon"><i class="fas fa-flask"></i></div>
-                                    <div class="metric-content">
-                                        <span class="metric-value">${project.totalTestCases || 0}</span>
-                                        <span class="metric-label">Test Cases</span>
-                                    </div>
-                                </div>
-                                <div class="simple-metric">
-                                    <div class="metric-icon"><i class="fas fa-bug"></i></div>
-                                    <div class="metric-content">
-                                        <span class="metric-value">${project.totalIssues || 0}</span>
-                                        <span class="metric-label">Issues</span>
-                                    </div>
-                                </div>
-                                <div class="simple-metric">
-                                    <div class="metric-icon"><i class="fas fa-magic"></i></div>
-                                    <div class="metric-content">
-                                        <span class="metric-value">${project.totalEnhancements || 0}</span>
-                                        <span class="metric-label">Enhancements</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="data-notice">
-                                <i class="fas fa-info-circle"></i>
-                                <span>Detailed breakdown data is being loaded. Refresh the page to see complete metrics.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
-}
-
-// Helper function for progress bar colors
-function getProgressBarColor(percentage) {
-    if (percentage >= 80) return '#4CAF50'; // Green
-    if (percentage >= 60) return '#FF9800'; // Orange
-    if (percentage >= 40) return '#FFC107'; // Yellow
-    return '#F44336'; // Red
-}
-
-// Helper function for rate class determination
-function getRateClass(percentage) {
-    if (percentage >= 80) return 'excellent';
-    if (percentage >= 60) return 'good';
-    if (percentage >= 40) return 'fair';
-    return 'poor';
-}
-
-async function exportDashboardReport() {
-    if (!dashboardStatsCache) {
-        showToast('No dashboard data available to export', 'warning');
-        return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    let yPos = 20;
-
-    // Title
-    doc.setFontSize(18);
-    doc.setFont(undefined, 'bold');
-    doc.text('QA Dashboard Report', 105, yPos, { align: 'center' });
-    yPos += 20;
-
-    // Overall Statistics
-    doc.setFontSize(14);
-    doc.text('Overall Statistics', 10, yPos);
-    yPos += 10;
-
-    const overall = dashboardStatsCache.overall;
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Total Reports: ${overall.totalReports}`, 10, yPos);
-    doc.text(`Completed: ${overall.completedReports}`, 60, yPos);
-    doc.text(`In Progress: ${overall.inProgressReports}`, 110, yPos);
-    doc.text(`Pending: ${overall.pendingReports}`, 160, yPos);
-    yPos += 10;
-
-    doc.text(`User Stories: ${overall.totalUserStories}`, 10, yPos);
-    doc.text(`Test Cases: ${overall.totalTestCases}`, 60, yPos);
-    doc.text(`Issues: ${overall.totalIssues}`, 110, yPos);
-    doc.text(`Enhancements: ${overall.totalEnhancements}`, 160, yPos);
-    yPos += 20;
-
-    // Project Metrics Table
-    if (dashboardStatsCache.projects && dashboardStatsCache.projects.length > 0) {
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text('Project Metrics', 10, yPos);
-        yPos += 10;
-
-        const projectTableData = dashboardStatsCache.projects.map(project => [
-            project.projectName,
-            project.portfolioName,
-            project.totalReports.toString(),
-            project.totalUserStories.toString(),
-            project.totalTestCases.toString(),
-            project.totalIssues.toString(),
-        ]);
-
-        doc.autoTable({
-            startY: yPos,
-            head: [['Project', 'Portfolio', 'Reports', 'Stories', 'Cases', 'Issues', 'Score']],
-            body: projectTableData,
-            styles: { fontSize: 8, cellPadding: 2 },
-            headStyles: { fillColor: [66, 133, 244], textColor: 255, fontStyle: 'bold' }
-        });
-    }
-
-    doc.save('QA_Dashboard_Report.pdf');
-}
-
-// --- Chart initialization functions ---
-function initializeCharts() {
-    initializeUserStoriesChart();
-    initializeTestCasesChart();
-    initializeIssuesPriorityChart();
-    initializeIssuesStatusChart();
-    initializeEnhancementsChart();
-    initializeAutomationTestCasesChart();
-    initializeAutomationPercentageChart();
-    initializeAutomationStabilityChart();
-}
-
-function getChartOptions() {
-    // Get theme-appropriate colors using robust detection
-    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
-
-    const textColor = isLightTheme ? '#1e293b' : '#f1f5f9';
-    const tooltipBg = isLightTheme ? '#ffffff' : '#334155';
-    const gridColor = isLightTheme ? '#e2e8f0' : '#334155';
-
-    console.log('Enhanced script chart options - isLightTheme:', isLightTheme, 'textColor:', textColor);
-
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    padding: 15,
-                    usePointStyle: true,
-                    font: { size: 11 },
-                    color: textColor
-                }
-            },
-            tooltip: {
-                titleColor: textColor,
-                bodyColor: textColor,
-                backgroundColor: tooltipBg,
-                borderColor: gridColor,
-                borderWidth: 1,
-                callbacks: {
-                    label: function (context) {
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const value = context.parsed || 0;
-                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                        return `${context.label}: ${value} (${percentage}%)`;
-                    }
-                }
-            }
-        }
-    };
-}
-
-function initializeDoughnutChart(canvasId, labels, backgroundColors) {
-    const ctx = document.getElementById(canvasId)?.getContext('2d');
-    if (!ctx) return null;
-
-    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
-    const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
-
-    return new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: new Array(labels.length).fill(0),
-                backgroundColor: backgroundColors,
-                borderWidth: 3,
-                borderColor: borderColor
-            }]
-        },
-        options: getChartOptions()
-    });
-}
-
-function initializeUserStoriesChart() {
-    const labels = ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'];
-    const colors = ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'];
-    if (userStoriesChart) userStoriesChart.destroy();
-    userStoriesChart = initializeDoughnutChart('userStoriesChart', labels, colors);
-}
-
-function initializeTestCasesChart() {
-    const labels = ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'];
-    const colors = ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'];
-    if (testCasesChart) testCasesChart.destroy();
-    testCasesChart = initializeDoughnutChart('testCasesChart', labels, colors);
-}
-
-function initializeIssuesPriorityChart() {
-    const labels = ['Critical', 'High', 'Medium', 'Low'];
-    const colors = ['#dc3545', '#fd7e14', '#ffc107', '#28a745'];
-    if (issuesPriorityChart) issuesPriorityChart.destroy();
-    issuesPriorityChart = initializeDoughnutChart('issuesPriorityChart', labels, colors);
-}
-
-function initializeIssuesStatusChart() {
-    const labels = ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'];
-    const colors = ['#17a2b8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1'];
-    if (issuesStatusChart) issuesStatusChart.destroy();
-    issuesStatusChart = initializeDoughnutChart('issuesStatusChart', labels, colors);
-}
-
-function initializeEnhancementsChart() {
-    const labels = ['New', 'Implemented', 'Exists'];
-    const colors = ['#17a2b8', '#28a745', '#6c757d'];
-    if (enhancementsChart) enhancementsChart.destroy();
-    enhancementsChart = initializeDoughnutChart('enhancementsChart', labels, colors);
-}
-
-function initializeAutomationTestCasesChart() {
-    const labels = ['Passed', 'Failed', 'Skipped'];
-    const colors = ['#28a745', '#dc3545', '#ffc107'];
-    if (automationTestCasesChart) automationTestCasesChart.destroy();
-    automationTestCasesChart = initializeDoughnutChart('automationTestCasesChart', labels, colors);
-}
-
-function initializeAutomationPercentageChart() {
-    const labels = ['Passed', 'Failed', 'Skipped'];
-    const colors = ['#28a745', '#dc3545', '#ffc107'];
-    if (automationPercentageChart) automationPercentageChart.destroy();
-    automationPercentageChart = initializeDoughnutChart('automationPercentageChart', labels, colors);
-}
-
-function initializeAutomationStabilityChart() {
-    const labels = ['Stable', 'Flaky'];
-    const colors = ['#28a745', '#fd7e14'];
-    if (automationStabilityChart) automationStabilityChart.destroy();
-    automationStabilityChart = initializeDoughnutChart('automationStabilityChart', labels, colors);
-}
-
-// --- Calculation and Chart Update Functions ---
-function updateChart(chart, data) {
-    if (chart) {
-        chart.data.datasets[0].data = data;
-        chart.update();
-    }
-}
-
-function calculatePercentages() {
-    const total = calculateUserStoryTotal();
-    const values = {
-        passed: parseInt(document.getElementById('passedStories')?.value) || 0,
-        passedWithIssues: parseInt(document.getElementById('passedWithIssuesStories')?.value) || 0,
-        failed: parseInt(document.getElementById('failedStories')?.value) || 0,
-        blocked: parseInt(document.getElementById('blockedStories')?.value) || 0,
-        cancelled: parseInt(document.getElementById('cancelledStories')?.value) || 0,
-        deferred: parseInt(document.getElementById('deferredStories')?.value) || 0,
-        notTestable: parseInt(document.getElementById('notTestableStories')?.value) || 0,
-    };
-
-    // Update total field (readonly)
-    document.getElementById('totalStories').value = total;
-    document.getElementById('userStoriesMetric').value = total;
-
-    // Update percentages
-    Object.keys(values).forEach(key => {
-        const percentageElement = document.getElementById(`${key}Percentage`);
-        if (percentageElement) {
-            percentageElement.textContent = total > 0 ? `${Math.round((values[key] / total) * 100)}%` : '0%';
-        }
-    });
-
-    updateChart(userStoriesChart, Object.values(values));
-}
-
-function calculateUserStoryTotal() {
-    const fields = ['passedStories', 'passedWithIssuesStories', 'failedStories', 'blockedStories', 'cancelledStories', 'deferredStories', 'notTestableStories'];
-    return fields.reduce((sum, field) => sum + (parseInt(document.getElementById(field)?.value) || 0), 0);
-}
-
-function calculateTestCasesPercentages() {
-    const total = calculateTestCasesTotal();
-
-    // More aggressive update approach
-    const totalField = document.getElementById('totalTestCases');
-    if (totalField) {
-        // Clear any existing placeholder
-        totalField.removeAttribute('placeholder');
-
-        // Set the value multiple ways
-        totalField.value = total;
-        totalField.setAttribute('value', total);
-        totalField.defaultValue = total;
-
-        // Force visual refresh
-        totalField.style.display = 'none';
-        totalField.offsetHeight; // Force reflow
-        totalField.style.display = '';
-
-        // Add a data attribute for debugging
-        totalField.setAttribute('data-calculated-value', total);
-
-        console.log('Total field updated:', totalField.value, 'Calculated:', total);
-    }
-
-    // Rest of the function...
-    const values = {
-        passed: parseInt(document.getElementById('passedTestCases')?.value) || 0,
-        passedWithIssues: parseInt(document.getElementById('passedWithIssuesTestCases')?.value) || 0,
-        failed: parseInt(document.getElementById('failedTestCases')?.value) || 0,
-        blocked: parseInt(document.getElementById('blockedTestCases')?.value) || 0,
-        cancelled: parseInt(document.getElementById('cancelledTestCases')?.value) || 0,
-        deferred: parseInt(document.getElementById('deferredTestCases')?.value) || 0,
-        notTestable: parseInt(document.getElementById('notTestableTestCases')?.value) || 0,
-    };
-
-    // Also update the metric field
-    const metricField = document.getElementById('testCasesMetric');
-    if (metricField) {
-        metricField.value = total;
-    }
-
-    Object.keys(values).forEach(key => {
-        const percentageElement = document.getElementById(`${key}TestCasesPercentage`);
-        if (percentageElement) {
-            percentageElement.textContent = total > 0 ? `${Math.round((values[key] / total) * 100)}%` : '0%';
-        }
-    });
-
-    updateChart(testCasesChart, Object.values(values));
-}
-
-function calculateTestCasesTotal() {
-    const fields = ['passedTestCases', 'passedWithIssuesTestCases', 'failedTestCases', 'blockedTestCases', 'cancelledTestCases', 'deferredTestCases', 'notTestableTestCases'];
-    return fields.reduce((sum, field) => sum + (parseInt(document.getElementById(field)?.value) || 0), 0);
-}
-
-function calculateIssuesPercentages() {
-    const total = calculateIssuesTotal();
-    const priorityValues = {
-        critical: parseInt(document.getElementById('criticalIssues')?.value) || 0,
-        high: parseInt(document.getElementById('highIssues')?.value) || 0,
-        medium: parseInt(document.getElementById('mediumIssues')?.value) || 0,
-        low: parseInt(document.getElementById('lowIssues')?.value) || 0,
-    };
-
-    // Update total field (readonly) - THIS WAS MISSING
-    document.getElementById('totalIssues').value = total;
-    document.getElementById('issuesMetric').value = total;
-
-    // Update percentages
-    Object.keys(priorityValues).forEach(key => {
-        const percentageElement = document.getElementById(`${key}IssuesPercentage`);
-        if (percentageElement) {
-            percentageElement.textContent = total > 0 ? `${Math.round((priorityValues[key] / total) * 100)}%` : '0%';
-        }
-    });
-
-    updateChart(issuesPriorityChart, Object.values(priorityValues));
-    calculateIssuesStatusPercentages();
-}
-
-function calculateIssuesTotal() {
-    const fields = ['criticalIssues', 'highIssues', 'mediumIssues', 'lowIssues'];
-    return fields.reduce((sum, field) => sum + (parseInt(document.getElementById(field)?.value) || 0), 0);
-}
-
-function calculateIssuesStatusTotal() {
-    const statusFields = ['newIssues', 'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredIssues'];
-    return statusFields.reduce((sum, field) => sum + (parseInt(document.getElementById(field)?.value) || 0), 0);
-}
-
-function calculateIssuesStatusPercentages() {
-    const total = calculateIssuesStatusTotal();
-    const statusValues = {
-        new: parseInt(document.getElementById('newIssues')?.value) || 0,
-        fixed: parseInt(document.getElementById('fixedIssues')?.value) || 0,
-        notFixed: parseInt(document.getElementById('notFixedIssues')?.value) || 0,
-        reopened: parseInt(document.getElementById('reopenedIssues')?.value) || 0,
-        deferred: parseInt(document.getElementById('deferredIssues')?.value) || 0,
-    };
-
-    // Update the total issues by status field
-    const totalIssuesByStatusElement = document.getElementById('totalIssuesByStatus');
-    if (totalIssuesByStatusElement) {
-        totalIssuesByStatusElement.value = total;
-    }
-
-    // Update percentages
-    Object.keys(statusValues).forEach(key => {
-        const percentageElement = document.getElementById(`${key}IssuesPercentage`);
-        if (percentageElement) {
-            percentageElement.textContent = total > 0 ? `${Math.round((statusValues[key] / total) * 100)}%` : '0%';
-        }
-    });
-
-    updateChart(issuesStatusChart, Object.values(statusValues));
-}
-
-function calculateEnhancementsPercentages() {
-    const total = calculateEnhancementsTotal();
-    const values = {
-        new: parseInt(document.getElementById('newEnhancements')?.value) || 0,
-        implemented: parseInt(document.getElementById('implementedEnhancements')?.value) || 0,
-        exists: parseInt(document.getElementById('existsEnhancements')?.value) || 0,
-    };
-
-    // Update total field (readonly) - THIS WAS MISSING
-    document.getElementById('totalEnhancements').value = total;
-    document.getElementById('enhancementsMetric').value = total;
-
-    // Update percentages
-    Object.keys(values).forEach(key => {
-        const percentageElement = document.getElementById(`${key}EnhancementsPercentage`);
-        if (percentageElement) {
-            percentageElement.textContent = total > 0 ? `${Math.round((values[key] / total) * 100)}%` : '0%';
-        }
-    });
-
-    updateChart(enhancementsChart, Object.values(values));
-}
-
-function calculateEnhancementsTotal() {
-    const fields = ['newEnhancements', 'implementedEnhancements', 'existsEnhancements'];
-    return fields.reduce((sum, field) => sum + (parseInt(document.getElementById(field)?.value) || 0), 0);
-}
-
-// Automation Regression calculation functions
-function calculateAutomationTotal() {
-    const passed = parseInt(document.getElementById('automationPassedTestCases')?.value) || 0;
-    const failed = parseInt(document.getElementById('automationFailedTestCases')?.value) || 0;
-    const skipped = parseInt(document.getElementById('automationSkippedTestCases')?.value) || 0;
-    return passed + failed + skipped;
-}
-
-function calculateAutomationStabilityTotal() {
-    const stable = parseInt(document.getElementById('automationStableTests')?.value) || 0;
-    const flaky = parseInt(document.getElementById('automationFlakyTests')?.value) || 0;
-    return stable + flaky;
-}
-
-function calculateAutomationPercentages() {
-    const total = calculateAutomationTotal();
-    const values = {
-        passed: parseInt(document.getElementById('automationPassedTestCases')?.value) || 0,
-        failed: parseInt(document.getElementById('automationFailedTestCases')?.value) || 0,
-        skipped: parseInt(document.getElementById('automationSkippedTestCases')?.value) || 0,
-    };
-
-    // Update total field (readonly)
-    document.getElementById('automationTotalTestCases').value = total;
-
-    // Update percentages
-    Object.keys(values).forEach(key => {
-        const percentageElement = document.getElementById(`automation${key.charAt(0).toUpperCase() + key.slice(1)}Percentage`);
-        const percentageDisplayElement = document.getElementById(`automation${key.charAt(0).toUpperCase() + key.slice(1)}PercentageDisplay`);
-        if (percentageElement) {
-            const percentage = total > 0 ? Math.round((values[key] / total) * 100) : 0;
-            percentageElement.textContent = `${percentage}%`;
-            if (percentageDisplayElement) {
-                percentageDisplayElement.value = percentage;
-            }
-        }
-    });
-
-    // Update charts if they exist
-    if (automationTestCasesChart) {
-        updateChart(automationTestCasesChart, Object.values(values));
-    }
-    if (automationPercentageChart) {
-        updateChart(automationPercentageChart, Object.values(values));
-    }
-}
-
-function calculateAutomationStabilityPercentages() {
-    const total = calculateAutomationStabilityTotal();
-    const values = {
-        stable: parseInt(document.getElementById('automationStableTests')?.value) || 0,
-        flaky: parseInt(document.getElementById('automationFlakyTests')?.value) || 0,
-    };
-
-    // Update total field (readonly)
-    document.getElementById('automationStabilityTotal').value = total;
-
-    // Update percentages
-    Object.keys(values).forEach(key => {
-        const percentageElement = document.getElementById(`automation${key.charAt(0).toUpperCase() + key.slice(1)}Percentage`);
-        if (percentageElement) {
-            const percentage = total > 0 ? Math.round((values[key] / total) * 100) : 0;
-            percentageElement.textContent = `${percentage}%`;
-        }
-    });
-
-    // Update charts if they exist
-    if (automationStabilityChart) {
-        updateChart(automationStabilityChart, Object.values(values));
-    }
-}
-
-// --- Dynamic Form Sections (Request, Build, Tester) ---
-function showRequestModal() { showModal('requestModal'); }
-function showBuildModal() { showModal('buildModal'); }
-function showTesterModal() {
-    loadExistingTesters(); // Load testers when modal opens
-    showModal('testerModal');
-}
-
-function addRequest() {
-    const requestId = document.getElementById('requestId').value.trim();
-    const requestUrl = document.getElementById('requestUrl').value.trim();
-    if (requestId && requestUrl) {
-        requestData.push({ id: requestId, url: requestUrl });
-        renderRequestList();
-        closeModal('requestModal');
-        showToast('Request added successfully!', 'success');
-    } else {
-        showToast('Please enter both Request ID and URL.', 'warning');
-    }
-}
-
-function addBuild() {
-    const requestId = document.getElementById('buildRequestId').value.trim();
-    const requestUrl = document.getElementById('buildRequestUrl').value.trim();
-    const environment = document.getElementById('buildEnvironment').value.trim();
-    const cycles = document.getElementById('buildCycles').value.trim();
-    if (requestId && requestUrl && environment && cycles) {
-        buildData.push({ requestId, requestUrl, environment, cycles });
-        renderBuildList();
-        closeModal('buildModal');
-        showToast('Build added successfully!', 'success');
-    } else {
-        showToast('Please fill in all build information fields.', 'warning');
-    }
-}
-
-// addTester function is replaced by addSelectedTester for consistency with team members
-// function addTester() {
-//     const testerName = document.getElementById('testerName').value.trim();
-//     if (testerName) {
-//         testerData.push({ name: testerName });
-//         renderTesterList();
-//         closeModal('testerModal');
-//     }
-// }
-
-function renderDynamicList(containerId, data, renderItemFn, removeFn) {
-    const container = document.getElementById(containerId);
-    if (!container) {
-        console.error(`Container with id '${containerId}' not found`);
-        return;
-    }
-
-
-    if (data.length === 0) {
-        // Check if the container is for team members, as it has a slightly different empty state message
-        if (containerId === 'teamMemberList') {
-            container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No team members added yet.</div>`;
-        } else if (containerId === 'testerList') {
-            container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No testers added yet. Click "Add/Select Tester" to get started.</div>`;
-        } else {
-            container.innerHTML = `<div class="empty-state" style="text-align: center; color: #6c757d; padding: 20px 0;">No items added yet. Click "Add Request" to get started.</div>`;
-        }
-    } else {
-        container.innerHTML = data.map((item, index) => renderItemFn(item, index, removeFn)).join('');
-    }
-}
-
-function renderRequestList() {
-    renderDynamicList('requestList', requestData, (item, index) => `
-        <div class="dynamic-item">
-            <div><strong>ID:</strong> ${item.id}<br><strong>URL:</strong> ${item.url}</div>
-            <button type="button" class="btn-sm btn-delete" onclick="removeRequest(${index})">Remove</button>
-        </div>`, removeRequest);
-}
-
-function renderBuildList() {
-    renderDynamicList('buildList', buildData, (item, index) => `
-        <div class="dynamic-item">
-            <div><strong>Req ID:</strong> ${item.requestId}<br><strong>URL:</strong> ${item.requestUrl}<br><strong>Env:</strong> ${item.environment}<br><strong>Cycles:</strong> ${item.cycles}</div>
-            <button type="button" class="btn-sm btn-delete" onclick="removeBuild(${index})">Remove</button>
-        </div>`, removeBuild);
-}
-
-function renderTesterList() {
-    renderDynamicList('testerList', testerData, (item, index, removeFn) => {
-        const roles = [];
-        if (item.is_automation_engineer) roles.push('Automation Engineer');
-        if (item.is_manual_engineer) roles.push('Manual Engineer');
-        const roleText = roles.length > 0 ? `<br><strong>Roles:</strong> ${roles.join(', ')}` : '<br><em style="color: #6c757d;">No roles assigned</em>';
-
-        return `
-        <div class="dynamic-item">
-            <div><strong>Name:</strong> ${item.name}<br><strong>Email:</strong> ${item.email}${roleText}</div>
-            <button type="button" class="btn-sm btn-delete" onclick="removeTester(${index})">Remove</button>
-        </div>`;
-    }, removeTester);
-}
-
-function removeRequest(index) { requestData.splice(index, 1); renderRequestList(); showToast('Request removed', 'info'); }
-function removeBuild(index) { buildData.splice(index, 1); renderBuildList(); showToast('Build removed', 'info'); }
-function removeTester(index) { testerData.splice(index, 1); renderTesterList(); showToast('Tester removed', 'info'); }
-
-function clearAllFields() {
-    if (confirm('Are you sure you want to clear all fields in the form?')) {
-        resetFormData();
-        showToast('All fields have been cleared.', 'info');
-    }
-}
-
-function clearCurrentSection() {
-    if (confirm('Are you sure you want to clear all fields in the current section?')) {
-        const section = document.getElementById(`section-${currentSection}`);
-        if (section) {
-            const inputs = section.querySelectorAll('input:not([readonly]), textarea, select');
-            inputs.forEach(input => {
-                if (input.type === 'checkbox' || input.type === 'radio') {
-                    input.checked = false;
-                } else {
-                    input.value = '';
-                }
-            });
-
-            // After clearing, recalculate percentages for relevant sections
-            if (section.id === 'section-3') {
-                calculatePercentages();
-            } else if (section.id === 'section-4') {
-                calculateTestCasesPercentages();
-            } else if (section.id === 'section-5') {
-                calculateIssuesPercentages();
-            } else if (section.id === 'section-6') {
-                calculateEnhancementsPercentages();
-            } else if (section.id === 'section-8') {
-                calculateAutomationPercentages();
-                calculateAutomationStabilityPercentages();
-            }
-
-            showToast('Current section fields have been cleared.', 'info');
-        }
-    }
-}
-
-// --- Page Management & Navigation (Simplified for multi-page app) ---
-// The showPage function is no longer needed for navigation between main pages.
-// Browser handles page loads.
-// function showPage(pageId) { ... }
-
-function showSection(sectionIndex) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(`section-${sectionIndex}`)?.classList.add('active');
-
-    document.querySelectorAll('#sidebar .nav-item').forEach((item, index) => {
-        item.classList.toggle('active', index === sectionIndex);
-    });
-
-    currentSection = sectionIndex;
-    updateNavigationButtons();
-    updateProgressBar();
-    window.scrollTo(0, 0);
-}
-
-function nextSection() {
-    if (currentSection < 12) { // Max section index is 12 (QA Notes)
-        showSection(currentSection + 1);
-    }
-}
-function previousSection() {
-    if (currentSection > 0) {
-        showSection(currentSection - 1);
-    }
-}
-
-function updateNavigationButtons() {
-    document.getElementById('prevBtn').disabled = currentSection === 0;
-    const isLastSection = currentSection === 12;
-    document.getElementById('nextBtn').style.display = isLastSection ? 'none' : 'inline-block';
-    document.getElementById('submitBtn').style.display = isLastSection ? 'inline-block' : 'none';
-}
-
-function updateProgressBar() {
-    const totalSections = 13;
-    const sectionTitles = [
-        'General Details',
-        'Test Summary',
-        'Request & Build Info',
-        'Team Information',
-        'User Stories',
-        'Test Cases',
-        'Issues by Priority',
-        'Issues by Status',
-        'Enhancements',
-        'Evaluation',
-        'Automation Regression',
-        'Automation Test Stability',
-        'QA Notes'
-    ];
-
-    // Calculate progress - show completion based on current section
-    const completedSections = currentSection; // Sections completed (0-based)
-    const currentStepNumber = currentSection + 1; // Current step being worked on (1-based)
-    const percentage = (completedSections / totalSections) * 100;
-
-    // Update progress percentage and fill
-    document.getElementById('progressPercent').textContent = `${Math.round(percentage)}%`;
-    document.getElementById('progressFill').style.width = `${percentage}%`;
-
-    // Update step and title text
-    document.getElementById('progressStep').textContent = `Step ${currentStepNumber} of ${totalSections}`;
-    document.getElementById('progressTitle').textContent = sectionTitles[currentSection] || 'Unknown Section';
-
-    // Update step indicators
-    document.querySelectorAll('.step').forEach((step, index) => {
-        step.classList.remove('active', 'completed');
-
-        if (index === currentSection) {
-            step.classList.add('active');
-        } else if (index < currentSection) {
-            step.classList.add('completed');
-            // Change icon to checkmark for completed steps
-            const icon = step.querySelector('.step-circle i');
-            if (icon && !icon.classList.contains('fa-check')) {
-                icon.className = 'fas fa-check';
-            }
-        } else {
-            // For future steps, ensure they have the correct icon (but don't force reset on initial load)
-            const icon = step.querySelector('.step-circle i');
-            const stepIcons = [
-                'fas fa-info-circle',
-                'fas fa-chart-bar',
-                'fas fa-clipboard-list',
-                'fas fa-users',
-                'fas fa-user-check',
-                'fas fa-flask',
-                'fas fa-exclamation-triangle',
-                'fas fa-tasks',
-                'fas fa-lightbulb',
-                'fas fa-star',
-                'fas fa-robot',
-                'fas fa-balance-scale',
-                'fas fa-sticky-note'
-            ];
-            if (icon) {
-                // Only reset icon if it's currently a checkmark (from previous completion)
-                if (icon.classList.contains('fa-check')) {
-                    icon.className = stepIcons[index] || 'fas fa-circle';
-                }
-                // Otherwise, leave the icon as it is (preserves initial HTML icons)
-            }
-        }
-    });
-}
-
-// Add click functionality to progress steps
-function initializeProgressSteps() {
-    document.querySelectorAll('.step').forEach((step, index) => {
-        step.addEventListener('click', () => {
-            showSection(index);
-        });
-    });
-}
-
-// backToDashboard now redirects to the dashboard page
-function backToDashboard() { window.location.href = '/dashboard'; }
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const formContainer = document.querySelector('.form-container');
-    const toggleBtn = document.querySelector('.sidebar-toggle-btn i');
-
-    sidebar.classList.toggle('collapsed');
-    formContainer.classList.toggle('sidebar-collapsed');
-
-    // Update toggle button icon
-    if (sidebar.classList.contains('collapsed')) {
-        toggleBtn.classList.remove('fa-bars');
-        toggleBtn.classList.add('fa-arrow-right');
-    } else {
-        toggleBtn.classList.remove('fa-arrow-right');
-        toggleBtn.classList.add('fa-bars');
-    }
-}
-
-// --- Enhanced Reports Table Functions with Filtering ---
-// Debounced search to reduce API calls
-let searchTimeout;
-
-// Filter state management
-let currentFilters = {
-    search: '',
-    project: '',
-    portfolio: '',
-    tester: '',
-    status: '',
-    dateFrom: '',
-    dateTo: '',
-    sprint: '',
-    sort: 'date-desc'
-};
-
-let filtersVisible = false;
-let allReports = []; // Cache for client-side filtering
-
 async function searchReports() {
-    const searchQuery = document.getElementById('searchInput')?.value || '';
+    export const searchQuery = document.getElementById('searchInput')?.value || '';
     currentFilters.search = searchQuery;
 
     // Clear existing timeout
@@ -1536,13 +26,13 @@ async function applyFilters() {
         // Fetch all reports if not cached or if we need fresh data
         if (allReports.length === 0) {
             console.log('Fetching reports for filtering...');
-            const result = await fetchReports(1, '', 1000); // Fetch large number to get all
+            export const result = await fetchReports(1, '', 1000); // Fetch large number to get all
             allReports = result.reports || [];
             console.log('Fetched', allReports.length, 'reports for filtering');
         }
 
         // Apply client-side filtering
-        let filteredReports = filterReports(allReports);
+        export let filteredReports = filterReports(allReports);
         console.log('After filtering:', filteredReports.length, 'reports');
 
         // Apply sorting
@@ -1569,7 +59,7 @@ async function applyFilters() {
 
         // Fallback: try to show all reports without filtering
         try {
-            const result = await fetchReports(1, '', 100);
+            export const result = await fetchReports(1, '', 100);
             renderReportsTable(result.reports || []);
         } catch (fallbackError) {
             console.error('Fallback also failed:', fallbackError);
@@ -1579,7 +69,7 @@ async function applyFilters() {
     hideReportsLoading();
 }
 
-function updateFilterState() {
+export function updateFilterState() {
     currentFilters.search = document.getElementById('searchInput')?.value || '';
     currentFilters.project = document.getElementById('projectFilter')?.value || '';
     currentFilters.portfolio = document.getElementById('portfolioFilter')?.value || '';
@@ -1591,7 +81,7 @@ function updateFilterState() {
     currentFilters.sort = document.getElementById('sortFilter')?.value || 'date-desc';
 }
 
-function filterReports(reports) {
+export function filterReports(reports) {
     if (!Array.isArray(reports)) {
         console.warn('filterReports: reports is not an array', reports);
         return [];
@@ -1602,8 +92,8 @@ function filterReports(reports) {
 
         // Search filter - make it more robust
         if (currentFilters.search) {
-            const searchTerm = currentFilters.search.toLowerCase();
-            const searchableFields = [
+            export const searchTerm = currentFilters.search.toLowerCase();
+            export const searchableFields = [
                 report.title || '',
                 report.project || '',
                 report.portfolio || '',
@@ -1611,7 +101,7 @@ function filterReports(reports) {
                 report.projectName || '',
                 report.portfolioName || ''
             ];
-            const searchableText = searchableFields.join(' ').toLowerCase();
+            export const searchableText = searchableFields.join(' ').toLowerCase();
             if (!searchableText.includes(searchTerm)) {
                 return false;
             }
@@ -1619,7 +109,7 @@ function filterReports(reports) {
 
         // Project filter - handle different field names
         if (currentFilters.project) {
-            const projectName = report.project || report.projectName || '';
+            export const projectName = report.project || report.projectName || '';
             if (projectName !== currentFilters.project) {
                 return false;
             }
@@ -1627,7 +117,7 @@ function filterReports(reports) {
 
         // Portfolio filter - handle different field names
         if (currentFilters.portfolio) {
-            const portfolioName = report.portfolio || report.portfolioName || '';
+            export const portfolioName = report.portfolio || report.portfolioName || '';
             if (portfolioName !== currentFilters.portfolio) {
                 return false;
             }
@@ -1635,10 +125,10 @@ function filterReports(reports) {
 
         // Tester filter - handle different data structures
         if (currentFilters.tester) {
-            let hasMatchingTester = false;
+            export let hasMatchingTester = false;
 
             // Get all possible tester values from the report
-            const allTesterValues = [];
+            export const allTesterValues = [];
 
             // Check testers array
             if (Array.isArray(report.testers)) {
@@ -1669,22 +159,22 @@ function filterReports(reports) {
             // Check testers as JSON string
             else if (typeof report.testers === 'string') {
                 try {
-                    const parsedTesters = JSON.parse(report.testers);
+                    export const parsedTesters = JSON.parse(report.testers);
                     if (Array.isArray(parsedTesters)) {
                         parsedTesters.forEach(tester => {
-                            const name = typeof tester === 'object' ? tester.name : tester;
+                            export const name = typeof tester === 'object' ? tester.name : tester;
                             if (name) allTesterValues.push(name.toString().trim());
                         });
                     }
                 } catch (e) {
                     // If not JSON, treat as comma-separated string
-                    const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
+                    export const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
                     allTesterValues.push(...testerList);
                 }
             }
 
             // Check single tester fields
-            const singleTesterFields = ['tester', 'testerName', 'assignedTester'];
+            export const singleTesterFields = ['tester', 'testerName', 'assignedTester'];
             singleTesterFields.forEach(field => {
                 if (report[field] && typeof report[field] === 'string') {
                     allTesterValues.push(report[field].trim());
@@ -1705,7 +195,7 @@ function filterReports(reports) {
 
         // Status filter - handle different field names
         if (currentFilters.status) {
-            const status = report.status || report.testingStatus || '';
+            export const status = report.status || report.testingStatus || '';
             if (status !== currentFilters.status) {
                 return false;
             }
@@ -1714,7 +204,7 @@ function filterReports(reports) {
         // Date range filter - handle different date formats
         if (currentFilters.dateFrom || currentFilters.dateTo) {
             // Try multiple date field names
-            const reportDateStr = report.date || report.reportDate || report.createdAt || report.created_at || report.dateCreated || '';
+            export const reportDateStr = report.date || report.reportDate || report.createdAt || report.created_at || report.dateCreated || '';
 
             // If no date found, skip date filtering for this report (don't exclude it)
             if (!reportDateStr) {
@@ -1723,14 +213,14 @@ function filterReports(reports) {
                 // Don't return false - let report pass through if no date available
             } else {
                 // Handle different date formats
-                let reportDate;
+                export let reportDate;
 
                 // Try parsing as-is first
                 reportDate = new Date(reportDateStr);
 
                 // If invalid, try parsing DD-MM-YYYY format
                 if (isNaN(reportDate.getTime()) && typeof reportDateStr === 'string') {
-                    const parts = reportDateStr.split('-');
+                    export const parts = reportDateStr.split('-');
                     if (parts.length === 3) {
                         // Try DD-MM-YYYY
                         if (parts[0].length === 2) {
@@ -1746,7 +236,7 @@ function filterReports(reports) {
                 // Only apply date filtering if we have a valid date
                 if (!isNaN(reportDate.getTime())) {
                     if (currentFilters.dateFrom) {
-                        const fromDate = new Date(currentFilters.dateFrom);
+                        export const fromDate = new Date(currentFilters.dateFrom);
                         fromDate.setHours(0, 0, 0, 0); // Start of day
                         if (reportDate < fromDate) {
                             return false;
@@ -1754,7 +244,7 @@ function filterReports(reports) {
                     }
 
                     if (currentFilters.dateTo) {
-                        const toDate = new Date(currentFilters.dateTo);
+                        export const toDate = new Date(currentFilters.dateTo);
                         toDate.setHours(23, 59, 59, 999); // End of day
                         if (reportDate > toDate) {
                             return false;
@@ -1769,9 +259,9 @@ function filterReports(reports) {
 
         // Sprint filter - handle different field names and types
         if (currentFilters.sprint) {
-            const sprintNumber = report.sprint || report.sprintNumber || '';
-            const filterSprint = currentFilters.sprint.toString();
-            const reportSprint = sprintNumber.toString();
+            export const sprintNumber = report.sprint || report.sprintNumber || '';
+            export const filterSprint = currentFilters.sprint.toString();
+            export const reportSprint = sprintNumber.toString();
 
             if (reportSprint !== filterSprint) {
                 return false;
@@ -1782,16 +272,16 @@ function filterReports(reports) {
     });
 }
 
-function sortReports(reports) {
+export function sortReports(reports) {
     if (!Array.isArray(reports)) {
         console.warn('sortReports: reports is not an array', reports);
         return [];
     }
 
-    const [field, direction] = currentFilters.sort.split('-');
+    export const [field, direction] = currentFilters.sort.split('-');
 
     return [...reports].sort((a, b) => {
-        let aValue, bValue;
+        export let aValue, bValue;
 
         switch (field) {
             case 'date':
@@ -1830,8 +320,8 @@ function sortReports(reports) {
     });
 }
 
-function updateFilterResultsDisplay(count) {
-    const resultsCountElement = document.getElementById('resultsCount');
+export function updateFilterResultsDisplay(count) {
+    export const resultsCountElement = document.getElementById('resultsCount');
     if (resultsCountElement) {
         resultsCountElement.textContent = count;
     }
@@ -1840,13 +330,13 @@ function updateFilterResultsDisplay(count) {
     updateActiveFiltersDisplay();
 }
 
-function updateActiveFiltersDisplay() {
-    const activeFiltersContainer = document.getElementById('activeFilters');
+export function updateActiveFiltersDisplay() {
+    export const activeFiltersContainer = document.getElementById('activeFilters');
     if (!activeFiltersContainer) return;
 
     activeFiltersContainer.innerHTML = '';
 
-    const filterLabels = {
+    export const filterLabels = {
         search: 'Search',
         project: 'Project',
         portfolio: 'Portfolio',
@@ -1859,7 +349,7 @@ function updateActiveFiltersDisplay() {
 
     Object.entries(currentFilters).forEach(([key, value]) => {
         if (value && key !== 'sort') {
-            const tag = document.createElement('div');
+            export const tag = document.createElement('div');
             tag.className = 'active-filter-tag';
             tag.innerHTML = `
                 <span>${filterLabels[key]}: ${value}</span>
@@ -1870,12 +360,12 @@ function updateActiveFiltersDisplay() {
     });
 }
 
-function removeFilter(filterKey) {
+export function removeFilter(filterKey) {
     // Clear the filter
     currentFilters[filterKey] = '';
 
     // Update the corresponding form input
-    const inputElement = document.getElementById(filterKey + 'Filter') || document.getElementById('searchInput');
+    export const inputElement = document.getElementById(filterKey + 'Filter') || document.getElementById('searchInput');
     if (inputElement) {
         inputElement.value = '';
     }
@@ -1884,7 +374,7 @@ function removeFilter(filterKey) {
     applyFilters();
 }
 
-function clearAllFilters() {
+export function clearAllFilters() {
     // Reset all filters
     Object.keys(currentFilters).forEach(key => {
         if (key !== 'sort') {
@@ -1896,7 +386,7 @@ function clearAllFilters() {
     currentFilters.sort = 'date-desc';
 
     // Clear all form inputs safely
-    const inputs = [
+    export const inputs = [
         'searchInput',
         'projectFilter',
         'portfolioFilter',
@@ -1908,14 +398,14 @@ function clearAllFilters() {
     ];
 
     inputs.forEach(inputId => {
-        const element = document.getElementById(inputId);
+        export const element = document.getElementById(inputId);
         if (element) {
             element.value = '';
         }
     });
 
     // Reset sort filter
-    const sortFilter = document.getElementById('sortFilter');
+    export const sortFilter = document.getElementById('sortFilter');
     if (sortFilter) {
         sortFilter.value = 'date-desc';
     }
@@ -1931,10 +421,10 @@ function clearAllFilters() {
     applyFilters();
 }
 
-function toggleFiltersVisibility() {
-    const filtersContainer = document.getElementById('filtersContainer');
-    const toggleText = document.getElementById('toggleText');
-    const toggleIcon = document.querySelector('.toggle-filters i');
+export function toggleFiltersVisibility() {
+    export const filtersContainer = document.getElementById('filtersContainer');
+    export const toggleText = document.getElementById('toggleText');
+    export const toggleIcon = document.querySelector('.toggle-filters i');
 
     filtersVisible = !filtersVisible;
 
@@ -1949,7 +439,7 @@ function toggleFiltersVisibility() {
     }
 }
 
-function applyQuickFilter(type) {
+export function applyQuickFilter(type) {
     // Remove active class from all quick filter buttons
     document.querySelectorAll('.quick-filter-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -1961,13 +451,13 @@ function applyQuickFilter(type) {
     }
 
     // Clear existing filters first (except search)
-    const searchValue = document.getElementById('searchInput').value;
+    export const searchValue = document.getElementById('searchInput').value;
     clearAllFilters();
     document.getElementById('searchInput').value = searchValue;
     currentFilters.search = searchValue;
 
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    export const today = new Date();
+    export const todayStr = today.toISOString().split('T')[0];
 
     switch (type) {
         case 'today':
@@ -1978,13 +468,13 @@ function applyQuickFilter(type) {
             break;
 
         case 'week':
-            const weekStart = new Date(today);
+            export const weekStart = new Date(today);
             weekStart.setDate(today.getDate() - today.getDay());
-            const weekEnd = new Date(weekStart);
+            export const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 6);
 
-            const weekStartStr = weekStart.toISOString().split('T')[0];
-            const weekEndStr = weekEnd.toISOString().split('T')[0];
+            export const weekStartStr = weekStart.toISOString().split('T')[0];
+            export const weekEndStr = weekEnd.toISOString().split('T')[0];
 
             document.getElementById('dateFromFilter').value = weekStartStr;
             document.getElementById('dateToFilter').value = weekEndStr;
@@ -1993,11 +483,11 @@ function applyQuickFilter(type) {
             break;
 
         case 'month':
-            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-            const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            export const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            export const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-            const monthStartStr = monthStart.toISOString().split('T')[0];
-            const monthEndStr = monthEnd.toISOString().split('T')[0];
+            export const monthStartStr = monthStart.toISOString().split('T')[0];
+            export const monthEndStr = monthEnd.toISOString().split('T')[0];
 
             document.getElementById('dateFromFilter').value = monthStartStr;
             document.getElementById('dateToFilter').value = monthEndStr;
@@ -2011,10 +501,10 @@ function applyQuickFilter(type) {
             break;
 
         case 'recent':
-            const recentStart = new Date(today);
+            export const recentStart = new Date(today);
             recentStart.setDate(today.getDate() - 7);
 
-            const recentStartStr = recentStart.toISOString().split('T')[0];
+            export const recentStartStr = recentStart.toISOString().split('T')[0];
 
             document.getElementById('dateFromFilter').value = recentStartStr;
             document.getElementById('dateToFilter').value = todayStr;
@@ -2041,8 +531,8 @@ async function showAllReports() {
 
     try {
         // Fetch all reports
-        const result = await fetchReports(1, '', 1000);
-        const reports = result.reports || [];
+        export const result = await fetchReports(1, '', 1000);
+        export const reports = result.reports || [];
 
         console.log('Total reports fetched:', reports.length);
 
@@ -2050,13 +540,13 @@ async function showAllReports() {
         renderReportsTable(reports);
 
         // Update results count
-        const resultsCountElement = document.getElementById('resultsCount');
+        export const resultsCountElement = document.getElementById('resultsCount');
         if (resultsCountElement) {
             resultsCountElement.textContent = reports.length;
         }
 
         // Clear active filters display
-        const activeFiltersContainer = document.getElementById('activeFilters');
+        export const activeFiltersContainer = document.getElementById('activeFilters');
         if (activeFiltersContainer) {
             activeFiltersContainer.innerHTML = '';
         }
@@ -2075,11 +565,11 @@ async function showAllReports() {
 async function testAPI() {
     console.log('🧪 Testing API endpoint...');
     try {
-        const response = await fetch('/api/reports');
+        export const response = await fetch('/api/reports');
         console.log('API Response status:', response.status);
         console.log('API Response headers:', [...response.headers.entries()]);
 
-        const data = await response.json();
+        export const data = await response.json();
         console.log('Raw API data:', data);
         console.log('Data type:', typeof data);
         console.log('Is array:', Array.isArray(data));
@@ -2108,10 +598,10 @@ async function testAPI() {
 async function testTestersAPI() {
     console.log('🧪 Testing testers API endpoint...');
     try {
-        const response = await fetch('/api/testers');
+        export const response = await fetch('/api/testers');
         console.log('Testers API Response status:', response.status);
 
-        const data = await response.json();
+        export const data = await response.json();
         console.log('Raw testers data:', data);
         console.log('Testers count:', data.length);
 
@@ -2125,7 +615,7 @@ async function testTestersAPI() {
 }
 
 // Test individual filters function
-function testIndividualFilters() {
+export function testIndividualFilters() {
     console.log('🧪 Testing individual filters...');
 
     if (allReports.length === 0) {
@@ -2136,16 +626,16 @@ function testIndividualFilters() {
     console.log('Total reports:', allReports.length);
 
     // Test each filter individually
-    const originalFilters = { ...currentFilters };
+    export const originalFilters = { ...currentFilters };
 
     // Test search filter
     currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
     currentFilters.search = 'test';
-    let filtered = filterReports(allReports);
+    export let filtered = filterReports(allReports);
     console.log('Search "test" results:', filtered.length);
 
     // Test project filter (use first available project)
-    const projects = [...new Set(allReports.map(r => r.project || r.projectName).filter(Boolean))];
+    export const projects = [...new Set(allReports.map(r => r.project || r.projectName).filter(Boolean))];
     if (projects.length > 0) {
         currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.project = projects[0];
@@ -2154,12 +644,12 @@ function testIndividualFilters() {
     }
 
     // Test tester filter (use first available tester)
-    const testers = new Set();
+    export const testers = new Set();
     allReports.forEach(report => {
         // Extract testers using same logic as initialization
         if (Array.isArray(report.testers)) {
             report.testers.forEach(tester => {
-                const name = typeof tester === 'object' ? tester.name : tester;
+                export const name = typeof tester === 'object' ? tester.name : tester;
                 if (name) testers.add(name.toString().trim());
             });
         } else if (Array.isArray(report.testerData)) {
@@ -2169,7 +659,7 @@ function testIndividualFilters() {
         }
     });
 
-    const testersList = [...testers];
+    export const testersList = [...testers];
     if (testersList.length > 0) {
         currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.tester = testersList[0];
@@ -2189,7 +679,7 @@ function testIndividualFilters() {
     }
 
     // Test status filter
-    const statuses = [...new Set(allReports.map(r => r.status || r.testingStatus).filter(Boolean))];
+    export const statuses = [...new Set(allReports.map(r => r.status || r.testingStatus).filter(Boolean))];
     if (statuses.length > 0) {
         currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.status = statuses[0];
@@ -2209,12 +699,12 @@ function testIndividualFilters() {
 }
 
 // Debug function to analyze report data structure
-function debugReportData() {
+export function debugReportData() {
     console.log('🔍 Debugging report data structure...');
     console.log('Total reports:', allReports.length);
 
     if (allReports.length > 0) {
-        const sampleReport = allReports[0];
+        export const sampleReport = allReports[0];
         console.log('Sample report structure:', sampleReport);
         console.log('Available fields:', Object.keys(sampleReport));
 
@@ -2246,7 +736,7 @@ function debugReportData() {
         });
 
         // Count unique testers
-        const allTesters = new Set();
+        export const allTesters = new Set();
         allReports.forEach(report => {
             if (Array.isArray(report.testers)) {
                 report.testers.forEach(tester => {
@@ -2269,7 +759,7 @@ function debugReportData() {
 async function initializeFilterDropdowns() {
     try {
         // Fetch all reports to populate filter options
-        const result = await fetchReports(1, '', 1000);
+        export const result = await fetchReports(1, '', 1000);
         allReports = result.reports || [];
 
         console.log('Initializing filters with', allReports.length, 'reports');
@@ -2283,9 +773,9 @@ async function initializeFilterDropdowns() {
         }
 
         // Extract unique values for dropdowns with robust field handling
-        const projects = new Set();
-        const portfolios = new Set();
-        const testers = new Set();
+        export const projects = new Set();
+        export const portfolios = new Set();
+        export const testers = new Set();
 
         // Debug: Log first few reports to understand data structure
         if (allReports.length > 0) {
@@ -2293,7 +783,7 @@ async function initializeFilterDropdowns() {
             console.log('All report keys:', Object.keys(allReports[0]));
 
             // Specifically check tester-related fields
-            const sampleReport = allReports[0];
+            export const sampleReport = allReports[0];
             console.log('Tester-related fields in sample report:', {
                 testers: sampleReport.testers,
                 tester: sampleReport.tester,
@@ -2321,15 +811,15 @@ async function initializeFilterDropdowns() {
             }
 
             // Extract project names
-            const projectName = report.project || report.projectName;
+            export const projectName = report.project || report.projectName;
             if (projectName) projects.add(projectName);
 
             // Extract portfolio names
-            const portfolioName = report.portfolio || report.portfolioName;
+            export const portfolioName = report.portfolio || report.portfolioName;
             if (portfolioName) portfolios.add(portfolioName);
 
             // Extract tester names - handle different data structures
-            const possibleTesterFields = [
+            export const possibleTesterFields = [
                 'testers', 'tester', 'testerData', 'tester_data',
                 'assignedTesters', 'testTeam', 'testerName', 'assignedTester'
             ];
@@ -2351,7 +841,7 @@ async function initializeFilterDropdowns() {
                         testers.add(tester.trim());
                     } else if (tester && typeof tester === 'object') {
                         // Handle different object structures
-                        const name = tester.name || tester.testerName || tester.email || tester.id;
+                        export const name = tester.name || tester.testerName || tester.email || tester.id;
                         if (name) testers.add(name.toString().trim());
                     }
                 });
@@ -2376,16 +866,16 @@ async function initializeFilterDropdowns() {
             else if (report.testers && typeof report.testers === 'string') {
                 try {
                     // Try to parse as JSON first
-                    const parsedTesters = JSON.parse(report.testers);
+                    export const parsedTesters = JSON.parse(report.testers);
                     if (Array.isArray(parsedTesters)) {
                         parsedTesters.forEach(tester => {
-                            const name = typeof tester === 'object' ? tester.name : tester;
+                            export const name = typeof tester === 'object' ? tester.name : tester;
                             if (name) testers.add(name.toString().trim());
                         });
                     }
                 } catch (e) {
                     // If not JSON, treat as comma-separated string
-                    const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
+                    export const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
                     testerList.forEach(tester => testers.add(tester));
                 }
             }
@@ -2403,9 +893,9 @@ async function initializeFilterDropdowns() {
         });
 
         // Convert sets to sorted arrays
-        const sortedProjects = [...projects].sort();
-        const sortedPortfolios = [...portfolios].sort();
-        const sortedTesters = [...testers].sort();
+        export const sortedProjects = [...projects].sort();
+        export const sortedPortfolios = [...portfolios].sort();
+        export const sortedTesters = [...testers].sort();
 
         console.log('Filter options extracted:', {
             projects: sortedProjects,
@@ -2423,20 +913,20 @@ async function initializeFilterDropdowns() {
         if (sortedTesters.length === 0) {
             console.log('No testers found in reports, trying to load from testers API...');
             try {
-                const testersResponse = await fetch('/api/testers');
+                export const testersResponse = await fetch('/api/testers');
                 if (testersResponse.ok) {
-                    const testersData = await testersResponse.json();
+                    export const testersData = await testersResponse.json();
                     console.log('Loaded testers from API:', testersData);
                     testersData.forEach(tester => {
                         if (tester.name) {
                             testers.add(tester.name);
                         }
                     });
-                    const updatedSortedTesters = [...testers].sort();
+                    export const updatedSortedTesters = [...testers].sort();
                     console.log('Updated testers list:', updatedSortedTesters);
 
                     // Update the tester dropdown with API data
-                    const testerFilter = document.getElementById('testerFilter');
+                    export const testerFilter = document.getElementById('testerFilter');
                     if (testerFilter) {
                         // Clear existing options except the first one
                         while (testerFilter.children.length > 1) {
@@ -2444,7 +934,7 @@ async function initializeFilterDropdowns() {
                         }
 
                         updatedSortedTesters.forEach(tester => {
-                            const option = document.createElement('option');
+                            export const option = document.createElement('option');
                             option.value = tester;
                             option.textContent = tester;
                             testerFilter.appendChild(option);
@@ -2457,7 +947,7 @@ async function initializeFilterDropdowns() {
         }
 
         // Populate project dropdown
-        const projectFilter = document.getElementById('projectFilter');
+        export const projectFilter = document.getElementById('projectFilter');
         if (projectFilter) {
             // Clear existing options except the first one
             while (projectFilter.children.length > 1) {
@@ -2465,7 +955,7 @@ async function initializeFilterDropdowns() {
             }
 
             sortedProjects.forEach(project => {
-                const option = document.createElement('option');
+                export const option = document.createElement('option');
                 option.value = project;
                 option.textContent = project;
                 projectFilter.appendChild(option);
@@ -2473,7 +963,7 @@ async function initializeFilterDropdowns() {
         }
 
         // Populate portfolio dropdown
-        const portfolioFilter = document.getElementById('portfolioFilter');
+        export const portfolioFilter = document.getElementById('portfolioFilter');
         if (portfolioFilter) {
             // Clear existing options except the first one
             while (portfolioFilter.children.length > 1) {
@@ -2481,7 +971,7 @@ async function initializeFilterDropdowns() {
             }
 
             sortedPortfolios.forEach(portfolio => {
-                const option = document.createElement('option');
+                export const option = document.createElement('option');
                 option.value = portfolio;
                 option.textContent = portfolio;
                 portfolioFilter.appendChild(option);
@@ -2489,7 +979,7 @@ async function initializeFilterDropdowns() {
         }
 
         // Populate tester dropdown
-        const testerFilter = document.getElementById('testerFilter');
+        export const testerFilter = document.getElementById('testerFilter');
         if (testerFilter) {
             // Clear existing options except the first one
             while (testerFilter.children.length > 1) {
@@ -2497,7 +987,7 @@ async function initializeFilterDropdowns() {
             }
 
             sortedTesters.forEach(tester => {
-                const option = document.createElement('option');
+                export const option = document.createElement('option');
                 option.value = tester;
                 option.textContent = tester;
                 testerFilter.appendChild(option);
@@ -2512,17 +1002,17 @@ async function initializeFilterDropdowns() {
 
 // Immediate search for pagination and buttons
 async function searchReportsImmediate() {
-    const searchQuery = document.getElementById('searchInput')?.value || '';
+    export const searchQuery = document.getElementById('searchInput')?.value || '';
     showReportsLoading();
-    const result = await fetchReports(currentPage, searchQuery);
+    export const result = await fetchReports(currentPage, searchQuery);
     hideReportsLoading();
 
     renderReportsTable(result.reports);
     renderPagination(result);
 }
 
-function renderReportsTable(reports) {
-    const tbody = document.getElementById('reportsTableBody');
+export function renderReportsTable(reports) {
+    export const tbody = document.getElementById('reportsTableBody');
     if (!tbody) return; // Ensure tbody exists
 
     if (reports.length === 0) {
@@ -2548,15 +1038,15 @@ function renderReportsTable(reports) {
     `).join('');
 }
 
-function renderPagination(result) {
-    const pagination = document.getElementById('pagination');
+export function renderPagination(result) {
+    export const pagination = document.getElementById('pagination');
     if (!pagination) return; // Ensure pagination element exists
 
     if (result.totalPages <= 1) {
         pagination.innerHTML = '';
         return;
     }
-    let paginationHTML = `<button class="pagination-btn" onclick="goToPage(${result.page - 1})" ${!result.hasPrev ? 'disabled' : ''}>←</button>`;
+    export let paginationHTML = `<button class="pagination-btn" onclick="goToPage(${result.page - 1})" ${!result.hasPrev ? 'disabled' : ''}>←</button>`;
     for (let i = 1; i <= result.totalPages; i++) {
         paginationHTML += `<button class="pagination-btn ${i === result.page ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
     }
@@ -2564,13 +1054,13 @@ function renderPagination(result) {
     pagination.innerHTML = paginationHTML;
 }
 
-function goToPage(page) {
+export function goToPage(page) {
     currentPage = page;
     searchReportsImmediate();
 }
 
 // --- Report Actions (CRUD) ---
-function createNewReport() {
+export function createNewReport() {
     // Redirect to the create report page
     window.location.href = '/create-report';
 }
@@ -2581,8 +1071,8 @@ async function regenerateReport(id) {
 }
 
 async function deleteReport(id) {
-    const confirmDelete = await new Promise(resolve => {
-        const modal = document.createElement('div');
+    export const confirmDelete = await new Promise(resolve => {
+        export const modal = document.createElement('div');
         modal.className = 'modal';
         modal.style.display = 'block';
 
@@ -2599,8 +1089,8 @@ async function deleteReport(id) {
 
         document.body.appendChild(modal);
 
-        const confirmBtn = document.getElementById('confirmDeleteBtn');
-        const cancelBtn = document.getElementById('cancelDeleteBtn');
+        export const confirmBtn = document.getElementById('confirmDeleteBtn');
+        export const cancelBtn = document.getElementById('cancelDeleteBtn');
 
         confirmBtn.onclick = () => {
             modal.remove();
@@ -2614,7 +1104,7 @@ async function deleteReport(id) {
     });
 
     if (confirmDelete) {
-        const result = await deleteReportDB(id);
+        export const result = await deleteReportDB(id);
         if (result) {
             allReportsCache = allReportsCache.filter(r => r.id !== id);
             // Re-fetch dashboard stats if the function exists
@@ -2630,13 +1120,13 @@ async function deleteReport(id) {
     }
 }
 
-function viewReport(id) {
+export function viewReport(id) {
     window.location.href = `/report/${id}`;
 }
 
 // --- Form Handling ---
-function resetFormData() {
-    const form = document.getElementById('qaReportForm');
+export function resetFormData() {
+    export const form = document.getElementById('qaReportForm');
     if (form) {
         form.reset();
 
@@ -2666,7 +1156,7 @@ function resetFormData() {
     }
 }
 
-function resetAllCharts() {
+export function resetAllCharts() {
     // Destroy existing charts to prevent memory leaks and then re-initialize them
     if (userStoriesChart) userStoriesChart.destroy();
     if (testCasesChart) testCasesChart.destroy();
@@ -2691,7 +1181,7 @@ async function loadReportForEditing(report) {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     // Load portfolio first
-    const portfolioSelect = document.getElementById('portfolioName');
+    export const portfolioSelect = document.getElementById('portfolioName');
     if (portfolioSelect && report.portfolioName) {
         portfolioSelect.value = report.portfolioName;
         // Trigger portfolio selection to load projects
@@ -2701,17 +1191,17 @@ async function loadReportForEditing(report) {
         await new Promise(resolve => setTimeout(resolve, 300));
 
         // Then load project
-        const projectSelect = document.getElementById('projectName');
+        export const projectSelect = document.getElementById('projectName');
         if (projectSelect && report.projectName) {
             projectSelect.value = report.projectName;
         }
     }
 
     // Basic fields (excluding portfolioName and projectName as they're handled above)
-    const basicFields = ['sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber', 'testEnvironment'];
+    export const basicFields = ['sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber', 'testEnvironment'];
 
     // Evaluation fields
-    const evaluationFields = [
+    export const evaluationFields = [
         'involvementScore', 'involvementReason',
         'requirementsQualityScore', 'requirementsQualityReason',
         'qaPlanReviewScore', 'qaPlanReviewReason',
@@ -2723,7 +1213,7 @@ async function loadReportForEditing(report) {
         'lowBugsScore', 'lowBugsReason'
     ];
     basicFields.forEach(field => {
-        const element = document.getElementById(field);
+        export const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
@@ -2731,7 +1221,7 @@ async function loadReportForEditing(report) {
 
     // Load evaluation fields
     evaluationFields.forEach(field => {
-        const element = document.getElementById(field);
+        export const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
@@ -2741,36 +1231,36 @@ async function loadReportForEditing(report) {
     calculateFinalScore();
 
     // User Stories
-    const userStoryFields = ['passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories', 'blockedUserStories', 'cancelledUserStories', 'deferredUserStories', 'notTestableUserStories'];
+    export const userStoryFields = ['passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories', 'blockedUserStories', 'cancelledUserStories', 'deferredUserStories', 'notTestableUserStories'];
     userStoryFields.forEach(field => {
-        const element = document.getElementById(field.replace('UserStories', 'Stories')); // Adjust ID for HTML
+        export const element = document.getElementById(field.replace('UserStories', 'Stories')); // Adjust ID for HTML
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
     });
 
     // Test Cases
-    const testCaseFields = ['passedTestCases', 'passedWithIssuesTestCases', 'failedTestCases', 'blockedTestCases', 'cancelledTestCases', 'deferredTestCases', 'notTestableTestCases'];
+    export const testCaseFields = ['passedTestCases', 'passedWithIssuesTestCases', 'failedTestCases', 'blockedTestCases', 'cancelledTestCases', 'deferredTestCases', 'notTestableTestCases'];
     testCaseFields.forEach(field => {
-        const element = document.getElementById(field);
+        export const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
     });
 
     // Issues
-    const issueFields = ['criticalIssues', 'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredIssues'];
+    export const issueFields = ['criticalIssues', 'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredIssues'];
     issueFields.forEach(field => {
-        const element = document.getElementById(field);
+        export const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
     });
 
     // Enhancements
-    const enhancementFields = ['newEnhancements', 'implementedEnhancements', 'existsEnhancements'];
+    export const enhancementFields = ['newEnhancements', 'implementedEnhancements', 'existsEnhancements'];
     enhancementFields.forEach(field => {
-        const element = document.getElementById(field);
+        export const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
@@ -2806,19 +1296,19 @@ async function loadReportForEditing(report) {
 // Form submission handler
 // This listener should only be active on the create_report.html page
 document.addEventListener('DOMContentLoaded', () => {
-    const qaReportForm = document.getElementById('qaReportForm');
+    export const qaReportForm = document.getElementById('qaReportForm');
     if (qaReportForm) {
         qaReportForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const formData = new FormData(this);
-            const reportData = {};
+            export const formData = new FormData(this);
+            export const reportData = {};
 
             // Collect form data
             for (let [key, value] of formData.entries()) {
                 // Handle special cases for array inputs (e.g., checkboxes if any)
                 if (key.endsWith('[]')) {
-                    const arrayKey = key.slice(0, -2);
+                    export const arrayKey = key.slice(0, -2);
                     if (!reportData[arrayKey]) {
                         reportData[arrayKey] = [];
                     }
@@ -2837,7 +1327,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.qaNotesData = qaNotesData; // Add QA notes array data
             // reportData.customFields = customFieldsData; // Add custom fields data - REMOVED
 
-            const savedReport = await saveReport(reportData);
+            export const savedReport = await saveReport(reportData);
             if (savedReport) {
                 showToast('Report saved successfully!', 'success');
 
@@ -2856,27 +1346,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- Enhanced Export Functions ---
 async function exportReportAsPdf(id) {
-    const report = allReportsCache.find(r => r.id === id);
+    export const report = allReportsCache.find(r => r.id === id);
     if (!report) {
         console.error("Report not found for PDF export:", id);
         showToast('Report not found for PDF export.', 'error');
         return;
     }
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    export const { jsPDF } = window.jspdf;
+    export const doc = new jsPDF();
 
-    let yPos = 20;
+    export let yPos = 20;
 
     // Helper functions
-    const addTitle = (text, fontSize = 16) => {
+    export const addTitle = (text, fontSize = 16) => {
         doc.setFontSize(fontSize);
         doc.setFont(undefined, 'bold');
         doc.text(text, 105, yPos, { align: 'center' });
         yPos += fontSize * 0.8;
     };
 
-    const addSection = (title, fontSize = 14) => {
+    export const addSection = (title, fontSize = 14) => {
         yPos += 10;
         doc.setFontSize(fontSize);
         doc.setFont(undefined, 'bold');
@@ -2884,10 +1374,10 @@ async function exportReportAsPdf(id) {
         yPos += 10;
     };
 
-    const addText = (text, x = 10) => {
+    export const addText = (text, x = 10) => {
         doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
-        const splitText = doc.splitTextToSize(text, 190);
+        export const splitText = doc.splitTextToSize(text, 190);
         doc.text(splitText, x, yPos);
         yPos += splitText.length * 6;
     };
@@ -2936,7 +1426,7 @@ async function exportReportAsPdf(id) {
     }
 
     // Dynamic sections with tables
-    const addDataTable = (title, data, headers) => {
+    export const addDataTable = (title, data, headers) => {
         if (data && data.length > 0) {
             addSection(title);
             doc.autoTable({
@@ -2952,23 +1442,23 @@ async function exportReportAsPdf(id) {
 
     // Requests
     if (report.requestData && report.requestData.length > 0) {
-        const requestsData = report.requestData.map(req => [req.id, req.url]);
+        export const requestsData = report.requestData.map(req => [req.id, req.url]);
         addDataTable("Request Information", requestsData, ['Request ID', 'URL']);
     }
 
     // Builds
     if (report.buildData && report.buildData.length > 0) {
-        const buildsData = report.buildData.map(build => [build.requestId, build.environment, build.cycles]);
+        export const buildsData = report.buildData.map(build => [build.requestId, build.environment, build.cycles]);
         addDataTable("Build Information", buildsData, ['Request ID', 'Environment', 'Cycles']);
     }
 
     // Testers
     if (report.testerData && report.testerData.length > 0) {
-        const testersData = report.testerData.map(tester => {
-            const roles = [];
+        export const testersData = report.testerData.map(tester => {
+            export const roles = [];
             if (tester.is_automation_engineer) roles.push('Automation Engineer');
             if (tester.is_manual_engineer) roles.push('Manual Engineer');
-            const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
+            export const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
             return [tester.name, tester.email, roleText];
         });
         addDataTable("Testers", testersData, ['Tester Name', 'Email', 'Roles']);
@@ -2976,7 +1466,7 @@ async function exportReportAsPdf(id) {
 
     // Team Members
     if (report.teamMemberData && report.teamMemberData.length > 0) {
-        const teamMembersData = report.teamMemberData.map(member => [
+        export const teamMembersData = report.teamMemberData.map(member => [
             member.name,
             member.role,
             member.email
@@ -3022,17 +1512,17 @@ async function exportReportAsPdf(id) {
 }
 
 async function exportReportAsExcel(id) {
-    const report = allReportsCache.find(r => r.id === id);
+    export const report = allReportsCache.find(r => r.id === id);
     if (!report) {
         console.error("Report not found for Excel export:", id);
         showToast('Report not found for Excel export.', 'error');
         return;
     }
 
-    const workbook = XLSX.utils.book_new();
+    export const workbook = XLSX.utils.book_new();
 
     // Summary Sheet
-    const summaryData = [
+    export const summaryData = [
         ["Field", "Value"],
         ["Portfolio Name", report.portfolioName || 'N/A'],
         ["Project Name", report.projectName || 'N/A'],
@@ -3051,11 +1541,11 @@ async function exportReportAsExcel(id) {
         ["Total Enhancements", report.totalEnhancements || 0],
         ["QA Notes", report.qaNotesData && report.qaNotesData.length > 0 ? `${report.qaNotesData.length} notes` : 'N/A']
     ];
-    const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+    export const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
     XLSX.utils.book_append_sheet(workbook, wsSummary, "Summary");
 
     // User Stories Sheet
-    const userStoriesData = [
+    export const userStoriesData = [
         ["Status", "Count", "Percentage"],
         ["Passed", report.passedUserStories || 0, report.totalUserStories ? Math.round(((report.passedUserStories || 0) / report.totalUserStories) * 100) : 0],
         ["Passed with Issues", report.passedWithIssuesUserStories || 0, report.totalUserStories ? Math.round(((report.passedWithIssuesUserStories || 0) / report.totalUserStories) * 100) : 0],
@@ -3065,11 +1555,11 @@ async function exportReportAsExcel(id) {
         ["Deferred", report.deferredUserStories || 0, report.totalUserStories ? Math.round(((report.deferredUserStories || 0) / report.totalUserStories) * 100) : 0],
         ["Not Testable", report.notTestableUserStories || 0, report.totalUserStories ? Math.round(((report.notTestableUserStories || 0) / report.totalUserStories) * 100) : 0]
     ];
-    const wsUserStories = XLSX.utils.aoa_to_sheet(userStoriesData);
+    export const wsUserStories = XLSX.utils.aoa_to_sheet(userStoriesData);
     XLSX.utils.book_append_sheet(workbook, wsUserStories, "User Stories");
 
     // Test Cases Sheet
-    const testCasesData = [
+    export const testCasesData = [
         ["Status", "Count", "Percentage"],
         ["Passed", report.passedTestCases || 0, report.totalTestCases ? Math.round(((report.passedTestCases || 0) / report.totalTestCases) * 100) : 0],
         ["Passed with Issues", report.passedWithIssuesTestCases || 0, report.totalTestCases ? Math.round(((report.passedWithIssuesTestCases || 0) / report.totalTestCases) * 100) : 0],
@@ -3079,11 +1569,11 @@ async function exportReportAsExcel(id) {
         ["Deferred", report.deferredTestCases || 0, report.totalTestCases ? Math.round(((report.deferredTestCases || 0) / report.totalTestCases) * 100) : 0],
         ["Not Testable", report.notTestableTestCases || 0, report.totalTestCases ? Math.round(((report.notTestableTestCases || 0) / report.totalTestCases) * 100) : 0]
     ];
-    const wsTestCases = XLSX.utils.aoa_to_sheet(testCasesData);
+    export const wsTestCases = XLSX.utils.aoa_to_sheet(testCasesData);
     XLSX.utils.book_append_sheet(workbook, wsTestCases, "Test Cases");
 
     // Issues Sheet
-    const issuesData = [
+    export const issuesData = [
         ["Priority/Status", "Count", "Percentage"],
         ["", "", ""],
         ["PRIORITY BREAKDOWN", "", ""],
@@ -3099,21 +1589,21 @@ async function exportReportAsExcel(id) {
         ["Re-opened", report.reopenedIssues || 0, report.totalIssues ? Math.round(((report.reopenedIssues || 0) / report.totalIssues) * 100) : 0],
         ["Deferred", report.deferredIssues || 0, report.totalIssues ? Math.round(((report.deferredIssues || 0) / report.totalIssues) * 100) : 0]
     ];
-    const wsIssues = XLSX.utils.aoa_to_sheet(issuesData);
+    export const wsIssues = XLSX.utils.aoa_to_sheet(issuesData);
     XLSX.utils.book_append_sheet(workbook, wsIssues, "Issues");
 
     // Enhancements Sheet
-    const enhancementsData = [
+    export const enhancementsData = [
         ["Status", "Count", "Percentage"],
         ["New", report.newEnhancements || 0, report.totalEnhancements ? Math.round(((report.newEnhancements || 0) / report.totalEnhancements) * 100) : 0],
         ["Implemented", report.implementedEnhancements || 0, report.totalEnhancements ? Math.round(((report.implementedEnhancements || 0) / report.totalEnhancements) * 100) : 0],
         ["Exists", report.existsEnhancements || 0, report.totalEnhancements ? Math.round(((report.existsEnhancements || 0) / report.totalEnhancements) * 100) : 0]
     ];
-    const wsEnhancements = XLSX.utils.aoa_to_sheet(enhancementsData);
+    export const wsEnhancements = XLSX.utils.aoa_to_sheet(enhancementsData);
     XLSX.utils.book_append_sheet(workbook, wsEnhancements, "Enhancements");
 
     // Detailed Metrics Sheet
-    const detailedMetricsData = [
+    export const detailedMetricsData = [
         ["Metric Category", "Metric", "Value"],
         ["", "", ""],
         ["USER STORIES METRICS", "", ""],
@@ -3165,41 +1655,41 @@ async function exportReportAsExcel(id) {
         ["Created At", "DateTime", report.createdAt || 'N/A'],
         ["Updated At", "DateTime", report.updatedAt || 'N/A']
     ];
-    const wsDetailedMetrics = XLSX.utils.aoa_to_sheet(detailedMetricsData);
+    export const wsDetailedMetrics = XLSX.utils.aoa_to_sheet(detailedMetricsData);
     XLSX.utils.book_append_sheet(workbook, wsDetailedMetrics, "Detailed Metrics");
 
     // Dynamic Data Sheets
     if (report.requestData && report.requestData.length > 0) {
-        const requestHeaders = ["Request ID", "URL"];
-        const requestsSheetData = report.requestData.map(req => [req.id, req.url]);
-        const wsRequests = XLSX.utils.aoa_to_sheet([requestHeaders, ...requestsSheetData]);
+        export const requestHeaders = ["Request ID", "URL"];
+        export const requestsSheetData = report.requestData.map(req => [req.id, req.url]);
+        export const wsRequests = XLSX.utils.aoa_to_sheet([requestHeaders, ...requestsSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsRequests, "Requests");
     }
 
     if (report.buildData && report.buildData.length > 0) {
-        const buildHeaders = ["Request ID", "URL", "Environment", "Cycles"];
-        const buildsSheetData = report.buildData.map(build => [build.requestId, build.requestUrl, build.environment, build.cycles]);
-        const wsBuilds = XLSX.utils.aoa_to_sheet([buildHeaders, ...buildsSheetData]);
+        export const buildHeaders = ["Request ID", "URL", "Environment", "Cycles"];
+        export const buildsSheetData = report.buildData.map(build => [build.requestId, build.requestUrl, build.environment, build.cycles]);
+        export const wsBuilds = XLSX.utils.aoa_to_sheet([buildHeaders, ...buildsSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsBuilds, "Builds");
     }
 
     if (report.testerData && report.testerData.length > 0) {
-        const testerHeaders = ["Tester Name", "Email", "Roles"];
-        const testersSheetData = report.testerData.map(tester => {
-            const roles = [];
+        export const testerHeaders = ["Tester Name", "Email", "Roles"];
+        export const testersSheetData = report.testerData.map(tester => {
+            export const roles = [];
             if (tester.is_automation_engineer) roles.push('Automation Engineer');
             if (tester.is_manual_engineer) roles.push('Manual Engineer');
-            const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
+            export const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
             return [tester.name, tester.email, roleText];
         });
-        const wsTesters = XLSX.utils.aoa_to_sheet([testerHeaders, ...testersSheetData]);
+        export const wsTesters = XLSX.utils.aoa_to_sheet([testerHeaders, ...testersSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsTesters, "Testers");
     }
 
     if (report.teamMemberData && report.teamMemberData.length > 0) {
-        const teamMemberHeaders = ["Name", "Email", "Role"];
-        const teamMembersSheetData = report.teamMemberData.map(member => [member.name, member.email, member.role]);
-        const wsTeamMembers = XLSX.utils.aoa_to_sheet([teamMemberHeaders, ...teamMembersSheetData]);
+        export const teamMemberHeaders = ["Name", "Email", "Role"];
+        export const teamMembersSheetData = report.teamMemberData.map(member => [member.name, member.email, member.role]);
+        export const wsTeamMembers = XLSX.utils.aoa_to_sheet([teamMemberHeaders, ...teamMembersSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsTeamMembers, "Team Members");
     }
     XLSX.writeFile(workbook, `QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.xlsx`);
@@ -3207,9 +1697,9 @@ async function exportReportAsExcel(id) {
 }
 
 // --- Modal & Utility Functions ---
-function showModal(modalId) {
+export function showModal(modalId) {
     console.log('showModal called with modalId:', modalId);
-    const modal = document.getElementById(modalId);
+    export const modal = document.getElementById(modalId);
     console.log('Modal element found:', modal);
     if (modal) {
         modal.style.display = 'flex';
@@ -3219,12 +1709,12 @@ function showModal(modalId) {
     }
 }
 
-function closeModal(modalId) {
+export function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
     // Clear form inputs
-    const modal = document.getElementById(modalId);
+    export const modal = document.getElementById(modalId);
     if (modal) { // Check if modal exists before querying
-        const inputs = modal.querySelectorAll('input, textarea, select');
+        export const inputs = modal.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
             if (input.type === 'checkbox' || input.type === 'radio') {
                 input.checked = false;
@@ -3235,25 +1725,25 @@ function closeModal(modalId) {
     }
 }
 
-function showAddPortfolioModal() {
+export function showAddPortfolioModal() {
     showModal('addPortfolioModal');
 }
 
-function showAddProjectModal() {
+export function showAddProjectModal() {
     showModal('addProjectModal');
 }
 
 async function addPortfolio() {
-    const name = document.getElementById('newPortfolioName').value.trim();
+    export const name = document.getElementById('newPortfolioName').value.trim();
     if (name) {
         try {
-            const response = await fetch('/api/portfolios', {
+            export const response = await fetch('/api/portfolios', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: name })
             });
             if (response.ok) {
-                const newPortfolio = await response.json();
+                export const newPortfolio = await response.json();
                 showToast('Portfolio added successfully! Now please add a project to this portfolio.', 'success');
                 invalidateAllCaches(); // Clear caches since data changed
 
@@ -3261,14 +1751,14 @@ async function addPortfolio() {
                 await loadPortfoliosOnly();
 
                 // Select the newly created portfolio
-                const portfolioSelect = document.getElementById('portfolioName');
+                export const portfolioSelect = document.getElementById('portfolioName');
                 if (portfolioSelect) {
                     // Find and select the new portfolio option
-                    const portfolioValue = name.toLowerCase().replace(/\s+/g, '-');
+                    export const portfolioValue = name.toLowerCase().replace(/\s+/g, '-');
                     portfolioSelect.value = portfolioValue;
 
                     // Trigger the change event to load projects for this portfolio
-                    const changeEvent = new Event('change', { bubbles: true });
+                    export const changeEvent = new Event('change', { bubbles: true });
                     portfolioSelect.dispatchEvent(changeEvent);
                 }
 
@@ -3281,7 +1771,7 @@ async function addPortfolio() {
                 }, 500);
 
             } else {
-                const error = await response.json();
+                export const error = await response.json();
                 showToast('Error adding portfolio: ' + (error.error || 'Unknown error'), 'error');
             }
         } catch (error) {
@@ -3294,26 +1784,26 @@ async function addPortfolio() {
 }
 
 async function addProject() {
-    const name = document.getElementById('newProjectName').value.trim();
-    const portfolioSelect = document.getElementById('portfolioName');
+    export const name = document.getElementById('newProjectName').value.trim();
+    export const portfolioSelect = document.getElementById('portfolioName');
 
     if (!portfolioSelect.value) {
         showToast('Please select a portfolio first.', 'warning');
         return;
     }
 
-    const selectedPortfolioOption = portfolioSelect.options[portfolioSelect.selectedIndex];
-    const actualPortfolioId = selectedPortfolioOption ? selectedPortfolioOption.dataset.id : null;
+    export const selectedPortfolioOption = portfolioSelect.options[portfolioSelect.selectedIndex];
+    export const actualPortfolioId = selectedPortfolioOption ? selectedPortfolioOption.dataset.id : null;
 
     if (name && actualPortfolioId) {
         try {
-            const response = await fetch('/api/projects', {
+            export const response = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: name, portfolio_id: actualPortfolioId })
             });
             if (response.ok) {
-                const newProject = await response.json();
+                export const newProject = await response.json();
                 showToast('Project added successfully!', 'success');
                 invalidateAllCaches(); // Clear caches since data changed
 
@@ -3321,19 +1811,19 @@ async function addProject() {
                 await loadProjectsForPortfolio(actualPortfolioId);
 
                 // Select the newly created project
-                const projectSelect = document.getElementById('projectName');
+                export const projectSelect = document.getElementById('projectName');
                 if (projectSelect) {
-                    const projectValue = name.toLowerCase().replace(/\s+/g, '-');
+                    export const projectValue = name.toLowerCase().replace(/\s+/g, '-');
                     projectSelect.value = projectValue;
 
                     // Trigger the change event to enable remaining fields
-                    const changeEvent = new Event('change', { bubbles: true });
+                    export const changeEvent = new Event('change', { bubbles: true });
                     projectSelect.dispatchEvent(changeEvent);
                 }
 
                 closeModal('addProjectModal');
             } else {
-                const error = await response.json();
+                export const error = await response.json();
                 showToast('Error adding project: ' + (error.error || 'Unknown error'), 'error');
             }
         } catch (error) {
@@ -3345,21 +1835,21 @@ async function addProject() {
     }
 }
 
-function getCurrentDate() {
-    const today = new Date();
+export function getCurrentDate() {
+    export const today = new Date();
     return `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
 }
 
-function generateDefaultReportName() {
-    const portfolioSelect = document.getElementById('portfolioName');
-    const projectSelect = document.getElementById('projectName');
-    const sprintNumber = document.getElementById('sprintNumber');
-    const cycleNumber = document.getElementById('cycleNumber');
+export function generateDefaultReportName() {
+    export const portfolioSelect = document.getElementById('portfolioName');
+    export const projectSelect = document.getElementById('projectName');
+    export const sprintNumber = document.getElementById('sprintNumber');
+    export const cycleNumber = document.getElementById('cycleNumber');
 
     if (portfolioSelect?.value && projectSelect?.value && sprintNumber?.value && cycleNumber?.value) {
-        const portfolio = portfolioSelect.options[portfolioSelect.selectedIndex].text;
-        const project = projectSelect.options[projectSelect.selectedIndex].text;
-        const today = getCurrentDate();
+        export const portfolio = portfolioSelect.options[portfolioSelect.selectedIndex].text;
+        export const project = projectSelect.options[projectSelect.selectedIndex].text;
+        export const today = getCurrentDate();
 
         return `Sprint-${portfolio}-${project}-${today}-${sprintNumber.value}-${cycleNumber.value}`;
     }
@@ -3368,9 +1858,9 @@ function generateDefaultReportName() {
 }
 
 // Evaluation Section Functions
-function toggleEvaluationCriteria() {
-    const content = document.getElementById('criteriaContent');
-    const icon = document.getElementById('criteriaToggleIcon');
+export function toggleEvaluationCriteria() {
+    export const content = document.getElementById('criteriaContent');
+    export const icon = document.getElementById('criteriaToggleIcon');
 
     if (content.classList.contains('expanded')) {
         content.classList.remove('expanded');
@@ -3381,8 +1871,8 @@ function toggleEvaluationCriteria() {
     }
 }
 
-function calculateFinalScore() {
-    const scoreFields = [
+export function calculateFinalScore() {
+    export const scoreFields = [
         'involvementScore',
         'requirementsQualityScore',
         'qaPlanReviewScore',
@@ -3393,9 +1883,9 @@ function calculateFinalScore() {
         'lowBugsScore'
     ];
 
-    let totalScore = 0;
+    export let totalScore = 0;
     scoreFields.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
+        export const field = document.getElementById(fieldId);
         if (field && field.value) {
             totalScore += parseInt(field.value) || 0;
         }
@@ -3407,11 +1897,11 @@ function calculateFinalScore() {
     updateEvaluationChart();
 }
 
-function updateEvaluationChart() {
-    const ctx = document.getElementById('evaluationChart');
+export function updateEvaluationChart() {
+    export const ctx = document.getElementById('evaluationChart');
     if (!ctx) return;
 
-    const scores = {
+    export const scores = {
         'Involvement': parseInt(document.getElementById('involvementScore')?.value) || 0,
         'Requirements Quality': parseInt(document.getElementById('requirementsQualityScore')?.value) || 0,
         'QA Plan Review': parseInt(document.getElementById('qaPlanReviewScore')?.value) || 0,
@@ -3423,7 +1913,7 @@ function updateEvaluationChart() {
         'Low Bugs': parseInt(document.getElementById('lowBugsScore')?.value) || 0
     };
 
-    const maxScores = {
+    export const maxScores = {
         'Involvement': 20,
         'Requirements Quality': 10,
         'QA Plan Review': 5,
@@ -3435,11 +1925,11 @@ function updateEvaluationChart() {
         'Low Bugs': 5
     };
 
-    const labels = Object.keys(scores);
-    const data = Object.values(scores);
-    const maxData = Object.values(maxScores);
+    export const labels = Object.keys(scores);
+    export const data = Object.values(scores);
+    export const maxData = Object.values(maxScores);
 
-    const colors = [
+    export const colors = [
         '#3b82f6', '#ef4444', '#10b981', '#f59e0b',
         '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899'
     ];
@@ -3484,9 +1974,9 @@ function updateEvaluationChart() {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            const label = context.label;
-                            const value = context.parsed;
-                            const maxValue = maxData[context.dataIndex];
+                            export const label = context.label;
+                            export const value = context.parsed;
+                            export const maxValue = maxData[context.dataIndex];
                             return `${label}: ${value}/${maxValue}`;
                         }
                     }
@@ -3496,16 +1986,16 @@ function updateEvaluationChart() {
     });
 }
 
-function formatDate(dateString) {
+export function formatDate(dateString) {
     if (!dateString) return 'N/A';
     // Handles both 'dd-mm-yyyy' and ISO strings
-    const date = new Date(dateString.includes('-') && dateString.length === 10 ?
+    export const date = new Date(dateString.includes('-') && dateString.length === 10 ?
         dateString.split('-').reverse().join('-') : dateString);
     return isNaN(date) ? 'Invalid Date' : date.toLocaleDateString('en-GB');
 }
 
-function getStatusClass(status) {
-    const map = {
+export function getStatusClass(status) {
+    export const map = {
         'passed': 'completed',
         'passed-with-issues': 'in-progress',
         'failed': 'pending',
@@ -3517,8 +2007,8 @@ function getStatusClass(status) {
     return map[status] || 'pending';
 }
 
-function getStatusText(status) {
-    const map = {
+export function getStatusText(status) {
+    export const map = {
         'passed': 'Passed',
         'passed-with-issues': 'Passed w/ Issues',
         'failed': 'Failed',
@@ -3533,7 +2023,7 @@ function getStatusText(status) {
 // --- Event Listeners and Window Functions ---
 // Close modal when clicking outside
 window.onclick = function (event) {
-    const modals = document.querySelectorAll('.modal');
+    export const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         if (event.target === modal) {
             modal.style.display = 'none';
@@ -3548,10 +2038,10 @@ window.addQANoteField = addQANoteField;
 
 // Date format validation and auto-generate report name
 document.addEventListener('DOMContentLoaded', function () {
-    const reportDateField = document.getElementById('reportDate');
+    export const reportDateField = document.getElementById('reportDate');
     if (reportDateField) {
         reportDateField.addEventListener('input', function (e) {
-            const datePattern = /^\d{2}-\d{2}-\d{4}$/;
+            export const datePattern = /^\d{2}-\d{2}-\d{4}$/;
             if (this.value && !datePattern.test(this.value)) {
                 this.setCustomValidity('Please enter date in dd-mm-yyyy format');
             } else {
@@ -3561,14 +2051,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Add event listeners for auto-generating report name
-    const fieldsForReportName = ['portfolioName', 'projectName', 'sprintNumber', 'cycleNumber'];
+    export const fieldsForReportName = ['portfolioName', 'projectName', 'sprintNumber', 'cycleNumber'];
     fieldsForReportName.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
+        export const field = document.getElementById(fieldId);
         if (field) {
             field.addEventListener('change', function () {
-                const reportNameField = document.getElementById('reportName');
+                export const reportNameField = document.getElementById('reportName');
                 if (reportNameField && !reportNameField.value.trim()) {
-                    const defaultName = generateDefaultReportName();
+                    export const defaultName = generateDefaultReportName();
                     if (defaultName) {
                         reportNameField.placeholder = defaultName;
                     }
@@ -3578,13 +2068,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-function toggleWeightColumn() {
-    const columns = document.querySelectorAll('.weight-column');
-    const button = document.getElementById('toggleWeightBtn');
+export function toggleWeightColumn() {
+    export const columns = document.querySelectorAll('.weight-column');
+    export const button = document.getElementById('toggleWeightBtn');
 
     if (!columns.length || !button) return;
 
-    const isVisible = columns[0].style.display !== 'none';
+    export const isVisible = columns[0].style.display !== 'none';
 
     columns.forEach(col => {
         col.style.display = isVisible ? 'none' : 'table-cell';
@@ -3593,13 +2083,13 @@ function toggleWeightColumn() {
     button.textContent = isVisible ? 'Show Weight' : 'Hide Weight';
 }
 
-function toggleProjectReasonColumn() {
-    const columns = document.querySelectorAll('.project-reason-column');
-    const button = document.getElementById('toggleProjectReasonBtn');
+export function toggleProjectReasonColumn() {
+    export const columns = document.querySelectorAll('.project-reason-column');
+    export const button = document.getElementById('toggleProjectReasonBtn');
 
     if (!columns.length || !button) return;
 
-    const isVisible = columns[0].style.display !== 'none';
+    export const isVisible = columns[0].style.display !== 'none';
 
     columns.forEach(col => {
         col.style.display = isVisible ? 'none' : 'table-cell';
@@ -3608,7 +2098,7 @@ function toggleProjectReasonColumn() {
     button.textContent = isVisible ? 'Show Reason' : 'Hide Reason';
 }
 
-let teamMemberData = [];
+export let teamMemberData = [];
 
 async function showTeamMemberModal() {
     await loadExistingTeamMembers();
@@ -3618,15 +2108,15 @@ async function showTeamMemberModal() {
 
 async function loadExistingTeamMembers() {
     try {
-        const response = await fetch('/api/team-members');
+        export const response = await fetch('/api/team-members');
         if (response.ok) {
-            const teamMembers = await response.json();
-            const select = document.getElementById('existingTeamMemberSelect');
+            export const teamMembers = await response.json();
+            export const select = document.getElementById('existingTeamMemberSelect');
 
             select.innerHTML = '<option value="">-- Select from existing team members --</option>';
 
             teamMembers.forEach(member => {
-                const option = document.createElement('option');
+                export const option = document.createElement('option');
                 option.value = JSON.stringify(member); // Store full object for easy retrieval
                 option.textContent = `${member.name} - ${member.role} (${member.email})`;
                 select.appendChild(option);
@@ -3638,8 +2128,8 @@ async function loadExistingTeamMembers() {
     }
 }
 
-function handleTeamMemberSelection() {
-    const select = document.getElementById('existingTeamMemberSelect');
+export function handleTeamMemberSelection() {
+    export const select = document.getElementById('existingTeamMemberSelect');
 
     // Since we simplified the modal to select-only, we don't need to handle role field
     if (!select) {
@@ -3650,8 +2140,8 @@ function handleTeamMemberSelection() {
     // The function is called but doesn't need to do anything since we only have select functionality
 }
 
-function clearTeamMemberForm() {
-    const existingSelect = document.getElementById('existingTeamMemberSelect');
+export function clearTeamMemberForm() {
+    export const existingSelect = document.getElementById('existingTeamMemberSelect');
 
     // Only clear the select dropdown since we simplified to select-only
     if (existingSelect) {
@@ -3660,7 +2150,7 @@ function clearTeamMemberForm() {
 }
 
 async function addSelectedTeamMember() {
-    const existingSelect = document.getElementById('existingTeamMemberSelect');
+    export const existingSelect = document.getElementById('existingTeamMemberSelect');
 
     if (!existingSelect) {
         console.error('Team member select element not found');
@@ -3672,7 +2162,7 @@ async function addSelectedTeamMember() {
         return;
     }
 
-    let memberToAdd = null;
+    export let memberToAdd = null;
 
     try {
         memberToAdd = JSON.parse(existingSelect.value);
@@ -3683,7 +2173,7 @@ async function addSelectedTeamMember() {
     }
 
     if (memberToAdd) {
-        const alreadyAdded = teamMemberData.some(tm => tm.email === memberToAdd.email);
+        export const alreadyAdded = teamMemberData.some(tm => tm.email === memberToAdd.email);
         if (alreadyAdded) {
             showToast('This team member is already added to the report', 'warning');
             return;
@@ -3702,8 +2192,8 @@ async function addSelectedTeamMember() {
     }
 }
 
-function renderTeamMemberList() {
-    const container = document.getElementById('teamMemberList');
+export function renderTeamMemberList() {
+    export const container = document.getElementById('teamMemberList');
     if (!container) return;
 
     if (teamMemberData.length === 0) {
@@ -3723,7 +2213,7 @@ function renderTeamMemberList() {
     `).join('');
 }
 
-function removeTeamMember(index) {
+export function removeTeamMember(index) {
     teamMemberData.splice(index, 1);
     renderTeamMemberList();
     showToast('Team member removed', 'info');
@@ -3733,20 +2223,20 @@ function removeTeamMember(index) {
 
 async function loadExistingTesters() {
     try {
-        const response = await fetch('/api/testers');
+        export const response = await fetch('/api/testers');
         if (response.ok) {
-            const testers = await response.json();
-            const select = document.getElementById('existingTesterSelect');
+            export const testers = await response.json();
+            export const select = document.getElementById('existingTesterSelect');
 
             select.innerHTML = '<option value="">-- Select from existing testers --</option>';
 
             testers.forEach(tester => {
-                const option = document.createElement('option');
+                export const option = document.createElement('option');
                 option.value = JSON.stringify(tester); // Store full object for easy retrieval
-                const roles = [];
+                export const roles = [];
                 if (tester.is_automation_engineer) roles.push('Automation');
                 if (tester.is_manual_engineer) roles.push('Manual');
-                const roleText = roles.length > 0 ? ` - ${roles.join(', ')}` : '';
+                export const roleText = roles.length > 0 ? ` - ${roles.join(', ')}` : '';
                 option.textContent = `${tester.name} (${tester.email})${roleText}`;
                 select.appendChild(option);
             });
@@ -3757,8 +2247,8 @@ async function loadExistingTesters() {
     }
 }
 
-function handleTesterSelection() {
-    const select = document.getElementById('existingTesterSelect');
+export function handleTesterSelection() {
+    export const select = document.getElementById('existingTesterSelect');
 
     // Since we simplified the modal to select-only, we don't need to handle add fields
     if (!select) {
@@ -3769,8 +2259,8 @@ function handleTesterSelection() {
     // The function is called but doesn't need to do anything since we only have select functionality
 }
 
-function clearTesterForm() {
-    const existingTesterSelect = document.getElementById('existingTesterSelect');
+export function clearTesterForm() {
+    export const existingTesterSelect = document.getElementById('existingTesterSelect');
 
     // Only clear the select dropdown since we simplified to select-only
     if (existingTesterSelect) {
@@ -3779,7 +2269,7 @@ function clearTesterForm() {
 }
 
 async function addSelectedTester() {
-    const existingTesterSelect = document.getElementById('existingTesterSelect');
+    export const existingTesterSelect = document.getElementById('existingTesterSelect');
 
     if (!existingTesterSelect) {
         console.error('Tester select element not found');
@@ -3791,7 +2281,7 @@ async function addSelectedTester() {
         return;
     }
 
-    let testerToAdd = null;
+    export let testerToAdd = null;
 
     try {
         testerToAdd = JSON.parse(existingTesterSelect.value);
@@ -3802,7 +2292,7 @@ async function addSelectedTester() {
     }
 
     if (testerToAdd) {
-        const alreadyAdded = testerData.some(t => t.email === testerToAdd.email);
+        export const alreadyAdded = testerData.some(t => t.email === testerToAdd.email);
         if (alreadyAdded) {
             showToast('This tester is already added to the report', 'warning');
             return;
@@ -3827,18 +2317,18 @@ async function addSelectedTester() {
 // This is a placeholder function for removing custom QA fields
 
 
-let qaNotesData = [];
+export let qaNotesData = [];
 
-function showAddQANoteModal() {
+export function showAddQANoteModal() {
     showModal('addQANoteModal');
-    const noteTextArea = document.getElementById('newQANoteText');
+    export const noteTextArea = document.getElementById('newQANoteText');
     if (noteTextArea) {
         noteTextArea.value = '';
     }
 }
 
-function addQANote() {
-    const noteText = document.getElementById('newQANoteText').value.trim();
+export function addQANote() {
+    export const noteText = document.getElementById('newQANoteText').value.trim();
     if (noteText) {
         qaNotesData.push({ note: noteText });
         renderQANotesList();
@@ -3851,7 +2341,7 @@ function addQANote() {
 }
 
 // Functions for custom QA Note Fields
-function showAddQANoteFieldModal() {
+export function showAddQANoteFieldModal() {
     showModal('addQANoteFieldModal');
     // Clear the form fields when opening the modal
     document.getElementById('qaFieldName').value = '';
@@ -3860,15 +2350,15 @@ function showAddQANoteFieldModal() {
 
 // This function is a placeholder. In a real scenario, it might populate a dropdown
 // with predefined field names or allow editing existing ones.
-function updateQAFieldOptions() {
+export function updateQAFieldOptions() {
     // For now, this function doesn't do anything as there are no predefined options.
     // It's kept to fulfill the request.
     console.log("updateQAFieldOptions called. No predefined options to update.");
 }
 
-function addQANoteField() {
-    const fieldName = document.getElementById('qaFieldName').value.trim();
-    const fieldValue = document.getElementById('qaFieldValue').value.trim();
+export function addQANoteField() {
+    export const fieldName = document.getElementById('qaFieldName').value.trim();
+    export const fieldValue = document.getElementById('qaFieldValue').value.trim();
 
     if (fieldName && fieldValue) {
         qaNoteFieldsData.push({ name: fieldName, value: fieldValue });
@@ -3880,8 +2370,8 @@ function addQANoteField() {
     }
 }
 
-function renderQANoteFieldsList() {
-    const container = document.getElementById('qaNoteFieldsList');
+export function renderQANoteFieldsList() {
+    export const container = document.getElementById('qaNoteFieldsList');
     if (!container) return;
 
     if (qaNoteFieldsData.length === 0) {
@@ -3899,21 +2389,21 @@ function renderQANoteFieldsList() {
     `).join('');
 }
 
-function removeQANoteField(index) {
+export function removeQANoteField(index) {
     qaNoteFieldsData.splice(index, 1);
     renderQANoteFieldsList();
     showToast('QA Note Field removed', 'info');
 }
 
 
-function removeQANote(index) {
+export function removeQANote(index) {
     qaNotesData.splice(index, 1);
     renderQANotesList();
     updateQANotesCount();
 }
 
-function renderQANotesList() {
-    const container = document.getElementById('qaNotesList');
+export function renderQANotesList() {
+    export const container = document.getElementById('qaNotesList');
     if (!container) return;
 
     if (qaNotesData.length === 0) {
@@ -3928,8 +2418,8 @@ function renderQANotesList() {
     }
 }
 
-function updateQANotesCount() {
-    const countField = document.getElementById('qaNotesMetric');
+export function updateQANotesCount() {
+    export const countField = document.getElementById('qaNotesMetric');
     if (countField) {
         countField.value = qaNotesData.length;
     }
@@ -3937,8 +2427,8 @@ function updateQANotesCount() {
 
 // --- Page Management & Navigation (Simplified for multi-page app) ---
 
-function renderQANotesFields() {
-    const container = document.getElementById('qaNotesFieldsList');
+export function renderQANotesFields() {
+    export const container = document.getElementById('qaNotesFieldsList');
     if (!container) return;
 
     // Find the default general notes field (if it exists and is not a custom field)
@@ -3946,20 +2436,20 @@ function renderQANotesFields() {
     // This function will only render *additional* custom QA fields.
 
     // Remove existing custom QA fields before re-rendering
-    const existingCustomFields = container.querySelectorAll('.qa-field-item');
+    export const existingCustomFields = container.querySelectorAll('.qa-field-item');
     existingCustomFields.forEach(field => field.remove());
 
     // Add new custom fields
     qaNotesFields.forEach(field => {
-        const fieldHTML = renderQANoteFieldHTML(field);
+        export const fieldHTML = renderQANoteFieldHTML(field);
         // Append to the container. If you want it after a specific element, you'd need to find that element.
         // For now, just append to the end of the list.
         container.insertAdjacentHTML('beforeend', fieldHTML);
     });
 }
 
-function renderQANoteFieldHTML(field) {
-    let inputHTML = '';
+export function renderQANoteFieldHTML(field) {
+    export let inputHTML = '';
 
     switch (field.type) {
         case 'input':
@@ -4017,14 +2507,14 @@ function renderQANoteFieldHTML(field) {
     `.trim();
 }
 
-function removeQANoteField(fieldId) {
+export function removeQANoteField(fieldId) {
     qaNotesFields = qaNotesFields.filter(field => field.id !== fieldId);
     renderQANotesFields();
     showToast('QA note field removed', 'info');
 }
 
 async function populatePortfolioDropdownForCreateReport(portfolios) {
-    const select = document.getElementById('portfolioName');
+    export const select = document.getElementById('portfolioName');
     if (!select) {
         console.error('Portfolio select element not found!');
         return;
@@ -4037,7 +2527,7 @@ async function populatePortfolioDropdownForCreateReport(portfolios) {
     // Add dynamic portfolios from database
     if (portfolios && Array.isArray(portfolios) && portfolios.length > 0) {
         portfolios.forEach(portfolio => {
-            const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
+            export const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
             // Store the actual ID in a data attribute
             select.innerHTML += `<option value="${value}" data-id="${portfolio.id}">${portfolio.name}</option>`;
         });
@@ -4046,8 +2536,8 @@ async function populatePortfolioDropdownForCreateReport(portfolios) {
 
 // Function called when portfolio is selected
 async function onPortfolioSelection() {
-    const portfolioSelect = document.getElementById('portfolioName');
-    const projectSelect = document.getElementById('projectName');
+    export const portfolioSelect = document.getElementById('portfolioName');
+    export const projectSelect = document.getElementById('projectName');
 
     if (!portfolioSelect.value) {
         // Clear projects and disable
@@ -4060,21 +2550,21 @@ async function onPortfolioSelection() {
     projectSelect.innerHTML = '<option value="">Loading projects...</option>';
 
     try {
-        let projects = [];
+        export let projects = [];
 
         if (portfolioSelect.value === 'no-portfolio') {
             // Load projects without portfolio
-            const response = await fetch('/api/projects/without-portfolio');
+            export const response = await fetch('/api/projects/without-portfolio');
             if (response.ok) {
                 projects = await response.json();
             }
         } else {
             // Get portfolio ID from data attribute
-            const selectedOption = portfolioSelect.options[portfolioSelect.selectedIndex];
-            const portfolioId = selectedOption.getAttribute('data-id');
+            export const selectedOption = portfolioSelect.options[portfolioSelect.selectedIndex];
+            export const portfolioId = selectedOption.getAttribute('data-id');
 
             if (portfolioId) {
-                const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
+                export const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
                 if (response.ok) {
                     projects = await response.json();
                 }
@@ -4098,7 +2588,7 @@ async function onPortfolioSelection() {
 }
 
 async function populateProjectDropdown(projects) {
-    const select = document.getElementById('projectName');
+    export const select = document.getElementById('projectName');
     if (!select) return;
 
     // Keep existing static options (if any, from your original HTML)
@@ -4108,18 +2598,18 @@ async function populateProjectDropdown(projects) {
 
     // Add dynamic projects from database
     projects.forEach(project => {
-        const value = project.name.toLowerCase().replace(/\s+/g, '-');
+        export const value = project.name.toLowerCase().replace(/\s+/g, '-');
         // Store the actual ID and portfolio ID in data attributes
         select.innerHTML += `<option value="${value}" data-id="${project.id}" data-portfolio-id="${project.portfolio_id}">${project.name}</option>`;
     });
 }
 
 // Caching for form dropdown data
-let formDataCache = null;
-let formDataCacheTime = null;
+export let formDataCache = null;
+export let formDataCacheTime = null;
 
 // Cache invalidation function
-function invalidateAllCaches() {
+export function invalidateAllCaches() {
     formDataCache = null;
     formDataCacheTime = null;
     dashboardStatsCache = null;
@@ -4127,13 +2617,13 @@ function invalidateAllCaches() {
 }
 
 // Global variable to store latest project data for auto-loading
-let latestProjectData = null;
+export let latestProjectData = null;
 
 // Function called when project is selected
 async function onProjectSelection() {
     console.log('onProjectSelection called');
-    const portfolioSelect = document.getElementById('portfolioName');
-    const projectSelect = document.getElementById('projectName');
+    export const portfolioSelect = document.getElementById('portfolioName');
+    export const projectSelect = document.getElementById('projectName');
 
     console.log('Portfolio value:', portfolioSelect?.value);
     console.log('Project value:', projectSelect?.value);
@@ -4143,7 +2633,7 @@ async function onProjectSelection() {
         return;
     }
 
-    let portfolioName, projectName;
+    export let portfolioName, projectName;
 
     // Handle "no-portfolio" case
     if (portfolioSelect.value === 'no-portfolio') {
@@ -4156,17 +2646,17 @@ async function onProjectSelection() {
     console.log('Fetching data for:', portfolioName, '/', projectName);
 
     // Convert to lowercase for case-insensitive matching
-    const portfolioNameLower = portfolioName.toLowerCase();
-    const projectNameLower = projectName.toLowerCase();
+    export const portfolioNameLower = portfolioName.toLowerCase();
+    export const projectNameLower = projectName.toLowerCase();
 
     console.log('URL will be:', `/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
 
     try {
-        const response = await fetch(`/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
+        export const response = await fetch(`/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
         console.log('API response status:', response.status);
 
         if (response.ok) {
-            const data = await response.json();
+            export const data = await response.json();
             console.log('API response data:', data);
 
             if (data.hasData) {
@@ -4175,7 +2665,7 @@ async function onProjectSelection() {
                 latestProjectData = data;
 
                 // Automatically load testers when project is selected
-                const latestData = data.latestData;
+                export const latestData = data.latestData;
                 if (latestData.testerData && latestData.testerData.length > 0) {
                     console.log('Auto-loading testers for selected project:', latestData.testerData);
                     testerData = [...latestData.testerData];
@@ -4198,10 +2688,10 @@ async function onProjectSelection() {
 }
 
 // Function to show the auto-load modal with data preview
-function showAutoLoadModal(data) {
+export function showAutoLoadModal(data) {
     console.log('showAutoLoadModal called with data:', data);
-    const modal = document.getElementById('autoLoadDataModal');
-    const preview = document.getElementById('dataPreview');
+    export const modal = document.getElementById('autoLoadDataModal');
+    export const preview = document.getElementById('dataPreview');
 
     console.log('Modal element:', modal);
     console.log('Preview element:', preview);
@@ -4217,10 +2707,10 @@ function showAutoLoadModal(data) {
     }
 
     // Build data preview
-    const latestData = data.latestData;
-    const suggestedValues = data.suggestedValues;
+    export const latestData = data.latestData;
+    export const suggestedValues = data.suggestedValues;
 
-    let previewHTML = `
+    export let previewHTML = `
         <h4>Latest Report Data:</h4>
         <div class="data-preview-item">
             <span class="data-preview-label">Sprint Number:</span>
@@ -4256,17 +2746,17 @@ function showAutoLoadModal(data) {
 }
 
 // Function to load selected data
-function loadSelectedData() {
+export function loadSelectedData() {
     if (!latestProjectData) return;
 
-    const latestData = latestProjectData.latestData;
-    const suggestedValues = latestProjectData.suggestedValues;
+    export const latestData = latestProjectData.latestData;
+    export const suggestedValues = latestProjectData.suggestedValues;
 
     // Check which data types to load
-    const loadSprintData = document.getElementById('loadSprintData').checked;
-    const loadReportData = document.getElementById('loadReportData').checked;
-    const loadTesters = document.getElementById('loadTesters').checked;
-    const loadTeamMembers = document.getElementById('loadTeamMembers').checked;
+    export const loadSprintData = document.getElementById('loadSprintData').checked;
+    export const loadReportData = document.getElementById('loadReportData').checked;
+    export const loadTesters = document.getElementById('loadTesters').checked;
+    export const loadTeamMembers = document.getElementById('loadTeamMembers').checked;
 
     // Load Sprint & Release Information with the new logic
     if (loadSprintData) {
@@ -4279,8 +2769,8 @@ function loadSelectedData() {
     if (loadReportData) {
         document.getElementById('reportVersion').value = latestData.reportVersion;
         // Set today's date
-        const today = new Date();
-        const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+        export const today = new Date();
+        export const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
         document.getElementById('reportDate').value = formattedDate;
     }
 
@@ -4305,9 +2795,9 @@ function loadSelectedData() {
 }
 
 // Function to set default values for new projects
-function setDefaultValues(defaults) {
-    const today = new Date();
-    const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+export function setDefaultValues(defaults) {
+    export const today = new Date();
+    export const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
 
     if (defaults) {
         document.getElementById('sprintNumber').value = defaults.sprintNumber;
@@ -4342,9 +2832,9 @@ async function loadFormDropdownData() {
 // Load only portfolios for fast initial loading
 async function loadPortfoliosOnly() {
     try {
-        const response = await fetch('/api/portfolios');
+        export const response = await fetch('/api/portfolios');
         if (response.ok) {
-            const portfolios = await response.json();
+            export const portfolios = await response.json();
             populatePortfolioDropdownForCreateReport(portfolios);
         } else {
             throw new Error('Failed to load portfolios');
@@ -4359,9 +2849,9 @@ async function loadPortfoliosOnly() {
 async function loadProjectsForPortfolio(portfolioId) {
     try {
         console.log('Loading projects for portfolio:', portfolioId);
-        const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
+        export const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
         if (response.ok) {
-            const projects = await response.json();
+            export const projects = await response.json();
             populateProjectDropdownFiltered(projects);
             enableProjectField();
         } else {
@@ -4374,14 +2864,14 @@ async function loadProjectsForPortfolio(portfolioId) {
 }
 
 // Disable all form fields except Portfolio Name
-function disableFormFieldsExceptPortfolio() {
-    const fieldsToDisable = [
+export function disableFormFieldsExceptPortfolio() {
+    export const fieldsToDisable = [
         'projectName', 'sprintNumber', 'cycleNumber', 'releaseNumber',
         'reportName', 'reportVersion', 'reportDate'
     ];
 
     fieldsToDisable.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
+        export const field = document.getElementById(fieldId);
         if (field) {
             field.disabled = true;
             field.style.opacity = '0.5';
@@ -4390,7 +2880,7 @@ function disableFormFieldsExceptPortfolio() {
     });
 
     // Also disable the project dropdown initially
-    const projectSelect = document.getElementById('projectName');
+    export const projectSelect = document.getElementById('projectName');
     if (projectSelect) {
         projectSelect.innerHTML = '<option value="">Select Portfolio first</option>';
         projectSelect.disabled = true;
@@ -4400,8 +2890,8 @@ function disableFormFieldsExceptPortfolio() {
 }
 
 // Enable project field after portfolio is selected
-function enableProjectField() {
-    const projectSelect = document.getElementById('projectName');
+export function enableProjectField() {
+    export const projectSelect = document.getElementById('projectName');
     if (projectSelect) {
         projectSelect.disabled = false;
         projectSelect.style.opacity = '1';
@@ -4410,14 +2900,14 @@ function enableProjectField() {
 }
 
 // Enable all remaining fields after project is selected
-function enableAllRemainingFields() {
-    const fieldsToEnable = [
+export function enableAllRemainingFields() {
+    export const fieldsToEnable = [
         'sprintNumber', 'cycleNumber', 'releaseNumber',
         'reportName', 'reportVersion', 'reportDate'
     ];
 
     fieldsToEnable.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
+        export const field = document.getElementById(fieldId);
         if (field) {
             field.disabled = false;
             field.style.opacity = '1';
@@ -4427,9 +2917,9 @@ function enableAllRemainingFields() {
 }
 
 // Setup event handlers for progressive form loading
-function setupProgressiveFormHandlers() {
-    const portfolioSelect = document.getElementById('portfolioName');
-    const projectSelect = document.getElementById('projectName');
+export function setupProgressiveFormHandlers() {
+    export const portfolioSelect = document.getElementById('portfolioName');
+    export const projectSelect = document.getElementById('projectName');
 
     if (portfolioSelect) {
         // Remove existing event listeners
@@ -4446,13 +2936,13 @@ function setupProgressiveFormHandlers() {
 
 // Handle portfolio selection
 async function onPortfolioChange(event) {
-    const selectedOption = event.target.selectedOptions[0];
+    export const selectedOption = event.target.selectedOptions[0];
     if (selectedOption && selectedOption.value && selectedOption.dataset.id) {
-        const portfolioId = selectedOption.dataset.id;
+        export const portfolioId = selectedOption.dataset.id;
         await loadProjectsForPortfolio(portfolioId);
 
         // Clear project selection when portfolio changes
-        const projectSelect = document.getElementById('projectName');
+        export const projectSelect = document.getElementById('projectName');
         if (projectSelect) {
             projectSelect.value = '';
         }
@@ -4480,14 +2970,14 @@ async function onProjectChangeProgressive(event) {
 }
 
 // Disable fields that require project selection
-function disableFieldsAfterPortfolio() {
-    const fieldsToDisable = [
+export function disableFieldsAfterPortfolio() {
+    export const fieldsToDisable = [
         'sprintNumber', 'cycleNumber', 'releaseNumber',
         'reportName', 'reportVersion', 'reportDate'
     ];
 
     fieldsToDisable.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
+        export const field = document.getElementById(fieldId);
         if (field) {
             field.disabled = true;
             field.style.opacity = '0.5';
@@ -4497,14 +2987,14 @@ function disableFieldsAfterPortfolio() {
 }
 
 // Enhanced project dropdown population for filtered projects
-function populateProjectDropdownFiltered(projects) {
-    const select = document.getElementById('projectName');
+export function populateProjectDropdownFiltered(projects) {
+    export const select = document.getElementById('projectName');
     if (!select) return;
 
     select.innerHTML = '<option value="">Select Project</option>';
 
     projects.forEach(project => {
-        const value = project.name.toLowerCase().replace(/\s+/g, '-');
+        export const value = project.name.toLowerCase().replace(/\s+/g, '-');
         select.innerHTML += `<option value="${value}" data-id="${project.id}">${project.name}</option>`;
     });
 }
@@ -4583,9 +3073,9 @@ window.populateProjectDropdownFiltered = populateProjectDropdownFiltered;
 window.initializeCharts = initializeCharts; // Make it globally accessible
 
 // Theme Toggle Functionality
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+export function toggleTheme() {
+    export const currentTheme = document.documentElement.getAttribute('data-theme');
+    export const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
@@ -4593,9 +3083,9 @@ function toggleTheme() {
     updateThemeButton(newTheme);
 }
 
-function updateThemeButton(theme) {
-    const themeIcon = document.getElementById('theme-icon');
-    const themeText = document.getElementById('theme-text');
+export function updateThemeButton(theme) {
+    export const themeIcon = document.getElementById('theme-icon');
+    export const themeText = document.getElementById('theme-text');
 
     if (theme === 'light') {
         themeIcon.className = 'fas fa-moon';
@@ -4606,8 +3096,8 @@ function updateThemeButton(theme) {
     }
 }
 
-function initializeTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
+export function initializeTheme() {
+    export const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeButton(savedTheme);
 }
@@ -4617,14 +3107,14 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
 
     // Setup MutationObserver to watch for theme attribute changes (fallback)
-    const observer = new MutationObserver(function (mutations) {
+    export const observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
                 console.log('Create report: Theme attribute changed, recreating charts...');
                 // Trigger chart recreation with same logic as themeChanged event
                 setTimeout(() => {
                     // Store current chart data before destroying charts
-                    const chartConfigs = [
+                    export const chartConfigs = [
                         { chart: userStoriesChart, id: 'userStoriesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
                         { chart: testCasesChart, id: 'testCasesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
                         { chart: issuesPriorityChart, id: 'issuesPriorityChart', labels: ['Critical', 'High', 'Medium', 'Low'], colors: ['#dc3545', '#fd7e14', '#ffc107', '#28a745'] },
@@ -4633,7 +3123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ];
 
                     // Store data and destroy existing charts
-                    const chartData = {};
+                    export const chartData = {};
                     chartConfigs.forEach(config => {
                         if (config.chart && config.chart.data) {
                             chartData[config.id] = config.chart.data.datasets[0].data;
@@ -4661,7 +3151,7 @@ window.addEventListener('themeChanged', (event) => {
     console.log('Theme changed, recreating form charts...');
 
     // Store current chart data before destroying charts
-    const chartConfigs = [
+    export const chartConfigs = [
         { chart: userStoriesChart, id: 'userStoriesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
         { chart: testCasesChart, id: 'testCasesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
         { chart: issuesPriorityChart, id: 'issuesPriorityChart', labels: ['Critical', 'High', 'Medium', 'Low'], colors: ['#dc3545', '#fd7e14', '#ffc107', '#28a745'] },
@@ -4670,7 +3160,7 @@ window.addEventListener('themeChanged', (event) => {
     ];
 
     // Store data and destroy existing charts
-    const chartData = {};
+    export const chartData = {};
     chartConfigs.forEach(config => {
         if (config.chart && config.chart.data) {
             chartData[config.id] = config.chart.data.datasets[0].data;
@@ -4687,17 +3177,17 @@ window.addEventListener('themeChanged', (event) => {
 });
 
 // Function to recreate form charts with stored data
-function recreateFormCharts(chartConfigs, chartData) {
-    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
-    const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
+export function recreateFormCharts(chartConfigs, chartData) {
+    export const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
+    export const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
     chartConfigs.forEach(config => {
-        const canvas = document.getElementById(config.id);
+        export const canvas = document.getElementById(config.id);
         if (canvas) {
-            const ctx = canvas.getContext('2d');
-            const data = chartData[config.id] || new Array(config.labels.length).fill(0);
+            export const ctx = canvas.getContext('2d');
+            export const data = chartData[config.id] || new Array(config.labels.length).fill(0);
 
-            const newChart = new Chart(ctx, {
+            export const newChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: config.labels,
@@ -4756,13 +3246,13 @@ window.dashboardStatsCache = dashboardStatsCache; // Make global variable access
 
 // --- LocalStorage Functions ---
 
-function saveFormDataToLocalStorage() {
+export function saveFormDataToLocalStorage() {
     try {
-        const form = document.getElementById('qaReportForm');
+        export const form = document.getElementById('qaReportForm');
         if (!form) return;
 
-        const formData = new FormData(form);
-        const formObject = {};
+        export const formData = new FormData(form);
+        export const formObject = {};
 
         // Save form fields
         for (let [key, value] of formData.entries()) {
@@ -4770,14 +3260,14 @@ function saveFormDataToLocalStorage() {
         }
 
         // Save additional form elements that might not be in FormData
-        const additionalFields = [
+        export const additionalFields = [
             'reportDate', 'portfolioName', 'projectName', 'sprintNumber',
             'reportVersion', 'cycleNumber', 'releaseNumber', 'testSummary',
             'testingStatus', 'testEnvironment'
         ];
 
         // Evaluation fields
-        const evaluationFields = [
+        export const evaluationFields = [
             'involvementScore', 'involvementReason',
             'requirementsQualityScore', 'requirementsQualityReason',
             'qaPlanReviewScore', 'qaPlanReviewReason',
@@ -4790,7 +3280,7 @@ function saveFormDataToLocalStorage() {
         ];
 
         additionalFields.forEach(fieldId => {
-            const element = document.getElementById(fieldId);
+            export const element = document.getElementById(fieldId);
             if (element) {
                 formObject[fieldId] = element.value;
             }
@@ -4798,19 +3288,19 @@ function saveFormDataToLocalStorage() {
 
         // Add evaluation fields to form data
         evaluationFields.forEach(fieldId => {
-            const element = document.getElementById(fieldId);
+            export const element = document.getElementById(fieldId);
             if (element) {
                 formObject[fieldId] = element.value;
             }
         });
 
         // Save calculated totals
-        const calculatedFields = [
+        export const calculatedFields = [
             'totalStories', 'totalTestCases', 'totalIssues', 'totalEnhancements'
         ];
 
         calculatedFields.forEach(fieldId => {
-            const element = document.getElementById(fieldId);
+            export const element = document.getElementById(fieldId);
             if (element) {
                 formObject[fieldId] = element.value;
             }
@@ -4819,7 +3309,7 @@ function saveFormDataToLocalStorage() {
         localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formObject));
 
         // Save arrays (requests, builds, testers, team members)
-        const arrayData = {
+        export const arrayData = {
             requestData: requestData,
             buildData: buildData,
             testerData: testerData,
@@ -4834,19 +3324,19 @@ function saveFormDataToLocalStorage() {
     }
 }
 
-function loadFormDataFromLocalStorage() {
+export function loadFormDataFromLocalStorage() {
     try {
         console.log('Loading form data from localStorage...');
-        const savedFormData = localStorage.getItem(FORM_DATA_KEY);
-        const savedArrayData = localStorage.getItem(FORM_ARRAYS_KEY);
+        export const savedFormData = localStorage.getItem(FORM_DATA_KEY);
+        export const savedArrayData = localStorage.getItem(FORM_ARRAYS_KEY);
 
         if (savedFormData) {
             console.log('Found saved form data, loading...');
-            const formObject = JSON.parse(savedFormData);
+            export const formObject = JSON.parse(savedFormData);
 
             // Load form fields
             Object.keys(formObject).forEach(key => {
-                const element = document.getElementById(key);
+                export const element = document.getElementById(key);
                 if (element) {
                     element.value = formObject[key];
                 }
@@ -4870,7 +3360,7 @@ function loadFormDataFromLocalStorage() {
 
         if (savedArrayData) {
             console.log('Found saved array data, loading...');
-            const arrayObject = JSON.parse(savedArrayData);
+            export const arrayObject = JSON.parse(savedArrayData);
 
             // Load arrays
             if (arrayObject.requestData) {
@@ -4902,7 +3392,7 @@ function loadFormDataFromLocalStorage() {
     }
 }
 
-function clearFormDataFromLocalStorage() {
+export function clearFormDataFromLocalStorage() {
     try {
         localStorage.removeItem(FORM_DATA_KEY);
         localStorage.removeItem(FORM_ARRAYS_KEY);
@@ -4912,7 +3402,7 @@ function clearFormDataFromLocalStorage() {
     }
 }
 
-function autoSaveFormData() {
+export function autoSaveFormData() {
     if (autoSaveTimeout) {
         clearTimeout(autoSaveTimeout);
     }
@@ -4923,8 +3413,8 @@ function autoSaveFormData() {
 }
 
 // Add event listeners for auto-save
-function setupAutoSave() {
-    const form = document.getElementById('qaReportForm');
+export function setupAutoSave() {
+    export const form = document.getElementById('qaReportForm');
     if (form) {
         console.log('Setting up autosave on form');
         form.addEventListener('input', autoSaveFormData);
@@ -4935,7 +3425,7 @@ function setupAutoSave() {
 }
 
 // Clear localStorage when form is submitted
-function clearFormDataOnSubmit() {
+export function clearFormDataOnSubmit() {
     try {
         // Clear form data from localStorage
         clearFormDataFromLocalStorage();
@@ -4949,7 +3439,7 @@ function clearFormDataOnSubmit() {
         qaNotesData = [];
 
         // Reset form fields
-        const form = document.getElementById('qaReportForm');
+        export const form = document.getElementById('qaReportForm');
         if (form) {
             form.reset();
         }
@@ -4968,14 +3458,14 @@ function clearFormDataOnSubmit() {
 }
 
 // Override the existing arrays when they're modified
-const originalAddRequest = window.addRequest;
-const originalAddBuild = window.addBuild;
-const originalAddSelectedTester = window.addSelectedTester;
-const originalAddSelectedTeamMember = window.addSelectedTeamMember;
+export const originalAddRequest = window.addRequest;
+export const originalAddBuild = window.addBuild;
+export const originalAddSelectedTester = window.addSelectedTester;
+export const originalAddSelectedTeamMember = window.addSelectedTeamMember;
 
 if (typeof originalAddRequest === 'function') {
     window.addRequest = function (...args) {
-        const result = originalAddRequest.apply(this, args);
+        export const result = originalAddRequest.apply(this, args);
         autoSaveFormData();
         return result;
     };
@@ -4983,7 +3473,7 @@ if (typeof originalAddRequest === 'function') {
 
 if (typeof originalAddBuild === 'function') {
     window.addBuild = function (...args) {
-        const result = originalAddBuild.apply(this, args);
+        export const result = originalAddBuild.apply(this, args);
         autoSaveFormData();
         return result;
     };
@@ -4991,7 +3481,7 @@ if (typeof originalAddBuild === 'function') {
 
 if (typeof originalAddSelectedTester === 'function') {
     window.addSelectedTester = function (...args) {
-        const result = originalAddSelectedTester.apply(this, args);
+        export const result = originalAddSelectedTester.apply(this, args);
         autoSaveFormData();
         return result;
     };
@@ -4999,7 +3489,7 @@ if (typeof originalAddSelectedTester === 'function') {
 
 if (typeof originalAddSelectedTeamMember === 'function') {
     window.addSelectedTeamMember = function (...args) {
-        const result = originalAddSelectedTeamMember.apply(this, args);
+        export const result = originalAddSelectedTeamMember.apply(this, args);
         autoSaveFormData();
         return result;
     };

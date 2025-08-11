@@ -748,7 +748,8 @@
         function renderIssuesView(report, isLightMode) {
             const priorityTable = document.getElementById('issuesPriorityViewTable');
             const statusTable = document.getElementById('issuesStatusViewTable');
-            const total = report.totalIssues || 0;
+            const priorityTotal = report.totalIssues || 0;
+            const statusTotal = report.totalIssuesByStatus || 0;
             
             // Priority table
             priorityTable.innerHTML = `
@@ -762,28 +763,28 @@
                 <tbody>
                     <tr>
                         <td><strong>Total Issues</strong></td>
-                        <td>${total}</td>
+                        <td>${priorityTotal}</td>
                         <td class="percentage-cell">100%</td>
                     </tr>
                     <tr>
                         <td>Critical</td>
                         <td>${report.criticalIssues || 0}</td>
-                        <td class="percentage-cell">${total ? Math.round(((report.criticalIssues || 0) / total) * 100) : 0}%</td>
+                        <td class="percentage-cell">${priorityTotal ? Math.round(((report.criticalIssues || 0) / priorityTotal) * 100) : 0}%</td>
                     </tr>
                     <tr>
                         <td>High</td>
                         <td>${report.highIssues || 0}</td>
-                        <td class="percentage-cell">${total ? Math.round(((report.highIssues || 0) / total) * 100) : 0}%</td>
+                        <td class="percentage-cell">${priorityTotal ? Math.round(((report.highIssues || 0) / priorityTotal) * 100) : 0}%</td>
                     </tr>
                     <tr>
                         <td>Medium</td>
                         <td>${report.mediumIssues || 0}</td>
-                        <td class="percentage-cell">${total ? Math.round(((report.mediumIssues || 0) / total) * 100) : 0}%</td>
+                        <td class="percentage-cell">${priorityTotal ? Math.round(((report.mediumIssues || 0) / priorityTotal) * 100) : 0}%</td>
                     </tr>
                     <tr>
                         <td>Low</td>
                         <td>${report.lowIssues || 0}</td>
-                        <td class="percentage-cell">${total ? Math.round(((report.lowIssues || 0) / total) * 100) : 0}%</td>
+                        <td class="percentage-cell">${priorityTotal ? Math.round(((report.lowIssues || 0) / priorityTotal) * 100) : 0}%</td>
                     </tr>
                 </tbody>
             `;
@@ -799,29 +800,34 @@
                 </thead>
                 <tbody>
                     <tr>
+                        <td><strong>Total Issues by Status</strong></td>
+                        <td>${statusTotal}</td>
+                        <td class="percentage-cell">100%</td>
+                    </tr>
+                    <tr>
                         <td>New</td>
                         <td>${report.newIssues || 0}</td>
-                        <td class="percentage-cell">${total ? Math.round(((report.newIssues || 0) / total) * 100) : 0}%</td>
+                        <td class="percentage-cell">${statusTotal ? Math.round(((report.newIssues || 0) / statusTotal) * 100) : 0}%</td>
                     </tr>
                     <tr>
                         <td>Fixed</td>
                         <td>${report.fixedIssues || 0}</td>
-                        <td class="percentage-cell">${total ? Math.round(((report.fixedIssues || 0) / total) * 100) : 0}%</td>
+                        <td class="percentage-cell">${statusTotal ? Math.round(((report.fixedIssues || 0) / statusTotal) * 100) : 0}%</td>
                     </tr>
                     <tr>
                         <td>Not Fixed</td>
                         <td>${report.notFixedIssues || 0}</td>
-                        <td class="percentage-cell">${total ? Math.round(((report.notFixedIssues || 0) / total) * 100) : 0}%</td>
+                        <td class="percentage-cell">${statusTotal ? Math.round(((report.notFixedIssues || 0) / statusTotal) * 100) : 0}%</td>
                     </tr>
                     <tr>
                         <td>Re-opened</td>
                         <td>${report.reopenedIssues || 0}</td>
-                        <td class="percentage-cell">${total ? Math.round(((report.reopenedIssues || 0) / total) * 100) : 0}%</td>
+                        <td class="percentage-cell">${statusTotal ? Math.round(((report.reopenedIssues || 0) / statusTotal) * 100) : 0}%</td>
                     </tr>
                     <tr>
                         <td>Deferred</td>
                         <td>${report.deferredIssues || 0}</td>
-                        <td class="percentage-cell">${total ? Math.round(((report.deferredIssues || 0) / total) * 100) : 0}%</td>
+                        <td class="percentage-cell">${statusTotal ? Math.round(((report.deferredIssues || 0) / statusTotal) * 100) : 0}%</td>
                     </tr>
                 </tbody>
             `;
@@ -1962,6 +1968,7 @@
             addSectionTitle('Issues by Priority');
 
             const totalIssues = currentReport.totalIssues || 0;
+            const totalIssuesByStatus = currentReport.totalIssuesByStatus || 0;
             const issuesPriorityData = [
                 ['Priority', 'Count', 'Percentage'],
                 ['Total Issues', totalIssues, '100%'],
@@ -2008,11 +2015,12 @@
 
             const issuesStatusData = [
                 ['Status', 'Count', 'Percentage'],
-                ['New', currentReport.newIssues || 0, totalIssues ? Math.round(((currentReport.newIssues || 0) / totalIssues) * 100) + '%' : '0%'],
-                ['Fixed', currentReport.fixedIssues || 0, totalIssues ? Math.round(((currentReport.fixedIssues || 0) / totalIssues) * 100) + '%' : '0%'],
-                ['Not Fixed', currentReport.notFixedIssues || 0, totalIssues ? Math.round(((currentReport.notFixedIssues || 0) / totalIssues) * 100) + '%' : '0%'],
-                ['Re-opened', currentReport.reopenedIssues || 0, totalIssues ? Math.round(((currentReport.reopenedIssues || 0) / totalIssues) * 100) + '%' : '0%'],
-                ['Deferred', currentReport.deferredIssues || 0, totalIssues ? Math.round(((currentReport.deferredIssues || 0) / totalIssues) * 100) + '%' : '0%']
+                ['Total Issues by Status', totalIssuesByStatus, '100%'],
+                ['New', currentReport.newIssues || 0, totalIssuesByStatus ? Math.round(((currentReport.newIssues || 0) / totalIssuesByStatus) * 100) + '%' : '0%'],
+                ['Fixed', currentReport.fixedIssues || 0, totalIssuesByStatus ? Math.round(((currentReport.fixedIssues || 0) / totalIssuesByStatus) * 100) + '%' : '0%'],
+                ['Not Fixed', currentReport.notFixedIssues || 0, totalIssuesByStatus ? Math.round(((currentReport.notFixedIssues || 0) / totalIssuesByStatus) * 100) + '%' : '0%'],
+                ['Re-opened', currentReport.reopenedIssues || 0, totalIssuesByStatus ? Math.round(((currentReport.reopenedIssues || 0) / totalIssuesByStatus) * 100) + '%' : '0%'],
+                ['Deferred', currentReport.deferredIssues || 0, totalIssuesByStatus ? Math.round(((currentReport.deferredIssues || 0) / totalIssuesByStatus) * 100) + '%' : '0%']
             ];
 
             // Create table and chart side by side - Issues by Status (high quality)
@@ -2355,11 +2363,11 @@
                 ["Low", currentReport.lowIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.lowIssues || 0) / currentReport.totalIssues) * 100) : 0],
                 ["", "", ""],
                 ["STATUS BREAKDOWN", "", ""],
-                ["New", currentReport.newIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.newIssues || 0) / currentReport.totalIssues) * 100) : 0],
-                ["Fixed", currentReport.fixedIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.fixedIssues || 0) / currentReport.totalIssues) * 100) : 0],
-                ["Not Fixed", currentReport.notFixedIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.notFixedIssues || 0) / currentReport.totalIssues) * 100) : 0],
-                ["Re-opened", currentReport.reopenedIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.reopenedIssues || 0) / currentReport.totalIssues) * 100) : 0],
-                ["Deferred", currentReport.deferredIssues || 0, currentReport.totalIssues ? Math.round(((currentReport.deferredIssues || 0) / currentReport.totalIssues) * 100) : 0]
+                ["New", currentReport.newIssues || 0, currentReport.totalIssuesByStatus ? Math.round(((currentReport.newIssues || 0) / currentReport.totalIssuesByStatus) * 100) : 0],
+                ["Fixed", currentReport.fixedIssues || 0, currentReport.totalIssuesByStatus ? Math.round(((currentReport.fixedIssues || 0) / currentReport.totalIssuesByStatus) * 100) : 0],
+                ["Not Fixed", currentReport.notFixedIssues || 0, currentReport.totalIssuesByStatus ? Math.round(((currentReport.notFixedIssues || 0) / currentReport.totalIssuesByStatus) * 100) : 0],
+                ["Re-opened", currentReport.reopenedIssues || 0, currentReport.totalIssuesByStatus ? Math.round(((currentReport.reopenedIssues || 0) / currentReport.totalIssuesByStatus) * 100) : 0],
+                ["Deferred", currentReport.deferredIssues || 0, currentReport.totalIssuesByStatus ? Math.round(((currentReport.deferredIssues || 0) / currentReport.totalIssuesByStatus) * 100) : 0]
             ];
             const wsIssues = XLSX.utils.aoa_to_sheet(issuesData);
             XLSX.utils.book_append_sheet(workbook, wsIssues, "Issues");

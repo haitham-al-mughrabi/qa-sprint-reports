@@ -51,7 +51,8 @@ class Report(db.Model):
     notTestableTestCases = db.Column(db.Integer, default=0)
 
     # Issues Data (detailed breakdown)
-    totalIssues = db.Column(db.Integer, default=0)
+    totalIssues = db.Column(db.Integer, default=0)  # Total by priority
+    totalIssuesByStatus = db.Column(db.Integer, default=0)  # Total by status
     criticalIssues = db.Column(db.Integer, default=0)
     highIssues = db.Column(db.Integer, default=0)
     mediumIssues = db.Column(db.Integer, default=0)
@@ -157,6 +158,15 @@ class Report(db.Model):
         )
         self.issuesMetric = self.totalIssues
 
+        # Calculate Issues total (by status)
+        self.totalIssuesByStatus = (
+            (self.newIssues or 0) +
+            (self.fixedIssues or 0) +
+            (self.notFixedIssues or 0) +
+            (self.reopenedIssues or 0) +
+            (self.deferredIssues or 0)
+        )
+
         # Calculate Enhancements total
         self.totalEnhancements = (
             (self.newEnhancements or 0) +
@@ -252,6 +262,7 @@ class Report(db.Model):
 
             # Issues
             'totalIssues': self.totalIssues,
+            'totalIssuesByStatus': self.totalIssuesByStatus,
             'criticalIssues': self.criticalIssues,
             'highIssues': self.highIssues,
             'mediumIssues': self.mediumIssues,
