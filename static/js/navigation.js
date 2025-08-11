@@ -25,14 +25,14 @@ export function previousSection() {
 
 export function updateNavigationButtons() {
     document.getElementById('prevBtn').disabled = currentSection === 0;
-    export const isLastSection = currentSection === 12;
+    const isLastSection = currentSection === 12;
     document.getElementById('nextBtn').style.display = isLastSection ? 'none' : 'inline-block';
     document.getElementById('submitBtn').style.display = isLastSection ? 'inline-block' : 'none';
 }
 
 export function updateProgressBar() {
-    export const totalSections = 13;
-    export const sectionTitles = [
+    const totalSections = 13;
+    const sectionTitles = [
         'General Details',
         'Test Summary',
         'Request & Build Info',
@@ -49,9 +49,9 @@ export function updateProgressBar() {
     ];
 
     // Calculate progress - show completion based on current section
-    export const completedSections = currentSection; // Sections completed (0-based)
-    export const currentStepNumber = currentSection + 1; // Current step being worked on (1-based)
-    export const percentage = (completedSections / totalSections) * 100;
+    const completedSections = currentSection; // Sections completed (0-based)
+    const currentStepNumber = currentSection + 1; // Current step being worked on (1-based)
+    const percentage = (completedSections / totalSections) * 100;
 
     // Update progress percentage and fill
     document.getElementById('progressPercent').textContent = `${Math.round(percentage)}%`;
@@ -70,14 +70,14 @@ export function updateProgressBar() {
         } else if (index < currentSection) {
             step.classList.add('completed');
             // Change icon to checkmark for completed steps
-            export const icon = step.querySelector('.step-circle i');
+            const icon = step.querySelector('.step-circle i');
             if (icon && !icon.classList.contains('fa-check')) {
                 icon.className = 'fas fa-check';
             }
         } else {
             // For future steps, ensure they have the correct icon (but don't force reset on initial load)
-            export const icon = step.querySelector('.step-circle i');
-            export const stepIcons = [
+            const icon = step.querySelector('.step-circle i');
+            const stepIcons = [
                 'fas fa-info-circle',
                 'fas fa-chart-bar',
                 'fas fa-clipboard-list',
@@ -115,9 +115,9 @@ export function initializeProgressSteps() {
 // backToDashboard now redirects to the dashboard page
 export function backToDashboard() { window.location.href = '/dashboard'; }
 export function toggleSidebar() {
-    export const sidebar = document.getElementById('sidebar');
-    export const formContainer = document.querySelector('.form-container');
-    export const toggleBtn = document.querySelector('.sidebar-toggle-btn i');
+    const sidebar = document.getElementById('sidebar');
+    const formContainer = document.querySelector('.form-container');
+    const toggleBtn = document.querySelector('.sidebar-toggle-btn i');
 
     sidebar.classList.toggle('collapsed');
     formContainer.classList.toggle('sidebar-collapsed');
@@ -134,10 +134,10 @@ export function toggleSidebar() {
 
 // --- Enhanced Reports Table Functions with Filtering ---
 // Debounced search to reduce API calls
-export let searchTimeout;
+let searchTimeout;
 
 // Filter state management
-export let currentFilters = {
+let currentFilters = {
     search: '',
     project: '',
     portfolio: '',
@@ -149,5 +149,5 @@ export let currentFilters = {
     sort: 'date-desc'
 };
 
-export let filtersVisible = false;
-export let allReports = []; // Cache for client-side filtering
+let filtersVisible = false;
+let allReports = []; // Cache for client-side filtering

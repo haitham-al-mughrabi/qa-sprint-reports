@@ -1,6 +1,6 @@
 export function showToast(message, type = 'info', duration = 5000) {
     // Create toast container if it doesn't exist
-    export let container = document.querySelector('.toast-container');
+    let container = document.querySelector('.toast-container');
     if (!container) {
         container = document.createElement('div');
         container.className = 'toast-container';
@@ -8,7 +8,7 @@ export function showToast(message, type = 'info', duration = 5000) {
     }
 
     // Create toast element
-    export const toast = document.createElement('div');
+    const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerHTML = `
         <div class="toast-icon"></div>

@@ -22,3 +22,4 @@ window.dynamic_forms = dynamic_forms;
 window.navigation = navigation;
 window.filters = filters;
 window.pagination = pagination;
+console.log(api); 

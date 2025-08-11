@@ -1,54 +1,48 @@
 export function updateDashboardStats(stats) {
-    console.log('Dashboard stats received:', stats); // Debug log
+    console.log('Dashboard stats received:', stats);
     if (!stats) {
         console.error('No stats data received');
         return;
     }
 
-    // Check if we are on the dashboard page by looking for a key element
-    export const totalReportsEl = document.getElementById('totalReports');
+    const totalReportsEl = document.getElementById('totalReports');
     if (!totalReportsEl) {
         console.error('Not on dashboard page or totalReports element not found');
-        return; // Exit if not on the dashboard page
+        return;
     }
 
-    // Update overall statistics
-    export const overall = stats.overall || {};
+    const overall = stats.overall || {};
     totalReportsEl.textContent = overall.totalReports || 0;
     document.getElementById('completedReports').textContent = overall.completedReports || 0;
     document.getElementById('inProgressReports').textContent = overall.inProgressReports || 0;
     document.getElementById('pendingReports').textContent = overall.pendingReports || 0;
 
-    // Update aggregate metrics
     document.getElementById('totalUserStories').textContent = overall.totalUserStories || 0;
     document.getElementById('totalTestCases').textContent = overall.totalTestCases || 0;
     document.getElementById('totalIssues').textContent = overall.totalIssues || 0;
     document.getElementById('totalEnhancements').textContent = overall.totalEnhancements || 0;
 
-    // Update automation regression metrics
     document.getElementById('totalAutomationTests').textContent = overall.automationTotalTestCases || 0;
-    export const automationTotal = overall.automationTotalTestCases || 0;
-    export const automationPassed = overall.automationPassedTestCases || 0;
-    export const automationPassRate = automationTotal > 0 ? Math.round((automationPassed / automationTotal) * 100) : 0;
+    const automationTotal = overall.automationTotalTestCases || 0;
+    const automationPassed = overall.automationPassedTestCases || 0;
+    const automationPassRate = automationTotal > 0 ? Math.round((automationPassed / automationTotal) * 100) : 0;
     document.getElementById('automationPassRate').textContent = `${automationPassRate}%`;
 
-    // Debug log projects data
     console.log('Projects data in updateDashboardStats:', stats.projects);
-
-    // Update project-specific metrics
     renderProjectMetrics(stats.projects || []);
 }
 
+
 export function renderProjectMetrics(projects) {
-    export const container = document.getElementById('projectMetrics');
+    const container = document.getElementById('projectMetrics');
     if (!container) {
         console.error('Project metrics container not found');
         return;
     }
-
+    
     // Debug log the projects data being rendered
     console.log('Rendering projects:', projects);
-
+    
     if (!projects || projects.length === 0) {
         container.innerHTML = `
             <div class="empty-state" style="text-align: center; color: #6c757d; padding: 40px 0; grid-column: 1 / -1;">
@@ -58,13 +52,14 @@ export function renderProjectMetrics(projects) {
             </div>
         `;
         return;
-    }
+    }    
 
     // Check if we have detailed breakdown data
-    export const hasDetailedData = projects.length > 0 &&
+    const hasDetailedData = projects.length > 0 &&
         (projects[0].passedUserStories !== undefined ||
-            projects[0].passedTestCases !== undefined ||
-            projects[0].criticalIssues !== undefined);
+        projects[0].passedTestCases !== undefined ||
+        projects[0].criticalIssues !== undefined);
+
 
     console.log('Has detailed breakdown data:', hasDetailedData);
 
@@ -444,10 +439,10 @@ async function exportDashboardReport() {
         return;
     }
 
-    export const { jsPDF } = window.jspdf;
-    export const doc = new jsPDF();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-    export let yPos = 20;
+    let yPos = 20;
 
     // Title
     doc.setFontSize(18);
@@ -460,7 +455,7 @@ async function exportDashboardReport() {
     doc.text('Overall Statistics', 10, yPos);
     yPos += 10;
 
-    export const overall = dashboardStatsCache.overall;
+    const overall = dashboardStatsCache.overall;
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
     doc.text(`Total Reports: ${overall.totalReports}`, 10, yPos);
@@ -482,7 +477,7 @@ async function exportDashboardReport() {
         doc.text('Project Metrics', 10, yPos);
         yPos += 10;
 
-        export const projectTableData = dashboardStatsCache.projects.map(project => [
+        const projectTableData = dashboardStatsCache.projects.map(project => [
             project.projectName,
             project.portfolioName,
             project.totalReports.toString(),

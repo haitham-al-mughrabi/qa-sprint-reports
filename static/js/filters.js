@@ -1,5 +1,5 @@
 async function searchReports() {
-    export const searchQuery = document.getElementById('searchInput')?.value || '';
+    const searchQuery = document.getElementById('searchInput')?.value || '';
     currentFilters.search = searchQuery;
 
     // Clear existing timeout
@@ -26,13 +26,13 @@ async function applyFilters() {
         // Fetch all reports if not cached or if we need fresh data
         if (allReports.length === 0) {
             console.log('Fetching reports for filtering...');
-            export const result = await fetchReports(1, '', 1000); // Fetch large number to get all
+            const result = await fetchReports(1, '', 1000); // Fetch large number to get all
             allReports = result.reports || [];
             console.log('Fetched', allReports.length, 'reports for filtering');
         }
 
         // Apply client-side filtering
-        export let filteredReports = filterReports(allReports);
+        let filteredReports = filterReports(allReports);
         console.log('After filtering:', filteredReports.length, 'reports');
 
         // Apply sorting
@@ -59,7 +59,7 @@ async function applyFilters() {
 
         // Fallback: try to show all reports without filtering
         try {
-            export const result = await fetchReports(1, '', 100);
+            const result = await fetchReports(1, '', 100);
             renderReportsTable(result.reports || []);
         } catch (fallbackError) {
             console.error('Fallback also failed:', fallbackError);
@@ -92,8 +92,8 @@ export function filterReports(reports) {
 
         // Search filter - make it more robust
         if (currentFilters.search) {
-            export const searchTerm = currentFilters.search.toLowerCase();
-            export const searchableFields = [
+            const searchTerm = currentFilters.search.toLowerCase();
+            const searchableFields = [
                 report.title || '',
                 report.project || '',
                 report.portfolio || '',
@@ -101,7 +101,7 @@ export function filterReports(reports) {
                 report.projectName || '',
                 report.portfolioName || ''
             ];
-            export const searchableText = searchableFields.join(' ').toLowerCase();
+            const searchableText = searchableFields.join(' ').toLowerCase();
             if (!searchableText.includes(searchTerm)) {
                 return false;
             }
@@ -109,7 +109,7 @@ export function filterReports(reports) {
 
         // Project filter - handle different field names
         if (currentFilters.project) {
-            export const projectName = report.project || report.projectName || '';
+            const projectName = report.project || report.projectName || '';
             if (projectName !== currentFilters.project) {
                 return false;
             }
@@ -117,7 +117,7 @@ export function filterReports(reports) {
 
         // Portfolio filter - handle different field names
         if (currentFilters.portfolio) {
-            export const portfolioName = report.portfolio || report.portfolioName || '';
+            const portfolioName = report.portfolio || report.portfolioName || '';
             if (portfolioName !== currentFilters.portfolio) {
                 return false;
             }
@@ -125,10 +125,10 @@ export function filterReports(reports) {
 
         // Tester filter - handle different data structures
         if (currentFilters.tester) {
-            export let hasMatchingTester = false;
+            let hasMatchingTester = false;
 
             // Get all possible tester values from the report
-            export const allTesterValues = [];
+            const allTesterValues = [];
 
             // Check testers array
             if (Array.isArray(report.testers)) {
@@ -159,22 +159,22 @@ export function filterReports(reports) {
             // Check testers as JSON string
             else if (typeof report.testers === 'string') {
                 try {
-                    export const parsedTesters = JSON.parse(report.testers);
+                    const parsedTesters = JSON.parse(report.testers);
                     if (Array.isArray(parsedTesters)) {
                         parsedTesters.forEach(tester => {
-                            export const name = typeof tester === 'object' ? tester.name : tester;
+                            const name = typeof tester === 'object' ? tester.name : tester;
                             if (name) allTesterValues.push(name.toString().trim());
                         });
                     }
                 } catch (e) {
                     // If not JSON, treat as comma-separated string
-                    export const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
+                    const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
                     allTesterValues.push(...testerList);
                 }
             }
 
             // Check single tester fields
-            export const singleTesterFields = ['tester', 'testerName', 'assignedTester'];
+            const singleTesterFields = ['tester', 'testerName', 'assignedTester'];
             singleTesterFields.forEach(field => {
                 if (report[field] && typeof report[field] === 'string') {
                     allTesterValues.push(report[field].trim());
@@ -195,7 +195,7 @@ export function filterReports(reports) {
 
         // Status filter - handle different field names
         if (currentFilters.status) {
-            export const status = report.status || report.testingStatus || '';
+            const status = report.status || report.testingStatus || '';
             if (status !== currentFilters.status) {
                 return false;
             }
@@ -204,7 +204,7 @@ export function filterReports(reports) {
         // Date range filter - handle different date formats
         if (currentFilters.dateFrom || currentFilters.dateTo) {
             // Try multiple date field names
-            export const reportDateStr = report.date || report.reportDate || report.createdAt || report.created_at || report.dateCreated || '';
+            const reportDateStr = report.date || report.reportDate || report.createdAt || report.created_at || report.dateCreated || '';
 
             // If no date found, skip date filtering for this report (don't exclude it)
             if (!reportDateStr) {
@@ -213,14 +213,14 @@ export function filterReports(reports) {
                 // Don't return false - let report pass through if no date available
             } else {
                 // Handle different date formats
-                export let reportDate;
+                let reportDate;
 
                 // Try parsing as-is first
                 reportDate = new Date(reportDateStr);
 
                 // If invalid, try parsing DD-MM-YYYY format
                 if (isNaN(reportDate.getTime()) && typeof reportDateStr === 'string') {
-                    export const parts = reportDateStr.split('-');
+                    const parts = reportDateStr.split('-');
                     if (parts.length === 3) {
                         // Try DD-MM-YYYY
                         if (parts[0].length === 2) {
@@ -236,7 +236,7 @@ export function filterReports(reports) {
                 // Only apply date filtering if we have a valid date
                 if (!isNaN(reportDate.getTime())) {
                     if (currentFilters.dateFrom) {
-                        export const fromDate = new Date(currentFilters.dateFrom);
+                        const fromDate = new Date(currentFilters.dateFrom);
                         fromDate.setHours(0, 0, 0, 0); // Start of day
                         if (reportDate < fromDate) {
                             return false;
@@ -244,7 +244,7 @@ export function filterReports(reports) {
                     }
 
                     if (currentFilters.dateTo) {
-                        export const toDate = new Date(currentFilters.dateTo);
+                        const toDate = new Date(currentFilters.dateTo);
                         toDate.setHours(23, 59, 59, 999); // End of day
                         if (reportDate > toDate) {
                             return false;
@@ -259,9 +259,9 @@ export function filterReports(reports) {
 
         // Sprint filter - handle different field names and types
         if (currentFilters.sprint) {
-            export const sprintNumber = report.sprint || report.sprintNumber || '';
-            export const filterSprint = currentFilters.sprint.toString();
-            export const reportSprint = sprintNumber.toString();
+            const sprintNumber = report.sprint || report.sprintNumber || '';
+            const filterSprint = currentFilters.sprint.toString();
+            const reportSprint = sprintNumber.toString();
 
             if (reportSprint !== filterSprint) {
                 return false;
@@ -278,10 +278,10 @@ export function sortReports(reports) {
         return [];
     }
 
-    export const [field, direction] = currentFilters.sort.split('-');
+    const [field, direction] = currentFilters.sort.split('-');
 
     return [...reports].sort((a, b) => {
-        export let aValue, bValue;
+        let aValue, bValue;
 
         switch (field) {
             case 'date':
@@ -321,7 +321,7 @@ export function sortReports(reports) {
 }
 
 export function updateFilterResultsDisplay(count) {
-    export const resultsCountElement = document.getElementById('resultsCount');
+    const resultsCountElement = document.getElementById('resultsCount');
     if (resultsCountElement) {
         resultsCountElement.textContent = count;
     }
@@ -331,12 +331,12 @@ export function updateFilterResultsDisplay(count) {
 }
 
 export function updateActiveFiltersDisplay() {
-    export const activeFiltersContainer = document.getElementById('activeFilters');
+    const activeFiltersContainer = document.getElementById('activeFilters');
     if (!activeFiltersContainer) return;
 
     activeFiltersContainer.innerHTML = '';
 
-    export const filterLabels = {
+    const filterLabels = {
         search: 'Search',
         project: 'Project',
         portfolio: 'Portfolio',
@@ -349,7 +349,7 @@ export function updateActiveFiltersDisplay() {
 
     Object.entries(currentFilters).forEach(([key, value]) => {
         if (value && key !== 'sort') {
-            export const tag = document.createElement('div');
+            const tag = document.createElement('div');
             tag.className = 'active-filter-tag';
             tag.innerHTML = `
                 <span>${filterLabels[key]}: ${value}</span>
@@ -365,7 +365,7 @@ export function removeFilter(filterKey) {
     currentFilters[filterKey] = '';
 
     // Update the corresponding form input
-    export const inputElement = document.getElementById(filterKey + 'Filter') || document.getElementById('searchInput');
+    const inputElement = document.getElementById(filterKey + 'Filter') || document.getElementById('searchInput');
     if (inputElement) {
         inputElement.value = '';
     }
@@ -386,7 +386,7 @@ export function clearAllFilters() {
     currentFilters.sort = 'date-desc';
 
     // Clear all form inputs safely
-    export const inputs = [
+    const inputs = [
         'searchInput',
         'projectFilter',
         'portfolioFilter',
@@ -398,14 +398,14 @@ export function clearAllFilters() {
     ];
 
     inputs.forEach(inputId => {
-        export const element = document.getElementById(inputId);
+        const element = document.getElementById(inputId);
         if (element) {
             element.value = '';
         }
     });
 
     // Reset sort filter
-    export const sortFilter = document.getElementById('sortFilter');
+    const sortFilter = document.getElementById('sortFilter');
     if (sortFilter) {
         sortFilter.value = 'date-desc';
     }
@@ -422,9 +422,9 @@ export function clearAllFilters() {
 }
 
 export function toggleFiltersVisibility() {
-    export const filtersContainer = document.getElementById('filtersContainer');
-    export const toggleText = document.getElementById('toggleText');
-    export const toggleIcon = document.querySelector('.toggle-filters i');
+    const filtersContainer = document.getElementById('filtersContainer');
+    const toggleText = document.getElementById('toggleText');
+    const toggleIcon = document.querySelector('.toggle-filters i');
 
     filtersVisible = !filtersVisible;
 
@@ -451,13 +451,13 @@ export function applyQuickFilter(type) {
     }
 
     // Clear existing filters first (except search)
-    export const searchValue = document.getElementById('searchInput').value;
+    const searchValue = document.getElementById('searchInput').value;
     clearAllFilters();
     document.getElementById('searchInput').value = searchValue;
     currentFilters.search = searchValue;
 
-    export const today = new Date();
-    export const todayStr = today.toISOString().split('T')[0];
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
 
     switch (type) {
         case 'today':
@@ -468,13 +468,13 @@ export function applyQuickFilter(type) {
             break;
 
         case 'week':
-            export const weekStart = new Date(today);
+            const weekStart = new Date(today);
             weekStart.setDate(today.getDate() - today.getDay());
-            export const weekEnd = new Date(weekStart);
+            const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 6);
 
-            export const weekStartStr = weekStart.toISOString().split('T')[0];
-            export const weekEndStr = weekEnd.toISOString().split('T')[0];
+            const weekStartStr = weekStart.toISOString().split('T')[0];
+            const weekEndStr = weekEnd.toISOString().split('T')[0];
 
             document.getElementById('dateFromFilter').value = weekStartStr;
             document.getElementById('dateToFilter').value = weekEndStr;
@@ -483,11 +483,11 @@ export function applyQuickFilter(type) {
             break;
 
         case 'month':
-            export const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-            export const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-            export const monthStartStr = monthStart.toISOString().split('T')[0];
-            export const monthEndStr = monthEnd.toISOString().split('T')[0];
+            const monthStartStr = monthStart.toISOString().split('T')[0];
+            const monthEndStr = monthEnd.toISOString().split('T')[0];
 
             document.getElementById('dateFromFilter').value = monthStartStr;
             document.getElementById('dateToFilter').value = monthEndStr;
@@ -501,10 +501,10 @@ export function applyQuickFilter(type) {
             break;
 
         case 'recent':
-            export const recentStart = new Date(today);
+            const recentStart = new Date(today);
             recentStart.setDate(today.getDate() - 7);
 
-            export const recentStartStr = recentStart.toISOString().split('T')[0];
+            const recentStartStr = recentStart.toISOString().split('T')[0];
 
             document.getElementById('dateFromFilter').value = recentStartStr;
             document.getElementById('dateToFilter').value = todayStr;
@@ -531,8 +531,8 @@ async function showAllReports() {
 
     try {
         // Fetch all reports
-        export const result = await fetchReports(1, '', 1000);
-        export const reports = result.reports || [];
+        const result = await fetchReports(1, '', 1000);
+        const reports = result.reports || [];
 
         console.log('Total reports fetched:', reports.length);
 
@@ -540,13 +540,13 @@ async function showAllReports() {
         renderReportsTable(reports);
 
         // Update results count
-        export const resultsCountElement = document.getElementById('resultsCount');
+        const resultsCountElement = document.getElementById('resultsCount');
         if (resultsCountElement) {
             resultsCountElement.textContent = reports.length;
         }
 
         // Clear active filters display
-        export const activeFiltersContainer = document.getElementById('activeFilters');
+        const activeFiltersContainer = document.getElementById('activeFilters');
         if (activeFiltersContainer) {
             activeFiltersContainer.innerHTML = '';
         }
@@ -565,11 +565,11 @@ async function showAllReports() {
 async function testAPI() {
     console.log('🧪 Testing API endpoint...');
     try {
-        export const response = await fetch('/api/reports');
+        const response = await fetch('/api/reports');
         console.log('API Response status:', response.status);
         console.log('API Response headers:', [...response.headers.entries()]);
 
-        export const data = await response.json();
+        const data = await response.json();
         console.log('Raw API data:', data);
         console.log('Data type:', typeof data);
         console.log('Is array:', Array.isArray(data));
@@ -598,10 +598,10 @@ async function testAPI() {
 async function testTestersAPI() {
     console.log('🧪 Testing testers API endpoint...');
     try {
-        export const response = await fetch('/api/testers');
+        const response = await fetch('/api/testers');
         console.log('Testers API Response status:', response.status);
 
-        export const data = await response.json();
+        const data = await response.json();
         console.log('Raw testers data:', data);
         console.log('Testers count:', data.length);
 
@@ -626,16 +626,16 @@ export function testIndividualFilters() {
     console.log('Total reports:', allReports.length);
 
     // Test each filter individually
-    export const originalFilters = { ...currentFilters };
+    const originalFilters = { ...currentFilters };
 
     // Test search filter
     currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
     currentFilters.search = 'test';
-    export let filtered = filterReports(allReports);
+    let filtered = filterReports(allReports);
     console.log('Search "test" results:', filtered.length);
 
     // Test project filter (use first available project)
-    export const projects = [...new Set(allReports.map(r => r.project || r.projectName).filter(Boolean))];
+    const projects = [...new Set(allReports.map(r => r.project || r.projectName).filter(Boolean))];
     if (projects.length > 0) {
         currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.project = projects[0];
@@ -644,12 +644,12 @@ export function testIndividualFilters() {
     }
 
     // Test tester filter (use first available tester)
-    export const testers = new Set();
+    const testers = new Set();
     allReports.forEach(report => {
         // Extract testers using same logic as initialization
         if (Array.isArray(report.testers)) {
             report.testers.forEach(tester => {
-                export const name = typeof tester === 'object' ? tester.name : tester;
+                const name = typeof tester === 'object' ? tester.name : tester;
                 if (name) testers.add(name.toString().trim());
             });
         } else if (Array.isArray(report.testerData)) {
@@ -659,7 +659,7 @@ export function testIndividualFilters() {
         }
     });
 
-    export const testersList = [...testers];
+    const testersList = [...testers];
     if (testersList.length > 0) {
         currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.tester = testersList[0];
@@ -679,7 +679,7 @@ export function testIndividualFilters() {
     }
 
     // Test status filter
-    export const statuses = [...new Set(allReports.map(r => r.status || r.testingStatus).filter(Boolean))];
+    const statuses = [...new Set(allReports.map(r => r.status || r.testingStatus).filter(Boolean))];
     if (statuses.length > 0) {
         currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.status = statuses[0];
@@ -704,7 +704,7 @@ export function debugReportData() {
     console.log('Total reports:', allReports.length);
 
     if (allReports.length > 0) {
-        export const sampleReport = allReports[0];
+        const sampleReport = allReports[0];
         console.log('Sample report structure:', sampleReport);
         console.log('Available fields:', Object.keys(sampleReport));
 
@@ -736,7 +736,7 @@ export function debugReportData() {
         });
 
         // Count unique testers
-        export const allTesters = new Set();
+        const allTesters = new Set();
         allReports.forEach(report => {
             if (Array.isArray(report.testers)) {
                 report.testers.forEach(tester => {
@@ -759,7 +759,7 @@ export function debugReportData() {
 async function initializeFilterDropdowns() {
     try {
         // Fetch all reports to populate filter options
-        export const result = await fetchReports(1, '', 1000);
+        const result = await fetchReports(1, '', 1000);
         allReports = result.reports || [];
 
         console.log('Initializing filters with', allReports.length, 'reports');
@@ -773,9 +773,9 @@ async function initializeFilterDropdowns() {
         }
 
         // Extract unique values for dropdowns with robust field handling
-        export const projects = new Set();
-        export const portfolios = new Set();
-        export const testers = new Set();
+        const projects = new Set();
+        const portfolios = new Set();
+        const testers = new Set();
 
         // Debug: Log first few reports to understand data structure
         if (allReports.length > 0) {
@@ -783,7 +783,7 @@ async function initializeFilterDropdowns() {
             console.log('All report keys:', Object.keys(allReports[0]));
 
             // Specifically check tester-related fields
-            export const sampleReport = allReports[0];
+            const sampleReport = allReports[0];
             console.log('Tester-related fields in sample report:', {
                 testers: sampleReport.testers,
                 tester: sampleReport.tester,
@@ -811,15 +811,15 @@ async function initializeFilterDropdowns() {
             }
 
             // Extract project names
-            export const projectName = report.project || report.projectName;
+            const projectName = report.project || report.projectName;
             if (projectName) projects.add(projectName);
 
             // Extract portfolio names
-            export const portfolioName = report.portfolio || report.portfolioName;
+            const portfolioName = report.portfolio || report.portfolioName;
             if (portfolioName) portfolios.add(portfolioName);
 
             // Extract tester names - handle different data structures
-            export const possibleTesterFields = [
+            const possibleTesterFields = [
                 'testers', 'tester', 'testerData', 'tester_data',
                 'assignedTesters', 'testTeam', 'testerName', 'assignedTester'
             ];
@@ -841,7 +841,7 @@ async function initializeFilterDropdowns() {
                         testers.add(tester.trim());
                     } else if (tester && typeof tester === 'object') {
                         // Handle different object structures
-                        export const name = tester.name || tester.testerName || tester.email || tester.id;
+                        const name = tester.name || tester.testerName || tester.email || tester.id;
                         if (name) testers.add(name.toString().trim());
                     }
                 });
@@ -866,16 +866,16 @@ async function initializeFilterDropdowns() {
             else if (report.testers && typeof report.testers === 'string') {
                 try {
                     // Try to parse as JSON first
-                    export const parsedTesters = JSON.parse(report.testers);
+                    const parsedTesters = JSON.parse(report.testers);
                     if (Array.isArray(parsedTesters)) {
                         parsedTesters.forEach(tester => {
-                            export const name = typeof tester === 'object' ? tester.name : tester;
+                            const name = typeof tester === 'object' ? tester.name : tester;
                             if (name) testers.add(name.toString().trim());
                         });
                     }
                 } catch (e) {
                     // If not JSON, treat as comma-separated string
-                    export const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
+                    const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
                     testerList.forEach(tester => testers.add(tester));
                 }
             }
@@ -893,9 +893,9 @@ async function initializeFilterDropdowns() {
         });
 
         // Convert sets to sorted arrays
-        export const sortedProjects = [...projects].sort();
-        export const sortedPortfolios = [...portfolios].sort();
-        export const sortedTesters = [...testers].sort();
+        const sortedProjects = [...projects].sort();
+        const sortedPortfolios = [...portfolios].sort();
+        const sortedTesters = [...testers].sort();
 
         console.log('Filter options extracted:', {
             projects: sortedProjects,
@@ -913,20 +913,20 @@ async function initializeFilterDropdowns() {
         if (sortedTesters.length === 0) {
             console.log('No testers found in reports, trying to load from testers API...');
             try {
-                export const testersResponse = await fetch('/api/testers');
+                const testersResponse = await fetch('/api/testers');
                 if (testersResponse.ok) {
-                    export const testersData = await testersResponse.json();
+                    const testersData = await testersResponse.json();
                     console.log('Loaded testers from API:', testersData);
                     testersData.forEach(tester => {
                         if (tester.name) {
                             testers.add(tester.name);
                         }
                     });
-                    export const updatedSortedTesters = [...testers].sort();
+                    const updatedSortedTesters = [...testers].sort();
                     console.log('Updated testers list:', updatedSortedTesters);
 
                     // Update the tester dropdown with API data
-                    export const testerFilter = document.getElementById('testerFilter');
+                    const testerFilter = document.getElementById('testerFilter');
                     if (testerFilter) {
                         // Clear existing options except the first one
                         while (testerFilter.children.length > 1) {
@@ -934,7 +934,7 @@ async function initializeFilterDropdowns() {
                         }
 
                         updatedSortedTesters.forEach(tester => {
-                            export const option = document.createElement('option');
+                            const option = document.createElement('option');
                             option.value = tester;
                             option.textContent = tester;
                             testerFilter.appendChild(option);
@@ -947,7 +947,7 @@ async function initializeFilterDropdowns() {
         }
 
         // Populate project dropdown
-        export const projectFilter = document.getElementById('projectFilter');
+        const projectFilter = document.getElementById('projectFilter');
         if (projectFilter) {
             // Clear existing options except the first one
             while (projectFilter.children.length > 1) {
@@ -955,7 +955,7 @@ async function initializeFilterDropdowns() {
             }
 
             sortedProjects.forEach(project => {
-                export const option = document.createElement('option');
+                const option = document.createElement('option');
                 option.value = project;
                 option.textContent = project;
                 projectFilter.appendChild(option);
@@ -963,7 +963,7 @@ async function initializeFilterDropdowns() {
         }
 
         // Populate portfolio dropdown
-        export const portfolioFilter = document.getElementById('portfolioFilter');
+        const portfolioFilter = document.getElementById('portfolioFilter');
         if (portfolioFilter) {
             // Clear existing options except the first one
             while (portfolioFilter.children.length > 1) {
@@ -971,7 +971,7 @@ async function initializeFilterDropdowns() {
             }
 
             sortedPortfolios.forEach(portfolio => {
-                export const option = document.createElement('option');
+                const option = document.createElement('option');
                 option.value = portfolio;
                 option.textContent = portfolio;
                 portfolioFilter.appendChild(option);
@@ -979,7 +979,7 @@ async function initializeFilterDropdowns() {
         }
 
         // Populate tester dropdown
-        export const testerFilter = document.getElementById('testerFilter');
+        const testerFilter = document.getElementById('testerFilter');
         if (testerFilter) {
             // Clear existing options except the first one
             while (testerFilter.children.length > 1) {
@@ -987,7 +987,7 @@ async function initializeFilterDropdowns() {
             }
 
             sortedTesters.forEach(tester => {
-                export const option = document.createElement('option');
+                const option = document.createElement('option');
                 option.value = tester;
                 option.textContent = tester;
                 testerFilter.appendChild(option);
@@ -1002,9 +1002,9 @@ async function initializeFilterDropdowns() {
 
 // Immediate search for pagination and buttons
 async function searchReportsImmediate() {
-    export const searchQuery = document.getElementById('searchInput')?.value || '';
+    const searchQuery = document.getElementById('searchInput')?.value || '';
     showReportsLoading();
-    export const result = await fetchReports(currentPage, searchQuery);
+    const result = await fetchReports(currentPage, searchQuery);
     hideReportsLoading();
 
     renderReportsTable(result.reports);
@@ -1012,7 +1012,7 @@ async function searchReportsImmediate() {
 }
 
 export function renderReportsTable(reports) {
-    export const tbody = document.getElementById('reportsTableBody');
+    const tbody = document.getElementById('reportsTableBody');
     if (!tbody) return; // Ensure tbody exists
 
     if (reports.length === 0) {
@@ -1039,14 +1039,14 @@ export function renderReportsTable(reports) {
 }
 
 export function renderPagination(result) {
-    export const pagination = document.getElementById('pagination');
+    const pagination = document.getElementById('pagination');
     if (!pagination) return; // Ensure pagination element exists
 
     if (result.totalPages <= 1) {
         pagination.innerHTML = '';
         return;
     }
-    export let paginationHTML = `<button class="pagination-btn" onclick="goToPage(${result.page - 1})" ${!result.hasPrev ? 'disabled' : ''}>←</button>`;
+    let paginationHTML = `<button class="pagination-btn" onclick="goToPage(${result.page - 1})" ${!result.hasPrev ? 'disabled' : ''}>←</button>`;
     for (let i = 1; i <= result.totalPages; i++) {
         paginationHTML += `<button class="pagination-btn ${i === result.page ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
     }
@@ -1071,8 +1071,8 @@ async function regenerateReport(id) {
 }
 
 async function deleteReport(id) {
-    export const confirmDelete = await new Promise(resolve => {
-        export const modal = document.createElement('div');
+    const confirmDelete = await new Promise(resolve => {
+        const modal = document.createElement('div');
         modal.className = 'modal';
         modal.style.display = 'block';
 
@@ -1089,8 +1089,8 @@ async function deleteReport(id) {
 
         document.body.appendChild(modal);
 
-        export const confirmBtn = document.getElementById('confirmDeleteBtn');
-        export const cancelBtn = document.getElementById('cancelDeleteBtn');
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const cancelBtn = document.getElementById('cancelDeleteBtn');
 
         confirmBtn.onclick = () => {
             modal.remove();
@@ -1104,7 +1104,7 @@ async function deleteReport(id) {
     });
 
     if (confirmDelete) {
-        export const result = await deleteReportDB(id);
+        const result = await deleteReportDB(id);
         if (result) {
             allReportsCache = allReportsCache.filter(r => r.id !== id);
             // Re-fetch dashboard stats if the function exists
@@ -1126,7 +1126,7 @@ export function viewReport(id) {
 
 // --- Form Handling ---
 export function resetFormData() {
-    export const form = document.getElementById('qaReportForm');
+    const form = document.getElementById('qaReportForm');
     if (form) {
         form.reset();
 
@@ -1181,7 +1181,7 @@ async function loadReportForEditing(report) {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     // Load portfolio first
-    export const portfolioSelect = document.getElementById('portfolioName');
+    const portfolioSelect = document.getElementById('portfolioName');
     if (portfolioSelect && report.portfolioName) {
         portfolioSelect.value = report.portfolioName;
         // Trigger portfolio selection to load projects
@@ -1191,17 +1191,17 @@ async function loadReportForEditing(report) {
         await new Promise(resolve => setTimeout(resolve, 300));
 
         // Then load project
-        export const projectSelect = document.getElementById('projectName');
+        const projectSelect = document.getElementById('projectName');
         if (projectSelect && report.projectName) {
             projectSelect.value = report.projectName;
         }
     }
 
     // Basic fields (excluding portfolioName and projectName as they're handled above)
-    export const basicFields = ['sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber', 'testEnvironment'];
+    const basicFields = ['sprintNumber', 'reportVersion', 'reportName', 'cycleNumber', 'reportDate', 'testSummary', 'testingStatus', 'releaseNumber', 'testEnvironment'];
 
     // Evaluation fields
-    export const evaluationFields = [
+    const evaluationFields = [
         'involvementScore', 'involvementReason',
         'requirementsQualityScore', 'requirementsQualityReason',
         'qaPlanReviewScore', 'qaPlanReviewReason',
@@ -1213,7 +1213,7 @@ async function loadReportForEditing(report) {
         'lowBugsScore', 'lowBugsReason'
     ];
     basicFields.forEach(field => {
-        export const element = document.getElementById(field);
+        const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
@@ -1221,7 +1221,7 @@ async function loadReportForEditing(report) {
 
     // Load evaluation fields
     evaluationFields.forEach(field => {
-        export const element = document.getElementById(field);
+        const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
@@ -1231,36 +1231,36 @@ async function loadReportForEditing(report) {
     calculateFinalScore();
 
     // User Stories
-    export const userStoryFields = ['passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories', 'blockedUserStories', 'cancelledUserStories', 'deferredUserStories', 'notTestableUserStories'];
+    const userStoryFields = ['passedUserStories', 'passedWithIssuesUserStories', 'failedUserStories', 'blockedUserStories', 'cancelledUserStories', 'deferredUserStories', 'notTestableUserStories'];
     userStoryFields.forEach(field => {
-        export const element = document.getElementById(field.replace('UserStories', 'Stories')); // Adjust ID for HTML
+        const element = document.getElementById(field.replace('UserStories', 'Stories')); // Adjust ID for HTML
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
     });
 
     // Test Cases
-    export const testCaseFields = ['passedTestCases', 'passedWithIssuesTestCases', 'failedTestCases', 'blockedTestCases', 'cancelledTestCases', 'deferredTestCases', 'notTestableTestCases'];
+    const testCaseFields = ['passedTestCases', 'passedWithIssuesTestCases', 'failedTestCases', 'blockedTestCases', 'cancelledTestCases', 'deferredTestCases', 'notTestableTestCases'];
     testCaseFields.forEach(field => {
-        export const element = document.getElementById(field);
+        const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
     });
 
     // Issues
-    export const issueFields = ['criticalIssues', 'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredIssues'];
+    const issueFields = ['criticalIssues', 'highIssues', 'mediumIssues', 'lowIssues', 'newIssues', 'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredIssues'];
     issueFields.forEach(field => {
-        export const element = document.getElementById(field);
+        const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
     });
 
     // Enhancements
-    export const enhancementFields = ['newEnhancements', 'implementedEnhancements', 'existsEnhancements'];
+    const enhancementFields = ['newEnhancements', 'implementedEnhancements', 'existsEnhancements'];
     enhancementFields.forEach(field => {
-        export const element = document.getElementById(field);
+        const element = document.getElementById(field);
         if (element && report[field] !== undefined) {
             element.value = report[field];
         }
@@ -1296,19 +1296,19 @@ async function loadReportForEditing(report) {
 // Form submission handler
 // This listener should only be active on the create_report.html page
 document.addEventListener('DOMContentLoaded', () => {
-    export const qaReportForm = document.getElementById('qaReportForm');
+    const qaReportForm = document.getElementById('qaReportForm');
     if (qaReportForm) {
         qaReportForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            export const formData = new FormData(this);
-            export const reportData = {};
+            const formData = new FormData(this);
+            const reportData = {};
 
             // Collect form data
             for (let [key, value] of formData.entries()) {
                 // Handle special cases for array inputs (e.g., checkboxes if any)
                 if (key.endsWith('[]')) {
-                    export const arrayKey = key.slice(0, -2);
+                    const arrayKey = key.slice(0, -2);
                     if (!reportData[arrayKey]) {
                         reportData[arrayKey] = [];
                     }
@@ -1327,7 +1327,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.qaNotesData = qaNotesData; // Add QA notes array data
             // reportData.customFields = customFieldsData; // Add custom fields data - REMOVED
 
-            export const savedReport = await saveReport(reportData);
+            const savedReport = await saveReport(reportData);
             if (savedReport) {
                 showToast('Report saved successfully!', 'success');
 
@@ -1346,27 +1346,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- Enhanced Export Functions ---
 async function exportReportAsPdf(id) {
-    export const report = allReportsCache.find(r => r.id === id);
+    const report = allReportsCache.find(r => r.id === id);
     if (!report) {
         console.error("Report not found for PDF export:", id);
         showToast('Report not found for PDF export.', 'error');
         return;
     }
 
-    export const { jsPDF } = window.jspdf;
-    export const doc = new jsPDF();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-    export let yPos = 20;
+    let yPos = 20;
 
     // Helper functions
-    export const addTitle = (text, fontSize = 16) => {
+    const addTitle = (text, fontSize = 16) => {
         doc.setFontSize(fontSize);
         doc.setFont(undefined, 'bold');
         doc.text(text, 105, yPos, { align: 'center' });
         yPos += fontSize * 0.8;
     };
 
-    export const addSection = (title, fontSize = 14) => {
+    const addSection = (title, fontSize = 14) => {
         yPos += 10;
         doc.setFontSize(fontSize);
         doc.setFont(undefined, 'bold');
@@ -1374,10 +1374,10 @@ async function exportReportAsPdf(id) {
         yPos += 10;
     };
 
-    export const addText = (text, x = 10) => {
+    const addText = (text, x = 10) => {
         doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
-        export const splitText = doc.splitTextToSize(text, 190);
+        const splitText = doc.splitTextToSize(text, 190);
         doc.text(splitText, x, yPos);
         yPos += splitText.length * 6;
     };
@@ -1426,7 +1426,7 @@ async function exportReportAsPdf(id) {
     }
 
     // Dynamic sections with tables
-    export const addDataTable = (title, data, headers) => {
+    const addDataTable = (title, data, headers) => {
         if (data && data.length > 0) {
             addSection(title);
             doc.autoTable({
@@ -1442,23 +1442,23 @@ async function exportReportAsPdf(id) {
 
     // Requests
     if (report.requestData && report.requestData.length > 0) {
-        export const requestsData = report.requestData.map(req => [req.id, req.url]);
+        const requestsData = report.requestData.map(req => [req.id, req.url]);
         addDataTable("Request Information", requestsData, ['Request ID', 'URL']);
     }
 
     // Builds
     if (report.buildData && report.buildData.length > 0) {
-        export const buildsData = report.buildData.map(build => [build.requestId, build.environment, build.cycles]);
+        const buildsData = report.buildData.map(build => [build.requestId, build.environment, build.cycles]);
         addDataTable("Build Information", buildsData, ['Request ID', 'Environment', 'Cycles']);
     }
 
     // Testers
     if (report.testerData && report.testerData.length > 0) {
-        export const testersData = report.testerData.map(tester => {
-            export const roles = [];
+        const testersData = report.testerData.map(tester => {
+            const roles = [];
             if (tester.is_automation_engineer) roles.push('Automation Engineer');
             if (tester.is_manual_engineer) roles.push('Manual Engineer');
-            export const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
+            const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
             return [tester.name, tester.email, roleText];
         });
         addDataTable("Testers", testersData, ['Tester Name', 'Email', 'Roles']);
@@ -1466,7 +1466,7 @@ async function exportReportAsPdf(id) {
 
     // Team Members
     if (report.teamMemberData && report.teamMemberData.length > 0) {
-        export const teamMembersData = report.teamMemberData.map(member => [
+        const teamMembersData = report.teamMemberData.map(member => [
             member.name,
             member.role,
             member.email
@@ -1512,17 +1512,17 @@ async function exportReportAsPdf(id) {
 }
 
 async function exportReportAsExcel(id) {
-    export const report = allReportsCache.find(r => r.id === id);
+    const report = allReportsCache.find(r => r.id === id);
     if (!report) {
         console.error("Report not found for Excel export:", id);
         showToast('Report not found for Excel export.', 'error');
         return;
     }
 
-    export const workbook = XLSX.utils.book_new();
+    const workbook = XLSX.utils.book_new();
 
     // Summary Sheet
-    export const summaryData = [
+    const summaryData = [
         ["Field", "Value"],
         ["Portfolio Name", report.portfolioName || 'N/A'],
         ["Project Name", report.projectName || 'N/A'],
@@ -1541,11 +1541,11 @@ async function exportReportAsExcel(id) {
         ["Total Enhancements", report.totalEnhancements || 0],
         ["QA Notes", report.qaNotesData && report.qaNotesData.length > 0 ? `${report.qaNotesData.length} notes` : 'N/A']
     ];
-    export const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
     XLSX.utils.book_append_sheet(workbook, wsSummary, "Summary");
 
     // User Stories Sheet
-    export const userStoriesData = [
+    const userStoriesData = [
         ["Status", "Count", "Percentage"],
         ["Passed", report.passedUserStories || 0, report.totalUserStories ? Math.round(((report.passedUserStories || 0) / report.totalUserStories) * 100) : 0],
         ["Passed with Issues", report.passedWithIssuesUserStories || 0, report.totalUserStories ? Math.round(((report.passedWithIssuesUserStories || 0) / report.totalUserStories) * 100) : 0],
@@ -1555,11 +1555,11 @@ async function exportReportAsExcel(id) {
         ["Deferred", report.deferredUserStories || 0, report.totalUserStories ? Math.round(((report.deferredUserStories || 0) / report.totalUserStories) * 100) : 0],
         ["Not Testable", report.notTestableUserStories || 0, report.totalUserStories ? Math.round(((report.notTestableUserStories || 0) / report.totalUserStories) * 100) : 0]
     ];
-    export const wsUserStories = XLSX.utils.aoa_to_sheet(userStoriesData);
+    const wsUserStories = XLSX.utils.aoa_to_sheet(userStoriesData);
     XLSX.utils.book_append_sheet(workbook, wsUserStories, "User Stories");
 
     // Test Cases Sheet
-    export const testCasesData = [
+    const testCasesData = [
         ["Status", "Count", "Percentage"],
         ["Passed", report.passedTestCases || 0, report.totalTestCases ? Math.round(((report.passedTestCases || 0) / report.totalTestCases) * 100) : 0],
         ["Passed with Issues", report.passedWithIssuesTestCases || 0, report.totalTestCases ? Math.round(((report.passedWithIssuesTestCases || 0) / report.totalTestCases) * 100) : 0],
@@ -1569,11 +1569,11 @@ async function exportReportAsExcel(id) {
         ["Deferred", report.deferredTestCases || 0, report.totalTestCases ? Math.round(((report.deferredTestCases || 0) / report.totalTestCases) * 100) : 0],
         ["Not Testable", report.notTestableTestCases || 0, report.totalTestCases ? Math.round(((report.notTestableTestCases || 0) / report.totalTestCases) * 100) : 0]
     ];
-    export const wsTestCases = XLSX.utils.aoa_to_sheet(testCasesData);
+    const wsTestCases = XLSX.utils.aoa_to_sheet(testCasesData);
     XLSX.utils.book_append_sheet(workbook, wsTestCases, "Test Cases");
 
     // Issues Sheet
-    export const issuesData = [
+    const issuesData = [
         ["Priority/Status", "Count", "Percentage"],
         ["", "", ""],
         ["PRIORITY BREAKDOWN", "", ""],
@@ -1589,21 +1589,21 @@ async function exportReportAsExcel(id) {
         ["Re-opened", report.reopenedIssues || 0, report.totalIssues ? Math.round(((report.reopenedIssues || 0) / report.totalIssues) * 100) : 0],
         ["Deferred", report.deferredIssues || 0, report.totalIssues ? Math.round(((report.deferredIssues || 0) / report.totalIssues) * 100) : 0]
     ];
-    export const wsIssues = XLSX.utils.aoa_to_sheet(issuesData);
+    const wsIssues = XLSX.utils.aoa_to_sheet(issuesData);
     XLSX.utils.book_append_sheet(workbook, wsIssues, "Issues");
 
     // Enhancements Sheet
-    export const enhancementsData = [
+    const enhancementsData = [
         ["Status", "Count", "Percentage"],
         ["New", report.newEnhancements || 0, report.totalEnhancements ? Math.round(((report.newEnhancements || 0) / report.totalEnhancements) * 100) : 0],
         ["Implemented", report.implementedEnhancements || 0, report.totalEnhancements ? Math.round(((report.implementedEnhancements || 0) / report.totalEnhancements) * 100) : 0],
         ["Exists", report.existsEnhancements || 0, report.totalEnhancements ? Math.round(((report.existsEnhancements || 0) / report.totalEnhancements) * 100) : 0]
     ];
-    export const wsEnhancements = XLSX.utils.aoa_to_sheet(enhancementsData);
+    const wsEnhancements = XLSX.utils.aoa_to_sheet(enhancementsData);
     XLSX.utils.book_append_sheet(workbook, wsEnhancements, "Enhancements");
 
     // Detailed Metrics Sheet
-    export const detailedMetricsData = [
+    const detailedMetricsData = [
         ["Metric Category", "Metric", "Value"],
         ["", "", ""],
         ["USER STORIES METRICS", "", ""],
@@ -1655,41 +1655,41 @@ async function exportReportAsExcel(id) {
         ["Created At", "DateTime", report.createdAt || 'N/A'],
         ["Updated At", "DateTime", report.updatedAt || 'N/A']
     ];
-    export const wsDetailedMetrics = XLSX.utils.aoa_to_sheet(detailedMetricsData);
+    const wsDetailedMetrics = XLSX.utils.aoa_to_sheet(detailedMetricsData);
     XLSX.utils.book_append_sheet(workbook, wsDetailedMetrics, "Detailed Metrics");
 
     // Dynamic Data Sheets
     if (report.requestData && report.requestData.length > 0) {
-        export const requestHeaders = ["Request ID", "URL"];
-        export const requestsSheetData = report.requestData.map(req => [req.id, req.url]);
-        export const wsRequests = XLSX.utils.aoa_to_sheet([requestHeaders, ...requestsSheetData]);
+        const requestHeaders = ["Request ID", "URL"];
+        const requestsSheetData = report.requestData.map(req => [req.id, req.url]);
+        const wsRequests = XLSX.utils.aoa_to_sheet([requestHeaders, ...requestsSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsRequests, "Requests");
     }
 
     if (report.buildData && report.buildData.length > 0) {
-        export const buildHeaders = ["Request ID", "URL", "Environment", "Cycles"];
-        export const buildsSheetData = report.buildData.map(build => [build.requestId, build.requestUrl, build.environment, build.cycles]);
-        export const wsBuilds = XLSX.utils.aoa_to_sheet([buildHeaders, ...buildsSheetData]);
+        const buildHeaders = ["Request ID", "URL", "Environment", "Cycles"];
+        const buildsSheetData = report.buildData.map(build => [build.requestId, build.requestUrl, build.environment, build.cycles]);
+        const wsBuilds = XLSX.utils.aoa_to_sheet([buildHeaders, ...buildsSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsBuilds, "Builds");
     }
 
     if (report.testerData && report.testerData.length > 0) {
-        export const testerHeaders = ["Tester Name", "Email", "Roles"];
-        export const testersSheetData = report.testerData.map(tester => {
-            export const roles = [];
+        const testerHeaders = ["Tester Name", "Email", "Roles"];
+        const testersSheetData = report.testerData.map(tester => {
+            const roles = [];
             if (tester.is_automation_engineer) roles.push('Automation Engineer');
             if (tester.is_manual_engineer) roles.push('Manual Engineer');
-            export const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
+            const roleText = roles.length > 0 ? roles.join(', ') : 'No roles assigned';
             return [tester.name, tester.email, roleText];
         });
-        export const wsTesters = XLSX.utils.aoa_to_sheet([testerHeaders, ...testersSheetData]);
+        const wsTesters = XLSX.utils.aoa_to_sheet([testerHeaders, ...testersSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsTesters, "Testers");
     }
 
     if (report.teamMemberData && report.teamMemberData.length > 0) {
-        export const teamMemberHeaders = ["Name", "Email", "Role"];
-        export const teamMembersSheetData = report.teamMemberData.map(member => [member.name, member.email, member.role]);
-        export const wsTeamMembers = XLSX.utils.aoa_to_sheet([teamMemberHeaders, ...teamMembersSheetData]);
+        const teamMemberHeaders = ["Name", "Email", "Role"];
+        const teamMembersSheetData = report.teamMemberData.map(member => [member.name, member.email, member.role]);
+        const wsTeamMembers = XLSX.utils.aoa_to_sheet([teamMemberHeaders, ...teamMembersSheetData]);
         XLSX.utils.book_append_sheet(workbook, wsTeamMembers, "Team Members");
     }
     XLSX.writeFile(workbook, `QA_Report_${report.portfolioName}_Sprint_${report.sprintNumber}.xlsx`);
@@ -1699,7 +1699,7 @@ async function exportReportAsExcel(id) {
 // --- Modal & Utility Functions ---
 export function showModal(modalId) {
     console.log('showModal called with modalId:', modalId);
-    export const modal = document.getElementById(modalId);
+    const modal = document.getElementById(modalId);
     console.log('Modal element found:', modal);
     if (modal) {
         modal.style.display = 'flex';
@@ -1712,9 +1712,9 @@ export function showModal(modalId) {
 export function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
     // Clear form inputs
-    export const modal = document.getElementById(modalId);
+    const modal = document.getElementById(modalId);
     if (modal) { // Check if modal exists before querying
-        export const inputs = modal.querySelectorAll('input, textarea, select');
+        const inputs = modal.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
             if (input.type === 'checkbox' || input.type === 'radio') {
                 input.checked = false;
@@ -1734,16 +1734,16 @@ export function showAddProjectModal() {
 }
 
 async function addPortfolio() {
-    export const name = document.getElementById('newPortfolioName').value.trim();
+    const name = document.getElementById('newPortfolioName').value.trim();
     if (name) {
         try {
-            export const response = await fetch('/api/portfolios', {
+            const response = await fetch('/api/portfolios', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: name })
             });
             if (response.ok) {
-                export const newPortfolio = await response.json();
+                const newPortfolio = await response.json();
                 showToast('Portfolio added successfully! Now please add a project to this portfolio.', 'success');
                 invalidateAllCaches(); // Clear caches since data changed
 
@@ -1751,14 +1751,14 @@ async function addPortfolio() {
                 await loadPortfoliosOnly();
 
                 // Select the newly created portfolio
-                export const portfolioSelect = document.getElementById('portfolioName');
+                const portfolioSelect = document.getElementById('portfolioName');
                 if (portfolioSelect) {
                     // Find and select the new portfolio option
-                    export const portfolioValue = name.toLowerCase().replace(/\s+/g, '-');
+                    const portfolioValue = name.toLowerCase().replace(/\s+/g, '-');
                     portfolioSelect.value = portfolioValue;
 
                     // Trigger the change event to load projects for this portfolio
-                    export const changeEvent = new Event('change', { bubbles: true });
+                    const changeEvent = new Event('change', { bubbles: true });
                     portfolioSelect.dispatchEvent(changeEvent);
                 }
 
@@ -1771,7 +1771,7 @@ async function addPortfolio() {
                 }, 500);
 
             } else {
-                export const error = await response.json();
+                const error = await response.json();
                 showToast('Error adding portfolio: ' + (error.error || 'Unknown error'), 'error');
             }
         } catch (error) {
@@ -1784,26 +1784,26 @@ async function addPortfolio() {
 }
 
 async function addProject() {
-    export const name = document.getElementById('newProjectName').value.trim();
-    export const portfolioSelect = document.getElementById('portfolioName');
+    const name = document.getElementById('newProjectName').value.trim();
+    const portfolioSelect = document.getElementById('portfolioName');
 
     if (!portfolioSelect.value) {
         showToast('Please select a portfolio first.', 'warning');
         return;
     }
 
-    export const selectedPortfolioOption = portfolioSelect.options[portfolioSelect.selectedIndex];
-    export const actualPortfolioId = selectedPortfolioOption ? selectedPortfolioOption.dataset.id : null;
+    const selectedPortfolioOption = portfolioSelect.options[portfolioSelect.selectedIndex];
+    const actualPortfolioId = selectedPortfolioOption ? selectedPortfolioOption.dataset.id : null;
 
     if (name && actualPortfolioId) {
         try {
-            export const response = await fetch('/api/projects', {
+            const response = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: name, portfolio_id: actualPortfolioId })
             });
             if (response.ok) {
-                export const newProject = await response.json();
+                const newProject = await response.json();
                 showToast('Project added successfully!', 'success');
                 invalidateAllCaches(); // Clear caches since data changed
 
@@ -1811,19 +1811,19 @@ async function addProject() {
                 await loadProjectsForPortfolio(actualPortfolioId);
 
                 // Select the newly created project
-                export const projectSelect = document.getElementById('projectName');
+                const projectSelect = document.getElementById('projectName');
                 if (projectSelect) {
-                    export const projectValue = name.toLowerCase().replace(/\s+/g, '-');
+                    const projectValue = name.toLowerCase().replace(/\s+/g, '-');
                     projectSelect.value = projectValue;
 
                     // Trigger the change event to enable remaining fields
-                    export const changeEvent = new Event('change', { bubbles: true });
+                    const changeEvent = new Event('change', { bubbles: true });
                     projectSelect.dispatchEvent(changeEvent);
                 }
 
                 closeModal('addProjectModal');
             } else {
-                export const error = await response.json();
+                const error = await response.json();
                 showToast('Error adding project: ' + (error.error || 'Unknown error'), 'error');
             }
         } catch (error) {
@@ -1836,20 +1836,20 @@ async function addProject() {
 }
 
 export function getCurrentDate() {
-    export const today = new Date();
+    const today = new Date();
     return `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
 }
 
 export function generateDefaultReportName() {
-    export const portfolioSelect = document.getElementById('portfolioName');
-    export const projectSelect = document.getElementById('projectName');
-    export const sprintNumber = document.getElementById('sprintNumber');
-    export const cycleNumber = document.getElementById('cycleNumber');
+    const portfolioSelect = document.getElementById('portfolioName');
+    const projectSelect = document.getElementById('projectName');
+    const sprintNumber = document.getElementById('sprintNumber');
+    const cycleNumber = document.getElementById('cycleNumber');
 
     if (portfolioSelect?.value && projectSelect?.value && sprintNumber?.value && cycleNumber?.value) {
-        export const portfolio = portfolioSelect.options[portfolioSelect.selectedIndex].text;
-        export const project = projectSelect.options[projectSelect.selectedIndex].text;
-        export const today = getCurrentDate();
+        const portfolio = portfolioSelect.options[portfolioSelect.selectedIndex].text;
+        const project = projectSelect.options[projectSelect.selectedIndex].text;
+        const today = getCurrentDate();
 
         return `Sprint-${portfolio}-${project}-${today}-${sprintNumber.value}-${cycleNumber.value}`;
     }
@@ -1859,8 +1859,8 @@ export function generateDefaultReportName() {
 
 // Evaluation Section Functions
 export function toggleEvaluationCriteria() {
-    export const content = document.getElementById('criteriaContent');
-    export const icon = document.getElementById('criteriaToggleIcon');
+    const content = document.getElementById('criteriaContent');
+    const icon = document.getElementById('criteriaToggleIcon');
 
     if (content.classList.contains('expanded')) {
         content.classList.remove('expanded');
@@ -1872,7 +1872,7 @@ export function toggleEvaluationCriteria() {
 }
 
 export function calculateFinalScore() {
-    export const scoreFields = [
+    const scoreFields = [
         'involvementScore',
         'requirementsQualityScore',
         'qaPlanReviewScore',
@@ -1883,9 +1883,9 @@ export function calculateFinalScore() {
         'lowBugsScore'
     ];
 
-    export let totalScore = 0;
+    let totalScore = 0;
     scoreFields.forEach(fieldId => {
-        export const field = document.getElementById(fieldId);
+        const field = document.getElementById(fieldId);
         if (field && field.value) {
             totalScore += parseInt(field.value) || 0;
         }
@@ -1898,10 +1898,10 @@ export function calculateFinalScore() {
 }
 
 export function updateEvaluationChart() {
-    export const ctx = document.getElementById('evaluationChart');
+    const ctx = document.getElementById('evaluationChart');
     if (!ctx) return;
 
-    export const scores = {
+    const scores = {
         'Involvement': parseInt(document.getElementById('involvementScore')?.value) || 0,
         'Requirements Quality': parseInt(document.getElementById('requirementsQualityScore')?.value) || 0,
         'QA Plan Review': parseInt(document.getElementById('qaPlanReviewScore')?.value) || 0,
@@ -1913,7 +1913,7 @@ export function updateEvaluationChart() {
         'Low Bugs': parseInt(document.getElementById('lowBugsScore')?.value) || 0
     };
 
-    export const maxScores = {
+    const maxScores = {
         'Involvement': 20,
         'Requirements Quality': 10,
         'QA Plan Review': 5,
@@ -1925,11 +1925,11 @@ export function updateEvaluationChart() {
         'Low Bugs': 5
     };
 
-    export const labels = Object.keys(scores);
-    export const data = Object.values(scores);
-    export const maxData = Object.values(maxScores);
+    const labels = Object.keys(scores);
+    const data = Object.values(scores);
+    const maxData = Object.values(maxScores);
 
-    export const colors = [
+    const colors = [
         '#3b82f6', '#ef4444', '#10b981', '#f59e0b',
         '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899'
     ];
@@ -1974,9 +1974,9 @@ export function updateEvaluationChart() {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            export const label = context.label;
-                            export const value = context.parsed;
-                            export const maxValue = maxData[context.dataIndex];
+                            const label = context.label;
+                            const value = context.parsed;
+                            const maxValue = maxData[context.dataIndex];
                             return `${label}: ${value}/${maxValue}`;
                         }
                     }
@@ -1989,13 +1989,13 @@ export function updateEvaluationChart() {
 export function formatDate(dateString) {
     if (!dateString) return 'N/A';
     // Handles both 'dd-mm-yyyy' and ISO strings
-    export const date = new Date(dateString.includes('-') && dateString.length === 10 ?
+    const date = new Date(dateString.includes('-') && dateString.length === 10 ?
         dateString.split('-').reverse().join('-') : dateString);
     return isNaN(date) ? 'Invalid Date' : date.toLocaleDateString('en-GB');
 }
 
 export function getStatusClass(status) {
-    export const map = {
+    const map = {
         'passed': 'completed',
         'passed-with-issues': 'in-progress',
         'failed': 'pending',
@@ -2008,7 +2008,7 @@ export function getStatusClass(status) {
 }
 
 export function getStatusText(status) {
-    export const map = {
+    const map = {
         'passed': 'Passed',
         'passed-with-issues': 'Passed w/ Issues',
         'failed': 'Failed',
@@ -2023,7 +2023,7 @@ export function getStatusText(status) {
 // --- Event Listeners and Window Functions ---
 // Close modal when clicking outside
 window.onclick = function (event) {
-    export const modals = document.querySelectorAll('.modal');
+    const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         if (event.target === modal) {
             modal.style.display = 'none';
@@ -2038,10 +2038,10 @@ window.addQANoteField = addQANoteField;
 
 // Date format validation and auto-generate report name
 document.addEventListener('DOMContentLoaded', function () {
-    export const reportDateField = document.getElementById('reportDate');
+    const reportDateField = document.getElementById('reportDate');
     if (reportDateField) {
         reportDateField.addEventListener('input', function (e) {
-            export const datePattern = /^\d{2}-\d{2}-\d{4}$/;
+            const datePattern = /^\d{2}-\d{2}-\d{4}$/;
             if (this.value && !datePattern.test(this.value)) {
                 this.setCustomValidity('Please enter date in dd-mm-yyyy format');
             } else {
@@ -2051,14 +2051,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Add event listeners for auto-generating report name
-    export const fieldsForReportName = ['portfolioName', 'projectName', 'sprintNumber', 'cycleNumber'];
+    const fieldsForReportName = ['portfolioName', 'projectName', 'sprintNumber', 'cycleNumber'];
     fieldsForReportName.forEach(fieldId => {
-        export const field = document.getElementById(fieldId);
+        const field = document.getElementById(fieldId);
         if (field) {
             field.addEventListener('change', function () {
-                export const reportNameField = document.getElementById('reportName');
+                const reportNameField = document.getElementById('reportName');
                 if (reportNameField && !reportNameField.value.trim()) {
-                    export const defaultName = generateDefaultReportName();
+                    const defaultName = generateDefaultReportName();
                     if (defaultName) {
                         reportNameField.placeholder = defaultName;
                     }
@@ -2069,12 +2069,12 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 export function toggleWeightColumn() {
-    export const columns = document.querySelectorAll('.weight-column');
-    export const button = document.getElementById('toggleWeightBtn');
+    const columns = document.querySelectorAll('.weight-column');
+    const button = document.getElementById('toggleWeightBtn');
 
     if (!columns.length || !button) return;
 
-    export const isVisible = columns[0].style.display !== 'none';
+    const isVisible = columns[0].style.display !== 'none';
 
     columns.forEach(col => {
         col.style.display = isVisible ? 'none' : 'table-cell';
@@ -2084,12 +2084,12 @@ export function toggleWeightColumn() {
 }
 
 export function toggleProjectReasonColumn() {
-    export const columns = document.querySelectorAll('.project-reason-column');
-    export const button = document.getElementById('toggleProjectReasonBtn');
+    const columns = document.querySelectorAll('.project-reason-column');
+    const button = document.getElementById('toggleProjectReasonBtn');
 
     if (!columns.length || !button) return;
 
-    export const isVisible = columns[0].style.display !== 'none';
+    const isVisible = columns[0].style.display !== 'none';
 
     columns.forEach(col => {
         col.style.display = isVisible ? 'none' : 'table-cell';
@@ -2098,7 +2098,7 @@ export function toggleProjectReasonColumn() {
     button.textContent = isVisible ? 'Show Reason' : 'Hide Reason';
 }
 
-export let teamMemberData = [];
+let teamMemberData = [];
 
 async function showTeamMemberModal() {
     await loadExistingTeamMembers();
@@ -2108,15 +2108,15 @@ async function showTeamMemberModal() {
 
 async function loadExistingTeamMembers() {
     try {
-        export const response = await fetch('/api/team-members');
+        const response = await fetch('/api/team-members');
         if (response.ok) {
-            export const teamMembers = await response.json();
-            export const select = document.getElementById('existingTeamMemberSelect');
+            const teamMembers = await response.json();
+            const select = document.getElementById('existingTeamMemberSelect');
 
             select.innerHTML = '<option value="">-- Select from existing team members --</option>';
 
             teamMembers.forEach(member => {
-                export const option = document.createElement('option');
+                const option = document.createElement('option');
                 option.value = JSON.stringify(member); // Store full object for easy retrieval
                 option.textContent = `${member.name} - ${member.role} (${member.email})`;
                 select.appendChild(option);
@@ -2129,7 +2129,7 @@ async function loadExistingTeamMembers() {
 }
 
 export function handleTeamMemberSelection() {
-    export const select = document.getElementById('existingTeamMemberSelect');
+    const select = document.getElementById('existingTeamMemberSelect');
 
     // Since we simplified the modal to select-only, we don't need to handle role field
     if (!select) {
@@ -2141,7 +2141,7 @@ export function handleTeamMemberSelection() {
 }
 
 export function clearTeamMemberForm() {
-    export const existingSelect = document.getElementById('existingTeamMemberSelect');
+    const existingSelect = document.getElementById('existingTeamMemberSelect');
 
     // Only clear the select dropdown since we simplified to select-only
     if (existingSelect) {
@@ -2150,7 +2150,7 @@ export function clearTeamMemberForm() {
 }
 
 async function addSelectedTeamMember() {
-    export const existingSelect = document.getElementById('existingTeamMemberSelect');
+    const existingSelect = document.getElementById('existingTeamMemberSelect');
 
     if (!existingSelect) {
         console.error('Team member select element not found');
@@ -2162,7 +2162,7 @@ async function addSelectedTeamMember() {
         return;
     }
 
-    export let memberToAdd = null;
+    let memberToAdd = null;
 
     try {
         memberToAdd = JSON.parse(existingSelect.value);
@@ -2173,7 +2173,7 @@ async function addSelectedTeamMember() {
     }
 
     if (memberToAdd) {
-        export const alreadyAdded = teamMemberData.some(tm => tm.email === memberToAdd.email);
+        const alreadyAdded = teamMemberData.some(tm => tm.email === memberToAdd.email);
         if (alreadyAdded) {
             showToast('This team member is already added to the report', 'warning');
             return;
@@ -2193,7 +2193,7 @@ async function addSelectedTeamMember() {
 }
 
 export function renderTeamMemberList() {
-    export const container = document.getElementById('teamMemberList');
+    const container = document.getElementById('teamMemberList');
     if (!container) return;
 
     if (teamMemberData.length === 0) {
@@ -2223,20 +2223,20 @@ export function removeTeamMember(index) {
 
 async function loadExistingTesters() {
     try {
-        export const response = await fetch('/api/testers');
+        const response = await fetch('/api/testers');
         if (response.ok) {
-            export const testers = await response.json();
-            export const select = document.getElementById('existingTesterSelect');
+            const testers = await response.json();
+            const select = document.getElementById('existingTesterSelect');
 
             select.innerHTML = '<option value="">-- Select from existing testers --</option>';
 
             testers.forEach(tester => {
-                export const option = document.createElement('option');
+                const option = document.createElement('option');
                 option.value = JSON.stringify(tester); // Store full object for easy retrieval
-                export const roles = [];
+                const roles = [];
                 if (tester.is_automation_engineer) roles.push('Automation');
                 if (tester.is_manual_engineer) roles.push('Manual');
-                export const roleText = roles.length > 0 ? ` - ${roles.join(', ')}` : '';
+                const roleText = roles.length > 0 ? ` - ${roles.join(', ')}` : '';
                 option.textContent = `${tester.name} (${tester.email})${roleText}`;
                 select.appendChild(option);
             });
@@ -2248,7 +2248,7 @@ async function loadExistingTesters() {
 }
 
 export function handleTesterSelection() {
-    export const select = document.getElementById('existingTesterSelect');
+    const select = document.getElementById('existingTesterSelect');
 
     // Since we simplified the modal to select-only, we don't need to handle add fields
     if (!select) {
@@ -2260,7 +2260,7 @@ export function handleTesterSelection() {
 }
 
 export function clearTesterForm() {
-    export const existingTesterSelect = document.getElementById('existingTesterSelect');
+    const existingTesterSelect = document.getElementById('existingTesterSelect');
 
     // Only clear the select dropdown since we simplified to select-only
     if (existingTesterSelect) {
@@ -2269,7 +2269,7 @@ export function clearTesterForm() {
 }
 
 async function addSelectedTester() {
-    export const existingTesterSelect = document.getElementById('existingTesterSelect');
+    const existingTesterSelect = document.getElementById('existingTesterSelect');
 
     if (!existingTesterSelect) {
         console.error('Tester select element not found');
@@ -2281,7 +2281,7 @@ async function addSelectedTester() {
         return;
     }
 
-    export let testerToAdd = null;
+    let testerToAdd = null;
 
     try {
         testerToAdd = JSON.parse(existingTesterSelect.value);
@@ -2292,7 +2292,7 @@ async function addSelectedTester() {
     }
 
     if (testerToAdd) {
-        export const alreadyAdded = testerData.some(t => t.email === testerToAdd.email);
+        const alreadyAdded = testerData.some(t => t.email === testerToAdd.email);
         if (alreadyAdded) {
             showToast('This tester is already added to the report', 'warning');
             return;
@@ -2317,18 +2317,18 @@ async function addSelectedTester() {
 // This is a placeholder function for removing custom QA fields
 
 
-export let qaNotesData = [];
+let qaNotesData = [];
 
 export function showAddQANoteModal() {
     showModal('addQANoteModal');
-    export const noteTextArea = document.getElementById('newQANoteText');
+    const noteTextArea = document.getElementById('newQANoteText');
     if (noteTextArea) {
         noteTextArea.value = '';
     }
 }
 
 export function addQANote() {
-    export const noteText = document.getElementById('newQANoteText').value.trim();
+    const noteText = document.getElementById('newQANoteText').value.trim();
     if (noteText) {
         qaNotesData.push({ note: noteText });
         renderQANotesList();
@@ -2357,8 +2357,8 @@ export function updateQAFieldOptions() {
 }
 
 export function addQANoteField() {
-    export const fieldName = document.getElementById('qaFieldName').value.trim();
-    export const fieldValue = document.getElementById('qaFieldValue').value.trim();
+    const fieldName = document.getElementById('qaFieldName').value.trim();
+    const fieldValue = document.getElementById('qaFieldValue').value.trim();
 
     if (fieldName && fieldValue) {
         qaNoteFieldsData.push({ name: fieldName, value: fieldValue });
@@ -2371,7 +2371,7 @@ export function addQANoteField() {
 }
 
 export function renderQANoteFieldsList() {
-    export const container = document.getElementById('qaNoteFieldsList');
+    const container = document.getElementById('qaNoteFieldsList');
     if (!container) return;
 
     if (qaNoteFieldsData.length === 0) {
@@ -2403,7 +2403,7 @@ export function removeQANote(index) {
 }
 
 export function renderQANotesList() {
-    export const container = document.getElementById('qaNotesList');
+    const container = document.getElementById('qaNotesList');
     if (!container) return;
 
     if (qaNotesData.length === 0) {
@@ -2419,7 +2419,7 @@ export function renderQANotesList() {
 }
 
 export function updateQANotesCount() {
-    export const countField = document.getElementById('qaNotesMetric');
+    const countField = document.getElementById('qaNotesMetric');
     if (countField) {
         countField.value = qaNotesData.length;
     }
@@ -2428,7 +2428,7 @@ export function updateQANotesCount() {
 // --- Page Management & Navigation (Simplified for multi-page app) ---
 
 export function renderQANotesFields() {
-    export const container = document.getElementById('qaNotesFieldsList');
+    const container = document.getElementById('qaNotesFieldsList');
     if (!container) return;
 
     // Find the default general notes field (if it exists and is not a custom field)
@@ -2436,12 +2436,12 @@ export function renderQANotesFields() {
     // This function will only render *additional* custom QA fields.
 
     // Remove existing custom QA fields before re-rendering
-    export const existingCustomFields = container.querySelectorAll('.qa-field-item');
+    const existingCustomFields = container.querySelectorAll('.qa-field-item');
     existingCustomFields.forEach(field => field.remove());
 
     // Add new custom fields
     qaNotesFields.forEach(field => {
-        export const fieldHTML = renderQANoteFieldHTML(field);
+        const fieldHTML = renderQANoteFieldHTML(field);
         // Append to the container. If you want it after a specific element, you'd need to find that element.
         // For now, just append to the end of the list.
         container.insertAdjacentHTML('beforeend', fieldHTML);
@@ -2449,7 +2449,7 @@ export function renderQANotesFields() {
 }
 
 export function renderQANoteFieldHTML(field) {
-    export let inputHTML = '';
+    let inputHTML = '';
 
     switch (field.type) {
         case 'input':
@@ -2514,7 +2514,7 @@ export function removeQANoteField(fieldId) {
 }
 
 async function populatePortfolioDropdownForCreateReport(portfolios) {
-    export const select = document.getElementById('portfolioName');
+    const select = document.getElementById('portfolioName');
     if (!select) {
         console.error('Portfolio select element not found!');
         return;
@@ -2527,7 +2527,7 @@ async function populatePortfolioDropdownForCreateReport(portfolios) {
     // Add dynamic portfolios from database
     if (portfolios && Array.isArray(portfolios) && portfolios.length > 0) {
         portfolios.forEach(portfolio => {
-            export const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
+            const value = portfolio.name.toLowerCase().replace(/\s+/g, '-');
             // Store the actual ID in a data attribute
             select.innerHTML += `<option value="${value}" data-id="${portfolio.id}">${portfolio.name}</option>`;
         });
@@ -2536,8 +2536,8 @@ async function populatePortfolioDropdownForCreateReport(portfolios) {
 
 // Function called when portfolio is selected
 async function onPortfolioSelection() {
-    export const portfolioSelect = document.getElementById('portfolioName');
-    export const projectSelect = document.getElementById('projectName');
+    const portfolioSelect = document.getElementById('portfolioName');
+    const projectSelect = document.getElementById('projectName');
 
     if (!portfolioSelect.value) {
         // Clear projects and disable
@@ -2550,21 +2550,21 @@ async function onPortfolioSelection() {
     projectSelect.innerHTML = '<option value="">Loading projects...</option>';
 
     try {
-        export let projects = [];
+        let projects = [];
 
         if (portfolioSelect.value === 'no-portfolio') {
             // Load projects without portfolio
-            export const response = await fetch('/api/projects/without-portfolio');
+            const response = await fetch('/api/projects/without-portfolio');
             if (response.ok) {
                 projects = await response.json();
             }
         } else {
             // Get portfolio ID from data attribute
-            export const selectedOption = portfolioSelect.options[portfolioSelect.selectedIndex];
-            export const portfolioId = selectedOption.getAttribute('data-id');
+            const selectedOption = portfolioSelect.options[portfolioSelect.selectedIndex];
+            const portfolioId = selectedOption.getAttribute('data-id');
 
             if (portfolioId) {
-                export const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
+                const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
                 if (response.ok) {
                     projects = await response.json();
                 }
@@ -2588,7 +2588,7 @@ async function onPortfolioSelection() {
 }
 
 async function populateProjectDropdown(projects) {
-    export const select = document.getElementById('projectName');
+    const select = document.getElementById('projectName');
     if (!select) return;
 
     // Keep existing static options (if any, from your original HTML)
@@ -2598,15 +2598,15 @@ async function populateProjectDropdown(projects) {
 
     // Add dynamic projects from database
     projects.forEach(project => {
-        export const value = project.name.toLowerCase().replace(/\s+/g, '-');
+        const value = project.name.toLowerCase().replace(/\s+/g, '-');
         // Store the actual ID and portfolio ID in data attributes
         select.innerHTML += `<option value="${value}" data-id="${project.id}" data-portfolio-id="${project.portfolio_id}">${project.name}</option>`;
     });
 }
 
 // Caching for form dropdown data
-export let formDataCache = null;
-export let formDataCacheTime = null;
+let formDataCache = null;
+let formDataCacheTime = null;
 
 // Cache invalidation function
 export function invalidateAllCaches() {
@@ -2617,13 +2617,13 @@ export function invalidateAllCaches() {
 }
 
 // Global variable to store latest project data for auto-loading
-export let latestProjectData = null;
+let latestProjectData = null;
 
 // Function called when project is selected
 async function onProjectSelection() {
     console.log('onProjectSelection called');
-    export const portfolioSelect = document.getElementById('portfolioName');
-    export const projectSelect = document.getElementById('projectName');
+    const portfolioSelect = document.getElementById('portfolioName');
+    const projectSelect = document.getElementById('projectName');
 
     console.log('Portfolio value:', portfolioSelect?.value);
     console.log('Project value:', projectSelect?.value);
@@ -2633,7 +2633,7 @@ async function onProjectSelection() {
         return;
     }
 
-    export let portfolioName, projectName;
+    let portfolioName, projectName;
 
     // Handle "no-portfolio" case
     if (portfolioSelect.value === 'no-portfolio') {
@@ -2646,17 +2646,17 @@ async function onProjectSelection() {
     console.log('Fetching data for:', portfolioName, '/', projectName);
 
     // Convert to lowercase for case-insensitive matching
-    export const portfolioNameLower = portfolioName.toLowerCase();
-    export const projectNameLower = projectName.toLowerCase();
+    const portfolioNameLower = portfolioName.toLowerCase();
+    const projectNameLower = projectName.toLowerCase();
 
     console.log('URL will be:', `/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
 
     try {
-        export const response = await fetch(`/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
+        const response = await fetch(`/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
         console.log('API response status:', response.status);
 
         if (response.ok) {
-            export const data = await response.json();
+            const data = await response.json();
             console.log('API response data:', data);
 
             if (data.hasData) {
@@ -2665,7 +2665,7 @@ async function onProjectSelection() {
                 latestProjectData = data;
 
                 // Automatically load testers when project is selected
-                export const latestData = data.latestData;
+                const latestData = data.latestData;
                 if (latestData.testerData && latestData.testerData.length > 0) {
                     console.log('Auto-loading testers for selected project:', latestData.testerData);
                     testerData = [...latestData.testerData];
@@ -2690,8 +2690,8 @@ async function onProjectSelection() {
 // Function to show the auto-load modal with data preview
 export function showAutoLoadModal(data) {
     console.log('showAutoLoadModal called with data:', data);
-    export const modal = document.getElementById('autoLoadDataModal');
-    export const preview = document.getElementById('dataPreview');
+    const modal = document.getElementById('autoLoadDataModal');
+    const preview = document.getElementById('dataPreview');
 
     console.log('Modal element:', modal);
     console.log('Preview element:', preview);
@@ -2707,10 +2707,10 @@ export function showAutoLoadModal(data) {
     }
 
     // Build data preview
-    export const latestData = data.latestData;
-    export const suggestedValues = data.suggestedValues;
+    const latestData = data.latestData;
+    const suggestedValues = data.suggestedValues;
 
-    export let previewHTML = `
+    let previewHTML = `
         <h4>Latest Report Data:</h4>
         <div class="data-preview-item">
             <span class="data-preview-label">Sprint Number:</span>
@@ -2749,14 +2749,14 @@ export function showAutoLoadModal(data) {
 export function loadSelectedData() {
     if (!latestProjectData) return;
 
-    export const latestData = latestProjectData.latestData;
-    export const suggestedValues = latestProjectData.suggestedValues;
+    const latestData = latestProjectData.latestData;
+    const suggestedValues = latestProjectData.suggestedValues;
 
     // Check which data types to load
-    export const loadSprintData = document.getElementById('loadSprintData').checked;
-    export const loadReportData = document.getElementById('loadReportData').checked;
-    export const loadTesters = document.getElementById('loadTesters').checked;
-    export const loadTeamMembers = document.getElementById('loadTeamMembers').checked;
+    const loadSprintData = document.getElementById('loadSprintData').checked;
+    const loadReportData = document.getElementById('loadReportData').checked;
+    const loadTesters = document.getElementById('loadTesters').checked;
+    const loadTeamMembers = document.getElementById('loadTeamMembers').checked;
 
     // Load Sprint & Release Information with the new logic
     if (loadSprintData) {
@@ -2769,8 +2769,8 @@ export function loadSelectedData() {
     if (loadReportData) {
         document.getElementById('reportVersion').value = latestData.reportVersion;
         // Set today's date
-        export const today = new Date();
-        export const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+        const today = new Date();
+        const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
         document.getElementById('reportDate').value = formattedDate;
     }
 
@@ -2796,8 +2796,8 @@ export function loadSelectedData() {
 
 // Function to set default values for new projects
 export function setDefaultValues(defaults) {
-    export const today = new Date();
-    export const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+    const today = new Date();
+    const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
 
     if (defaults) {
         document.getElementById('sprintNumber').value = defaults.sprintNumber;
@@ -2832,9 +2832,9 @@ async function loadFormDropdownData() {
 // Load only portfolios for fast initial loading
 async function loadPortfoliosOnly() {
     try {
-        export const response = await fetch('/api/portfolios');
+        const response = await fetch('/api/portfolios');
         if (response.ok) {
-            export const portfolios = await response.json();
+            const portfolios = await response.json();
             populatePortfolioDropdownForCreateReport(portfolios);
         } else {
             throw new Error('Failed to load portfolios');
@@ -2849,9 +2849,9 @@ async function loadPortfoliosOnly() {
 async function loadProjectsForPortfolio(portfolioId) {
     try {
         console.log('Loading projects for portfolio:', portfolioId);
-        export const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
+        const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
         if (response.ok) {
-            export const projects = await response.json();
+            const projects = await response.json();
             populateProjectDropdownFiltered(projects);
             enableProjectField();
         } else {
@@ -2865,13 +2865,13 @@ async function loadProjectsForPortfolio(portfolioId) {
 
 // Disable all form fields except Portfolio Name
 export function disableFormFieldsExceptPortfolio() {
-    export const fieldsToDisable = [
+    const fieldsToDisable = [
         'projectName', 'sprintNumber', 'cycleNumber', 'releaseNumber',
         'reportName', 'reportVersion', 'reportDate'
     ];
 
     fieldsToDisable.forEach(fieldId => {
-        export const field = document.getElementById(fieldId);
+        const field = document.getElementById(fieldId);
         if (field) {
             field.disabled = true;
             field.style.opacity = '0.5';
@@ -2880,7 +2880,7 @@ export function disableFormFieldsExceptPortfolio() {
     });
 
     // Also disable the project dropdown initially
-    export const projectSelect = document.getElementById('projectName');
+    const projectSelect = document.getElementById('projectName');
     if (projectSelect) {
         projectSelect.innerHTML = '<option value="">Select Portfolio first</option>';
         projectSelect.disabled = true;
@@ -2891,7 +2891,7 @@ export function disableFormFieldsExceptPortfolio() {
 
 // Enable project field after portfolio is selected
 export function enableProjectField() {
-    export const projectSelect = document.getElementById('projectName');
+    const projectSelect = document.getElementById('projectName');
     if (projectSelect) {
         projectSelect.disabled = false;
         projectSelect.style.opacity = '1';
@@ -2901,13 +2901,13 @@ export function enableProjectField() {
 
 // Enable all remaining fields after project is selected
 export function enableAllRemainingFields() {
-    export const fieldsToEnable = [
+    const fieldsToEnable = [
         'sprintNumber', 'cycleNumber', 'releaseNumber',
         'reportName', 'reportVersion', 'reportDate'
     ];
 
     fieldsToEnable.forEach(fieldId => {
-        export const field = document.getElementById(fieldId);
+        const field = document.getElementById(fieldId);
         if (field) {
             field.disabled = false;
             field.style.opacity = '1';
@@ -2918,8 +2918,8 @@ export function enableAllRemainingFields() {
 
 // Setup event handlers for progressive form loading
 export function setupProgressiveFormHandlers() {
-    export const portfolioSelect = document.getElementById('portfolioName');
-    export const projectSelect = document.getElementById('projectName');
+    const portfolioSelect = document.getElementById('portfolioName');
+    const projectSelect = document.getElementById('projectName');
 
     if (portfolioSelect) {
         // Remove existing event listeners
@@ -2936,13 +2936,13 @@ export function setupProgressiveFormHandlers() {
 
 // Handle portfolio selection
 async function onPortfolioChange(event) {
-    export const selectedOption = event.target.selectedOptions[0];
+    const selectedOption = event.target.selectedOptions[0];
     if (selectedOption && selectedOption.value && selectedOption.dataset.id) {
-        export const portfolioId = selectedOption.dataset.id;
+        const portfolioId = selectedOption.dataset.id;
         await loadProjectsForPortfolio(portfolioId);
 
         // Clear project selection when portfolio changes
-        export const projectSelect = document.getElementById('projectName');
+        const projectSelect = document.getElementById('projectName');
         if (projectSelect) {
             projectSelect.value = '';
         }
@@ -2971,13 +2971,13 @@ async function onProjectChangeProgressive(event) {
 
 // Disable fields that require project selection
 export function disableFieldsAfterPortfolio() {
-    export const fieldsToDisable = [
+    const fieldsToDisable = [
         'sprintNumber', 'cycleNumber', 'releaseNumber',
         'reportName', 'reportVersion', 'reportDate'
     ];
 
     fieldsToDisable.forEach(fieldId => {
-        export const field = document.getElementById(fieldId);
+        const field = document.getElementById(fieldId);
         if (field) {
             field.disabled = true;
             field.style.opacity = '0.5';
@@ -2988,13 +2988,13 @@ export function disableFieldsAfterPortfolio() {
 
 // Enhanced project dropdown population for filtered projects
 export function populateProjectDropdownFiltered(projects) {
-    export const select = document.getElementById('projectName');
+    const select = document.getElementById('projectName');
     if (!select) return;
 
     select.innerHTML = '<option value="">Select Project</option>';
 
     projects.forEach(project => {
-        export const value = project.name.toLowerCase().replace(/\s+/g, '-');
+        const value = project.name.toLowerCase().replace(/\s+/g, '-');
         select.innerHTML += `<option value="${value}" data-id="${project.id}">${project.name}</option>`;
     });
 }
@@ -3074,8 +3074,8 @@ window.initializeCharts = initializeCharts; // Make it globally accessible
 
 // Theme Toggle Functionality
 export function toggleTheme() {
-    export const currentTheme = document.documentElement.getAttribute('data-theme');
-    export const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
@@ -3084,8 +3084,8 @@ export function toggleTheme() {
 }
 
 export function updateThemeButton(theme) {
-    export const themeIcon = document.getElementById('theme-icon');
-    export const themeText = document.getElementById('theme-text');
+    const themeIcon = document.getElementById('theme-icon');
+    const themeText = document.getElementById('theme-text');
 
     if (theme === 'light') {
         themeIcon.className = 'fas fa-moon';
@@ -3097,7 +3097,7 @@ export function updateThemeButton(theme) {
 }
 
 export function initializeTheme() {
-    export const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeButton(savedTheme);
 }
@@ -3107,14 +3107,14 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
 
     // Setup MutationObserver to watch for theme attribute changes (fallback)
-    export const observer = new MutationObserver(function (mutations) {
+    const observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
                 console.log('Create report: Theme attribute changed, recreating charts...');
                 // Trigger chart recreation with same logic as themeChanged event
                 setTimeout(() => {
                     // Store current chart data before destroying charts
-                    export const chartConfigs = [
+                    const chartConfigs = [
                         { chart: userStoriesChart, id: 'userStoriesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
                         { chart: testCasesChart, id: 'testCasesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
                         { chart: issuesPriorityChart, id: 'issuesPriorityChart', labels: ['Critical', 'High', 'Medium', 'Low'], colors: ['#dc3545', '#fd7e14', '#ffc107', '#28a745'] },
@@ -3123,7 +3123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ];
 
                     // Store data and destroy existing charts
-                    export const chartData = {};
+                    const chartData = {};
                     chartConfigs.forEach(config => {
                         if (config.chart && config.chart.data) {
                             chartData[config.id] = config.chart.data.datasets[0].data;
@@ -3151,7 +3151,7 @@ window.addEventListener('themeChanged', (event) => {
     console.log('Theme changed, recreating form charts...');
 
     // Store current chart data before destroying charts
-    export const chartConfigs = [
+    const chartConfigs = [
         { chart: userStoriesChart, id: 'userStoriesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
         { chart: testCasesChart, id: 'testCasesChart', labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'], colors: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#fd7e14', '#6f42c1', '#20c997'] },
         { chart: issuesPriorityChart, id: 'issuesPriorityChart', labels: ['Critical', 'High', 'Medium', 'Low'], colors: ['#dc3545', '#fd7e14', '#ffc107', '#28a745'] },
@@ -3160,7 +3160,7 @@ window.addEventListener('themeChanged', (event) => {
     ];
 
     // Store data and destroy existing charts
-    export const chartData = {};
+    const chartData = {};
     chartConfigs.forEach(config => {
         if (config.chart && config.chart.data) {
             chartData[config.id] = config.chart.data.datasets[0].data;
@@ -3178,16 +3178,16 @@ window.addEventListener('themeChanged', (event) => {
 
 // Function to recreate form charts with stored data
 export function recreateFormCharts(chartConfigs, chartData) {
-    export const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
-    export const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
+    const isLightTheme = window.isCurrentThemeLight ? window.isCurrentThemeLight() : true;
+    const borderColor = isLightTheme ? '#ffffff' : '#1e293b';
 
     chartConfigs.forEach(config => {
-        export const canvas = document.getElementById(config.id);
+        const canvas = document.getElementById(config.id);
         if (canvas) {
-            export const ctx = canvas.getContext('2d');
-            export const data = chartData[config.id] || new Array(config.labels.length).fill(0);
+            const ctx = canvas.getContext('2d');
+            const data = chartData[config.id] || new Array(config.labels.length).fill(0);
 
-            export const newChart = new Chart(ctx, {
+            const newChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: config.labels,
@@ -3248,11 +3248,11 @@ window.dashboardStatsCache = dashboardStatsCache; // Make global variable access
 
 export function saveFormDataToLocalStorage() {
     try {
-        export const form = document.getElementById('qaReportForm');
+        const form = document.getElementById('qaReportForm');
         if (!form) return;
 
-        export const formData = new FormData(form);
-        export const formObject = {};
+        const formData = new FormData(form);
+        const formObject = {};
 
         // Save form fields
         for (let [key, value] of formData.entries()) {
@@ -3260,14 +3260,14 @@ export function saveFormDataToLocalStorage() {
         }
 
         // Save additional form elements that might not be in FormData
-        export const additionalFields = [
+        const additionalFields = [
             'reportDate', 'portfolioName', 'projectName', 'sprintNumber',
             'reportVersion', 'cycleNumber', 'releaseNumber', 'testSummary',
             'testingStatus', 'testEnvironment'
         ];
 
         // Evaluation fields
-        export const evaluationFields = [
+        const evaluationFields = [
             'involvementScore', 'involvementReason',
             'requirementsQualityScore', 'requirementsQualityReason',
             'qaPlanReviewScore', 'qaPlanReviewReason',
@@ -3280,7 +3280,7 @@ export function saveFormDataToLocalStorage() {
         ];
 
         additionalFields.forEach(fieldId => {
-            export const element = document.getElementById(fieldId);
+            const element = document.getElementById(fieldId);
             if (element) {
                 formObject[fieldId] = element.value;
             }
@@ -3288,19 +3288,19 @@ export function saveFormDataToLocalStorage() {
 
         // Add evaluation fields to form data
         evaluationFields.forEach(fieldId => {
-            export const element = document.getElementById(fieldId);
+            const element = document.getElementById(fieldId);
             if (element) {
                 formObject[fieldId] = element.value;
             }
         });
 
         // Save calculated totals
-        export const calculatedFields = [
+        const calculatedFields = [
             'totalStories', 'totalTestCases', 'totalIssues', 'totalEnhancements'
         ];
 
         calculatedFields.forEach(fieldId => {
-            export const element = document.getElementById(fieldId);
+            const element = document.getElementById(fieldId);
             if (element) {
                 formObject[fieldId] = element.value;
             }
@@ -3309,7 +3309,7 @@ export function saveFormDataToLocalStorage() {
         localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formObject));
 
         // Save arrays (requests, builds, testers, team members)
-        export const arrayData = {
+        const arrayData = {
             requestData: requestData,
             buildData: buildData,
             testerData: testerData,
@@ -3327,16 +3327,16 @@ export function saveFormDataToLocalStorage() {
 export function loadFormDataFromLocalStorage() {
     try {
         console.log('Loading form data from localStorage...');
-        export const savedFormData = localStorage.getItem(FORM_DATA_KEY);
-        export const savedArrayData = localStorage.getItem(FORM_ARRAYS_KEY);
+        const savedFormData = localStorage.getItem(FORM_DATA_KEY);
+        const savedArrayData = localStorage.getItem(FORM_ARRAYS_KEY);
 
         if (savedFormData) {
             console.log('Found saved form data, loading...');
-            export const formObject = JSON.parse(savedFormData);
+            const formObject = JSON.parse(savedFormData);
 
             // Load form fields
             Object.keys(formObject).forEach(key => {
-                export const element = document.getElementById(key);
+                const element = document.getElementById(key);
                 if (element) {
                     element.value = formObject[key];
                 }
@@ -3360,7 +3360,7 @@ export function loadFormDataFromLocalStorage() {
 
         if (savedArrayData) {
             console.log('Found saved array data, loading...');
-            export const arrayObject = JSON.parse(savedArrayData);
+            const arrayObject = JSON.parse(savedArrayData);
 
             // Load arrays
             if (arrayObject.requestData) {
@@ -3414,7 +3414,7 @@ export function autoSaveFormData() {
 
 // Add event listeners for auto-save
 export function setupAutoSave() {
-    export const form = document.getElementById('qaReportForm');
+    const form = document.getElementById('qaReportForm');
     if (form) {
         console.log('Setting up autosave on form');
         form.addEventListener('input', autoSaveFormData);
@@ -3439,7 +3439,7 @@ export function clearFormDataOnSubmit() {
         qaNotesData = [];
 
         // Reset form fields
-        export const form = document.getElementById('qaReportForm');
+        const form = document.getElementById('qaReportForm');
         if (form) {
             form.reset();
         }
@@ -3458,14 +3458,14 @@ export function clearFormDataOnSubmit() {
 }
 
 // Override the existing arrays when they're modified
-export const originalAddRequest = window.addRequest;
-export const originalAddBuild = window.addBuild;
-export const originalAddSelectedTester = window.addSelectedTester;
-export const originalAddSelectedTeamMember = window.addSelectedTeamMember;
+const originalAddRequest = window.addRequest;
+const originalAddBuild = window.addBuild;
+const originalAddSelectedTester = window.addSelectedTester;
+const originalAddSelectedTeamMember = window.addSelectedTeamMember;
 
 if (typeof originalAddRequest === 'function') {
     window.addRequest = function (...args) {
-        export const result = originalAddRequest.apply(this, args);
+        const result = originalAddRequest.apply(this, args);
         autoSaveFormData();
         return result;
     };
@@ -3473,7 +3473,7 @@ if (typeof originalAddRequest === 'function') {
 
 if (typeof originalAddBuild === 'function') {
     window.addBuild = function (...args) {
-        export const result = originalAddBuild.apply(this, args);
+        const result = originalAddBuild.apply(this, args);
         autoSaveFormData();
         return result;
     };
@@ -3481,7 +3481,7 @@ if (typeof originalAddBuild === 'function') {
 
 if (typeof originalAddSelectedTester === 'function') {
     window.addSelectedTester = function (...args) {
-        export const result = originalAddSelectedTester.apply(this, args);
+        const result = originalAddSelectedTester.apply(this, args);
         autoSaveFormData();
         return result;
     };
@@ -3489,7 +3489,7 @@ if (typeof originalAddSelectedTester === 'function') {
 
 if (typeof originalAddSelectedTeamMember === 'function') {
     window.addSelectedTeamMember = function (...args) {
-        export const result = originalAddSelectedTeamMember.apply(this, args);
+        const result = originalAddSelectedTeamMember.apply(this, args);
         autoSaveFormData();
         return result;
     };

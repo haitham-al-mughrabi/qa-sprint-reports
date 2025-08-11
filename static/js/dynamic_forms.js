@@ -6,8 +6,8 @@ export function showTesterModal() {
 }
 
 export function addRequest() {
-    export const requestId = document.getElementById('requestId').value.trim();
-    export const requestUrl = document.getElementById('requestUrl').value.trim();
+    const requestId = document.getElementById('requestId').value.trim();
+    const requestUrl = document.getElementById('requestUrl').value.trim();
     if (requestId && requestUrl) {
         requestData.push({ id: requestId, url: requestUrl });
         renderRequestList();
@@ -19,10 +19,10 @@ export function addRequest() {
 }
 
 export function addBuild() {
-    export const requestId = document.getElementById('buildRequestId').value.trim();
-    export const requestUrl = document.getElementById('buildRequestUrl').value.trim();
-    export const environment = document.getElementById('buildEnvironment').value.trim();
-    export const cycles = document.getElementById('buildCycles').value.trim();
+    const requestId = document.getElementById('buildRequestId').value.trim();
+    const requestUrl = document.getElementById('buildRequestUrl').value.trim();
+    const environment = document.getElementById('buildEnvironment').value.trim();
+    const cycles = document.getElementById('buildCycles').value.trim();
     if (requestId && requestUrl && environment && cycles) {
         buildData.push({ requestId, requestUrl, environment, cycles });
         renderBuildList();
@@ -44,7 +44,7 @@ export function addBuild() {
 // }
 
 export function renderDynamicList(containerId, data, renderItemFn, removeFn) {
-    export const container = document.getElementById(containerId);
+    const container = document.getElementById(containerId);
     if (!container) {
         console.error(`Container with id '${containerId}' not found`);
         return;
@@ -83,10 +83,10 @@ export function renderBuildList() {
 
 export function renderTesterList() {
     renderDynamicList('testerList', testerData, (item, index, removeFn) => {
-        export const roles = [];
+        const roles = [];
         if (item.is_automation_engineer) roles.push('Automation Engineer');
         if (item.is_manual_engineer) roles.push('Manual Engineer');
-        export const roleText = roles.length > 0 ? `<br><strong>Roles:</strong> ${roles.join(', ')}` : '<br><em style="color: #6c757d;">No roles assigned</em>';
+        const roleText = roles.length > 0 ? `<br><strong>Roles:</strong> ${roles.join(', ')}` : '<br><em style="color: #6c757d;">No roles assigned</em>';
 
         return `
         <div class="dynamic-item">
@@ -109,9 +109,9 @@ export function clearAllFields() {
 
 export function clearCurrentSection() {
     if (confirm('Are you sure you want to clear all fields in the current section?')) {
-        export const section = document.getElementById(`section-${currentSection}`);
+        const section = document.getElementById(`section-${currentSection}`);
         if (section) {
-            export const inputs = section.querySelectorAll('input:not([readonly]), textarea, select');
+            const inputs = section.querySelectorAll('input:not([readonly]), textarea, select');
             inputs.forEach(input => {
                 if (input.type === 'checkbox' || input.type === 'radio') {
                     input.checked = false;
