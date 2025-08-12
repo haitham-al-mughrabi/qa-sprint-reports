@@ -1355,6 +1355,13 @@ function clearCurrentSection() {
 // function showPage(pageId) { ... }
 
 function showSection(sectionIndex) {
+    // Use report type-aware navigation if available
+    if (typeof window.showSectionForReportType === 'function') {
+        window.showSectionForReportType(sectionIndex);
+        return;
+    }
+    
+    // Fallback to original implementation
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById(`section-${sectionIndex}`)?.classList.add('active');
 
@@ -1369,17 +1376,39 @@ function showSection(sectionIndex) {
 }
 
 function nextSection() {
+    // Use report type-aware navigation if available
+    if (typeof window.nextSectionForReportType === 'function') {
+        window.nextSectionForReportType();
+        return;
+    }
+    
+    // Fallback to original implementation
     if (currentSection < 12) { // Max section index is 12 (QA Notes)
         showSection(currentSection + 1);
     }
 }
+
 function previousSection() {
+    // Use report type-aware navigation if available
+    if (typeof window.previousSectionForReportType === 'function') {
+        window.previousSectionForReportType();
+        return;
+    }
+    
+    // Fallback to original implementation
     if (currentSection > 0) {
         showSection(currentSection - 1);
     }
 }
 
 function updateNavigationButtons() {
+    // Use report type-aware navigation if available
+    if (typeof window.updateNavigationButtonsForReportType === 'function') {
+        window.updateNavigationButtonsForReportType();
+        return;
+    }
+    
+    // Fallback to original implementation
     document.getElementById('prevBtn').disabled = currentSection === 0;
     const isLastSection = currentSection === 12;
     document.getElementById('nextBtn').style.display = isLastSection ? 'none' : 'inline-block';
@@ -1387,6 +1416,13 @@ function updateNavigationButtons() {
 }
 
 function updateProgressBar() {
+    // Use report type-aware navigation if available
+    if (typeof window.updateProgressBarForReportType === 'function') {
+        window.updateProgressBarForReportType();
+        return;
+    }
+    
+    // Fallback to original implementation
     const totalSections = 13;
     const sectionTitles = [
         'General Details',
@@ -2836,6 +2872,18 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.qaNoteFieldsData = qaNoteFieldsData; // Add custom QA note fields
             reportData.qaNotesData = qaNotesData; // Add QA notes array data
             // reportData.customFields = customFieldsData; // Add custom fields data - REMOVED
+            
+            // Determine report type based on current URL path
+            const currentPath = window.location.pathname;
+            if (currentPath.includes('/sprint-report')) {
+                reportData.reportType = 'sprint';
+            } else if (currentPath.includes('/manual-report')) {
+                reportData.reportType = 'manual';
+            } else if (currentPath.includes('/automation-report')) {
+                reportData.reportType = 'automation';
+            } else {
+                reportData.reportType = 'sprint'; // default
+            }
 
             const savedReport = await saveReport(reportData);
             if (savedReport) {

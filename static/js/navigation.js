@@ -1,4 +1,11 @@
 export function showSection(sectionIndex) {
+    // Use report type-aware navigation if available
+    if (typeof window.showSectionForReportType === 'function') {
+        window.showSectionForReportType(sectionIndex);
+        return;
+    }
+    
+    // Fallback to original implementation
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById(`section-${sectionIndex}`)?.classList.add('active');
 
@@ -13,17 +20,39 @@ export function showSection(sectionIndex) {
 }
 
 export function nextSection() {
+    // Use report type-aware navigation if available
+    if (typeof window.nextSectionForReportType === 'function') {
+        window.nextSectionForReportType();
+        return;
+    }
+    
+    // Fallback to original implementation
     if (currentSection < 12) { // Max section index is 12 (QA Notes)
         showSection(currentSection + 1);
     }
 }
+
 export function previousSection() {
+    // Use report type-aware navigation if available
+    if (typeof window.previousSectionForReportType === 'function') {
+        window.previousSectionForReportType();
+        return;
+    }
+    
+    // Fallback to original implementation
     if (currentSection > 0) {
         showSection(currentSection - 1);
     }
 }
 
 export function updateNavigationButtons() {
+    // Use report type-aware navigation if available
+    if (typeof window.updateNavigationButtonsForReportType === 'function') {
+        window.updateNavigationButtonsForReportType();
+        return;
+    }
+    
+    // Fallback to original implementation
     document.getElementById('prevBtn').disabled = currentSection === 0;
     const isLastSection = currentSection === 12;
     document.getElementById('nextBtn').style.display = isLastSection ? 'none' : 'inline-block';
@@ -31,6 +60,13 @@ export function updateNavigationButtons() {
 }
 
 export function updateProgressBar() {
+    // Use report type-aware navigation if available
+    if (typeof window.updateProgressBarForReportType === 'function') {
+        window.updateProgressBarForReportType();
+        return;
+    }
+    
+    // Fallback to original implementation
     const totalSections = 13;
     const sectionTitles = [
         'General Details',
@@ -105,6 +141,13 @@ export function updateProgressBar() {
 
 // Add click functionality to progress steps
 export function initializeProgressSteps() {
+    // Use report type-aware navigation if available
+    if (typeof window.initializeProgressStepsForReportType === 'function') {
+        window.initializeProgressStepsForReportType();
+        return;
+    }
+    
+    // Fallback to original implementation
     document.querySelectorAll('.step').forEach((step, index) => {
         step.addEventListener('click', () => {
             showSection(index);

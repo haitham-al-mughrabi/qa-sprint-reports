@@ -159,6 +159,9 @@ function renderReportView(report) {
     // Get current theme for charts
     const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
     
+    // Configure sections based on report type
+    configureSectionVisibility(report);
+    
     // Render all sections
     try {
         renderCoverInfo(report);
@@ -177,4 +180,66 @@ function renderReportView(report) {
     } catch (error) {
         console.error('Error rendering report sections:', error);
     }
+}
+
+// Function to show/hide sections based on report type
+function configureSectionVisibility(report) {
+    const reportType = report.reportType || 'sprint';
+    console.log('Configuring sections for report type:', reportType);
+    
+    // Define section visibility rules for each report type
+    const sectionRules = {
+        'sprint': {
+            userStories: true,
+            testCases: true,
+            issues: true,
+            enhancements: true,
+            automationRegression: true,  // Show for sprint reports
+            evaluation: true
+        },
+        'manual': {
+            userStories: true,
+            testCases: true,
+            issues: true,
+            enhancements: true,
+            automationRegression: false,  // Hide for manual reports
+            evaluation: true
+        },
+        'automation': {
+            userStories: false,  // Hide for automation reports
+            testCases: true,
+            issues: true,
+            enhancements: false,  // Hide for automation reports
+            automationRegression: true,  // Show for automation reports
+            evaluation: false  // Hide for automation reports
+        }
+    };
+    
+    const rules = sectionRules[reportType] || sectionRules['sprint'];
+    
+    // Apply visibility rules to sections by finding parent elements
+    const sectionElements = [
+        { elements: document.querySelectorAll('#userStoriesViewTable'), rule: 'userStories' },
+        { elements: document.querySelectorAll('#testCasesViewTable'), rule: 'testCases' },
+        { elements: document.querySelectorAll('#issuesPriorityViewTable, #issuesStatusViewTable'), rule: 'issues' },
+        { elements: document.querySelectorAll('#enhancementsViewTable'), rule: 'enhancements' },
+        { elements: document.querySelectorAll('#automationTestCasesViewTable, #automationStabilityViewTable'), rule: 'automationRegression' },
+        { elements: document.querySelectorAll('#evaluationSection'), rule: 'evaluation' }
+    ];
+    
+    sectionElements.forEach(({ elements, rule }) => {
+        elements.forEach(element => {
+            // Find the parent dashboard-section
+            const parentSection = element.closest('.dashboard-section');
+            if (parentSection) {
+                if (rules[rule]) {
+                    parentSection.style.display = '';
+                    parentSection.classList.remove('report-section-hidden');
+                } else {
+                    parentSection.style.display = 'none';
+                    parentSection.classList.add('report-section-hidden');
+                }
+            }
+        });
+    });
 }

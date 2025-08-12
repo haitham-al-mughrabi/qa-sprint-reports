@@ -15,6 +15,7 @@ class Report(db.Model):
     sprintNumber = db.Column(db.Integer, nullable=False)
     reportVersion = db.Column(db.String(50))
     reportName = db.Column(db.String(255))  # New field for custom report name
+    reportType = db.Column(db.String(50), default='sprint')  # Report type: sprint, manual, automation
     cycleNumber = db.Column(db.Integer)
     releaseNumber = db.Column(db.String(50))  # Add missing releaseNumber field
     reportDate = db.Column(db.String(50))
@@ -232,6 +233,7 @@ class Report(db.Model):
             'sprintNumber': self.sprintNumber,
             'reportVersion': self.reportVersion,
             'reportName': self.reportName,
+            'reportType': self.reportType,
             'cycleNumber': self.cycleNumber,
             'releaseNumber': self.releaseNumber,
             'reportDate': self.reportDate,

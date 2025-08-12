@@ -880,3 +880,7 @@ ight theme background adjustment */
 [data-theme="light"] #evaluationSection #finalScoreDisplay {
     color: var(--accent);
 }
+/* Report Section Visibility */
+.report-section-hidden {
+    display: none !important;
+}

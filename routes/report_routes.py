@@ -140,6 +140,7 @@ def create_report():
         report.sprintNumber = int(data.get('sprintNumber', 1)) if data.get('sprintNumber') else 1
         report.reportVersion = data.get('reportVersion', '1.0')
         report.reportName = data.get('reportName', '')
+        report.reportType = data.get('reportType', 'sprint')
         report.cycleNumber = int(data.get('cycleNumber', 1)) if data.get('cycleNumber') else 1
         report.releaseNumber = data.get('releaseNumber', '1.0')
         report.reportDate = data.get('reportDate', '')
@@ -254,6 +255,7 @@ def update_report(report_id):
         report.sprintNumber = int(data.get('sprintNumber', report.sprintNumber)) if data.get('sprintNumber') else report.sprintNumber
         report.reportVersion = data.get('reportVersion', report.reportVersion)
         report.reportName = data.get('reportName', report.reportName)
+        report.reportType = data.get('reportType', report.reportType)
         report.cycleNumber = int(data.get('cycleNumber', report.cycleNumber)) if data.get('cycleNumber') else report.cycleNumber
         report.releaseNumber = data.get('releaseNumber', report.releaseNumber)
         report.reportDate = data.get('reportDate', report.reportDate)

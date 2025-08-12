@@ -27,6 +27,7 @@ def migrate_database(basedir):
             ('releaseNumber', 'VARCHAR(50)'),
             ('testEnvironment', 'VARCHAR(50)'),
             ('reportName', 'VARCHAR(255)'),
+            ('reportType', 'VARCHAR(50) DEFAULT "sprint"'),
             ('teamMemberData', 'TEXT DEFAULT "[]"'),
             ('qaNotesData', 'TEXT DEFAULT "[]"'),
             ('qaNoteFieldsData', 'TEXT DEFAULT "[]"'),
