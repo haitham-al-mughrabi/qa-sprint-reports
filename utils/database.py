@@ -7,7 +7,12 @@ import os
 
 def migrate_database(basedir):
     """Handle database migration for new fields"""
-    db_path = os.path.join(basedir, 'reports.db')
+    data_dir = os.path.join(basedir, 'data')
+    
+    # Ensure data directory exists
+    os.makedirs(data_dir, exist_ok=True)
+    
+    db_path = os.path.join(data_dir, 'reports.db')
 
     if os.path.exists(db_path):
         conn = sqlite3.connect(db_path)

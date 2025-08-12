@@ -16,7 +16,7 @@ report_bp = Blueprint('report_routes', __name__)
 @approved_user_required
 def reports_page():
     """Serves the reports management HTML page."""
-    return render_template('reports.html')
+    return render_template('reports/reports.html')
 
 
 @report_bp.route('/report-types')
@@ -25,7 +25,7 @@ def reports_page():
 def report_types_page():
     """Serves the report types selection page."""
     try:
-        return render_template('report_types.html')
+        return render_template('reports/report_types.html')
     except:
         return "Report types template not found", 404
 
@@ -36,7 +36,7 @@ def report_types_page():
 def sprint_report_page():
     """Serves the sprint report creation page."""
     try:
-        return render_template('sprint_report.html')
+        return render_template('reports/sprint_report.html')
     except:
         return "Sprint report template not found", 404
 
@@ -47,7 +47,7 @@ def sprint_report_page():
 def manual_report_page():
     """Serves the manual report creation page."""
     try:
-        return render_template('manual_report.html')
+        return render_template('reports/manual_report.html')
     except:
         return "Manual report template not found", 404
 
@@ -57,7 +57,7 @@ def manual_report_page():
 @approved_user_required
 def create_report_page():
     """Serves the create/edit report HTML page."""
-    return render_template('create_report.html')
+    return render_template('reports/create_report.html')
 
 
 @report_bp.route('/report/<int:report_id>')
@@ -65,7 +65,7 @@ def create_report_page():
 @approved_user_required
 def view_report(report_id):
     """Serves the report view page."""
-    return render_template('view_report.html', report_id=report_id)
+    return render_template('reports/view_report.html', report_id=report_id)
 
 
 @report_bp.route('/api/reports', methods=['GET'])

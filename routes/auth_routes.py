@@ -22,7 +22,7 @@ def index():
 def login():
     """Login page and authentication"""
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('auth/login.html')
 
     try:
         data = request.get_json()
@@ -89,7 +89,7 @@ def login():
 def register():
     """Registration page and user creation"""
     if request.method == 'GET':
-        return render_template('register.html')
+        return render_template('auth/register.html')
 
     try:
         data = request.get_json()
@@ -172,7 +172,7 @@ def logout():
 def reset_password():
     """Password reset request page"""
     if request.method == 'GET':
-        return render_template('reset_password.html')
+        return render_template('auth/reset_password.html')
 
     try:
         data = request.get_json()
@@ -225,7 +225,7 @@ def reset_password_form():
     if request.method == 'GET':
         if 'reset_user_id' not in session:
             return redirect(url_for('auth_routes.login'))
-        return render_template('reset_password_form.html')
+        return render_template('auth/reset_password_form.html')
 
     try:
         if 'reset_user_id' not in session:

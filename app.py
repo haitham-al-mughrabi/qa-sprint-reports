@@ -17,11 +17,12 @@ from routes import register_blueprints
 load_dotenv()
 
 # --- App & Database Configuration ---
-app = Flask(__name__, template_folder='.', static_folder='static')
+app = Flask(__name__, template_folder='pages', static_folder='static')
 
 # Define the absolute path for the database file
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'reports.db')
+data_dir = os.path.join(basedir, 'data')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(data_dir, 'reports.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
 
@@ -36,6 +37,9 @@ register_blueprints(app)
 
 if __name__ == '__main__':
     with app.app_context():
+        # Ensure data directory exists
+        os.makedirs(data_dir, exist_ok=True)
+        
         # This will create the database file and all tables if they don't exist.
         db.create_all()
         # Handle migration for existing databases

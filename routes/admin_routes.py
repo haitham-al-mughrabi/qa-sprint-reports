@@ -17,7 +17,7 @@ admin_bp = Blueprint('admin_routes', __name__)
 @admin_required
 def user_management_page():
     """Serves the user management HTML page."""
-    return render_template('user_management.html')
+    return render_template('admin/user_management.html')
 
 
 @admin_bp.route('/profile')
@@ -26,7 +26,7 @@ def user_management_page():
 def profile_page():
     """Serves the user profile HTML page."""
     user = User.query.get(session['user_id'])
-    return render_template('profile.html', user=user)
+    return render_template('admin/profile.html', user=user)
 
 
 @admin_bp.route('/user-details')
@@ -34,7 +34,7 @@ def profile_page():
 @admin_required
 def user_details_page():
     """Serves the user details HTML page."""
-    return render_template('user_details.html')
+    return render_template('admin/user_details.html')
 
 
 @admin_bp.route('/manage-data')
@@ -42,7 +42,7 @@ def user_details_page():
 @admin_required
 def manage_data_page():
     """Serves the data management HTML page."""
-    return render_template('manage_data.html')
+    return render_template('admin/manage_data.html')
 
 
 @admin_bp.route('/manage')
