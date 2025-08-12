@@ -9,7 +9,6 @@ import * as dynamic_forms from './dynamic_forms.js';
 import * as navigation from './navigation.js';
 import * as filters from './filters.js';
 import * as pagination from './pagination.js';
-import * as login_script from "./login_script.js";
 
 // Expose modules globally if needed
 window.globals = globals;
@@ -23,4 +22,12 @@ window.dynamic_forms = dynamic_forms;
 window.navigation = navigation;
 window.filters = filters;
 window.pagination = pagination;
-window.login_script=login_script;
+
+// Expose specific dashboard functions globally for HTML onclick handlers
+window.loadDashboardData = dashboard.loadDashboardData;
+window.exportDashboardReport = dashboard.exportDashboardReport;
+
+console.log('Main.js loaded - Dashboard functions available:');
+console.log('- loadDashboardData:', typeof window.loadDashboardData);
+console.log('- exportDashboardReport:', typeof window.exportDashboardReport);
+console.log('- dashboard module:', dashboard);

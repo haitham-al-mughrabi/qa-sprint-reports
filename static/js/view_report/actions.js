@@ -879,12 +879,21 @@ async function loadUserInfo() {
     try {
         const response = await fetch('/api/auth/profile');
         if (response.ok) {
-            const user = await response.json();
-            document.getElementById('userDisplayName').textContent = user.first_name;
+            const result = await response.json();
+            const user = result.user || result; // Handle different response formats
             
-            // Show admin links if user is admin
-            if (user.role === 'admin') {
-                document.getElementById('adminLinks').style.display = 'block';
+            // Update user name in navigation
+            const userNameElement = document.querySelector('.user-name');
+            if (userNameElement && user.first_name) {
+                userNameElement.textContent = user.first_name;
+            }
+            
+            // Show/hide admin links based on user role
+            const adminLinks = document.querySelectorAll('.admin-only');
+            if (user.is_admin) {
+                adminLinks.forEach(link => link.style.display = 'block');
+            } else {
+                adminLinks.forEach(link => link.style.display = 'none');
             }
         } else {
             // User not authenticated, redirect to login

@@ -1,3 +1,8 @@
+import { getStatusClass, getStatusText, getRateClass, formatDate } from './utils.js';
+import { fetchDashboardStats } from './api.js';
+import { dashboardStats, CACHE_DURATION } from './globals.js';
+import { showToast } from './toast.js';
+
 export function updateDashboardStats(stats) {
     console.log('Dashboard stats received:', stats);
     if (!stats) {
@@ -433,8 +438,9 @@ export function renderProjectMetrics(projects) {
 }
 
 // Helper function for progress bar colors
-async function exportDashboardReport() {
-    if (!dashboardStatsCache) {
+export async function exportDashboardReport() {
+    const currentCache = dashboardStats.getCache();
+    if (!currentCache || !currentCache.data) {
         showToast('No dashboard data available to export', 'warning');
         return;
     }
@@ -455,7 +461,7 @@ async function exportDashboardReport() {
     doc.text('Overall Statistics', 10, yPos);
     yPos += 10;
 
-    const overall = dashboardStatsCache.overall;
+    const overall = currentCache.data.overall;
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
     doc.text(`Total Reports: ${overall.totalReports}`, 10, yPos);
@@ -471,13 +477,13 @@ async function exportDashboardReport() {
     yPos += 20;
 
     // Project Metrics Table
-    if (dashboardStatsCache.projects && dashboardStatsCache.projects.length > 0) {
+    if (currentCache.data.projects && currentCache.data.projects.length > 0) {
         doc.setFontSize(14);
         doc.setFont(undefined, 'bold');
         doc.text('Project Metrics', 10, yPos);
         yPos += 10;
 
-        const projectTableData = dashboardStatsCache.projects.map(project => [
+        const projectTableData = currentCache.data.projects.map(project => [
             project.projectName,
             project.portfolioName,
             project.totalReports.toString(),
@@ -499,3 +505,128 @@ async function exportDashboardReport() {
 }
 
 // --- Chart initialization functions ---
+
+// Show loading state for dashboard
+function showDashboardLoading() {
+    const loadingEl = document.getElementById('dashboardLoading');
+    const metricsEl = document.getElementById('projectMetrics');
+    if (loadingEl) loadingEl.style.display = 'flex';
+    if (metricsEl) metricsEl.style.display = 'none';
+}
+
+// Hide loading state and show metrics
+export function hideDashboardLoading() {
+    const loadingEl = document.getElementById('dashboardLoading');
+    const metricsEl = document.getElementById('projectMetrics');
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (metricsEl) metricsEl.style.display = 'grid';
+}
+
+// Initialize the dashboard
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Dashboard: Initializing...');
+    console.log('Dashboard: Current URL:', window.location.pathname);
+    
+    // Debug: Check if required functions are available
+    console.log('Dashboard: fetchDashboardStats available:', typeof fetchDashboardStats);
+    console.log('Dashboard: updateDashboardStats available:', typeof updateDashboardStats);
+    console.log('Dashboard: renderProjectMetrics available:', typeof renderProjectMetrics);
+    
+    // Check if we're on the dashboard page
+    if (!window.location.pathname.includes('/dashboard')) {
+        console.log('Dashboard: Not on dashboard page, skipping initialization');
+        return;
+    }
+    
+    // Initialize theme first
+    if (window.themeManager) {
+        window.themeManager.init();
+    }
+    
+    // Set active class for navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === window.location.pathname) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+    
+    // Load dashboard data
+    loadDashboardData();
+    
+    // Set up refresh button if it exists
+    const refreshBtn = document.getElementById('refreshDashboard');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', loadDashboardData);
+    }
+});
+
+// Load dashboard data
+export function loadDashboardData() {
+    console.log('Dashboard: Loading data...');
+    console.log('Dashboard: fetchDashboardStats function:', fetchDashboardStats);
+    showDashboardLoading();
+    
+    // Clear any existing data
+    const metricsContainer = document.getElementById('projectMetrics');
+    if (metricsContainer) {
+        metricsContainer.innerHTML = '';
+    }
+    
+    // Add debug info
+    console.log('Dashboard: fetchDashboardStats function available:', typeof fetchDashboardStats);
+    
+    // Fetch and update dashboard stats
+    fetchDashboardStats()
+        .then(stats => {
+            console.log('Dashboard: Data loaded successfully', stats);
+            if (!stats) {
+                throw new Error('No data returned from server');
+            }
+            
+            // Debug log the structure
+            console.log('Dashboard: Stats structure:', {
+                overall: stats.overall ? 'present' : 'missing',
+                projects: stats.projects ? `${stats.projects.length} projects` : 'missing'
+            });
+            
+            // Store stats in global cache
+            dashboardStats.setCache({
+                data: stats,
+                cacheTime: Date.now()
+            });
+            
+            // Update the UI with the new data
+            updateDashboardStats(stats);
+            
+            // Show success message if we have data
+            if (stats.overall && stats.overall.totalReports > 0) {
+                showToast('Dashboard updated successfully', 'success');
+            } else {
+                showToast('No report data available. Create your first report to see metrics.', 'info');
+            }
+        })
+        .catch(error => {
+            console.error('Dashboard: Error loading data:', error);
+            showToast(`Error loading dashboard data: ${error.message}`, 'error');
+            
+            // Show empty state if there's an error
+            const container = document.getElementById('projectMetrics');
+            if (container) {
+                container.innerHTML = `
+                    <div class="empty-state" style="text-align: center; color: #6c757d; padding: 40px 0; grid-column: 1 / -1;">
+                        <div style="font-size: 3em; margin-bottom: 20px;"><i class="fas fa-exclamation-triangle"></i></div>
+                        <h3>Error Loading Data</h3>
+                        <p>Could not load project metrics: ${error.message}</p>
+                        <button class="btn btn-primary" onclick="loadDashboardData()">
+                            <i class="fas fa-sync-alt"></i> Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        })
+        .finally(() => {
+            hideDashboardLoading();
+        });
+}

@@ -341,7 +341,25 @@
 
     <!-- Link to the external JavaScript files -->
     <script src="/static/enhanced_script.js" defer></script>
-    <script type="module" src="static/js/view_report.js"></script>
+    
+    <!-- View Report Scripts - Load in correct order -->
+    <script src="/static/js/view_report/toast.js" defer></script>
+    <script src="/static/js/view_report/utils.js" defer></script>
+    <script src="/static/js/view_report/sections/cover_info.js" defer></script>
+    <script src="/static/js/view_report/sections/test_summary.js" defer></script>
+    <script src="/static/js/view_report/sections/metrics_overview.js" defer></script>
+    <script src="/static/js/view_report/sections/user_stories.js" defer></script>
+    <script src="/static/js/view_report/sections/test_cases.js" defer></script>
+    <script src="/static/js/view_report/sections/issues.js" defer></script>
+    <script src="/static/js/view_report/sections/enhancements.js" defer></script>
+    <script src="/static/js/view_report/sections/automation_regression.js" defer></script>
+    <script src="/static/js/view_report/sections/additional_info.js" defer></script>
+    <script src="/static/js/view_report/sections/qa_notes.js" defer></script>
+    <script src="/static/js/view_report/sections/evaluation.js" defer></script>
+    <script src="/static/js/view_report/charts/theme_update.js" defer></script>
+    <script src="/static/js/view_report/charts/theme_listeners.js" defer></script>
+    <script src="/static/js/view_report/actions.js" defer></script>
+    <script src="/static/js/view_report/report_loader.js" defer></script>
 
 </body>
 </html>

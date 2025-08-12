@@ -2507,11 +2507,11 @@ export function renderQANoteFieldHTML(field) {
     `.trim();
 }
 
-export function removeQANoteField(fieldId) {
-    qaNotesFields = qaNotesFields.filter(field => field.id !== fieldId);
-    renderQANotesFields();
-    showToast('QA note field removed', 'info');
-}
+// export function removeQANoteField(fieldId) {
+//     qaNotesFields = qaNotesFields.filter(field => field.id !== fieldId);
+//     renderQANotesFields();
+//     showToast('QA note field removed', 'info');
+// }
 
 async function populatePortfolioDropdownForCreateReport(portfolios) {
     const select = document.getElementById('portfolioName');

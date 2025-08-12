@@ -139,3 +139,42 @@ function getStatusText(status) {
     };
     return map[status] || 'Pending';
 }
+
+// Main render function that calls all section renderers
+function renderReportView(report) {
+    console.log('Rendering report view with data:', report);
+    
+    // Update page title and subtitle
+    const reportTitle = document.getElementById('reportTitle');
+    const reportSubtitle = document.getElementById('reportSubtitle');
+    
+    if (reportTitle) {
+        reportTitle.textContent = report.reportName || `${report.projectName} - Sprint ${report.sprintNumber}`;
+    }
+    
+    if (reportSubtitle) {
+        reportSubtitle.textContent = `${report.portfolioName} | ${formatDate(report.reportDate)} | Status: ${getStatusText(report.testingStatus)}`;
+    }
+    
+    // Get current theme for charts
+    const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
+    
+    // Render all sections
+    try {
+        renderCoverInfo(report);
+        renderTestSummary(report);
+        renderMetricsOverview(report);
+        renderUserStoriesView(report, isLightMode);
+        renderTestCasesView(report, isLightMode);
+        renderIssuesView(report, isLightMode);
+        renderEnhancementsView(report, isLightMode);
+        renderAutomationRegressionView(report, isLightMode);
+        renderAdditionalInfo(report);
+        renderQANotes(report);
+        renderEvaluationView(report, isLightMode);
+        
+        console.log('All sections rendered successfully');
+    } catch (error) {
+        console.error('Error rendering report sections:', error);
+    }
+}

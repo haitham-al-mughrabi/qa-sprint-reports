@@ -1,3 +1,5 @@
+import { reportsPerPage, dashboardStats, CACHE_DURATION, API_URL, editingReportId } from './globals.js';
+
 // Define exports properly at top-level
 export async function fetchReports(page = 1, search = '', limit = reportsPerPage) {
     try {
@@ -40,9 +42,10 @@ export async function fetchReports(page = 1, search = '', limit = reportsPerPage
 
 export async function fetchDashboardStats() {
     try {
-        if (dashboardStatsCache && dashboardStatsCache.cacheTime &&
-            (Date.now() - dashboardStatsCache.cacheTime) < CACHE_DURATION) {
-            return dashboardStatsCache.data;
+        const currentCache = dashboardStats.getCache();
+        if (currentCache && currentCache.cacheTime &&
+            (Date.now() - currentCache.cacheTime) < CACHE_DURATION) {
+            return currentCache.data;
         }
 
         let response;
@@ -95,10 +98,10 @@ export async function fetchDashboardStats() {
             throw new Error('Invalid data structure received from API');
         }
 
-        dashboardStatsCache = {
+        dashboardStats.setCache({
             data: data,
             cacheTime: Date.now()
-        };
+        });
 
         return data;
     } catch (error) {

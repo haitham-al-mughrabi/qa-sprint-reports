@@ -4,7 +4,13 @@ let editingReportId = null;
 let currentPage = 1;
 const reportsPerPage = 10;
 let allReportsCache = []; // Cache for all reports to avoid re-fetching
-let dashboardStatsCache = null; // Cache for dashboard statistics with structure: {data: object, cacheTime: number}
+// Dashboard cache object that can be modified by other modules
+const dashboardStats = {
+    cache: null, // Cache for dashboard statistics with structure: {data: object, cacheTime: number}
+    setCache: (data) => { dashboardStats.cache = data; },
+    getCache: () => dashboardStats.cache,
+    clearCache: () => { dashboardStats.cache = null; }
+};
 // Auto-save functionality
 let autoSaveTimeout = null;
 
@@ -34,5 +40,17 @@ let weightReasonVisible = false; // Not directly used in this version but kept f
 // --- API Communication ---
 const API_URL = '/api/reports';
 const DASHBOARD_API_URL = '/api/dashboard/stats';
+
+// Export global variables for use in other modules
+export { 
+    currentSection, editingReportId, currentPage, reportsPerPage, 
+    allReportsCache, dashboardStats, autoSaveTimeout,
+    FORM_DATA_KEY, FORM_ARRAYS_KEY, CACHE_DURATION,
+    requestData, buildData, testerData, qaNoteFieldsData,
+    userStoriesChart, testCasesChart, issuesPriorityChart, issuesStatusChart,
+    enhancementsChart, automationTestCasesChart, automationPercentageChart,
+    automationStabilityChart, evaluationChart, scoreColumnCount, weightReasonVisible,
+    API_URL, DASHBOARD_API_URL
+};
 
 

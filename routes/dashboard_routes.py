@@ -303,6 +303,7 @@ def get_dashboard_stats():
         return jsonify({'error': 'Failed to fetch dashboard statistics'}), 500
 
 
+
 @dashboard_bp.route('/api/project-stats/<int:project_id>', methods=['GET'])
 @login_required
 @approved_user_required
