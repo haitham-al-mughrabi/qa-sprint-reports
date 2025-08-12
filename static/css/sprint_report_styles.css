@@ -1,0 +1,31 @@
+/* Force Font Awesome icons to display */
+.fas, .far, .fab, .fal, .fad, .fa {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+    font-variant: normal !important;
+    text-transform: none !important;
+    line-height: 1 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Ensure step circle icons are visible */
+.step-circle i {
+    font-size: 1.2rem !important;
+    display: inline-block !important;
+}
+
+/* Navigation icons */
+.nav-item i {
+    font-size: 1rem !important;
+    margin-right: 0.5rem !important;
+    display: inline-block !important;
+}
+
+/* Section title icons */
+.section-title i {
+    font-size: 1.5rem !important;
+    margin-right: 0.75rem !important;
+    display: inline-block !important;
+}

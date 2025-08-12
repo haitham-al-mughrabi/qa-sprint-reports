@@ -9,6 +9,7 @@ import * as dynamic_forms from './dynamic_forms.js';
 import * as navigation from './navigation.js';
 import * as filters from './filters.js';
 import * as pagination from './pagination.js';
+import * as login_script from "./login_script.js";
 
 // Expose modules globally if needed
 window.globals = globals;
@@ -22,4 +23,4 @@ window.dynamic_forms = dynamic_forms;
 window.navigation = navigation;
 window.filters = filters;
 window.pagination = pagination;
-console.log(api); 
+window.login_script=login_script;

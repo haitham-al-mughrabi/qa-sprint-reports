@@ -1,0 +1,237 @@
+/* Force Font Awesome icons to display */
+.fas,
+.far,
+.fab,
+.fal,
+.fad,
+.fa {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+    font-variant: normal !important;
+    text-transform: none !important;
+    line-height: 1 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Report Type Selection Styles */
+.report-types-page {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding-top: var(--nav-height, 70px);
+    transition: background-color 0.3s ease;
+}
+
+.report-types-container {
+    padding: 2rem;
+    max-width: var(--max-width, 1400px);
+    margin: 0 auto;
+    width: 100%;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header h1 i {
+    color: var(--primary);
+}
+
+.page-header p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.report-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.report-type-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.report-type-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-heavy);
+    border-color: var(--primary);
+}
+
+.report-type-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transform: scaleX(0);
+    transition: var(--transition);
+}
+
+.report-type-card:hover::before {
+    transform: scaleX(1);
+}
+
+.card-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 2rem;
+    box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.25);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.card-description {
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.card-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+}
+
+.card-features li {
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.card-features li i {
+    color: var(--success);
+    margin-right: 0.75rem;
+    width: 16px;
+}
+
+.select-button {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-large);
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.select-button:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.3);
+}
+
+.select-button i {
+    font-size: 1.1rem;
+}
+
+/* Specific card colors */
+.sprint-card .card-icon {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.manual-card .card-icon {
+    background: linear-gradient(135deg, #10b981, #047857);
+}
+
+.automation-card .card-icon {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.performance-card .card-icon {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .report-types-container {
+        padding: 1rem;
+    }
+
+    .page-header {
+        padding: 1rem 0;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .report-types-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .report-type-card {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .report-types-container {
+        padding: 0.5rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+    }
+}
+
+/* Theme transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
