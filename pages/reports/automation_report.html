@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Report - QA Reports System</title>
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Font Awesome - Load first and preload for better performance -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Fallback Font Awesome from different CDN -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css" 
+        onerror="this.onerror=null;this.href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css';" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload"
+        as="style" onload="this.rel='stylesheet'">
+
+    <!-- Main styles -->
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/unified-nav.css">
+    <link rel="stylesheet" href="/static/new_report.css">
+    <link rel="stylesheet" href="/static/css/automation_report_styles.css">
+
+    <!-- Theme manager (loads early) -->
+    <script src="/static/theme-manager.js"></script>
+    
+    <!-- Navigation script -->
+    <script src="/static/nav.js" defer></script>
+
+    <!-- External libraries (defer non-critical) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
+        defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
+    <!-- Load non-critical CSS asynchronously -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+    </noscript>
+</head>
+
+<body>
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-rocket"></i> QA Reports System
+            </div>
+            
+            <button class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="/reports" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-text">Reports</span>
+                </a>
+                <a href="/report-types" class="nav-link active">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="nav-text">New Report</span>
+                </a>
+                <a href="/manage" class="nav-link">
+                    <i class="fas fa-cogs"></i>
+                    <span class="nav-text">Manage Data</span>
+                </a>
+                <a href="/project-statistics" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span class="nav-text">Statistics</span>
+                </a>
+            </div>
+            
+            <div class="nav-controls">
+                <div class="nav-user">
+                    <div class="nav-dropdown">
+                        <button class="nav-dropdown-btn">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="user-name">User</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="nav-dropdown-content">
+                            <a href="/profile">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </a>
+                            <a href="/user-management" class="admin-only">
+                                <i class="fas fa-users-cog"></i>
+                                User Management
+                            </a>
+                            <a href="/logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Enhanced QA Form Page -->
+    <div id="formPage" class="page active">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+        <div class="form-container">
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2><i class="fas fa-clipboard"></i> Report Sections</h2>
+                    <button class="back-btn" onclick="window.location.href='/dashboard'"><i
+                            class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                </div>
+                <a href="#" class="nav-item active" onclick="showSection(0)"><i class="fas fa-info-circle"></i> General Details</a>
+                <a href="#" class="nav-item" onclick="showSection(1)"><i class="fas fa-chart-bar"></i> Test Summary</a>
+                <a href="#" class="nav-item" onclick="showSection(2)"><i class="fas fa-users"></i> Team Information</a>
+                <a href="#" class="nav-item" onclick="showSection(3)"><i class="fas fa-robot"></i> Regression Test Results</a>
+                <a href="#" class="nav-item" onclick="showSection(4)"><i class="fas fa-balance-scale"></i> Test Stability</a>
+                <a href="#" class="nav-item" onclick="showSection(5)"><i class="fas fa-cogs"></i> Covered Services</a>
+                <a href="#" class="nav-item" onclick="showSection(6)"><i class="fas fa-puzzle-piece"></i> Covered Modules</a>
+                <a href="#" class="nav-item" onclick="showSection(7)"><i class="fas fa-bug"></i> Bugs</a>
+                <a href="#" class="nav-item" onclick="showSection(8)"><i class="fas fa-sticky-note"></i> QA Notes</a>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="dashboard-header">
+                    <div class="header-content">
+                        <h1 id="formTitle">Create Automation Report</h1>
+                        <p>Complete all sections to generate your comprehensive QA automation testing report</p>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="progress-info">
+                            <div class="progress-text" style="top:15%">
+                                <span id="progressStep">Step 1 of 9</span>
+                                <span id="progressTitle">General Details</span>
+                            </div>
+                            <div class="progress-percentage">
+                                <span id="progressPercent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-steps">
+                            <div class="step active" data-step="0">
+                                <div class="step-circle">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <span class="step-label">General</span>
+                            </div>
+                            <div class="step" data-step="1">
+                                <div class="step-circle">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <span class="step-label">Summary</span>
+                            </div>
+                            <div class="step" data-step="2">
+                                <div class="step-circle">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <span class="step-label">Team</span>
+                            </div>
+                            <div class="step" data-step="3">
+                                <div class="step-circle">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <span class="step-label">Regression</span>
+                            </div>
+                            <div class="step" data-step="4">
+                                <div class="step-circle">
+                                    <i class="fas fa-balance-scale"></i>
+                                </div>
+                                <span class="step-label">Stability</span>
+                            </div>
+                            <div class="step" data-step="5">
+                                <div class="step-circle">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <span class="step-label">Services</span>
+                            </div>
+                            <div class="step" data-step="6">
+                                <div class="step-circle">
+                                    <i class="fas fa-puzzle-piece"></i>
+                                </div>
+                                <span class="step-label">Modules</span>
+                            </div>
+                            <div class="step" data-step="7">
+                                <div class="step-circle">
+                                    <i class="fas fa-bug"></i>
+                                </div>
+                                <span class="step-label">Bugs</span>
+                            </div>
+                            <div class="step" data-step="8">
+                                <div class="step-circle">
+                                    <i class="fas fa-sticky-note"></i>
+                                </div>
+                                <span class="step-label">Notes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-area">
+                    <form id="qaReportForm">
+                        <!-- Section 0: General Details -->
+                        <div class="section active" id="section-0">
+                            <h2 class="section-title"><i class="fas fa-info-circle"></i> General Details</h2>
+                            <div class="general-details-grid">
+                                <!-- Row 1: Report Name -->
+                                <div class="form-group full-width">
+                                    <label for="reportName">Report Name</label>
+                                    <input type="text" id="reportName" name="reportName"
+                                        placeholder="Enter custom report name"
+                                        oninput="updateReportTitle()">
+                                    <small class="field-hint">Leave blank to use default name [reporttype-Portfolio-project-date-sprint-cyclenumber]</small>
+                                </div>
+
+                                <!-- Row 2: Portfolio and Project -->
+                                <div class="form-group">
+                                    <label for="portfolioName">Portfolio Name</label>
+                                    <select id="portfolioName" name="portfolioName"
+                                        onchange="onPortfolioSelection()">
+                                        <option value="">Select Portfolio</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="projectName">Project Name</label>
+                                    <select id="projectName" name="projectName" onchange="onProjectSelection()">
+                                        <option value="">Select Project</option>
+                                    </select>
+                                </div>
+
+                                <!-- Row 3: Report Date and Test Environment -->
+                                <div class="form-group">
+                                    <label for="reportDate">Report Date</label>
+                                    <input type="text" id="reportDate" name="reportDate"
+                                        pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy">
+                                </div>
+                                <div class="form-group">
+                                    <label for="testEnvironment">Test Environment</label>
+                                    <select id="testEnvironment" name="testEnvironment">
+                                        <option value="">Select Environment</option>
+                                        <option value="local">Local</option>
+                                        <option value="demo">Demo</option>
+                                        <option value="dev">Dev</option>
+                                        <option value="stage">Stage</option>
+                                        <option value="uat">UAT</option>
+                                        <option value="pre-production">Pre-production</option>
+                                        <option value="production">Production</option>
+                                    </select>
+                                </div>
+
+                                <!-- Row 4: Sprint Number and Release Number -->
+                                <div class="form-group">
+                                    <label for="sprintNumber">Sprint Number</label>
+                                    <input type="number" id="sprintNumber" name="sprintNumber" min="1"
+                                        placeholder="Enter sprint number">
+                                </div>
+                                <div class="form-group">
+                                    <label for="releaseNumber">Release Number</label>
+                                    <input type="text" id="releaseNumber" name="releaseNumber"
+                                        placeholder="e.g., R1.0, R2.1">
+                                </div>
+                                
+                                <!-- Row 5: Report Version -->
+                                <div class="form-group">
+                                    <label for="reportVersion">Report Version</label>
+                                    <input type="number" id="reportVersion" name="reportVersion"
+                                        placeholder="3" value="3" min="1" step="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 1: Test Summary -->
+                        <div class="section" id="section-1">
+                            <h2 class="section-title"><i class="fas fa-chart-bar"></i> Test Summary & Status</h2>
+                            <div class="test-summary-layout">
+                                <div class="test-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-file-alt"></i>
+                                        <h3>Test Summary & Status</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="form-group">
+                                            <label for="testSummary">Test Summary</label>
+                                            <textarea id="testSummary" name="testSummary"
+                                                placeholder="Provide a comprehensive summary of the testing activities..."
+                                                rows="6"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="testingStatus">Testing Status</label>
+                                            <select id="testingStatus" name="testingStatus">
+                                                <option value="">Select Status</option>
+                                                <option value="passed"><i class="fas fa-check-circle"></i> Passed
+                                                </option>
+                                                <option value="passed-with-issues"><i
+                                                        class="fas fa-exclamation-triangle"></i> Passed with Issues
+                                                </option>
+                                                <option value="failed"><i class="fas fa-times-circle"></i> Failed
+                                                </option>
+                                                <option value="blocked"><i class="fas fa-ban"></i> Blocked</option>
+                                                <option value="cancelled"><i class="fas fa-trash-alt"></i> Cancelled
+                                                </option>
+                                                <option value="deferred"><i class="fas fa-pause"></i> Deferred</option>
+                                                <option value="not-testable"><i class="fas fa-question-circle"></i> Not
+                                                    Testable</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Team Information -->
+                        <div class="section" id="section-2">
+                            <h2 class="section-title"><i class="fas fa-users"></i> Team Information</h2>
+
+                            <!-- Team Information Layout -->
+                            <div class="additional-info-layout">
+                                <div class="info-card-v2 additional-info-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-user-cog"></i>
+                                        <h3>Tester(s) Information</h3>
+                                        <button type="button" class="card-btn" onclick="showTesterModal()">
+                                            <i class="fas fa-user-plus"></i> Select Tester
+                                        </button>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="dynamic-list" id="testerList">
+                                            <div class="empty-state">No testers added yet. Click "Add/Select Tester" to
+                                                get started.</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="info-card-v2 additional-info-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-users"></i>
+                                        <h3>Team Members</h3>
+                                        <button type="button" class="card-btn" onclick="showTeamMemberModal()">
+                                            <i class="fas fa-users"></i> Select Team Member
+                                        </button>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="dynamic-list" id="teamMemberList">
+                                            <div class="empty-state">No team members added yet.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Automation Regression -->
+                        <div class="section" id="section-3">
+                            <h2 class="section-title"><i class="fas fa-robot"></i> Automation Regression</h2>
+
+                            <div class="automation-layout">
+                                <!-- Section 1: Test Cases Summary -->
+                                <div class="automation-section-card automation-test-cases-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <h3>Test Cases Summary</h3>
+                                    </div>
+                                    <div class="automation-content-layout">
+                                        <div class="automation-table-section">
+                                            <table class="data-table" id="automationTestCasesTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Status</th>
+                                                        <th>Count</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><strong>Total Test Cases</strong></td>
+                                                        <td><input type="number" id="automationTotalTestCases" min="0"
+                                                                placeholder="0" readonly
+                                                                class="readonly-field calculated-total"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-check-circle text-success"></i> Passed</td>
+                                                        <td><input type="number" id="automationPassedTestCases"
+                                                                name="automationPassedTestCases" min="0" placeholder="0"
+                                                                oninput="calculateAutomationPercentages()"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-times-circle text-danger"></i> Failed</td>
+                                                        <td><input type="number" id="automationFailedTestCases"
+                                                                name="automationFailedTestCases" min="0" placeholder="0"
+                                                                oninput="calculateAutomationPercentages()"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-forward text-warning"></i> Skipped</td>
+                                                        <td><input type="number" id="automationSkippedTestCases"
+                                                                name="automationSkippedTestCases" min="0"
+                                                                placeholder="0"
+                                                                oninput="calculateAutomationPercentages()"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="automation-chart-section">
+                                            <div class="chart-container">
+                                                <canvas id="automationTestCasesChart" width="400" height="400"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 4: Automation Test Stability -->
+                        <div class="section" id="section-4">
+                            <h2 class="section-title"><i class="fas fa-balance-scale"></i> Automation Test Stability</h2>
+
+                            <div class="automation-layout">
+                                <div class="automation-section-card automation-stability-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-balance-scale"></i>
+                                        <h3>Automation Test Stability Analysis</h3>
+                                    </div>
+                                    <div class="automation-content-layout">
+                                        <div class="automation-table-section">
+                                            <table class="data-table" id="automationStabilityTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Stability</th>
+                                                        <th>Count</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><strong>Total Tests</strong></td>
+                                                        <td><input type="number" id="automationStabilityTotal" min="0"
+                                                                placeholder="0" readonly
+                                                                class="readonly-field calculated-total"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-shield-alt text-success"></i> Stable</td>
+                                                        <td><input type="number" id="automationStableTests"
+                                                                name="automationStableTests" min="0" placeholder="0"
+                                                                oninput="calculateAutomationStabilityPercentages()">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-exclamation-triangle text-warning"></i>
+                                                            Flaky</td>
+                                                        <td><input type="number" id="automationFlakyTests"
+                                                                name="automationFlakyTests" min="0" placeholder="0"
+                                                                oninput="calculateAutomationStabilityPercentages()">
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="automation-chart-section">
+                                            <div class="chart-container">
+                                                <canvas id="automationStabilityChart" width="400" height="400"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 5: Covered Services -->
+                        <div class="section" id="section-5">
+                            <h2 class="section-title"><i class="fas fa-cogs"></i> Covered Services</h2>
+                            <div class="qa-notes-container">
+                                <div class="dynamic-list" id="coveredServicesContainer">
+                                    <div id="coveredServicesList">
+                                        <div class="empty-state">No covered services added yet. Click "Add Service" to get started.</div>
+                                    </div>
+                                </div>
+                                <div class="section-actions">
+                                    <button type="button" class="btn btn-primary" onclick="showAddCoveredServiceModal()">
+                                        <i class="fas fa-plus"></i> Add Service
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 6: Covered Modules -->
+                        <div class="section" id="section-6">
+                            <h2 class="section-title"><i class="fas fa-puzzle-piece"></i> Covered Modules</h2>
+                            <div class="qa-notes-container">
+                                <div class="dynamic-list" id="coveredModulesContainer">
+                                    <div id="coveredModulesList">
+                                        <div class="empty-state">No covered modules added yet. Click "Add Module" to get started.</div>
+                                    </div>
+                                </div>
+                                <div class="section-actions">
+                                    <button type="button" class="btn btn-primary" onclick="showAddCoveredModuleModal()">
+                                        <i class="fas fa-plus"></i> Add Module
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 7: Bugs -->
+                        <div class="section" id="section-7">
+                            <h2 class="section-title"><i class="fas fa-bug"></i> Bugs</h2>
+                            <div class="qa-notes-container">
+                                <div class="dynamic-list" id="bugsContainer">
+                                    <div id="bugsList">
+                                        <div class="empty-state">No bugs added yet. Click "Add Bug" to get started.</div>
+                                    </div>
+                                </div>
+                                <div class="section-actions">
+                                    <button type="button" class="btn btn-primary" onclick="showAddBugModal()">
+                                        <i class="fas fa-plus"></i> Add Bug
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 8: QA Notes -->
+                        <div class="section" id="section-8">
+                            <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
+                            
+                            <div class="qa-notes-container">
+                                <div class="dynamic-list" id="qaNotesContainer">
+                                    <div id="qaNotesList">
+                                        <div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="section-actions">
+                                    <button type="button" class="btn btn-primary" onclick="showAddQANoteModal()">
+                                        <i class="fas fa-plus"></i> Add QA Note
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="navigation-buttons">
+                            <button type="button" class="nav-btn" id="prevBtn" onclick="previousSection()" disabled>←
+                                Previous</button>
+                            <button type="button" class="nav-btn clear-btn" id="clearSectionBtn"
+                                onclick="clearCurrentSection()">Clear Section</button>
+                            <button type="button" class="nav-btn clear-btn" id="clearAllBtn"
+                                onclick="clearAllFields()">Clear All</button>
+                            <button type="button" class="nav-btn" id="nextBtn" onclick="nextSection()">Next →</button>
+                            <button type="submit" class="nav-btn submit-btn" id="submitBtn" style="display: none;">💾
+                                Save Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="addCoveredServiceModal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-cogs"></i> Add Covered Service</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="newCoveredServiceText">Service Name:</label>
+                    <textarea id="newCoveredServiceText" placeholder="Enter the service name..." rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addCoveredServiceModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addCoveredService()">Add Service</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addCoveredModuleModal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-puzzle-piece"></i> Add Covered Module</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="newCoveredModuleText">Module Name:</label>
+                    <textarea id="newCoveredModuleText" placeholder="Enter the module name..." rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addCoveredModuleModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addCoveredModule()">Add Module</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addBugModal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-bug"></i> Add Bug</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="newBugText">Bug Description:</label>
+                    <textarea id="newBugText" placeholder="Enter the bug description..." rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addBugModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addBug()">Add Bug</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addQANoteModal" class="modal">
+        <div class="modal-content">
+            <h3>📝 Add QA Note</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="newQANoteText">Note:</label>
+                    <textarea id="newQANoteText" placeholder="Enter your QA note here..." rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addQANoteModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addQANote()">Add Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Link to the external JavaScript files -->
+    <script src="/static/enhanced_script.js"></script>
+    <script src="/static/Charts.js"></script>
+    <script src="/static/js/automation_report.js"></script>
+
+</body>
+
+</html>

@@ -52,6 +52,17 @@ def manual_report_page():
         return "Manual report template not found", 404
 
 
+@report_bp.route('/automation-report')
+@login_required
+@approved_user_required
+def automation_report_page():
+    """Serves the automation report creation page."""
+    try:
+        return render_template('reports/automation_report.html')
+    except:
+        return "Automation report template not found", 404
+
+
 @report_bp.route('/create-report')
 @login_required
 @approved_user_required
@@ -180,6 +191,11 @@ def create_report():
         report.qaNotesData = json.dumps(data.get('qaNotesData', []))
         report.qaNoteFieldsData = json.dumps(data.get('qaNoteFieldsData', []))
 
+        # Set automation report specific data
+        report.covered_services = json.dumps(data.get('covered_services', []))
+        report.covered_modules = json.dumps(data.get('covered_modules', []))
+        report.bugs = json.dumps(data.get('bugs', []))
+
         # Set automation regression data
         report.automationPassedTestCases = data.get('automationPassedTestCases', 0)
         report.automationFailedTestCases = data.get('automationFailedTestCases', 0)
@@ -294,6 +310,14 @@ def update_report(report_id):
             report.qaNotesData = json.dumps(data['qaNotesData'])
         if 'qaNoteFieldsData' in data:
             report.qaNoteFieldsData = json.dumps(data['qaNoteFieldsData'])
+
+        # Update automation report specific data
+        if 'covered_services' in data:
+            report.covered_services = json.dumps(data['covered_services'])
+        if 'covered_modules' in data:
+            report.covered_modules = json.dumps(data['covered_modules'])
+        if 'bugs' in data:
+            report.bugs = json.dumps(data['bugs'])
 
         # Update automation regression data
         report.automationPassedTestCases = data.get('automationPassedTestCases', report.automationPassedTestCases)

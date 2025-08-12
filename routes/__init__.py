@@ -10,9 +10,11 @@ def register_blueprints(app):
     from .report_routes import report_bp
     from .admin_routes import admin_bp
     from .api_routes import api_bp
+    from .error_test_routes import error_test_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(report_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(error_test_bp)

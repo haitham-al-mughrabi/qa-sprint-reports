@@ -79,6 +79,11 @@ class Report(db.Model):
     qaNotesData = db.Column(db.Text, default='[]')  # Store multiple QA notes as JSON array
     qaNoteFieldsData = db.Column(db.Text, default='[]')  # Store custom QA note fields as JSON array
 
+    # Automation Report Specific Fields
+    covered_services = db.Column(db.Text, default='[]')
+    covered_modules = db.Column(db.Text, default='[]')
+    bugs = db.Column(db.Text, default='[]')
+
     # Automation Regression Data
     # Section 1: Test Cases (auto-calculated from existing test cases)
     automationPassedTestCases = db.Column(db.Integer, default=0)
@@ -286,6 +291,11 @@ class Report(db.Model):
             'enhancementsMetric': self.enhancementsMetric,
             'qaNotesData': json.loads(self.qaNotesData or '[]'),
             'qaNoteFieldsData': json.loads(self.qaNoteFieldsData or '[]'),
+
+            # Automation Report Specific Fields
+            'covered_services': json.loads(self.covered_services or '[]'),
+            'covered_modules': json.loads(self.covered_modules or '[]'),
+            'bugs': json.loads(self.bugs or '[]'),
 
             # Automation Regression Data
             'automationPassedTestCases': self.automationPassedTestCases,

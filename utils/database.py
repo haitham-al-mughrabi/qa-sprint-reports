@@ -62,7 +62,10 @@ def migrate_database(basedir):
             ('lowBugsScore', 'INTEGER DEFAULT 0'),
             ('lowBugsReason', 'TEXT'),
             ('finalEvaluationScore', 'INTEGER DEFAULT 0'),
-            ('totalIssuesByStatus', 'INTEGER DEFAULT 0')
+            ('totalIssuesByStatus', 'INTEGER DEFAULT 0'),
+            ('covered_services', 'TEXT DEFAULT "[]"'),
+            ('covered_modules', 'TEXT DEFAULT "[]"'),
+            ('bugs', 'TEXT DEFAULT "[]"')
         ]
 
         for column_name, column_type in migrations:

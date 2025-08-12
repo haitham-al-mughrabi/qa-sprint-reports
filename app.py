@@ -35,6 +35,49 @@ email_service.init_app(app)
 # Register all blueprints
 register_blueprints(app)
 
+# Error handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    from flask import render_template
+    return render_template('errors/404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    from flask import render_template
+    db.session.rollback()
+    return render_template('errors/500.html'), 500
+
+@app.errorhandler(403)
+def forbidden_error(error):
+    from flask import render_template
+    return render_template('errors/403.html'), 403
+
+@app.errorhandler(401)
+def unauthorized_error(error):
+    from flask import render_template
+    return render_template('errors/401.html'), 401
+
+# Generic error handler for other HTTP errors
+@app.errorhandler(Exception)
+def handle_exception(e):
+    from flask import render_template
+    from werkzeug.exceptions import HTTPException
+    
+    # Pass through HTTP errors
+    if isinstance(e, HTTPException):
+        # For HTTP errors not specifically handled above
+        if e.code not in [401, 403, 404, 500]:
+            return render_template('errors/generic.html', 
+                                 error_code=e.code,
+                                 error_title=e.name,
+                                 error_message=e.description), e.code
+        # Let specific handlers handle their errors
+        return e
+    
+    # Handle non-HTTP exceptions
+    db.session.rollback()
+    return render_template('errors/500.html'), 500
+
 if __name__ == '__main__':
     with app.app_context():
         # Ensure data directory exists

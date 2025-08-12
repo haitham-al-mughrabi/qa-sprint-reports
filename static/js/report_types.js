@@ -109,8 +109,7 @@ function selectReportType(type) {
                 window.location.href = '/manual-report';
                 break;
             case 'automation':
-                alert('Automation Report form coming soon...');
-                // window.location.href = '/create-report?type=automation';
+                window.location.href = '/automation-report';
                 break;
             case 'performance':
                 alert('Performance Report form coming soon...');
