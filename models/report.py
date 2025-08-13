@@ -104,6 +104,39 @@ class Report(db.Model):
     automationStablePercentage = db.Column(db.Float, default=0.0)
     automationFlakyPercentage = db.Column(db.Float, default=0.0)
 
+    # Performance Report Specific Fields
+    # Test Objective & Scope
+    testObjective = db.Column(db.Text)
+    testScope = db.Column(db.Text)
+    
+    # Test Details
+    numberOfUsers = db.Column(db.Integer, default=0)
+    executionDuration = db.Column(db.String(100))
+    
+    # Test Summary Table Data
+    userLoad = db.Column(db.String(100))
+    responseTime = db.Column(db.String(100))
+    requestVolume = db.Column(db.String(100))
+    errorRate = db.Column(db.String(100))
+    slowest = db.Column(db.String(100))
+    fastest = db.Column(db.String(100))
+    
+    # Test Criteria
+    totalRequests = db.Column(db.Integer, default=0)
+    failedRequests = db.Column(db.Integer, default=0)
+    failureRate = db.Column(db.Float, default=0.0)  # Auto-calculated
+    statusCodes = db.Column(db.Text, default='[]')  # JSON array
+    averageResponse = db.Column(db.String(100))
+    averageResponseUnit = db.Column(db.String(20), default='ms')
+    maxResponse = db.Column(db.String(100))
+    maxResponseUnit = db.Column(db.String(20), default='ms')
+    
+    # Performance Test Scenarios (JSON array)
+    performanceScenarios = db.Column(db.Text, default='[]')
+    
+    # HTTP Requests Status Overview (JSON array)
+    httpRequestsData = db.Column(db.Text, default='[]')
+
     # Evaluation Data
     involvementScore = db.Column(db.Integer, default=0)
     involvementReason = db.Column(db.Text)
@@ -223,6 +256,12 @@ class Report(db.Model):
             (self.mediumBugsScore or 0) +
             (self.lowBugsScore or 0)
         )
+        
+        # Calculate performance report failure rate
+        if self.totalRequests and self.totalRequests > 0:
+            self.failureRate = round(((self.failedRequests or 0) / self.totalRequests) * 100, 2)
+        else:
+            self.failureRate = 0.0
 
     def to_dict(self):
         """Converts the Report object to a dictionary for JSON serialization."""
@@ -312,6 +351,28 @@ class Report(db.Model):
             'automationStabilityTotal': self.automationStabilityTotal,
             'automationStablePercentage': self.automationStablePercentage,
             'automationFlakyPercentage': self.automationFlakyPercentage,
+
+            # Performance Report Data
+            'testObjective': self.testObjective,
+            'testScope': self.testScope,
+            'numberOfUsers': self.numberOfUsers,
+            'executionDuration': self.executionDuration,
+            'userLoad': self.userLoad,
+            'responseTime': self.responseTime,
+            'requestVolume': self.requestVolume,
+            'errorRate': self.errorRate,
+            'slowest': self.slowest,
+            'fastest': self.fastest,
+            'totalRequests': self.totalRequests,
+            'failedRequests': self.failedRequests,
+            'failureRate': self.failureRate,
+            'statusCodes': json.loads(self.statusCodes or '[]'),
+            'averageResponse': self.averageResponse,
+            'averageResponseUnit': self.averageResponseUnit,
+            'maxResponse': self.maxResponse,
+            'maxResponseUnit': self.maxResponseUnit,
+            'performanceScenarios': json.loads(self.performanceScenarios or '[]'),
+            'httpRequestsData': json.loads(self.httpRequestsData or '[]'),
 
             # Evaluation Data
             'involvementScore': self.involvementScore,

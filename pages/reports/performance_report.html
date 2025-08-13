@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Report - QA Reports System</title>
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Font Awesome - Load first and preload for better performance -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Fallback Font Awesome from different CDN -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css" 
+        onerror="this.onerror=null;this.href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css';" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="preload"
+        as="style" onload="this.rel='stylesheet'">
+
+    <!-- Main styles -->
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/unified-nav.css">
+    <link rel="stylesheet" href="/static/new_report.css">
+    <link rel="stylesheet" href="/static/css/performance_report_styles.css">
+
+    <!-- Theme manager (loads early) -->
+    <script src="/static/theme-manager.js"></script>
+    
+    <!-- Navigation script -->
+    <script src="/static/nav.js" defer></script>
+
+    <!-- External libraries (defer non-critical) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
+        defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
+    <!-- Load non-critical CSS asynchronously -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+    </noscript>
+</head>
+
+<body>
+    <!-- Navigation Header -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-rocket"></i> QA Reports System
+            </div>
+            
+            <button class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="/reports" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-text">Reports</span>
+                </a>
+                <a href="/report-types" class="nav-link active">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="nav-text">New Report</span>
+                </a>
+                <a href="/manage" class="nav-link">
+                    <i class="fas fa-cogs"></i>
+                    <span class="nav-text">Manage Data</span>
+                </a>
+                <a href="/project-statistics" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span class="nav-text">Statistics</span>
+                </a>
+            </div>
+            
+            <div class="nav-controls">
+                <div class="nav-user">
+                    <div class="nav-dropdown">
+                        <button class="nav-dropdown-btn">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="user-name">User</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="nav-dropdown-content">
+                            <a href="/profile">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </a>
+                            <a href="/user-management" class="admin-only">
+                                <i class="fas fa-users-cog"></i>
+                                User Management
+                            </a>
+                            <a href="/logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun" id="theme-icon"></i>
+                    <span id="theme-text">Light</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Enhanced QA Form Page -->
+    <div id="formPage" class="page active">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+        <div class="form-container">
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2><i class="fas fa-clipboard"></i> Report Sections</h2>
+                    <button class="back-btn" onclick="window.location.href='/dashboard'"><i
+                            class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                </div>
+                <a href="#" class="nav-item active" onclick="showSection(0)"><i class="fas fa-info-circle"></i> General Details</a>
+                <a href="#" class="nav-item" onclick="showSection(1)"><i class="fas fa-project-diagram"></i> Project Details</a>
+                <a href="#" class="nav-item" onclick="showSection(2)"><i class="fas fa-users"></i> Team Information</a>
+                <a href="#" class="nav-item" onclick="showSection(3)"><i class="fas fa-bullseye"></i> Test Objective & Scope</a>
+                <a href="#" class="nav-item" onclick="showSection(4)"><i class="fas fa-cogs"></i> Test Details</a>
+                <a href="#" class="nav-item" onclick="showSection(5)"><i class="fas fa-chart-bar"></i> Test Summary</a>
+                <a href="#" class="nav-item" onclick="showSection(6)"><i class="fas fa-check-circle"></i> Test Criteria</a>
+                <a href="#" class="nav-item" onclick="showSection(7)"><i class="fas fa-tasks"></i> Performance Test Scenarios</a>
+                <a href="#" class="nav-item" onclick="showSection(8)"><i class="fas fa-server"></i> HTTP Requests Status</a>
+                <a href="#" class="nav-item" onclick="showSection(9)"><i class="fas fa-sticky-note"></i> QA Notes</a>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="dashboard-header">
+                    <div class="header-content">
+                        <h1 id="formTitle">Create Performance Report</h1>
+                        <p>Complete all sections to generate your comprehensive performance testing report</p>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="progress-info">
+                            <div class="progress-text" style="top:15%">
+                                <span id="progressStep">Step 1 of 10</span>
+                                <span id="progressTitle">General Details</span>
+                            </div>
+                            <div class="progress-percentage">
+                                <span id="progressPercent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-steps">
+                            <div class="step active" data-step="0">
+                                <div class="step-circle">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <span class="step-label">General</span>
+                            </div>
+                            <div class="step" data-step="1">
+                                <div class="step-circle">
+                                    <i class="fas fa-project-diagram"></i>
+                                </div>
+                                <span class="step-label">Project</span>
+                            </div>
+                            <div class="step" data-step="2">
+                                <div class="step-circle">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <span class="step-label">Team</span>
+                            </div>
+                            <div class="step" data-step="3">
+                                <div class="step-circle">
+                                    <i class="fas fa-bullseye"></i>
+                                </div>
+                                <span class="step-label">Objective</span>
+                            </div>
+                            <div class="step" data-step="4">
+                                <div class="step-circle">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <span class="step-label">Details</span>
+                            </div>
+                            <div class="step" data-step="5">
+                                <div class="step-circle">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <span class="step-label">Summary</span>
+                            </div>
+                            <div class="step" data-step="6">
+                                <div class="step-circle">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <span class="step-label">Criteria</span>
+                            </div>
+                            <div class="step" data-step="7">
+                                <div class="step-circle">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <span class="step-label">Scenarios</span>
+                            </div>
+                            <div class="step" data-step="8">
+                                <div class="step-circle">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <span class="step-label">HTTP</span>
+                            </div>
+                            <div class="step" data-step="9">
+                                <div class="step-circle">
+                                    <i class="fas fa-sticky-note"></i>
+                                </div>
+                                <span class="step-label">Notes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-area">
+                    <form id="qaReportForm">    
+                    <!-- Section 0: General Details -->
+                        <div class="section active" id="section-0">
+                            <h2 class="section-title"><i class="fas fa-info-circle"></i> General Details</h2>
+                            <div class="general-details-grid">
+                                <!-- Row 1: Report Name -->
+                                <div class="form-group full-width">
+                                    <label for="reportName">Report Name</label>
+                                    <input type="text" id="reportName" name="reportName"
+                                        placeholder="Enter custom report name"
+                                        oninput="updateReportTitle()">
+                                    <small class="field-hint">Leave blank to use default name [reporttype-Portfolio-project-date-sprint-cyclenumber]</small>
+                                </div>
+
+                                <!-- Row 2: Portfolio and Project -->
+                                <div class="form-group">
+                                    <label for="portfolioName">Portfolio Name <span style="color: var(--danger);">*</span></label>
+                                    <select id="portfolioName" name="portfolioName" required
+                                        onchange="onPortfolioSelection()">
+                                        <option value="">Select Portfolio</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="projectName">Project Name <span style="color: var(--danger);">*</span></label>
+                                    <select id="projectName" name="projectName" required onchange="onProjectSelection()">
+                                        <option value="">Select Project</option>
+                                    </select>
+                                </div>
+
+                                <!-- Row 3: Test Environment -->
+                                <div class="form-group">
+                                    <label for="testEnvironment">Test Environment <span style="color: var(--danger);">*</span></label>
+                                    <select id="testEnvironment" name="testEnvironment" required>
+                                        <option value="">Select Environment</option>
+                                        <option value="local">Local</option>
+                                        <option value="demo">Demo</option>
+                                        <option value="dev">Dev</option>
+                                        <option value="stage">Stage</option>
+                                        <option value="uat">UAT</option>
+                                        <option value="pre-production">Pre-production</option>
+                                        <option value="production">Production</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 1: Project Details -->
+                        <div class="section" id="section-1">
+                            <h2 class="section-title"><i class="fas fa-project-diagram"></i> Project Details</h2>
+                            <div class="general-details-grid">
+                                <!-- Row 1: Report Information -->
+                                <div class="form-group">
+                                    <label for="reportVersion">Report Version</label>
+                                    <input type="text" id="reportVersion" name="reportVersion"
+                                        placeholder="e.g., 1.0" value="1.0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="reportDate">Report Date</label>
+                                    <input type="text" id="reportDate" name="reportDate"
+                                        pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy">
+                                </div>
+
+                                <!-- Row 2: Report Type -->
+                                <div class="form-group">
+                                    <label for="reportType">Report Type</label>
+                                    <input type="text" id="reportType" name="reportType"
+                                        value="Performance" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Team Information -->
+                        <div class="section" id="section-2">
+                            <h2 class="section-title"><i class="fas fa-users"></i> Team Information</h2>
+
+                            <!-- Team Information Layout -->
+                            <div class="additional-info-layout">
+                                <div class="info-card-v2 additional-info-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-user-cog"></i>
+                                        <h3>Tester(s) Information</h3>
+                                        <button type="button" class="card-btn" onclick="showTesterModal()">
+                                            <i class="fas fa-user-plus"></i> Select Tester
+                                        </button>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="dynamic-list" id="testerList">
+                                            <div class="empty-state">No testers added yet. Click "Add/Select Tester" to
+                                                get started.</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="info-card-v2 additional-info-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-users"></i>
+                                        <h3>Team Members</h3>
+                                        <button type="button" class="card-btn" onclick="showTeamMemberModal()">
+                                            <i class="fas fa-users"></i> Select Team Member
+                                        </button>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="dynamic-list" id="teamMemberList">
+                                            <div class="empty-state">No team members added yet.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Test Objective & Scope -->
+                        <div class="section" id="section-3">
+                            <h2 class="section-title"><i class="fas fa-bullseye"></i> Test Objective & Scope</h2>
+                            <div class="test-summary-layout">
+                                <div class="test-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-bullseye"></i>
+                                        <h3>Test Objective & Scope</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="form-group">
+                                            <label for="testObjective">Test Objective</label>
+                                            <textarea id="testObjective" name="testObjective"
+                                                placeholder="Describe the main objectives of this performance testing..."
+                                                rows="6"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="testScope">Test Scope</label>
+                                            <textarea id="testScope" name="testScope"
+                                                placeholder="Define the scope and boundaries of the performance testing..."
+                                                rows="6"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 4: Test Details -->
+                        <div class="section" id="section-4">
+                            <h2 class="section-title"><i class="fas fa-cogs"></i> Test Details</h2>
+                            <div class="test-summary-layout">
+                                <div class="test-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-cogs"></i>
+                                        <h3>Test Configuration</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div class="form-group">
+                                            <label for="testingStatus">Testing Status</label>
+                                            <select id="testingStatus" name="testingStatus">
+                                                <option value="">Select Status</option>
+                                                <option value="passed"><i class="fas fa-check-circle"></i> Passed</option>
+                                                <option value="passed-with-issues"><i class="fas fa-exclamation-triangle"></i> Passed with Issues</option>
+                                                <option value="failed"><i class="fas fa-times-circle"></i> Failed</option>
+                                                <option value="blocked"><i class="fas fa-ban"></i> Blocked</option>
+                                                <option value="cancelled"><i class="fas fa-trash-alt"></i> Cancelled</option>
+                                                <option value="deferred"><i class="fas fa-pause"></i> Deferred</option>
+                                                <option value="not-testable"><i class="fas fa-question-circle"></i> Not Testable</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="numberOfUsers">Number of Users (VUs)</label>
+                                            <input type="number" id="numberOfUsers" name="numberOfUsers" min="1"
+                                                placeholder="e.g., 100">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="executionDuration">Execution Duration</label>
+                                            <input type="text" id="executionDuration" name="executionDuration"
+                                                placeholder="e.g., 30 minutes, 2 hours">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 5: Test Summary -->
+                        <div class="section" id="section-5">
+                            <h2 class="section-title"><i class="fas fa-chart-bar"></i> Test Summary</h2>
+                            <div class="test-summary-layout">
+                                <div class="test-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <h3>Performance Metrics Summary</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <table class="data-table" id="testSummaryTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Metric</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>User Load</strong></td>
+                                                    <td><input type="text" id="userLoad" name="userLoad" placeholder="e.g., 100 concurrent users"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Response Time</strong></td>
+                                                    <td><input type="text" id="responseTime" name="responseTime" placeholder="e.g., 250ms avg"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Request Volume</strong></td>
+                                                    <td><input type="text" id="requestVolume" name="requestVolume" placeholder="e.g., 10,000 requests"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Error Rate</strong></td>
+                                                    <td><input type="text" id="errorRate" name="errorRate" placeholder="e.g., 0.5%"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Slowest</strong></td>
+                                                    <td><input type="text" id="slowest" name="slowest" placeholder="e.g., 2.5s"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Fastest</strong></td>
+                                                    <td><input type="text" id="fastest" name="fastest" placeholder="e.g., 50ms"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 6: Test Criteria -->
+                        <div class="section" id="section-6">
+                            <h2 class="section-title"><i class="fas fa-check-circle"></i> Test Criteria</h2>
+                            <div class="test-summary-layout">
+                                <div class="test-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-check-circle"></i>
+                                        <h3>Performance Test Criteria</h3>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <table class="data-table" id="testCriteriaTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Criteria</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Number of Users</strong></td>
+                                                    <td>
+                                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                                            <input type="number" id="criteriaUsers" name="criteriaUsers" min="1" placeholder="100" style="flex: 1;">
+                                                            <span>Concurrent users</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Total Number of Requests</strong></td>
+                                                    <td>
+                                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                                            <input type="number" id="totalRequests" name="totalRequests" min="0" placeholder="10000" style="flex: 1;" oninput="calculateFailureRate()">
+                                                            <span>requests</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Number of Failed Requests</strong></td>
+                                                    <td>
+                                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                                            <input type="number" id="failedRequests" name="failedRequests" min="0" placeholder="50" style="flex: 1;" oninput="calculateFailureRate()">
+                                                            <span>requests</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Failure Rate</strong></td>
+                                                    <td>
+                                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                                            <input type="text" id="failureRate" name="failureRate" readonly class="readonly-field calculated-total" placeholder="0.00%" style="flex: 1;">
+                                                            <span>percentage (auto-calculated)</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Status/Error Codes</strong></td>
+                                                    <td>
+                                                        <div class="status-codes-container" id="statusCodesContainer">
+                                                            <div class="empty-state">No status codes added yet.</div>
+                                                        </div>
+                                                        <button type="button" class="add-btn small" onclick="showStatusCodeModal()">
+                                                            <i class="fas fa-plus"></i> Add Status Code
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Average Response Time</strong></td>
+                                                    <td>
+                                                        <div class="response-time-input">
+                                                            <input type="text" id="averageResponse" name="averageResponse" placeholder="250">
+                                                            <select id="averageResponseUnit" name="averageResponseUnit">
+                                                                <option value="ms">ms</option>
+                                                                <option value="sec">sec</option>
+                                                                <option value="min">min</option>
+                                                                <option value="hour">hour</option>
+                                                            </select>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Max Response Time</strong></td>
+                                                    <td>
+                                                        <div class="response-time-input">
+                                                            <input type="text" id="maxResponse" name="maxResponse" placeholder="2500">
+                                                            <select id="maxResponseUnit" name="maxResponseUnit">
+                                                                <option value="ms">ms</option>
+                                                                <option value="sec">sec</option>
+                                                                <option value="min">min</option>
+                                                                <option value="hour">hour</option>
+                                                            </select>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 7: Performance Test Scenarios -->
+                        <div class="section" id="section-7">
+                            <h2 class="section-title"><i class="fas fa-tasks"></i> Performance Test Scenarios</h2>
+                            <div class="test-summary-layout">
+                                <div class="test-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-tasks"></i>
+                                        <h3>Test Scenarios</h3>
+                                        <button type="button" class="card-btn" onclick="showTestScenarioModal()">
+                                            <i class="fas fa-plus"></i> Add Scenario
+                                        </button>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <div id="performanceScenariosContainer">
+                                            <div class="empty-state">No performance scenarios added yet. Click "Add Scenario" to get started.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 8: HTTP Requests Status Overview -->
+                        <div class="section" id="section-8">
+                            <h2 class="section-title"><i class="fas fa-server"></i> HTTP Requests Status Overview</h2>
+                            <div class="test-summary-layout">
+                                <div class="test-summary-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-server"></i>
+                                        <h3>HTTP Requests Overview</h3>
+                                        <button type="button" class="card-btn" onclick="addHttpRequest()">
+                                            <i class="fas fa-plus"></i> Add Request
+                                        </button>
+                                    </div>
+                                    <div class="info-card-v2-content">
+                                        <table class="data-table" id="httpRequestsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Request/Endpoint</th>
+                                                    <th>Status</th>
+                                                    <th>Count</th>
+                                                    <th>AVG Time</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="httpRequestsTableBody">
+                                                <tr>
+                                                    <td colspan="5" class="empty-state">No HTTP requests added yet. Click "Add Request" to get started.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 9: QA Notes -->
+                        <div class="section" id="section-9">
+                            <h2 class="section-title"><i class="fas fa-sticky-note"></i> QA Notes</h2>
+                            
+                            <div class="qa-notes-container">
+                                <div class="dynamic-list" id="qaNotesContainer">
+                                    <div id="qaNotesList">
+                                        <div class="empty-state">No QA notes added yet. Click "Add Note" to get started.</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="section-actions">
+                                    <button type="button" class="btn btn-primary" onclick="showAddQANoteModal()">
+                                        <i class="fas fa-plus"></i> Add QA Note
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn" id="prevBtn" onclick="previousSectionForReportType()" disabled>←
+                        Previous</button>
+                    <button type="button" class="nav-btn clear-btn" id="clearSectionBtn"
+                        onclick="clearCurrentSection()">Clear Section</button>
+                    <button type="button" class="nav-btn clear-btn" id="clearAllBtn"
+                        onclick="clearAllFields()">Clear All</button>
+                    <button type="button" class="nav-btn" id="nextBtn" onclick="nextSectionForReportType()">Next →</button>
+                    <button type="submit" class="nav-btn submit-btn" id="submitBtn" onclick="submitForm()" style="display: none;">💾
+                        Save Report</button>
+                </div>
+            </div>
+        </div>
+    </div>   
+ <!-- Modals -->
+    <!-- Tester Selection Modal -->
+    <div id="testerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Select Tester</h3>
+                <span class="close" onclick="closeTesterModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="testerSelect">Available Testers</label>
+                    <select id="testerSelect" onchange="updateTesterForm()">
+                        <option value="">Select a tester</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="testerName">Name</label>
+                    <input type="text" id="testerName" placeholder="Enter tester name">
+                </div>
+                <div class="form-group">
+                    <label for="testerEmail">Email</label>
+                    <input type="email" id="testerEmail" placeholder="Enter tester email">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeTesterModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="addTester()">Add Tester</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Member Selection Modal -->
+    <div id="teamMemberModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-users"></i> Select Team Member</h3>
+                <span class="close" onclick="closeTeamMemberModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="teamMemberSelect">Available Team Members</label>
+                    <select id="teamMemberSelect" onchange="updateTeamMemberForm()">
+                        <option value="">Select a team member</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="teamMemberName">Name</label>
+                    <input type="text" id="teamMemberName" placeholder="Enter team member name">
+                </div>
+                <div class="form-group">
+                    <label for="teamMemberEmail">Email</label>
+                    <input type="email" id="teamMemberEmail" placeholder="Enter team member email">
+                </div>
+                <div class="form-group">
+                    <label for="teamMemberRole">Role</label>
+                    <input type="text" id="teamMemberRole" placeholder="Enter role (e.g., Developer, Product Owner)">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeTeamMemberModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="addTeamMember()">Add Team Member</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Status/Error Code Modal -->
+    <div id="statusCodeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-code"></i> Add Status/Error Code</h3>
+                <span class="close" onclick="closeStatusCodeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="statusCodeSelect">Status Code</label>
+                    <select id="statusCodeSelect" onchange="updateStatusCodeInfo()">
+                        <option value="">Select Status Code</option>
+                        <!-- 2xx Success -->
+                        <option value="200">200 - OK</option>
+                        <option value="201">201 - Created</option>
+                        <option value="202">202 - Accepted</option>
+                        <option value="204">204 - No Content</option>
+                        <!-- 3xx Redirection -->
+                        <option value="301">301 - Moved Permanently</option>
+                        <option value="302">302 - Found</option>
+                        <option value="304">304 - Not Modified</option>
+                        <option value="307">307 - Temporary Redirect</option>
+                        <option value="308">308 - Permanent Redirect</option>
+                        <!-- 4xx Client Error -->
+                        <option value="400">400 - Bad Request</option>
+                        <option value="401">401 - Unauthorized</option>
+                        <option value="403">403 - Forbidden</option>
+                        <option value="404">404 - Not Found</option>
+                        <option value="405">405 - Method Not Allowed</option>
+                        <option value="408">408 - Request Timeout</option>
+                        <option value="409">409 - Conflict</option>
+                        <option value="410">410 - Gone</option>
+                        <option value="413">413 - Payload Too Large</option>
+                        <option value="414">414 - URI Too Long</option>
+                        <option value="415">415 - Unsupported Media Type</option>
+                        <option value="422">422 - Unprocessable Entity</option>
+                        <option value="429">429 - Too Many Requests</option>
+                        <!-- 5xx Server Error -->
+                        <option value="500">500 - Internal Server Error</option>
+                        <option value="501">501 - Not Implemented</option>
+                        <option value="502">502 - Bad Gateway</option>
+                        <option value="503">503 - Service Unavailable</option>
+                        <option value="504">504 - Gateway Timeout</option>
+                        <option value="505">505 - HTTP Version Not Supported</option>
+                        <option value="507">507 - Insufficient Storage</option>
+                        <option value="508">508 - Loop Detected</option>
+                        <option value="510">510 - Not Extended</option>
+                        <option value="511">511 - Network Authentication Required</option>
+                        <!-- Cloudflare/CDN Specific -->
+                        <option value="520">520 - Web Server Returned Unknown Error</option>
+                        <option value="521">521 - Web Server Is Down</option>
+                        <option value="522">522 - Connection Timed Out</option>
+                        <option value="523">523 - Origin Is Unreachable</option>
+                        <option value="524">524 - A Timeout Occurred</option>
+                        <option value="525">525 - SSL Handshake Failed</option>
+                        <option value="526">526 - Invalid SSL Certificate</option>
+                        <option value="527">527 - Railgun Error</option>
+                        <option value="529">529 - Site Is Overloaded</option>
+                        <option value="530">530 - Site Is Frozen</option>
+                        <!-- Connection Errors -->
+                        <option value="0">0 - Connection Error</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="statusCodeCount">Count</label>
+                    <input type="number" id="statusCodeCount" placeholder="e.g., 150" min="0" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeStatusCodeModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="addStatusCode()">Add Status Code</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Scenario Modal -->
+    <div id="testScenarioModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-tasks"></i> Add Performance Test Scenario</h3>
+                <span class="close" onclick="closeTestScenarioModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="scenarioName">Scenario Name</label>
+                    <input type="text" id="scenarioName" placeholder="e.g., User Login Flow" />
+                </div>
+                <div class="form-group">
+                    <label for="scenarioDescription">Description</label>
+                    <textarea id="scenarioDescription" rows="3" placeholder="Describe the test scenario..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="scenarioUsers">Number of Users</label>
+                    <input type="number" id="scenarioUsers" placeholder="e.g., 100" min="1" />
+                </div>
+                <div class="form-group">
+                    <label for="scenarioDuration">Duration (minutes)</label>
+                    <input type="number" id="scenarioDuration" placeholder="e.g., 30" min="1" />
+                </div>
+                <div class="form-group">
+                    <label for="scenarioResult">Test Result</label>
+                    <select id="scenarioResult">
+                        <option value="">Select Result</option>
+                        <option value="passed">Passed</option>
+                        <option value="failed">Failed</option>
+                        <option value="warning">Warning</option>
+                        <option value="blocked">Blocked</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeTestScenarioModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="addTestScenario()">Add Scenario</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QA Note Modal -->
+    <div id="addQANoteModal" class="modal">
+        <div class="modal-content">
+            <h3>📝 Add QA Note</h3>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="newQANoteText">Note:</label>
+                    <textarea id="newQANoteText" placeholder="Enter your QA note here..." rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addQANoteModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addQANote()">Add Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3>Saving Report...</h3>
+            <p>Please wait while we save your performance report.</p>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="success-overlay" style="display: none;">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Report Saved Successfully!</h3>
+            <p>Your performance report has been saved to the database.</p>
+            <div class="success-actions">
+                <button type="button" class="btn btn-primary" onclick="window.location.href='/dashboard'">
+                    <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/reports'">
+                    <i class="fas fa-chart-line"></i> View Reports
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="/static/js/performance_report.js" defer></script>
+
+    <!-- Report Navigation Utility -->
+    <script src="/static/js/report_type_navigation.js" defer></script>
+    <script src="/static/js/main.js" defer></script>
+    
+    <!-- JavaScript -->
+    
+</body>
+
+</html>

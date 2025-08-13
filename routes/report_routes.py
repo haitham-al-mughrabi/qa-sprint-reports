@@ -63,6 +63,17 @@ def automation_report_page():
         return "Automation report template not found", 404
 
 
+@report_bp.route('/performance-report')
+@login_required
+@approved_user_required
+def performance_report_page():
+    """Serves the performance report creation page."""
+    try:
+        return render_template('reports/performance_report.html')
+    except:
+        return "Performance report template not found", 404
+
+
 @report_bp.route('/create-report')
 @login_required
 @approved_user_required
@@ -204,6 +215,27 @@ def create_report():
         report.automationStableTests = data.get('automationStableTests', 0)
         report.automationFlakyTests = data.get('automationFlakyTests', 0)
 
+        # Set performance report specific data
+        report.testObjective = data.get('testObjective', '')
+        report.testScope = data.get('testScope', '')
+        report.numberOfUsers = data.get('numberOfUsers', 0)
+        report.executionDuration = data.get('executionDuration', '')
+        report.userLoad = data.get('userLoad', '')
+        report.responseTime = data.get('responseTime', '')
+        report.requestVolume = data.get('requestVolume', '')
+        report.errorRate = data.get('errorRate', '')
+        report.slowest = data.get('slowest', '')
+        report.fastest = data.get('fastest', '')
+        report.totalRequests = data.get('totalRequests', 0)
+        report.failedRequests = data.get('failedRequests', 0)
+        report.statusCodes = json.dumps(data.get('statusCodes', []))
+        report.averageResponse = data.get('averageResponse', '')
+        report.averageResponseUnit = data.get('averageResponseUnit', 'ms')
+        report.maxResponse = data.get('maxResponse', '')
+        report.maxResponseUnit = data.get('maxResponseUnit', 'ms')
+        report.performanceScenarios = json.dumps(data.get('performanceScenarios', []))
+        report.httpRequestsData = json.dumps(data.get('httpRequestsData', []))
+
         # Set evaluation data
         report.involvementScore = data.get('involvementScore', 0)
         report.involvementReason = data.get('involvementReason', '')
@@ -327,6 +359,30 @@ def update_report(report_id):
         report.automationSkippedTestCases = data.get('automationSkippedTestCases', report.automationSkippedTestCases)
         report.automationStableTests = data.get('automationStableTests', report.automationStableTests)
         report.automationFlakyTests = data.get('automationFlakyTests', report.automationFlakyTests)
+
+        # Update performance report specific data
+        report.testObjective = data.get('testObjective', report.testObjective)
+        report.testScope = data.get('testScope', report.testScope)
+        report.numberOfUsers = data.get('numberOfUsers', report.numberOfUsers)
+        report.executionDuration = data.get('executionDuration', report.executionDuration)
+        report.userLoad = data.get('userLoad', report.userLoad)
+        report.responseTime = data.get('responseTime', report.responseTime)
+        report.requestVolume = data.get('requestVolume', report.requestVolume)
+        report.errorRate = data.get('errorRate', report.errorRate)
+        report.slowest = data.get('slowest', report.slowest)
+        report.fastest = data.get('fastest', report.fastest)
+        report.totalRequests = data.get('totalRequests', report.totalRequests)
+        report.failedRequests = data.get('failedRequests', report.failedRequests)
+        if 'statusCodes' in data:
+            report.statusCodes = json.dumps(data['statusCodes'])
+        report.averageResponse = data.get('averageResponse', report.averageResponse)
+        report.averageResponseUnit = data.get('averageResponseUnit', report.averageResponseUnit)
+        report.maxResponse = data.get('maxResponse', report.maxResponse)
+        report.maxResponseUnit = data.get('maxResponseUnit', report.maxResponseUnit)
+        if 'performanceScenarios' in data:
+            report.performanceScenarios = json.dumps(data['performanceScenarios'])
+        if 'httpRequestsData' in data:
+            report.httpRequestsData = json.dumps(data['httpRequestsData'])
 
         # Update evaluation data
         report.involvementScore = data.get('involvementScore', report.involvementScore)

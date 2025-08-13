@@ -112,8 +112,7 @@ function selectReportType(type) {
                 window.location.href = '/automation-report';
                 break;
             case 'performance':
-                alert('Performance Report form coming soon...');
-                // window.location.href = '/create-report?type=performance';
+                window.location.href = '/performance-report';
                 break;
             default:
                 alert('Unknown report type');

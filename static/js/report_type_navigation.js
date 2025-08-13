@@ -52,6 +52,21 @@ const REPORT_TYPE_CONFIGS = {
             { id: 7, title: 'Bugs', icon: 'fas fa-bug', label: 'Bugs' },
             { id: 8, title: 'QA Notes', icon: 'fas fa-sticky-note', label: 'Notes' }
         ]
+    },
+    'performance': {
+        totalSections: 10,
+        sections: [
+            { id: 0, title: 'General Details', icon: 'fas fa-info-circle', label: 'General' },
+            { id: 1, title: 'Project Details', icon: 'fas fa-project-diagram', label: 'Project' },
+            { id: 2, title: 'Team Information', icon: 'fas fa-users', label: 'Team' },
+            { id: 3, title: 'Test Objective & Scope', icon: 'fas fa-bullseye', label: 'Objective' },
+            { id: 4, title: 'Test Details', icon: 'fas fa-cogs', label: 'Details' },
+            { id: 5, title: 'Test Summary', icon: 'fas fa-chart-bar', label: 'Summary' },
+            { id: 6, title: 'Test Criteria', icon: 'fas fa-check-circle', label: 'Criteria' },
+            { id: 7, title: 'Performance Test Scenarios', icon: 'fas fa-tasks', label: 'Scenarios' },
+            { id: 8, title: 'HTTP Requests Status', icon: 'fas fa-server', label: 'HTTP' },
+            { id: 9, title: 'QA Notes', icon: 'fas fa-sticky-note', label: 'Notes' }
+        ]
     }
 };
 
@@ -64,6 +79,8 @@ function getCurrentReportType() {
         return 'manual';
     } else if (currentPath.includes('/automation-report')) {
         return 'automation';
+    } else if (currentPath.includes('/performance-report')) {
+        return 'performance';
     }
     return 'sprint'; // default
 }

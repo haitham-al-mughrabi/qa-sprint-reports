@@ -66,7 +66,28 @@ def migrate_database(basedir):
             ('totalIssuesByStatus', 'INTEGER DEFAULT 0'),
             ('covered_services', 'TEXT DEFAULT "[]"'),
             ('covered_modules', 'TEXT DEFAULT "[]"'),
-            ('bugs', 'TEXT DEFAULT "[]"')
+            ('bugs', 'TEXT DEFAULT "[]"'),
+            # Performance Report fields
+            ('testObjective', 'TEXT'),
+            ('testScope', 'TEXT'),
+            ('numberOfUsers', 'INTEGER DEFAULT 0'),
+            ('executionDuration', 'VARCHAR(100)'),
+            ('userLoad', 'VARCHAR(100)'),
+            ('responseTime', 'VARCHAR(100)'),
+            ('requestVolume', 'VARCHAR(100)'),
+            ('errorRate', 'VARCHAR(100)'),
+            ('slowest', 'VARCHAR(100)'),
+            ('fastest', 'VARCHAR(100)'),
+            ('totalRequests', 'INTEGER DEFAULT 0'),
+            ('failedRequests', 'INTEGER DEFAULT 0'),
+            ('failureRate', 'REAL DEFAULT 0.0'),
+            ('statusCodes', 'TEXT DEFAULT "[]"'),
+            ('averageResponse', 'VARCHAR(100)'),
+            ('averageResponseUnit', 'VARCHAR(20) DEFAULT "ms"'),
+            ('maxResponse', 'VARCHAR(100)'),
+            ('maxResponseUnit', 'VARCHAR(20) DEFAULT "ms"'),
+            ('performanceScenarios', 'TEXT DEFAULT "[]"'),
+            ('httpRequestsData', 'TEXT DEFAULT "[]"')
         ]
 
         for column_name, column_type in migrations:
