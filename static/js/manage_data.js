@@ -43,8 +43,6 @@ function setupRoleFilters() {
 
 async function loadAllData() {
     try {
-        console.log('Loading all data...');
-
         // Load data sequentially to avoid overwhelming the server
         const portfolioResponse = await fetch('/api/portfolios');
         const projectResponse = await fetch('/api/projects');
@@ -56,13 +54,6 @@ async function loadAllData() {
         projects = projectResponse.ok ? await projectResponse.json() : [];
         testers = testerResponse.ok ? await testerResponse.json() : [];
         teamMembers = teamResponse.ok ? await teamResponse.json() : [];
-
-        console.log('Data loaded:', {
-            portfolios: portfolios.length,
-            projects: projects.length,
-            testers: testers.length,
-            teamMembers: teamMembers.length
-        });
 
         // Ensure arrays are properly initialized
         portfolios = Array.isArray(portfolios) ? portfolios : [];
@@ -305,8 +296,6 @@ function populatePortfolioPills(selectedId = '') {
         return;
     }
 
-    console.log('Populating portfolio pills with data:', portfolios);
-
     // Find standalone pill and existing portfolio pills
     const standalonePill = container.querySelector('.standalone-pill');
     const existingPortfolioPills = container.querySelectorAll('.portfolio-pill:not(.standalone-pill)');
@@ -327,7 +316,6 @@ function populatePortfolioPills(selectedId = '') {
 
     // Add portfolio pills
     if (portfolios && Array.isArray(portfolios) && portfolios.length > 0) {
-        console.log(`Adding ${portfolios.length} portfolio pills`);
         portfolios.forEach((p, index) => {
             if (!p || !p.name) {
                 console.warn(`Portfolio at index ${index} is invalid:`, p);
@@ -358,8 +346,6 @@ function populatePortfolioPills(selectedId = '') {
                 pill.classList.add('selected');
                 pill.setAttribute('aria-pressed', 'true');
             }
-
-            console.log(`Added portfolio pill: ${p.name} (ID: ${p.id})`);
         });
     } else {
         console.warn('No portfolios available or portfolios is not an array:', portfolios);
@@ -369,10 +355,8 @@ function populatePortfolioPills(selectedId = '') {
     if (!selectedId || selectedId === '') {
         standalonePill.classList.add('selected');
         standalonePill.setAttribute('aria-pressed', 'true');
-        console.log('Selected standalone pill as default');
     }
 
-    console.log('Portfolio pills population completed');
 }
 function populatePortfolioFilter() {
     const select = document.getElementById('portfolioFilter');
@@ -443,8 +427,6 @@ async function showAddProjectModalWithPortfolios() {
 
         // Populate portfolio pills after data is confirmed loaded
         populatePortfolioPills(); // Default to standalone
-
-        console.log('Portfolio pills populated with', portfolios.length, 'portfolios');
     } catch (error) {
         console.error('Error loading portfolios for Add Project modal:', error);
         showToast('Failed to load portfolios. Please try again.', 'error');
@@ -571,9 +553,6 @@ function editTeamMember(id) {
 async function saveData(type, body, modalId) {
     const url = editingId ? `/api/${type}/${editingId}` : `/api/${type}`;
     const method = editingId ? 'PUT' : 'POST';
-
-    console.log(`Saving ${type}:`, { method, url, body });
-
     try {
         const response = await fetch(url, {
             method,
@@ -581,11 +560,8 @@ async function saveData(type, body, modalId) {
             body: JSON.stringify(body)
         });
 
-        console.log(`Response for ${type}:`, response.status, response.statusText);
-
         if (response.ok) {
             const result = await response.json();
-            console.log(`Successfully saved ${type}:`, result);
 
             // Reload all data to ensure consistency
             await loadAllData();
@@ -654,14 +630,6 @@ async function saveProject() {
         // If it's empty string (standalone), keep it as null, otherwise use the ID
         portfolio_id = portfolioIdAttr && portfolioIdAttr !== '' ? parseInt(portfolioIdAttr) : null;
     }
-
-    console.log('Saving project with data:', {
-        name,
-        portfolio_id,
-        description,
-        selectedPill: selectedPortfolioPill,
-        portfolioIdAttr: selectedPortfolioPill ? selectedPortfolioPill.getAttribute('data-portfolio-id') : 'no pill selected'
-    });
 
     if (!name) {
         showToast('Project name is required', 'warning');
@@ -840,7 +808,6 @@ function toggleSingleTagPill(pill) {
     const pillSelector = isPortfolioContainer ? '.portfolio-pill' : '.role-pill';
     const allPills = container.querySelectorAll(pillSelector);
 
-    console.log('Toggling pill:', pill, 'Container:', container.id, 'Selector:', pillSelector);
 
     // Remove selected state from all pills
     allPills.forEach(p => {
@@ -855,7 +822,6 @@ function toggleSingleTagPill(pill) {
     // Log the selected portfolio ID for debugging
     if (isPortfolioContainer) {
         const portfolioId = pill.getAttribute('data-portfolio-id');
-        console.log('Selected portfolio ID:', portfolioId);
     }
 }
 

@@ -89,14 +89,11 @@ async function fetchDashboardStats() {
             return dashboardStatsCache.data;
         }
 
-        console.log('Fetching dashboard stats from API...');
-
         // Try cached endpoint first (has detailed breakdown data), fallback to regular endpoint
         let response;
         let data;
 
         try {
-            console.log('Attempting to fetch from cached endpoint...');
             response = await fetch('/api/dashboard/stats/cached', {
                 method: 'GET',
                 headers: {
@@ -105,19 +102,15 @@ async function fetchDashboardStats() {
                 }
             });
 
-            console.log('Cached endpoint response status:', response.status);
 
             if (response.ok) {
                 data = await response.json();
-                console.log('Successfully fetched from cached endpoint, projects:', data.projects?.length || 0);
 
                 // Validate that we have the detailed breakdown data
                 if (data.projects && data.projects.length > 0) {
                     const firstProject = data.projects[0];
                     if (firstProject.passedUserStories !== undefined || firstProject.passedTestCases !== undefined) {
-                        console.log('Cached endpoint has detailed breakdown data - using it');
                     } else {
-                        console.log('Cached endpoint missing detailed breakdown data');
                     }
                 }
             } else {
@@ -125,11 +118,9 @@ async function fetchDashboardStats() {
                 throw new Error(`Cached endpoint failed: ${response.status} - ${errorText}`);
             }
         } catch (cachedError) {
-            console.log('Cached endpoint failed, trying regular endpoint:', cachedError.message);
 
             // Fallback to regular endpoint (but it has limited data)
             try {
-                console.log('Attempting to fetch from regular endpoint...');
                 response = await fetch('/api/dashboard/stats', {
                     method: 'GET',
                     headers: {
@@ -138,15 +129,12 @@ async function fetchDashboardStats() {
                     }
                 });
 
-                console.log('Regular endpoint response status:', response.status);
 
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Regular endpoint failed: ${response.status} - ${errorText}`);
                 }
                 data = await response.json();
-                console.log('Successfully fetched from regular endpoint, projects:', data.projects?.length || 0);
-                console.log('Warning: Regular endpoint has limited project data - some metrics may not display');
             } catch (regularError) {
                 console.error('Both endpoints failed:', regularError.message);
                 throw regularError;
@@ -164,10 +152,6 @@ async function fetchDashboardStats() {
             cacheTime: Date.now()
         };
 
-        console.log('Dashboard stats cached successfully:', {
-            overall: data.overall ? 'present' : 'missing',
-            projects: data.projects ? data.projects.length : 0
-        });
 
         return data;
     } catch (error) {
@@ -297,7 +281,6 @@ function removeToast(toast) {
 
 // --- Dashboard Functions ---
 function updateDashboardStats(stats) {
-    console.log('Dashboard stats received:', stats); // Debug log
     if (!stats) {
         console.error('No stats data received');
         return;
@@ -331,7 +314,6 @@ function updateDashboardStats(stats) {
     document.getElementById('automationPassRate').textContent = `${automationPassRate}%`;
 
     // Debug log projects data
-    console.log('Projects data in updateDashboardStats:', stats.projects);
 
     // Update project-specific metrics
     renderProjectMetrics(stats.projects || []);
@@ -345,7 +327,6 @@ function renderProjectMetrics(projects) {
     }
 
     // Debug log the projects data being rendered
-    console.log('Rendering projects:', projects);
 
     if (!projects || projects.length === 0) {
         container.innerHTML = `
@@ -364,7 +345,6 @@ function renderProjectMetrics(projects) {
             projects[0].passedTestCases !== undefined ||
             projects[0].criticalIssues !== undefined);
 
-    console.log('Has detailed breakdown data:', hasDetailedData);
 
     if (hasDetailedData) {
         // Render full detailed project cards
@@ -643,7 +623,6 @@ function renderProjectMetrics(projects) {
         `).join('');
     } else {
         // Render simplified project cards when detailed data is not available
-        console.log('Rendering simplified project cards due to missing detailed data');
         container.innerHTML = projects.map(project => `
             <div class="project-metric-card">
                 <div class="project-header">
@@ -836,7 +815,6 @@ function getChartOptions() {
     const tooltipBg = isLightTheme ? '#ffffff' : '#334155';
     const gridColor = isLightTheme ? '#e2e8f0' : '#334155';
 
-    console.log('Enhanced script chart options - isLightTheme:', isLightTheme, 'textColor:', textColor);
 
     return {
         responsive: true,
@@ -1010,7 +988,6 @@ function calculateTestCasesPercentages() {
         // Add a data attribute for debugging
         totalField.setAttribute('data-calculated-value', total);
 
-        console.log('Total field updated:', totalField.value, 'Calculated:', total);
     }
 
     // Rest of the function...
@@ -1360,7 +1337,7 @@ function showSection(sectionIndex) {
         window.showSectionForReportType(sectionIndex);
         return;
     }
-    
+
     // Fallback to original implementation
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById(`section-${sectionIndex}`)?.classList.add('active');
@@ -1381,7 +1358,7 @@ function nextSection() {
         window.nextSectionForReportType();
         return;
     }
-    
+
     // Fallback to original implementation
     if (currentSection < 12) { // Max section index is 12 (QA Notes)
         showSection(currentSection + 1);
@@ -1394,7 +1371,7 @@ function previousSection() {
         window.previousSectionForReportType();
         return;
     }
-    
+
     // Fallback to original implementation
     if (currentSection > 0) {
         showSection(currentSection - 1);
@@ -1407,7 +1384,7 @@ function updateNavigationButtons() {
         window.updateNavigationButtonsForReportType();
         return;
     }
-    
+
     // Fallback to original implementation
     document.getElementById('prevBtn').disabled = currentSection === 0;
     const isLastSection = currentSection === 12;
@@ -1421,7 +1398,7 @@ function updateProgressBar() {
         window.updateProgressBarForReportType();
         return;
     }
-    
+
     // Fallback to original implementation
     const totalSections = 13;
     const sectionTitles = [
@@ -1566,24 +1543,19 @@ async function applyFilters() {
     // Update filter state from form inputs
     updateFilterState();
 
-    console.log('Applying filters:', currentFilters);
 
     try {
         // Fetch all reports if not cached or if we need fresh data
         if (allReports.length === 0) {
-            console.log('Fetching reports for filtering...');
             const result = await fetchReports(1, '', 1000); // Fetch large number to get all
             allReports = result.reports || [];
-            console.log('Fetched', allReports.length, 'reports for filtering');
         }
 
         // Apply client-side filtering
         let filteredReports = filterReports(allReports);
-        console.log('After filtering:', filteredReports.length, 'reports');
 
         // Apply sorting
         filteredReports = sortReports(filteredReports);
-        console.log('After sorting:', filteredReports.length, 'reports');
 
         // Update results count and active filters display
         updateFilterResultsDisplay(filteredReports.length);
@@ -1734,8 +1706,7 @@ function filterReports(reports) {
 
             if (!hasMatchingTester) {
                 // Only log for debugging if needed
-                // console.log('Tester filter failed for report:', report.id || report.title, 'Looking for:', currentFilters.tester, 'Found values:', allTesterValues);
-                return false;
+                //                 return false;
             }
         }
 
@@ -1755,8 +1726,7 @@ function filterReports(reports) {
             // If no date found, skip date filtering for this report (don't exclude it)
             if (!reportDateStr) {
                 // Only log for debugging if needed
-                // console.log('No date found for report:', report.id || report.title, 'Skipping date filter');
-                // Don't return false - let report pass through if no date available
+                //                 // Don't return false - let report pass through if no date available
             } else {
                 // Handle different date formats
                 let reportDate;
@@ -1798,24 +1768,23 @@ function filterReports(reports) {
                     }
                 } else {
                     // Invalid date format - log for debugging but don't exclude report
-                    // console.log('Invalid date format:', reportDateStr, 'for report:', report.id || report.title);
+                    //                 }
+                }
+            }
+
+            // Sprint filter - handle different field names and types
+            if (currentFilters.sprint) {
+                const sprintNumber = report.sprint || report.sprintNumber || '';
+                const filterSprint = currentFilters.sprint.toString();
+                const reportSprint = sprintNumber.toString();
+
+                if (reportSprint !== filterSprint) {
+                    return false;
                 }
             }
         }
-
-        // Sprint filter - handle different field names and types
-        if (currentFilters.sprint) {
-            const sprintNumber = report.sprint || report.sprintNumber || '';
-            const filterSprint = currentFilters.sprint.toString();
-            const reportSprint = sprintNumber.toString();
-
-            if (reportSprint !== filterSprint) {
-                return false;
-            }
-        }
-
-        return true;
-    });
+            return true;
+        });
 }
 
 function sortReports(reports) {
@@ -1961,7 +1930,6 @@ function clearAllFilters() {
         btn.classList.remove('active');
     });
 
-    console.log('All filters cleared');
 
     // Reapply filters (which will show all reports)
     applyFilters();
@@ -2064,7 +2032,6 @@ function applyQuickFilter(type) {
 
 // Function to refresh filter data
 async function refreshFilterData() {
-    console.log('🔄 Refreshing filter data...');
     allReports = []; // Clear cache
     await initializeFilterDropdowns();
     applyFilters();
@@ -2072,7 +2039,6 @@ async function refreshFilterData() {
 
 // Function to show all reports without filtering
 async function showAllReports() {
-    console.log('📋 Showing all reports without filtering...');
     showReportsLoading();
 
     try {
@@ -2080,7 +2046,6 @@ async function showAllReports() {
         const result = await fetchReports(1, '', 1000);
         const reports = result.reports || [];
 
-        console.log('Total reports fetched:', reports.length);
 
         // Show all reports without any filtering
         renderReportsTable(reports);
@@ -2097,7 +2062,6 @@ async function showAllReports() {
             activeFiltersContainer.innerHTML = '';
         }
 
-        console.log('All reports displayed successfully');
 
     } catch (error) {
         console.error('Error showing all reports:', error);
@@ -2109,29 +2073,17 @@ async function showAllReports() {
 
 // Test API function
 async function testAPI() {
-    console.log('🧪 Testing API endpoint...');
     try {
         const response = await fetch('/api/reports');
-        console.log('API Response status:', response.status);
-        console.log('API Response headers:', [...response.headers.entries()]);
 
         const data = await response.json();
-        console.log('Raw API data:', data);
-        console.log('Data type:', typeof data);
-        console.log('Is array:', Array.isArray(data));
 
         if (Array.isArray(data)) {
-            console.log('Array length:', data.length);
             if (data.length > 0) {
-                console.log('First item:', data[0]);
-                console.log('First item keys:', Object.keys(data[0]));
             }
         } else if (data && typeof data === 'object') {
-            console.log('Object keys:', Object.keys(data));
             if (data.reports) {
-                console.log('Reports array length:', data.reports.length);
                 if (data.reports.length > 0) {
-                    console.log('First report:', data.reports[0]);
                 }
             }
         }
@@ -2142,18 +2094,12 @@ async function testAPI() {
 
 // Test testers API function
 async function testTestersAPI() {
-    console.log('🧪 Testing testers API endpoint...');
     try {
         const response = await fetch('/api/testers');
-        console.log('Testers API Response status:', response.status);
 
         const data = await response.json();
-        console.log('Raw testers data:', data);
-        console.log('Testers count:', data.length);
 
         if (data.length > 0) {
-            console.log('First tester:', data[0]);
-            console.log('Tester keys:', Object.keys(data[0]));
         }
     } catch (error) {
         console.error('Testers API test failed:', error);
@@ -2162,14 +2108,11 @@ async function testTestersAPI() {
 
 // Test individual filters function
 function testIndividualFilters() {
-    console.log('🧪 Testing individual filters...');
 
     if (allReports.length === 0) {
-        console.log('No reports loaded. Run refreshFilterData() first.');
         return;
     }
 
-    console.log('Total reports:', allReports.length);
 
     // Test each filter individually
     const originalFilters = { ...currentFilters };
@@ -2178,7 +2121,6 @@ function testIndividualFilters() {
     currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
     currentFilters.search = 'test';
     let filtered = filterReports(allReports);
-    console.log('Search "test" results:', filtered.length);
 
     // Test project filter (use first available project)
     const projects = [...new Set(allReports.map(r => r.project || r.projectName).filter(Boolean))];
@@ -2186,7 +2128,6 @@ function testIndividualFilters() {
         currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.project = projects[0];
         filtered = filterReports(allReports);
-        console.log(`Project "${projects[0]}" results:`, filtered.length);
     }
 
     // Test tester filter (use first available tester)
@@ -2210,17 +2151,9 @@ function testIndividualFilters() {
         currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.tester = testersList[0];
         filtered = filterReports(allReports);
-        console.log(`Tester "${testersList[0]}" results:`, filtered.length);
 
         // Debug first few reports for tester data
-        console.log('First 3 reports tester data:');
         allReports.slice(0, 3).forEach((report, i) => {
-            console.log(`Report ${i + 1}:`, {
-                title: report.title,
-                testers: report.testers,
-                testerData: report.testerData,
-                tester_data: report.tester_data
-            });
         });
     }
 
@@ -2230,55 +2163,29 @@ function testIndividualFilters() {
         currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
         currentFilters.status = statuses[0];
         filtered = filterReports(allReports);
-        console.log(`Status "${statuses[0]}" results:`, filtered.length);
     }
 
     // Test no filters (should return all)
     currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
     filtered = filterReports(allReports);
-    console.log('No filters results (should be all):', filtered.length);
 
     // Restore original filters
     currentFilters = originalFilters;
 
-    console.log('Individual filter testing complete!');
 }
 
 // Debug function to analyze report data structure
 function debugReportData() {
-    console.log('🔍 Debugging report data structure...');
-    console.log('Total reports:', allReports.length);
 
     if (allReports.length > 0) {
         const sampleReport = allReports[0];
-        console.log('Sample report structure:', sampleReport);
-        console.log('Available fields:', Object.keys(sampleReport));
 
         // Analyze tester data
-        console.log('\n👤 Tester data analysis:');
         allReports.slice(0, 5).forEach((report, index) => {
-            console.log(`Report ${index + 1}:`, {
-                id: report.id,
-                title: report.title,
-                testers: report.testers,
-                tester: report.tester,
-                testerName: report.testerName,
-                assignedTester: report.assignedTester
-            });
         });
 
         // Analyze date data
-        console.log('\n📅 Date data analysis:');
         allReports.slice(0, 5).forEach((report, index) => {
-            console.log(`Report ${index + 1}:`, {
-                id: report.id,
-                title: report.title,
-                date: report.date,
-                reportDate: report.reportDate,
-                createdAt: report.createdAt,
-                created_at: report.created_at,
-                dateCreated: report.dateCreated
-            });
         });
 
         // Count unique testers
@@ -2295,9 +2202,6 @@ function debugReportData() {
             }
         });
 
-        console.log('\n📊 Summary:');
-        console.log('Unique testers found:', [...allTesters]);
-        console.log('Total unique testers:', allTesters.size);
     }
 }
 
@@ -2308,8 +2212,6 @@ async function initializeFilterDropdowns() {
         const result = await fetchReports(1, '', 1000);
         allReports = result.reports || [];
 
-        console.log('Initializing filters with', allReports.length, 'reports');
-        console.log('Raw API result:', result);
 
         // If no reports, try to understand why
         if (allReports.length === 0) {
@@ -2325,35 +2227,14 @@ async function initializeFilterDropdowns() {
 
         // Debug: Log first few reports to understand data structure
         if (allReports.length > 0) {
-            console.log('Sample report data structure:', allReports[0]);
-            console.log('All report keys:', Object.keys(allReports[0]));
 
             // Specifically check tester-related fields
             const sampleReport = allReports[0];
-            console.log('Tester-related fields in sample report:', {
-                testers: sampleReport.testers,
-                tester: sampleReport.tester,
-                testerData: sampleReport.testerData,
-                tester_data: sampleReport.tester_data,
-                assignedTesters: sampleReport.assignedTesters,
-                testTeam: sampleReport.testTeam
-            });
         }
 
         allReports.forEach((report, index) => {
             // Debug first few reports
             if (index < 3) {
-                console.log(`Report ${index}:`, {
-                    project: report.project,
-                    projectName: report.projectName,
-                    portfolio: report.portfolio,
-                    portfolioName: report.portfolioName,
-                    testers: report.testers,
-                    tester: report.tester,
-                    date: report.date,
-                    reportDate: report.reportDate,
-                    createdAt: report.createdAt
-                });
             }
 
             // Extract project names
@@ -2372,12 +2253,6 @@ async function initializeFilterDropdowns() {
 
             // Log tester fields for debugging (only for first few reports)
             if (index < 3) {
-                console.log(`Report ${index} tester fields:`,
-                    possibleTesterFields.reduce((acc, field) => {
-                        acc[field] = report[field];
-                        return acc;
-                    }, {})
-                );
             }
 
             // Check for testers array
@@ -2443,33 +2318,20 @@ async function initializeFilterDropdowns() {
         const sortedPortfolios = [...portfolios].sort();
         const sortedTesters = [...testers].sort();
 
-        console.log('Filter options extracted:', {
-            projects: sortedProjects,
-            portfolios: sortedPortfolios,
-            testers: sortedTesters
-        });
 
-        console.log('Filter counts:', {
-            projects: sortedProjects.length,
-            portfolios: sortedPortfolios.length,
-            testers: sortedTesters.length
-        });
 
         // If no testers found in reports, try to load from testers API
         if (sortedTesters.length === 0) {
-            console.log('No testers found in reports, trying to load from testers API...');
             try {
                 const testersResponse = await fetch('/api/testers');
                 if (testersResponse.ok) {
                     const testersData = await testersResponse.json();
-                    console.log('Loaded testers from API:', testersData);
                     testersData.forEach(tester => {
                         if (tester.name) {
                             testers.add(tester.name);
                         }
                     });
                     const updatedSortedTesters = [...testers].sort();
-                    console.log('Updated testers list:', updatedSortedTesters);
 
                     // Update the tester dropdown with API data
                     const testerFilter = document.getElementById('testerFilter');
@@ -2872,7 +2734,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reportData.qaNoteFieldsData = qaNoteFieldsData; // Add custom QA note fields
             reportData.qaNotesData = qaNotesData; // Add QA notes array data
             // reportData.customFields = customFieldsData; // Add custom fields data - REMOVED
-            
+
             // Determine report type based on current URL path
             const currentPath = window.location.pathname;
             if (currentPath.includes('/sprint-report')) {
@@ -3256,12 +3118,9 @@ async function exportReportAsExcel(id) {
 
 // --- Modal & Utility Functions ---
 function showModal(modalId) {
-    console.log('showModal called with modalId:', modalId);
     const modal = document.getElementById(modalId);
-    console.log('Modal element found:', modal);
     if (modal) {
         modal.style.display = 'flex';
-        console.log('Modal display set to flex');
     } else {
         console.error('Modal element not found:', modalId);
     }
@@ -3911,7 +3770,6 @@ function showAddQANoteFieldModal() {
 function updateQAFieldOptions() {
     // For now, this function doesn't do anything as there are no predefined options.
     // It's kept to fulfill the request.
-    console.log("updateQAFieldOptions called. No predefined options to update.");
 }
 
 function addQANoteField() {
@@ -4179,15 +4037,11 @@ let latestProjectData = null;
 
 // Function called when project is selected
 async function onProjectSelection() {
-    console.log('onProjectSelection called');
     const portfolioSelect = document.getElementById('portfolioName');
     const projectSelect = document.getElementById('projectName');
 
-    console.log('Portfolio value:', portfolioSelect?.value);
-    console.log('Project value:', projectSelect?.value);
 
     if (!portfolioSelect.value || !projectSelect.value) {
-        console.log('Missing portfolio or project value, returning');
         return;
     }
 
@@ -4201,40 +4055,30 @@ async function onProjectSelection() {
     }
 
     projectName = projectSelect.options[projectSelect.selectedIndex].text;
-    console.log('Fetching data for:', portfolioName, '/', projectName);
 
     // Convert to lowercase for case-insensitive matching
     const portfolioNameLower = portfolioName.toLowerCase();
     const projectNameLower = projectName.toLowerCase();
 
-    console.log('URL will be:', `/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
 
     try {
         const response = await fetch(`/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
-        console.log('API response status:', response.status);
 
         if (response.ok) {
             const data = await response.json();
-            console.log('API response data:', data);
 
             if (data.hasData) {
-                console.log('Has data, showing modal');
-                console.log('Data received:', JSON.stringify(data, null, 2));
                 latestProjectData = data;
 
                 // Automatically load testers when project is selected
                 const latestData = data.latestData;
                 if (latestData.testerData && latestData.testerData.length > 0) {
-                    console.log('Auto-loading testers for selected project:', latestData.testerData);
                     testerData = [...latestData.testerData];
                     renderTesterList();
                 }
 
-                console.log('About to call showAutoLoadModal...');
                 showAutoLoadModal(data);
             } else {
-                console.log('No previous data found for this project');
-                console.log('Default values:', data.defaultValues);
                 // No previous data, set defaults
                 setDefaultValues(data.defaultValues);
             }
@@ -4247,12 +4091,9 @@ async function onProjectSelection() {
 
 // Function to show the auto-load modal with data preview
 function showAutoLoadModal(data) {
-    console.log('showAutoLoadModal called with data:', data);
     const modal = document.getElementById('autoLoadDataModal');
     const preview = document.getElementById('dataPreview');
 
-    console.log('Modal element:', modal);
-    console.log('Preview element:', preview);
 
     if (!modal) {
         console.error('Modal element not found! Make sure you are on the create report page.');
@@ -4297,10 +4138,7 @@ function showAutoLoadModal(data) {
     `;
 
     preview.innerHTML = previewHTML;
-    console.log('Preview HTML set, about to show modal');
-    console.log('Preview HTML content:', previewHTML);
     showModal('autoLoadDataModal');
-    console.log('showModal call completed');
 }
 
 // Function to load selected data
@@ -4377,7 +4215,6 @@ function setDefaultValues(defaults) {
 // Progressive form loading - starts with only portfolios
 async function loadFormDropdownData() {
     try {
-        console.log('Loading minimal portfolio data for progressive form loading...');
         await loadPortfoliosOnly();
         disableFormFieldsExceptPortfolio();
         setupProgressiveFormHandlers();
@@ -4406,7 +4243,6 @@ async function loadPortfoliosOnly() {
 // Load projects for a specific portfolio
 async function loadProjectsForPortfolio(portfolioId) {
     try {
-        console.log('Loading projects for portfolio:', portfolioId);
         const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
         if (response.ok) {
             const projects = await response.json();
@@ -4668,7 +4504,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-                console.log('Create report: Theme attribute changed, recreating charts...');
                 // Trigger chart recreation with same logic as themeChanged event
                 setTimeout(() => {
                     // Store current chart data before destroying charts
@@ -4706,7 +4541,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Listen for theme changes and update chart colors
 window.addEventListener('themeChanged', (event) => {
-    console.log('Theme changed, recreating form charts...');
 
     // Store current chart data before destroying charts
     const chartConfigs = [
@@ -4780,7 +4614,6 @@ function recreateFormCharts(chartConfigs, chartData) {
         }
     });
 
-    console.log('Form charts recreated with new theme colors');
 }
 
 // Make theme functions globally accessible
@@ -4876,7 +4709,6 @@ function saveFormDataToLocalStorage() {
 
         localStorage.setItem(FORM_ARRAYS_KEY, JSON.stringify(arrayData));
 
-        console.log('Form data saved to localStorage:', Object.keys(formObject).length, 'fields');
     } catch (error) {
         console.error('Error saving form data to localStorage:', error);
     }
@@ -4884,12 +4716,10 @@ function saveFormDataToLocalStorage() {
 
 function loadFormDataFromLocalStorage() {
     try {
-        console.log('Loading form data from localStorage...');
         const savedFormData = localStorage.getItem(FORM_DATA_KEY);
         const savedArrayData = localStorage.getItem(FORM_ARRAYS_KEY);
 
         if (savedFormData) {
-            console.log('Found saved form data, loading...');
             const formObject = JSON.parse(savedFormData);
 
             // Load form fields
@@ -4899,7 +4729,6 @@ function loadFormDataFromLocalStorage() {
                     element.value = formObject[key];
                 }
             });
-            console.log('Loaded', Object.keys(formObject).length, 'form fields');
 
             // Trigger calculations after loading data
             setTimeout(() => {
@@ -4913,11 +4742,9 @@ function loadFormDataFromLocalStorage() {
                 if (typeof updateAutoCalculatedFields === 'function') updateAutoCalculatedFields();
             }, 500);
         } else {
-            console.log('No saved form data found in localStorage');
         }
 
         if (savedArrayData) {
-            console.log('Found saved array data, loading...');
             const arrayObject = JSON.parse(savedArrayData);
 
             // Load arrays
@@ -4941,10 +4768,8 @@ function loadFormDataFromLocalStorage() {
                 renderTeamMemberList();
             }
         } else {
-            console.log('No saved array data found');
         }
 
-        console.log('Form data loaded from localStorage');
     } catch (error) {
         console.error('Error loading form data from localStorage:', error);
     }
@@ -4954,7 +4779,6 @@ function clearFormDataFromLocalStorage() {
     try {
         localStorage.removeItem(FORM_DATA_KEY);
         localStorage.removeItem(FORM_ARRAYS_KEY);
-        console.log('Form data cleared from localStorage');
     } catch (error) {
         console.error('Error clearing form data from localStorage:', error);
     }
@@ -4965,7 +4789,6 @@ function autoSaveFormData() {
         clearTimeout(autoSaveTimeout);
     }
     autoSaveTimeout = setTimeout(() => {
-        console.log('Auto-saving form data...');
         saveFormDataToLocalStorage();
     }, 1000); // Save after 1 second of inactivity
 }
@@ -4974,7 +4797,6 @@ function autoSaveFormData() {
 function setupAutoSave() {
     const form = document.getElementById('qaReportForm');
     if (form) {
-        console.log('Setting up autosave on form');
         form.addEventListener('input', autoSaveFormData);
         form.addEventListener('change', autoSaveFormData);
     } else {
@@ -5009,7 +4831,6 @@ function clearFormDataOnSubmit() {
         currentSection = 0;
         updateNavigationButtons();
 
-        console.log('Form data cleared after successful submission');
     } catch (error) {
         console.error('Error clearing form data after submission:', error);
     }

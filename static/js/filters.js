@@ -2269,15 +2269,9 @@ let latestProjectData = null;
 
 // Function called when project is selected
 async function onProjectSelection() {
-    console.log('onProjectSelection called');
     const portfolioSelect = document.getElementById('portfolioName');
     const projectSelect = document.getElementById('projectName');
-
-    console.log('Portfolio value:', portfolioSelect?.value);
-    console.log('Project value:', projectSelect?.value);
-
     if (!portfolioSelect.value || !projectSelect.value) {
-        console.log('Missing portfolio or project value, returning');
         return;
     }
 
@@ -2291,40 +2285,30 @@ async function onProjectSelection() {
     }
 
     projectName = projectSelect.options[projectSelect.selectedIndex].text;
-    console.log('Fetching data for:', portfolioName, '/', projectName);
 
     // Convert to lowercase for case-insensitive matching
     const portfolioNameLower = portfolioName.toLowerCase();
     const projectNameLower = projectName.toLowerCase();
 
-    console.log('URL will be:', `/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
 
     try {
         const response = await fetch(`/api/projects/${encodeURIComponent(portfolioNameLower)}/${encodeURIComponent(projectNameLower)}/latest-data`);
-        console.log('API response status:', response.status);
 
         if (response.ok) {
             const data = await response.json();
-            console.log('API response data:', data);
 
             if (data.hasData) {
-                console.log('Has data, showing modal');
-                console.log('Data received:', JSON.stringify(data, null, 2));
                 latestProjectData = data;
 
                 // Automatically load testers when project is selected
                 const latestData = data.latestData;
                 if (latestData.testerData && latestData.testerData.length > 0) {
-                    console.log('Auto-loading testers for selected project:', latestData.testerData);
                     testerData = [...latestData.testerData];
                     renderTesterList();
                 }
 
-                console.log('About to call showAutoLoadModal...');
                 showAutoLoadModal(data);
             } else {
-                console.log('No previous data found for this project');
-                console.log('Default values:', data.defaultValues);
                 // No previous data, set defaults
                 setDefaultValues(data.defaultValues);
             }
@@ -2458,7 +2442,6 @@ export function setDefaultValues(defaults) {
 // Progressive form loading - starts with only portfolios
 async function loadFormDropdownData() {
     try {
-        console.log('Loading minimal portfolio data for progressive form loading...');
         await loadPortfoliosOnly();
         disableFormFieldsExceptPortfolio();
         setupProgressiveFormHandlers();

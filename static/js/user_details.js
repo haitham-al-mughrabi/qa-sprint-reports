@@ -42,11 +42,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const targetTab = urlParams.get('tab');
     const action = urlParams.get('action');
 
-    console.log('URL parameters:', window.location.search);
-    console.log('Extracted user ID:', currentUserId);
-    console.log('Target tab:', targetTab);
-    console.log('Action:', action);
-
     if (!currentUserId) {
         showError('No user ID provided in URL. Please access this page from the User Management page.');
         return;
@@ -80,7 +75,6 @@ async function testApiAccess() {
         if (!response.ok && response.status !== 401) {
             throw new Error('API not accessible');
         }
-        console.log('API is accessible');
     } catch (error) {
         console.warn('API access test failed:', error);
         throw error;
@@ -90,7 +84,6 @@ async function testApiAccess() {
 // Load user data from API
 async function loadUserData() {
     try {
-        console.log('Loading user data for ID:', currentUserId);
         showLoading();
 
         // Validate user ID
@@ -99,10 +92,8 @@ async function loadUserData() {
         }
 
         const apiUrl = `/api/users/${currentUserId}`;
-        console.log('Fetching from:', apiUrl);
 
         const response = await fetch(apiUrl);
-        console.log('Response status:', response.status);
 
         if (response.status === 404) {
             throw new Error('User not found');
@@ -113,13 +104,9 @@ async function loadUserData() {
             console.error('API Error:', errorText);
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-
         const data = await response.json();
-        console.log('API Response:', data);
-
         if (data.success && data.user) {
             currentUser = data.user;
-            console.log('User data loaded:', currentUser);
             populateUserData(currentUser);
             loadActivityLog();
             hideLoading();
@@ -728,8 +715,6 @@ if (typeof window.toggleTheme === 'undefined') {
                         themeText.textContent = 'Light';
                     }
                 }
-
-                console.log('Theme toggled to:', newTheme);
             }
         } catch (error) {
             console.error('Theme toggle failed:', error);

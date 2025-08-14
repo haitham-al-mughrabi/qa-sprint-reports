@@ -26,8 +26,3 @@ window.pagination = pagination;
 // Expose specific dashboard functions globally for HTML onclick handlers
 window.loadDashboardData = dashboard.loadDashboardData;
 window.exportDashboardReport = dashboard.exportDashboardReport;
-
-console.log('Main.js loaded - Dashboard functions available:');
-console.log('- loadDashboardData:', typeof window.loadDashboardData);
-console.log('- exportDashboardReport:', typeof window.exportDashboardReport);
-console.log('- dashboard module:', dashboard);

@@ -954,9 +954,7 @@ function updateQANotesList() {
 
 // Form submission
 async function submitForm() {
-    try {
-        console.log('=== STARTING FORM SUBMISSION ===');
-        
+    try {        
         // Collect all form data first
         const formData = collectFormData();
         
@@ -968,7 +966,6 @@ async function submitForm() {
         
         // Validate required fields
         if (!validateFormData(formData)) {
-            console.log('Form validation failed - stopping submission');
             return;
         }
         
@@ -994,7 +991,6 @@ async function submitForm() {
         } catch (jsonError) {
             console.error('❌ Failed to parse JSON response:', jsonError);
             const textResponse = await response.text();
-            console.log('📥 Raw response text:', textResponse);
             throw new Error(`Server returned invalid JSON. Status: ${response.status}, Response: ${textResponse}`);
         }
         
@@ -1046,7 +1042,6 @@ async function submitForm() {
 }
 
 function collectFormData() {
-    console.log('=== COLLECTING FORM DATA ===');
     
     // Check if required DOM elements exist
     const requiredElements = ['reportName', 'portfolioName', 'projectName', 'testEnvironment', 'reportDate'];
@@ -1088,15 +1083,6 @@ function collectFormData() {
         count: item.count,
         avgTime: item.avgTime
     }));
-    
-    console.log('Global data arrays:', {
-        statusCodesData: statusCodesData,
-        performanceScenariosData: performanceScenariosData,
-        httpRequestsData: httpRequestsData,
-        testers: testers,
-        teamMembers: teamMembers,
-        qaNotesData: qaNotesData
-    });
     
     const formData = {
         // Basic information
@@ -1145,16 +1131,10 @@ function collectFormData() {
         httpRequestsData: httpRequests,
         qaNotesData: qaNotesData
     };
-    
-    console.log('=== FORM DATA COLLECTED SUCCESSFULLY ===');
-    console.log('Final form data structure:', formData);
     return formData;
 }
 
 function validateFormData(data) {
-    console.log('=== FORM VALIDATION DEBUG ==='); 
-    console.log('Full form data object:', JSON.stringify(data, null, 2));
-    
     const requiredFields = [
         { field: 'portfolioName', name: 'Portfolio Name' },
         { field: 'projectName', name: 'Project Name' },
@@ -1164,27 +1144,18 @@ function validateFormData(data) {
     
     const missingFields = [];
     
-    console.log('=== CHECKING REQUIRED FIELDS ===');
     for (const { field, name } of requiredFields) {
         const value = data[field];
         const isEmpty = !value || (typeof value === 'string' && value.trim() === '');
-        console.log(`${name} (${field}):`, {
-            value: value,
-            type: typeof value,
-            isEmpty: isEmpty,
-            element: document.getElementById(field)?.value || 'ELEMENT NOT FOUND'
-        });
         
         if (isEmpty) {
             missingFields.push(name);
         }
     }
     
-    console.log('Missing fields:', missingFields);
     
     if (missingFields.length > 0) {
         const errorMsg = `Please fill in the following required fields: ${missingFields.join(', ')}`;
-        console.log('Validation failed:', errorMsg);
         showToast(errorMsg, 'error');
         
         // Focus on first missing field
@@ -1203,7 +1174,6 @@ function validateFormData(data) {
         return false;
     }
     
-    console.log('=== FORM VALIDATION PASSED ===');
     return true;
 }
 
@@ -1416,7 +1386,6 @@ function autoSaveFormData() {
         clearTimeout(autoSaveTimeout);
     }
     autoSaveTimeout = setTimeout(() => {
-        console.log('Auto-saving form data...');
         saveFormDataToLocalStorage();
     }, 1000); // Save after 1 second of inactivity
 }
@@ -1457,7 +1426,6 @@ function saveFormDataToLocalStorage() {
         };
         localStorage.setItem(FORM_ARRAYS_KEY, JSON.stringify(arrayData));
         
-        console.log('Form data auto-saved to localStorage');
     } catch (error) {
         console.error('Error saving form data:', error);
     }
@@ -1514,7 +1482,6 @@ function loadFormDataFromLocalStorage() {
             }
         }
         
-        console.log('Form data loaded from localStorage');
     } catch (error) {
         console.error('Error loading form data:', error);
     }
@@ -1523,7 +1490,6 @@ function loadFormDataFromLocalStorage() {
 function clearFormDataFromLocalStorage() {
     localStorage.removeItem(FORM_DATA_KEY);
     localStorage.removeItem(FORM_ARRAYS_KEY);
-    console.log('Form data cleared from localStorage');
 }
 
 // Modal utility functions from enhanced_script.js

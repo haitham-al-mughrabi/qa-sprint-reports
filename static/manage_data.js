@@ -31,28 +31,17 @@ function showTab(tabName) {
 
 // Data Loading
 async function loadAllData() {
-    console.log('loadAllData called');
     try {
-        console.log('Fetching data from /api/form-data');
         const response = await fetch('/api/form-data');
-        console.log('Response status:', response.status);
 
         if (response.ok) {
             const data = await response.json();
-            console.log('Raw data received:', data);
 
             portfolios = data.portfolios || [];
             projects = data.projects || [];
             testers = data.testers || [];
             teamMembers = data.team_members || [];
 
-            console.log('Data loaded successfully:', {
-                portfolios: portfolios.length,
-                projects: projects.length,
-                testers: testers.length,
-                teamMembers: teamMembers.length
-            });
-            console.log('Portfolios data:', portfolios);
         } else {
             console.error('Failed to load data:', response.status, response.statusText);
             const errorText = await response.text();
@@ -352,8 +341,6 @@ function closeModal(modalId) {
 
 // Helper Functions
 function populatePortfolioPills() {
-    console.log('populatePortfolioPills called');
-    console.log('Portfolios available:', portfolios);
 
     const container = document.getElementById('projectPortfoliosContainer');
     if (!container) {
@@ -363,7 +350,6 @@ function populatePortfolioPills() {
 
     // Clear existing portfolio pills (keep the standalone pill)
     const existingPills = container.querySelectorAll('.tag-pill:not(.standalone-pill)');
-    console.log('Removing existing pills:', existingPills.length);
     existingPills.forEach(pill => pill.remove());
 
     // Reset standalone pill selection
@@ -371,16 +357,13 @@ function populatePortfolioPills() {
     if (standalonePill) {
         standalonePill.classList.add('active');
         standalonePill.setAttribute('aria-pressed', 'true');
-        console.log('Standalone pill activated');
     } else {
         console.error('Standalone pill not found');
     }
 
     // Add portfolio pills
     if (portfolios && portfolios.length > 0) {
-        console.log('Adding portfolio pills for', portfolios.length, 'portfolios');
         portfolios.forEach(portfolio => {
-            console.log('Creating pill for portfolio:', portfolio);
             const pill = document.createElement('div');
             pill.className = 'tag-pill portfolio-pill';
             pill.setAttribute('data-portfolio-id', portfolio.id);
@@ -400,9 +383,7 @@ function populatePortfolioPills() {
             `;
             container.appendChild(pill);
         });
-        console.log('Portfolio pills added successfully');
     } else {
-        console.log('No portfolios available or portfolios array is empty');
     }
 }
 

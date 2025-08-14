@@ -90,8 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Report type selection function
 function selectReportType(type) {
-    console.log(`Selected report type: ${type}`);
-
     // Add visual feedback
     const card = event.currentTarget;
     card.style.transform = 'scale(0.98)';

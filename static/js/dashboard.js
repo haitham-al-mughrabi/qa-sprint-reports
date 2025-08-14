@@ -470,46 +470,17 @@ export function renderProjectMetrics(projects) {
 
 // Helper function for progress bar colors
 export async function exportDashboardReport() {
-    const currentCache = dashboardStats.getCache();
-    if (!currentCache || !currentCache.data) {
-        showToast('No dashboard data available to export', 'warning');
-        return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    let yPos = 20;
-
-    // Title
-    doc.setFontSize(18);
-    doc.setFont(undefined, 'bold');
-    doc.text('QA Dashboard Report', 105, yPos, { align: 'center' });
-    yPos += 20;
-
-    // Overall Statistics
-    doc.setFontSize(14);
-    doc.text('Overall Statistics', 10, yPos);
-    yPos += 10;
-
-    const overall = currentCache.data.overall;
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Total Reports: ${overall.totalReports}`, 10, yPos);
-    doc.text(`Completed: ${overall.completedReports}`, 60, yPos);
-    doc.text(`In Progress: ${overall.inProgressReports}`, 110, yPos);
-    doc.text(`Pending: ${overall.pendingReports}`, 160, yPos);
-    yPos += 10;
-
-    doc.text(`User Stories: ${overall.totalUserStories}`, 10, yPos);
-    doc.text(`Test Cases: ${overall.totalTestCases}`, 60, yPos);
-    doc.text(`Issues: ${overall.totalIssues}`, 110, yPos);
-    doc.text(`Enhancements: ${overall.totalEnhancements}`, 160, yPos);
-    yPos += 20;
-
-    // Project Metrics section excluded as requested
-
-    doc.save('QA_Dashboard_Report.pdf');
+    const dashboard = document.getElementById('dashboardPage');
+    html2canvas(dashboard).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const imgProps= doc.getImageProperties(imgData);
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        doc.save('dashboard-report.pdf');
+    });
 }
 
 // --- Chart initialization functions ---

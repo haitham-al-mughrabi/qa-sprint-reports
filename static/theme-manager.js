@@ -38,7 +38,6 @@ class ThemeManager {
         // Trigger custom event for components that need to react to theme changes
         // Add a longer delay to ensure CSS variables have fully updated
         setTimeout(() => {
-            console.log('Firing themeChanged event for theme:', theme);
             window.dispatchEvent(new CustomEvent('themeChanged', { 
                 detail: { theme: theme } 
             }));
@@ -125,8 +124,7 @@ class ThemeManager {
                 });
             }
             
-            console.log('Chart.js defaults updated for theme:', theme);
-            
+                        
             // Force update all existing charts with new theme
             this.forceUpdateAllCharts(isDark);
         }
@@ -244,8 +242,7 @@ function isCurrentThemeLight() {
 
 // Force refresh all charts with current theme colors
 function forceRefreshAllCharts() {
-    console.log('Force refreshing all charts with current theme...');
-    
+        
     // Update Chart.js defaults first
     if (window.themeManager) {
         window.themeManager.updateChartsTheme(getCurrentTheme());
@@ -259,8 +256,7 @@ function forceRefreshAllCharts() {
 
 // Force recreate all charts (more aggressive)
 function forceRecreateAllCharts() {
-    console.log('Force recreating all charts...');
-    
+        
     // Destroy all Chart.js instances
     if (typeof Chart !== 'undefined' && Chart.instances) {
         Object.values(Chart.instances).forEach(chart => {
@@ -300,8 +296,7 @@ function applyEarlyTheme() {
         Chart.defaults.backgroundColor = isDark ? '#1e293b' : '#ffffff';
     }
     
-    console.log('Early theme applied:', savedTheme);
-}
+    }
 
 // Apply theme immediately
 applyEarlyTheme();
@@ -310,12 +305,10 @@ applyEarlyTheme();
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         themeManager.init();
-        console.log('Theme manager initialized after DOM load');
-    });
+            });
 } else {
     themeManager.init();
-    console.log('Theme manager initialized (DOM already loaded)');
-}
+    }
 
 // Listen for theme changes from other tabs
 window.addEventListener('storage', (event) => {

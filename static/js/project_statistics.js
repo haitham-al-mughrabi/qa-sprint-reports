@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Wait for Chart.js to load
     await waitForChart();
-    console.log('Chart.js loaded successfully');
 });
 
 // Authentication functions

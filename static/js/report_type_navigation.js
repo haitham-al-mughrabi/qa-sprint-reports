@@ -278,9 +278,7 @@ function showSectionForReportType(sectionIndex) {
 }
 
 // Initialize the navigation system for the current report type
-function initializeReportTypeNavigation() {
-    console.log('Initializing report type navigation for:', getCurrentReportType());
-    
+function initializeReportTypeNavigation() {    
     // Update sidebar for current report type
     updateSidebarNavigationForReportType();
     

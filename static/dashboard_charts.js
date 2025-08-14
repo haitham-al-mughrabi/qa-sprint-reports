@@ -659,9 +659,6 @@ async function exportDashboardReport() {
     
     const themeBackgroundColor = themeColors.background;
     const textColor = themeColors.textPrimary;
-    
-    console.log('Light mode detected:', isLightMode);
-    console.log('Using background color:', themeBackgroundColor);
 
     const addPageBackground = () => {
         pdf.setFillColor(themeBackgroundColor);
