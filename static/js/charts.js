@@ -1,8 +1,16 @@
+import { 
+    userStoriesChart, testCasesChart, issuesPriorityChart, issuesStatusChart,
+    issuesOpenStatusChart, issuesResolutionStatusChart, enhancementsChart,
+    automationTestCasesChart, automationPercentageChart, automationStabilityChart
+} from './globals.js';
+
 export function initializeCharts() {
     initializeUserStoriesChart();
     initializeTestCasesChart();
     initializeIssuesPriorityChart();
     initializeIssuesStatusChart();
+    initializeIssuesOpenStatusChart();
+    initializeIssuesResolutionStatusChart();
     initializeEnhancementsChart();
     initializeAutomationTestCasesChart();
     initializeAutomationPercentageChart();
@@ -100,6 +108,20 @@ export function initializeIssuesStatusChart() {
     issuesStatusChart = initializeDoughnutChart('issuesStatusChart', labels, colors);
 }
 
+export function initializeIssuesOpenStatusChart() {
+    const labels = ['New', 'Re-opened', 'Deferred (old bugs)'];
+    const colors = ['#17a2b8', '#fd7e14', '#6f42c1'];
+    if (issuesOpenStatusChart) issuesOpenStatusChart.destroy();
+    issuesOpenStatusChart = initializeDoughnutChart('issuesOpenStatusChart', labels, colors);
+}
+
+export function initializeIssuesResolutionStatusChart() {
+    const labels = ['Fixed', 'Not Fixed'];
+    const colors = ['#28a745', '#dc3545'];
+    if (issuesResolutionStatusChart) issuesResolutionStatusChart.destroy();
+    issuesResolutionStatusChart = initializeDoughnutChart('issuesResolutionStatusChart', labels, colors);
+}
+
 export function initializeEnhancementsChart() {
     const labels = ['New', 'Implemented', 'Exists'];
     const colors = ['#17a2b8', '#28a745', '#6c757d'];
@@ -134,5 +156,20 @@ export function updateChart(chart, data) {
     if (chart) {
         chart.data.datasets[0].data = data;
         chart.update();
+    }
+}
+
+// Update functions for new charts
+export function updateIssuesOpenStatusChart(values) {
+    if (issuesOpenStatusChart) {
+        issuesOpenStatusChart.data.datasets[0].data = [values.new, values.reopened, values.deferredOldBugs];
+        issuesOpenStatusChart.update();
+    }
+}
+
+export function updateIssuesResolutionStatusChart(values) {
+    if (issuesResolutionStatusChart) {
+        issuesResolutionStatusChart.data.datasets[0].data = [values.fixed, values.notFixed];
+        issuesResolutionStatusChart.update();
     }
 }

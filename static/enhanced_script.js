@@ -25,6 +25,8 @@ let userStoriesChart = null;
 let testCasesChart = null;
 let issuesPriorityChart = null;
 let issuesStatusChart = null;
+let issuesOpenStatusChart = null;
+let issuesResolutionStatusChart = null;
 let enhancementsChart = null;
 let automationTestCasesChart = null;
 let automationPercentageChart = null;
@@ -801,6 +803,8 @@ function initializeCharts() {
     initializeTestCasesChart();
     initializeIssuesPriorityChart();
     initializeIssuesStatusChart();
+    initializeIssuesOpenStatusChart();
+    initializeIssuesResolutionStatusChart();
     initializeEnhancementsChart();
     initializeAutomationTestCasesChart();
     initializeAutomationPercentageChart();
@@ -896,6 +900,20 @@ function initializeIssuesStatusChart() {
     const colors = ['#17a2b8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1'];
     if (issuesStatusChart) issuesStatusChart.destroy();
     issuesStatusChart = initializeDoughnutChart('issuesStatusChart', labels, colors);
+}
+
+function initializeIssuesOpenStatusChart() {
+    const labels = ['New', 'Re-opened', 'Deferred (old bugs)'];
+    const colors = ['#17a2b8', '#fd7e14', '#6f42c1'];
+    if (issuesOpenStatusChart) issuesOpenStatusChart.destroy();
+    issuesOpenStatusChart = initializeDoughnutChart('issuesOpenStatusChart', labels, colors);
+}
+
+function initializeIssuesResolutionStatusChart() {
+    const labels = ['Fixed', 'Not Fixed'];
+    const colors = ['#28a745', '#dc3545'];
+    if (issuesResolutionStatusChart) issuesResolutionStatusChart.destroy();
+    issuesResolutionStatusChart = initializeDoughnutChart('issuesResolutionStatusChart', labels, colors);
 }
 
 function initializeEnhancementsChart() {
@@ -1053,35 +1071,54 @@ function calculateIssuesTotal() {
 }
 
 function calculateIssuesStatusTotal() {
-    const statusFields = ['newIssues', 'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredIssues'];
+    const statusFields = ['newIssues', 'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredOldBugsIssues'];
     return statusFields.reduce((sum, field) => sum + (parseInt(document.getElementById(field)?.value) || 0), 0);
 }
 
 function calculateIssuesStatusPercentages() {
-    const total = calculateIssuesStatusTotal();
-    const statusValues = {
-        new: parseInt(document.getElementById('newIssues')?.value) || 0,
-        fixed: parseInt(document.getElementById('fixedIssues')?.value) || 0,
-        notFixed: parseInt(document.getElementById('notFixedIssues')?.value) || 0,
-        reopened: parseInt(document.getElementById('reopenedIssues')?.value) || 0,
-        deferred: parseInt(document.getElementById('deferredIssues')?.value) || 0,
-    };
+    // Calculate individual values
+    const newIssues = parseInt(document.getElementById('newIssues')?.value) || 0;
+    const fixedIssues = parseInt(document.getElementById('fixedIssues')?.value) || 0;
+    const notFixedIssues = parseInt(document.getElementById('notFixedIssues')?.value) || 0;
+    const reopenedIssues = parseInt(document.getElementById('reopenedIssues')?.value) || 0;
+    const deferredOldBugsIssues = parseInt(document.getElementById('deferredOldBugsIssues')?.value) || 0;
 
-    // Update the total issues by status field
-    const totalIssuesByStatusElement = document.getElementById('totalIssuesByStatus');
-    if (totalIssuesByStatusElement) {
-        totalIssuesByStatusElement.value = total;
+    // Calculate sub-section totals
+    const totalOpenStatus = newIssues + reopenedIssues + deferredOldBugsIssues;
+    const totalResolutionStatus = fixedIssues + notFixedIssues;
+    const grandTotal = totalOpenStatus + totalResolutionStatus;
+
+    // Update the individual totals
+    const totalOpenStatusElement = document.getElementById('totalIssuesOpenStatus');
+    if (totalOpenStatusElement) {
+        totalOpenStatusElement.value = totalOpenStatus;
     }
 
-    // Update percentages
-    Object.keys(statusValues).forEach(key => {
-        const percentageElement = document.getElementById(`${key}IssuesPercentage`);
-        if (percentageElement) {
-            percentageElement.textContent = total > 0 ? `${Math.round((statusValues[key] / total) * 100)}%` : '0%';
-        }
-    });
+    const totalResolutionStatusElement = document.getElementById('totalIssuesResolutionStatus');
+    if (totalResolutionStatusElement) {
+        totalResolutionStatusElement.value = totalResolutionStatus;
+    }
 
-    updateChart(issuesStatusChart, Object.values(statusValues));
+    // Update legacy total for compatibility
+    const totalIssuesByStatusElement = document.getElementById('totalIssuesByStatus');
+    if (totalIssuesByStatusElement) {
+        totalIssuesByStatusElement.value = grandTotal;
+    }
+
+    // Update new charts
+    if (issuesOpenStatusChart) {
+        updateChart(issuesOpenStatusChart, [newIssues, reopenedIssues, deferredOldBugsIssues]);
+    }
+    
+    if (issuesResolutionStatusChart) {
+        updateChart(issuesResolutionStatusChart, [fixedIssues, notFixedIssues]);
+    }
+
+    // Legacy chart support
+    const legacyStatusValues = [newIssues, fixedIssues, notFixedIssues, reopenedIssues, deferredOldBugsIssues];
+    if (issuesStatusChart) {
+        updateChart(issuesStatusChart, legacyStatusValues);
+    }
 }
 
 function calculateEnhancementsPercentages() {

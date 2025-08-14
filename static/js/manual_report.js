@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Override navigation functions for manual report (11 sections)
-let currentSection = 0;
+currentSection = 0;
 const totalSections = 11;
 
 // Section titles for manual report

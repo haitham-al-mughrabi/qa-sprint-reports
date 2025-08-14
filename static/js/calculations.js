@@ -138,35 +138,73 @@ export function calculateIssuesTotal() {
 // Issues (status)
 
 export function calculateIssuesStatusTotal() {
-    const statusFields = ['newIssues', 'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredIssues'];
+    const statusFields = ['newIssues', 'fixedIssues', 'notFixedIssues', 'reopenedIssues', 'deferredOldBugsIssues'];
     return statusFields.reduce((sum, field) => sum + (parseInt(document.getElementById(field)?.value, 10) || 0), 0);
 }
 
 export function calculateIssuesStatusPercentages() {
-    const total = calculateIssuesStatusTotal();
-    const statusValues = {
-        new: parseInt(document.getElementById('newIssues')?.value, 10) || 0,
-        fixed: parseInt(document.getElementById('fixedIssues')?.value, 10) || 0,
-        notFixed: parseInt(document.getElementById('notFixedIssues')?.value, 10) || 0,
-        reopened: parseInt(document.getElementById('reopenedIssues')?.value, 10) || 0,
-        deferred: parseInt(document.getElementById('deferredIssues')?.value, 10) || 0,
-    };
+    // Calculate individual values
+    const newIssues = parseInt(document.getElementById('newIssues')?.value, 10) || 0;
+    const fixedIssues = parseInt(document.getElementById('fixedIssues')?.value, 10) || 0;
+    const notFixedIssues = parseInt(document.getElementById('notFixedIssues')?.value, 10) || 0;
+    const reopenedIssues = parseInt(document.getElementById('reopenedIssues')?.value, 10) || 0;
+    const deferredOldBugsIssues = parseInt(document.getElementById('deferredOldBugsIssues')?.value, 10) || 0;
 
-    const totalIssuesByStatusElement = document.getElementById('totalIssuesByStatus');
-    if (totalIssuesByStatusElement) {
-        totalIssuesByStatusElement.value = total;
+    // Calculate sub-section totals
+    const totalOpenStatus = newIssues + reopenedIssues + deferredOldBugsIssues;
+    const totalResolutionStatus = fixedIssues + notFixedIssues;
+    const grandTotal = totalOpenStatus + totalResolutionStatus;
+
+    // Update the individual totals
+    const totalOpenStatusElement = document.getElementById('totalIssuesOpenStatus');
+    if (totalOpenStatusElement) {
+        totalOpenStatusElement.value = totalOpenStatus;
     }
 
-    Object.keys(statusValues).forEach(key => {
-        const percentageElement = document.getElementById(`${key}IssuesPercentage`);
-        if (percentageElement) {
-            percentageElement.textContent = total > 0
-                ? `${Math.round((statusValues[key] / total) * 100)}%`
-                : '0%';
-        }
-    });
+    const totalResolutionStatusElement = document.getElementById('totalIssuesResolutionStatus');
+    if (totalResolutionStatusElement) {
+        totalResolutionStatusElement.value = totalResolutionStatus;
+    }
 
-    updateChart(issuesStatusChart, Object.values(statusValues));
+    // Update legacy total for compatibility
+    const totalIssuesByStatusElement = document.getElementById('totalIssuesByStatus');
+    if (totalIssuesByStatusElement) {
+        totalIssuesByStatusElement.value = grandTotal;
+    }
+
+    // Create data structures for charts
+    const openStatusValues = {
+        new: newIssues,
+        reopened: reopenedIssues,
+        deferredOldBugs: deferredOldBugsIssues
+    };
+
+    const resolutionStatusValues = {
+        fixed: fixedIssues,
+        notFixed: notFixedIssues
+    };
+
+    // Update charts if functions exist
+    if (typeof updateIssuesOpenStatusChart === 'function') {
+        updateIssuesOpenStatusChart(openStatusValues);
+    }
+    
+    if (typeof updateIssuesResolutionStatusChart === 'function') {
+        updateIssuesResolutionStatusChart(resolutionStatusValues);
+    }
+
+    // Legacy chart support
+    const legacyStatusValues = {
+        new: newIssues,
+        fixed: fixedIssues,
+        notFixed: notFixedIssues,
+        reopened: reopenedIssues,
+        deferred: deferredOldBugsIssues
+    };
+
+    if (typeof updateChart === 'function' && typeof issuesStatusChart !== 'undefined') {
+        updateChart(issuesStatusChart, Object.values(legacyStatusValues));
+    }
 }
 
 // Enhancements

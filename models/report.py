@@ -63,6 +63,11 @@ class Report(db.Model):
     notFixedIssues = db.Column(db.Integer, default=0)
     reopenedIssues = db.Column(db.Integer, default=0)
     deferredIssues = db.Column(db.Integer, default=0)
+    deferredOldBugsIssues = db.Column(db.Integer, default=0)  # New field for deferred (old bugs)
+    
+    # New totals for the two sub-sections
+    totalIssuesOpenStatus = db.Column(db.Integer, default=0)  # Total for open issues (New, Re-opened, Deferred old bugs)
+    totalIssuesResolutionStatus = db.Column(db.Integer, default=0)  # Total for resolution issues (Fixed, Not Fixed)
 
     # Enhancements Data (detailed breakdown)
     totalEnhancements = db.Column(db.Integer, default=0)
@@ -197,13 +202,26 @@ class Report(db.Model):
         )
         self.issuesMetric = self.totalIssues
 
-        # Calculate Issues total (by status)
+        # Calculate Issues total (by status) - original total
         self.totalIssuesByStatus = (
             (self.newIssues or 0) +
             (self.fixedIssues or 0) +
             (self.notFixedIssues or 0) +
             (self.reopenedIssues or 0) +
-            (self.deferredIssues or 0)
+            (self.deferredIssues or 0) +
+            (self.deferredOldBugsIssues or 0)
+        )
+        
+        # Calculate new sub-section totals
+        self.totalIssuesOpenStatus = (
+            (self.newIssues or 0) +
+            (self.reopenedIssues or 0) +
+            (self.deferredOldBugsIssues or 0)
+        )
+        
+        self.totalIssuesResolutionStatus = (
+            (self.fixedIssues or 0) +
+            (self.notFixedIssues or 0)
         )
 
         # Calculate Enhancements total
@@ -318,6 +336,9 @@ class Report(db.Model):
             'notFixedIssues': self.notFixedIssues,
             'reopenedIssues': self.reopenedIssues,
             'deferredIssues': self.deferredIssues,
+            'deferredOldBugsIssues': self.deferredOldBugsIssues,
+            'totalIssuesOpenStatus': self.totalIssuesOpenStatus,
+            'totalIssuesResolutionStatus': self.totalIssuesResolutionStatus,
 
             # Enhancements
             'totalEnhancements': self.totalEnhancements,

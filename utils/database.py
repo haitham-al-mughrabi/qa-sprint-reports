@@ -87,7 +87,11 @@ def migrate_database(basedir):
             ('maxResponse', 'VARCHAR(100)'),
             ('maxResponseUnit', 'VARCHAR(20) DEFAULT "ms"'),
             ('performanceScenarios', 'TEXT DEFAULT "[]"'),
-            ('httpRequestsData', 'TEXT DEFAULT "[]"')
+            ('httpRequestsData', 'TEXT DEFAULT "[]"'),
+            # New fields for Issues by Status restructure
+            ('deferredOldBugsIssues', 'INTEGER DEFAULT 0'),
+            ('totalIssuesOpenStatus', 'INTEGER DEFAULT 0'),
+            ('totalIssuesResolutionStatus', 'INTEGER DEFAULT 0')
         ]
 
         for column_name, column_type in migrations:

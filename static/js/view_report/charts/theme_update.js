@@ -19,6 +19,8 @@ function updateChartsForTheme() {
     renderTestCasesChart(currentReport, isLightMode);
     renderIssuesPriorityChart(currentReport, isLightMode);
     renderIssuesStatusChart(currentReport, isLightMode);
+    renderIssuesOpenStatusChart(currentReport, isLightMode);
+    renderIssuesResolutionStatusChart(currentReport, isLightMode);
     renderEnhancementsChart(currentReport, isLightMode);
     renderAutomationTestCasesChart(currentReport, isLightMode);
     renderAutomationStabilityChart(currentReport, isLightMode);
@@ -118,17 +120,69 @@ function renderIssuesStatusChart(report, isLightMode) {
     viewCharts.issuesStatus = new Chart(statusCtx, {
         type: 'doughnut',
         data: {
-            labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'],
+            labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred (old bugs)'],
             datasets: [{
                 data: [
                     report.newIssues || 0,
                     report.fixedIssues || 0,
                     report.notFixedIssues || 0,
                     report.reopenedIssues || 0,
-                    report.deferredIssues || 0
+                    report.deferredOldBugsIssues || 0
                 ],
                 backgroundColor: [
                     '#2196F3', '#4CAF50', '#E91E63', '#FF5722', '#673AB7'
+                ],
+                borderWidth: 3,
+                borderColor: 'var(--surface)'
+            }]
+        },
+        options: getViewChartOptions(isLightMode)
+    });
+}
+
+function renderIssuesOpenStatusChart(report, isLightMode) {
+    const openStatusCtx = document.getElementById('issuesOpenStatusViewChart').getContext('2d');
+    if (viewCharts.issuesOpenStatus) viewCharts.issuesOpenStatus.destroy();
+    
+    viewCharts.issuesOpenStatus = new Chart(openStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['New', 'Re-opened', 'Deferred (old bugs)'],
+            datasets: [{
+                data: [
+                    report.newIssues || 0,
+                    report.reopenedIssues || 0,
+                    report.deferredOldBugsIssues || 0
+                ],
+                backgroundColor: [
+                    '#2196F3', // Blue - New
+                    '#FF5722', // Deep Orange - Re-opened
+                    '#673AB7'  // Deep Purple - Deferred
+                ],
+                borderWidth: 3,
+                borderColor: 'var(--surface)'
+            }]
+        },
+        options: getViewChartOptions(isLightMode)
+    });
+}
+
+function renderIssuesResolutionStatusChart(report, isLightMode) {
+    const resolutionStatusCtx = document.getElementById('issuesResolutionStatusViewChart').getContext('2d');
+    if (viewCharts.issuesResolutionStatus) viewCharts.issuesResolutionStatus.destroy();
+    
+    viewCharts.issuesResolutionStatus = new Chart(resolutionStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Fixed', 'Not Fixed'],
+            datasets: [{
+                data: [
+                    report.fixedIssues || 0,
+                    report.notFixedIssues || 0
+                ],
+                backgroundColor: [
+                    '#4CAF50', // Green - Fixed
+                    '#E91E63'  // Pink - Not Fixed
                 ],
                 borderWidth: 3,
                 borderColor: 'var(--surface)'

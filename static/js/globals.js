@@ -29,6 +29,8 @@ let userStoriesChart = null;
 let testCasesChart = null;
 let issuesPriorityChart = null;
 let issuesStatusChart = null;
+let issuesOpenStatusChart = null;
+let issuesResolutionStatusChart = null;
 let enhancementsChart = null;
 let automationTestCasesChart = null;
 let automationPercentageChart = null;
@@ -48,6 +50,7 @@ export {
     FORM_DATA_KEY, FORM_ARRAYS_KEY, CACHE_DURATION,
     requestData, buildData, testerData, qaNoteFieldsData,
     userStoriesChart, testCasesChart, issuesPriorityChart, issuesStatusChart,
+    issuesOpenStatusChart, issuesResolutionStatusChart,
     enhancementsChart, automationTestCasesChart, automationPercentageChart,
     automationStabilityChart, evaluationChart, scoreColumnCount, weightReasonVisible,
     API_URL, DASHBOARD_API_URL

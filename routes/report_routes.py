@@ -193,6 +193,7 @@ def create_report():
         report.notFixedIssues = data.get('notFixedIssues', 0)
         report.reopenedIssues = data.get('reopenedIssues', 0)
         report.deferredIssues = data.get('deferredIssues', 0)
+        report.deferredOldBugsIssues = data.get('deferredOldBugsIssues', 0)
 
         # Set enhancements data
         report.newEnhancements = data.get('newEnhancements', 0)
@@ -333,6 +334,7 @@ def update_report(report_id):
         report.notFixedIssues = data.get('notFixedIssues', report.notFixedIssues)
         report.reopenedIssues = data.get('reopenedIssues', report.reopenedIssues)
         report.deferredIssues = data.get('deferredIssues', report.deferredIssues)
+        report.deferredOldBugsIssues = data.get('deferredOldBugsIssues', report.deferredOldBugsIssues)
 
         # Update enhancements data
         report.newEnhancements = data.get('newEnhancements', report.newEnhancements)

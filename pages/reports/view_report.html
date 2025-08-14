@@ -222,18 +222,41 @@
 
             <div class="dashboard-section">
                 <h2 class="section-title"><i class="fas fa-tasks"></i> Issues by Status</h2>
+                
+                <!-- Sub-section 1: Open Issues Status -->
                 <div class="charts-container">
                     <div class="chart-section card">
-                        <h3 class="chart-title">Issues by Status Breakdown</h3>
-                        <table class="data-table" id="issuesStatusViewTable">
+                        <h3 class="chart-title"><i class="fas fa-exclamation-circle"></i> Open Issues Status</h3>
+                        <table class="data-table" id="issuesOpenStatusViewTable">
                             </table>
                     </div>
                     <div class="chart-section card">
-                        <h3 class="chart-title">Issues by Status Chart</h3>
+                        <h3 class="chart-title">Open Issues Status Chart</h3>
                         <div class="chart-container">
-                            <canvas id="issuesStatusViewChart" width="300" height="300"></canvas>
+                            <canvas id="issuesOpenStatusViewChart" width="300" height="300"></canvas>
                         </div>
                     </div>
+                </div>
+                
+                <!-- Sub-section 2: Resolution Status -->
+                <div class="charts-container" style="margin-top: 20px;">
+                    <div class="chart-section card">
+                        <h3 class="chart-title"><i class="fas fa-check-circle"></i> Resolution Status</h3>
+                        <table class="data-table" id="issuesResolutionStatusViewTable">
+                            </table>
+                    </div>
+                    <div class="chart-section card">
+                        <h3 class="chart-title">Resolution Status Chart</h3>
+                        <div class="chart-container">
+                            <canvas id="issuesResolutionStatusViewChart" width="300" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legacy container for backward compatibility -->
+                <div style="display: none;">
+                    <table class="data-table" id="issuesStatusViewTable"></table>
+                    <canvas id="issuesStatusViewChart" width="300" height="300"></canvas>
                 </div>
             </div>
 

@@ -782,15 +782,16 @@
                         <div class="section" id="section-7">
                             <h2 class="section-title"><i class="fas fa-tasks"></i> Issues by Status</h2>
 
+                            <!-- Sub-section 1: Open Issues Status -->
                             <div class="issues-analysis-layout">
                                 <div class="issues-status-card">
                                     <div class="info-card-v2-header">
-                                        <i class="fas fa-chart-bar"></i>
-                                        <h3>Issues by Status</h3>
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <h3>Open Issues Status</h3>
                                     </div>
                                     <div class="issues-content-layout">
                                         <div class="issues-table-section">
-                                            <table class="data-table" id="issuesStatusTable">
+                                            <table class="data-table" id="issuesOpenStatusTable">
                                                 <thead>
                                                     <tr>
                                                         <th>Status</th>
@@ -799,8 +800,8 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td><strong>Total Issues by Status</strong></td>
-                                                        <td><input type="number" id="totalIssuesByStatus" min="0"
+                                                        <td><strong>Total</strong></td>
+                                                        <td><input type="number" id="totalIssuesOpenStatus" min="0"
                                                                 placeholder="0" readonly
                                                                 class="readonly-field calculated-total"></td>
                                                     </tr>
@@ -811,28 +812,15 @@
                                                                 oninput="calculateIssuesStatusPercentages()"></td>
                                                     </tr>
                                                     <tr>
-                                                        <td><i class="fas fa-check-circle text-success"></i> Fixed</td>
-                                                        <td><input type="number" id="fixedIssues" name="fixedIssues"
-                                                                min="0" placeholder="0"
-                                                                oninput="calculateIssuesStatusPercentages()"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><i class="fas fa-times-circle text-danger"></i> Not Fixed
-                                                        </td>
-                                                        <td><input type="number" id="notFixedIssues"
-                                                                name="notFixedIssues" min="0" placeholder="0"
-                                                                oninput="calculateIssuesStatusPercentages()"></td>
-                                                    </tr>
-                                                    <tr>
                                                         <td><i class="fas fa-redo text-warning"></i> Re-opened</td>
                                                         <td><input type="number" id="reopenedIssues"
                                                                 name="reopenedIssues" min="0" placeholder="0"
                                                                 oninput="calculateIssuesStatusPercentages()"></td>
                                                     </tr>
                                                     <tr>
-                                                        <td><i class="fas fa-pause"></i> Deferred</td>
-                                                        <td><input type="number" id="deferredIssues"
-                                                                name="deferredIssues" min="0" placeholder="0"
+                                                        <td><i class="fas fa-clock text-info"></i> Deferred (old bugs)</td>
+                                                        <td><input type="number" id="deferredOldBugsIssues"
+                                                                name="deferredOldBugsIssues" min="0" placeholder="0"
                                                                 oninput="calculateIssuesStatusPercentages()"></td>
                                                     </tr>
                                                 </tbody>
@@ -840,12 +828,63 @@
                                         </div>
                                         <div class="issues-chart-section">
                                             <div class="chart-container">
-                                                <canvas id="issuesStatusChart" width="400" height="300"></canvas>
+                                                <canvas id="issuesOpenStatusChart" width="400" height="300"></canvas>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Sub-section 2: Resolution Status -->
+                            <div class="issues-analysis-layout" style="margin-top: 30px;">
+                                <div class="issues-status-card">
+                                    <div class="info-card-v2-header">
+                                        <i class="fas fa-check-circle"></i>
+                                        <h3>Resolution Status</h3>
+                                    </div>
+                                    <div class="issues-content-layout">
+                                        <div class="issues-table-section">
+                                            <table class="data-table" id="issuesResolutionStatusTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Status</th>
+                                                        <th>Count</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><strong>Total</strong></td>
+                                                        <td><input type="number" id="totalIssuesResolutionStatus" min="0"
+                                                                placeholder="0" readonly
+                                                                class="readonly-field calculated-total"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-check-circle text-success"></i> Fixed</td>
+                                                        <td><input type="number" id="fixedIssues" name="fixedIssues"
+                                                                min="0" placeholder="0"
+                                                                oninput="calculateIssuesStatusPercentages()"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="fas fa-times-circle text-danger"></i> Not Fixed</td>
+                                                        <td><input type="number" id="notFixedIssues"
+                                                                name="notFixedIssues" min="0" placeholder="0"
+                                                                oninput="calculateIssuesStatusPercentages()"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="issues-chart-section">
+                                            <div class="chart-container">
+                                                <canvas id="issuesResolutionStatusChart" width="400" height="300"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hidden field for legacy compatibility -->
+                            <input type="hidden" id="totalIssuesByStatus" name="totalIssuesByStatus" value="0">
+                            <input type="hidden" id="deferredIssues" name="deferredIssues" value="0">
                         </div>
 
 
