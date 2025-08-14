@@ -48,67 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 
-// Debug helper function - can be called from browser console
-window.debugFormSubmission = function() {
-    console.log('=== MANUAL FORM DEBUGGING ===');
-    
-    console.log('1. Checking DOM elements...');
-    const elements = ['reportName', 'portfolioName', 'projectName', 'testEnvironment', 'reportDate'];
-    elements.forEach(id => {
-        const element = document.getElementById(id);
-        console.log(`${id}:`, element ? element.value : 'ELEMENT NOT FOUND');
-    });
-    
-    console.log('2. Checking global arrays...');
-    console.log('statusCodesData:', statusCodesData);
-    console.log('performanceScenariosData:', performanceScenariosData);
-    console.log('httpRequestsData:', httpRequestsData);
-    console.log('testers:', testers);
-    console.log('teamMembers:', teamMembers);
-    
-    console.log('3. Testing form data collection...');
-    const formData = collectFormData();
-    if (formData) {
-        console.log('✅ Form data collected successfully');
-        
-        console.log('4. Testing validation...');
-        const isValid = validateFormData(formData);
-        console.log('✅ Validation result:', isValid);
-        
-        return { formData, isValid };
-    } else {
-        console.error('❌ Form data collection failed');
-        return null;
-    }
-};
 
-// Test form submission without actually sending to server
-window.testFormSubmission = function() {
-    console.log('=== TESTING FORM SUBMISSION (DRY RUN) ===');
-    
-    const formData = collectFormData();
-    if (!formData) {
-        console.error('❌ Cannot proceed - form data collection failed');
-        return false;
-    }
-    
-    const isValid = validateFormData(formData);
-    if (!isValid) {
-        console.error('❌ Cannot proceed - form validation failed');
-        return false;
-    }
-    
-    console.log('✅ Form submission test completed successfully!');
-    console.log('📤 Form data that would be sent to server:', formData);
-    
-    return { success: true, formData };
-};
-
-// Force submit form (for testing)
-window.forceSubmitForm = function() {
-    console.log('🚀 FORCING FORM SUBMISSION...');
-    submitForm();
-};
 
 // Data migration function to handle old QA notes structure
 function migrateQANotesData(qaData) {
@@ -174,11 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load form data from localStorage if available
     loadFormDataFromLocalStorage();
     
-    // Debug message for developers
-    console.log('📋 Performance Report initialized successfully');
-    console.log('💡 Debug tools available in browser console:');
-    console.log('   - debugFormSubmission() - Check form data and validation');
-    console.log('   - testFormSubmission() - Test complete submission process (dry run)');
+    
 });
 
 // Initialize form
@@ -1043,7 +979,7 @@ async function submitForm() {
         }
         
         // Submit to API
-        console.log('Submitting form data to API:', formData); // Debug log
+        
         const response = await fetch('/api/reports', {
             method: 'POST',
             headers: {
@@ -1052,11 +988,17 @@ async function submitForm() {
             body: JSON.stringify(formData)
         });
         
-        console.log('API response status:', response.status); // Debug log
-        const result = await response.json();
-        console.log('API response result:', result); // Debug log
+        let result;
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            console.error('❌ Failed to parse JSON response:', jsonError);
+            const textResponse = await response.text();
+            console.log('📥 Raw response text:', textResponse);
+            throw new Error(`Server returned invalid JSON. Status: ${response.status}, Response: ${textResponse}`);
+        }
         
-        if (response.ok && result.success) {
+        if (response.ok && result.success) {            
             savedReportId = result.report.id;
             const loadingOverlay = document.getElementById('loadingOverlay');
             const successMessage = document.getElementById('successMessage');
@@ -1072,8 +1014,25 @@ async function submitForm() {
             clearFormDataFromLocalStorage();
             
             showToast('Report saved successfully!', 'success');
+            
+            // Redirect to reports page after 3 seconds
+            setTimeout(() => {
+                window.location.href = '/reports';
+            }, 3000);
+            
         } else {
-            throw new Error(result.message || 'Failed to save report');
+            console.error('❌ API returned error:', result);
+            
+            // Handle specific error cases
+            if (response.status === 401) {
+                throw new Error('Authentication required. Please log in again.');
+            } else if (response.status === 403) {
+                throw new Error('Access denied. You may not have permission to create reports.');
+            } else if (response.status === 422) {
+                throw new Error('Invalid data format. Please check your form data.');
+            } else {
+                throw new Error(result.message || `Server error (${response.status}): Failed to save report`);
+            }
         }
         
     } catch (error) {
@@ -1148,6 +1107,10 @@ function collectFormData() {
         reportVersion: document.getElementById('reportVersion')?.value || '',
         reportDate: document.getElementById('reportDate')?.value || '',
         reportType: 'performance',
+        
+        // Required fields for database (with defaults for performance reports)
+        sprintNumber: 1, // Performance reports don't have sprints, use default
+        cycleNumber: 1,  // Performance reports don't have cycles, use default
         
         // Test objective & scope
         testObjective: document.getElementById('testObjective')?.value || '',

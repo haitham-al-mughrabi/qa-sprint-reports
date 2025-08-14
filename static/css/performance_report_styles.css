@@ -147,11 +147,26 @@
     min-width: 60px;
 }
 
-.status-2xx { background-color: #28a745; }
-.status-3xx { background-color: #ffc107; color: #000; }
-.status-4xx { background-color: #fd7e14; }
-.status-5xx { background-color: #dc3545; }
-.status-0 { background-color: #6c757d; }
+.status-2xx {
+    background-color: #28a745;
+}
+
+.status-3xx {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.status-4xx {
+    background-color: #fd7e14;
+}
+
+.status-5xx {
+    background-color: #dc3545;
+}
+
+.status-0 {
+    background-color: #6c757d;
+}
 
 /* Table Action Buttons */
 .table-action-btn {
@@ -326,8 +341,13 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Responsive Design for Performance Report */
@@ -336,22 +356,22 @@
         flex-direction: column;
         gap: 5px;
     }
-    
+
     .scenario-header {
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .status-code-item {
         flex-direction: column;
         align-items: stretch;
         gap: 8px;
     }
-    
+
     .data-table {
         font-size: 14px;
     }
-    
+
     .data-table th,
     .data-table td {
         padding: 8px;
@@ -492,6 +512,7 @@
         transform: translateX(100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -503,6 +524,7 @@
         transform: translateX(0);
         opacity: 1;
     }
+
     to {
         transform: translateX(100%);
         opacity: 0;
@@ -597,7 +619,8 @@
     flex-shrink: 0;
 }
 
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
     padding: 0.75rem 1.5rem;
     border-radius: var(--border-radius);
     font-weight: 500;
@@ -632,6 +655,7 @@
         opacity: 0;
         transform: translateY(-50px) scale(0.9);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -705,17 +729,17 @@
         margin: 2% auto;
         max-height: 95vh;
     }
-    
+
     .modal-header,
     .modal-body,
     .modal-footer {
         padding: 1.5rem;
     }
-    
+
     .modal-footer {
         flex-direction: column;
     }
-    
+
     .btn-primary,
     .btn-secondary {
         width: 100%;
@@ -991,8 +1015,10 @@
 .card-btn i {
     font-size: 0.75rem;
 }
+
 /* Loading and Success Overlays */
-.loading-overlay, .success-overlay {
+.loading-overlay,
+.success-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -1005,7 +1031,8 @@
     z-index: 10000;
 }
 
-.loading-content, .success-content {
+.loading-content,
+.success-content {
     background: var(--surface);
     padding: 40px;
     border-radius: 12px;
@@ -1025,8 +1052,13 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .success-icon {

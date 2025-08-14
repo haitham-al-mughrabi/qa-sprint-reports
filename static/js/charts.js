@@ -16,8 +16,6 @@ export function getChartOptions() {
     const tooltipBg = isLightTheme ? '#ffffff' : '#334155';
     const gridColor = isLightTheme ? '#e2e8f0' : '#334155';
 
-    console.log('Enhanced script chart options - isLightTheme:', isLightTheme, 'textColor:', textColor);
-
     return {
         responsive: true,
         maintainAspectRatio: false,

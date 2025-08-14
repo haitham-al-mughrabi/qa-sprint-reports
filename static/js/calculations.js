@@ -58,7 +58,6 @@ export function calculateTestCasesPercentages() {
         totalField.offsetHeight; // Force reflow
         totalField.style.display = '';
         totalField.setAttribute('data-calculated-value', String(total));
-        console.log('Total field updated:', totalField.value, 'Calculated:', total);
     }
 
     const values = {

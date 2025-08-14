@@ -20,24 +20,18 @@ async function applyFilters() {
     // Update filter state from form inputs
     updateFilterState();
 
-    console.log('Applying filters:', currentFilters);
-
     try {
         // Fetch all reports if not cached or if we need fresh data
         if (allReports.length === 0) {
-            console.log('Fetching reports for filtering...');
             const result = await fetchReports(1, '', 1000); // Fetch large number to get all
             allReports = result.reports || [];
-            console.log('Fetched', allReports.length, 'reports for filtering');
         }
 
         // Apply client-side filtering
         let filteredReports = filterReports(allReports);
-        console.log('After filtering:', filteredReports.length, 'reports');
 
         // Apply sorting
         filteredReports = sortReports(filteredReports);
-        console.log('After sorting:', filteredReports.length, 'reports');
 
         // Update results count and active filters display
         updateFilterResultsDisplay(filteredReports.length);
@@ -83,7 +77,7 @@ export function updateFilterState() {
 
 export function filterReports(reports) {
     if (!Array.isArray(reports)) {
-        console.warn('filterReports: reports is not an array', reports);
+        
         return [];
     }
 
@@ -188,7 +182,7 @@ export function filterReports(reports) {
 
             if (!hasMatchingTester) {
                 // Only log for debugging if needed
-                // console.log('Tester filter failed for report:', report.id || report.title, 'Looking for:', currentFilters.tester, 'Found values:', allTesterValues);
+                
                 return false;
             }
         }
@@ -209,7 +203,7 @@ export function filterReports(reports) {
             // If no date found, skip date filtering for this report (don't exclude it)
             if (!reportDateStr) {
                 // Only log for debugging if needed
-                // console.log('No date found for report:', report.id || report.title, 'Skipping date filter');
+                
                 // Don't return false - let report pass through if no date available
             } else {
                 // Handle different date formats
@@ -252,7 +246,7 @@ export function filterReports(reports) {
                     }
                 } else {
                     // Invalid date format - log for debugging but don't exclude report
-                    // console.log('Invalid date format:', reportDateStr, 'for report:', report.id || report.title);
+                    
                 }
             }
         }
@@ -274,7 +268,7 @@ export function filterReports(reports) {
 
 export function sortReports(reports) {
     if (!Array.isArray(reports)) {
-        console.warn('sortReports: reports is not an array', reports);
+        
         return [];
     }
 
@@ -415,7 +409,7 @@ export function clearAllFilters() {
         btn.classList.remove('active');
     });
 
-    console.log('All filters cleared');
+    
 
     // Reapply filters (which will show all reports)
     applyFilters();
@@ -518,7 +512,7 @@ export function applyQuickFilter(type) {
 
 // Function to refresh filter data
 async function refreshFilterData() {
-    console.log('🔄 Refreshing filter data...');
+    
     allReports = []; // Clear cache
     await initializeFilterDropdowns();
     applyFilters();
@@ -526,7 +520,7 @@ async function refreshFilterData() {
 
 // Function to show all reports without filtering
 async function showAllReports() {
-    console.log('📋 Showing all reports without filtering...');
+    
     showReportsLoading();
 
     try {
@@ -534,7 +528,7 @@ async function showAllReports() {
         const result = await fetchReports(1, '', 1000);
         const reports = result.reports || [];
 
-        console.log('Total reports fetched:', reports.length);
+        
 
         // Show all reports without any filtering
         renderReportsTable(reports);
@@ -551,7 +545,7 @@ async function showAllReports() {
             activeFiltersContainer.innerHTML = '';
         }
 
-        console.log('All reports displayed successfully');
+        
 
     } catch (error) {
         console.error('Error showing all reports:', error);
@@ -561,199 +555,7 @@ async function showAllReports() {
     hideReportsLoading();
 }
 
-// Test API function
-async function testAPI() {
-    console.log('🧪 Testing API endpoint...');
-    try {
-        const response = await fetch('/api/reports');
-        console.log('API Response status:', response.status);
-        console.log('API Response headers:', [...response.headers.entries()]);
 
-        const data = await response.json();
-        console.log('Raw API data:', data);
-        console.log('Data type:', typeof data);
-        console.log('Is array:', Array.isArray(data));
-
-        if (Array.isArray(data)) {
-            console.log('Array length:', data.length);
-            if (data.length > 0) {
-                console.log('First item:', data[0]);
-                console.log('First item keys:', Object.keys(data[0]));
-            }
-        } else if (data && typeof data === 'object') {
-            console.log('Object keys:', Object.keys(data));
-            if (data.reports) {
-                console.log('Reports array length:', data.reports.length);
-                if (data.reports.length > 0) {
-                    console.log('First report:', data.reports[0]);
-                }
-            }
-        }
-    } catch (error) {
-        console.error('API test failed:', error);
-    }
-}
-
-// Test testers API function
-async function testTestersAPI() {
-    console.log('🧪 Testing testers API endpoint...');
-    try {
-        const response = await fetch('/api/testers');
-        console.log('Testers API Response status:', response.status);
-
-        const data = await response.json();
-        console.log('Raw testers data:', data);
-        console.log('Testers count:', data.length);
-
-        if (data.length > 0) {
-            console.log('First tester:', data[0]);
-            console.log('Tester keys:', Object.keys(data[0]));
-        }
-    } catch (error) {
-        console.error('Testers API test failed:', error);
-    }
-}
-
-// Test individual filters function
-export function testIndividualFilters() {
-    console.log('🧪 Testing individual filters...');
-
-    if (allReports.length === 0) {
-        console.log('No reports loaded. Run refreshFilterData() first.');
-        return;
-    }
-
-    console.log('Total reports:', allReports.length);
-
-    // Test each filter individually
-    const originalFilters = { ...currentFilters };
-
-    // Test search filter
-    currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
-    currentFilters.search = 'test';
-    let filtered = filterReports(allReports);
-    console.log('Search "test" results:', filtered.length);
-
-    // Test project filter (use first available project)
-    const projects = [...new Set(allReports.map(r => r.project || r.projectName).filter(Boolean))];
-    if (projects.length > 0) {
-        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
-        currentFilters.project = projects[0];
-        filtered = filterReports(allReports);
-        console.log(`Project "${projects[0]}" results:`, filtered.length);
-    }
-
-    // Test tester filter (use first available tester)
-    const testers = new Set();
-    allReports.forEach(report => {
-        // Extract testers using same logic as initialization
-        if (Array.isArray(report.testers)) {
-            report.testers.forEach(tester => {
-                const name = typeof tester === 'object' ? tester.name : tester;
-                if (name) testers.add(name.toString().trim());
-            });
-        } else if (Array.isArray(report.testerData)) {
-            report.testerData.forEach(tester => {
-                if (tester && tester.name) testers.add(tester.name.trim());
-            });
-        }
-    });
-
-    const testersList = [...testers];
-    if (testersList.length > 0) {
-        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
-        currentFilters.tester = testersList[0];
-        filtered = filterReports(allReports);
-        console.log(`Tester "${testersList[0]}" results:`, filtered.length);
-
-        // Debug first few reports for tester data
-        console.log('First 3 reports tester data:');
-        allReports.slice(0, 3).forEach((report, i) => {
-            console.log(`Report ${i + 1}:`, {
-                title: report.title,
-                testers: report.testers,
-                testerData: report.testerData,
-                tester_data: report.tester_data
-            });
-        });
-    }
-
-    // Test status filter
-    const statuses = [...new Set(allReports.map(r => r.status || r.testingStatus).filter(Boolean))];
-    if (statuses.length > 0) {
-        currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
-        currentFilters.status = statuses[0];
-        filtered = filterReports(allReports);
-        console.log(`Status "${statuses[0]}" results:`, filtered.length);
-    }
-
-    // Test no filters (should return all)
-    currentFilters = { search: '', project: '', portfolio: '', tester: '', status: '', dateFrom: '', dateTo: '', sprint: '', sort: 'date-desc' };
-    filtered = filterReports(allReports);
-    console.log('No filters results (should be all):', filtered.length);
-
-    // Restore original filters
-    currentFilters = originalFilters;
-
-    console.log('Individual filter testing complete!');
-}
-
-// Debug function to analyze report data structure
-export function debugReportData() {
-    console.log('🔍 Debugging report data structure...');
-    console.log('Total reports:', allReports.length);
-
-    if (allReports.length > 0) {
-        const sampleReport = allReports[0];
-        console.log('Sample report structure:', sampleReport);
-        console.log('Available fields:', Object.keys(sampleReport));
-
-        // Analyze tester data
-        console.log('\n👤 Tester data analysis:');
-        allReports.slice(0, 5).forEach((report, index) => {
-            console.log(`Report ${index + 1}:`, {
-                id: report.id,
-                title: report.title,
-                testers: report.testers,
-                tester: report.tester,
-                testerName: report.testerName,
-                assignedTester: report.assignedTester
-            });
-        });
-
-        // Analyze date data
-        console.log('\n📅 Date data analysis:');
-        allReports.slice(0, 5).forEach((report, index) => {
-            console.log(`Report ${index + 1}:`, {
-                id: report.id,
-                title: report.title,
-                date: report.date,
-                reportDate: report.reportDate,
-                createdAt: report.createdAt,
-                created_at: report.created_at,
-                dateCreated: report.dateCreated
-            });
-        });
-
-        // Count unique testers
-        const allTesters = new Set();
-        allReports.forEach(report => {
-            if (Array.isArray(report.testers)) {
-                report.testers.forEach(tester => {
-                    if (tester) allTesters.add(typeof tester === 'object' ? tester.name : tester);
-                });
-            } else if (report.testers) {
-                allTesters.add(report.testers);
-            } else if (report.tester) {
-                allTesters.add(report.tester);
-            }
-        });
-
-        console.log('\n📊 Summary:');
-        console.log('Unique testers found:', [...allTesters]);
-        console.log('Total unique testers:', allTesters.size);
-    }
-}
 
 // Initialize filter dropdowns with data
 async function initializeFilterDropdowns() {
@@ -762,13 +564,13 @@ async function initializeFilterDropdowns() {
         const result = await fetchReports(1, '', 1000);
         allReports = result.reports || [];
 
-        console.log('Initializing filters with', allReports.length, 'reports');
-        console.log('Raw API result:', result);
+        
+        
 
-        // If no reports, try to understand why
+        // If no reports, try to undersokaytand why
         if (allReports.length === 0) {
-            console.warn('No reports found. API result structure:', result);
-            console.warn('Possible issues: 1) No data in database, 2) API endpoint issue, 3) Data structure mismatch');
+            
+            
             return;
         }
 
@@ -779,172 +581,22 @@ async function initializeFilterDropdowns() {
 
         // Debug: Log first few reports to understand data structure
         if (allReports.length > 0) {
-            console.log('Sample report data structure:', allReports[0]);
-            console.log('All report keys:', Object.keys(allReports[0]));
+            
+            
 
-            // Specifically check tester-related fields
-            const sampleReport = allReports[0];
-            console.log('Tester-related fields in sample report:', {
-                testers: sampleReport.testers,
-                tester: sampleReport.tester,
-                testerData: sampleReport.testerData,
-                tester_data: sampleReport.tester_data,
-                assignedTesters: sampleReport.assignedTesters,
-                testTeam: sampleReport.testTeam
-            });
+            
         }
 
-        allReports.forEach((report, index) => {
-            // Debug first few reports
-            if (index < 3) {
-                console.log(`Report ${index}:`, {
-                    project: report.project,
-                    projectName: report.projectName,
-                    portfolio: report.portfolio,
-                    portfolioName: report.portfolioName,
-                    testers: report.testers,
-                    tester: report.tester,
-                    date: report.date,
-                    reportDate: report.reportDate,
-                    createdAt: report.createdAt
-                });
-            }
-
-            // Extract project names
-            const projectName = report.project || report.projectName;
-            if (projectName) projects.add(projectName);
-
-            // Extract portfolio names
-            const portfolioName = report.portfolio || report.portfolioName;
-            if (portfolioName) portfolios.add(portfolioName);
-
-            // Extract tester names - handle different data structures
-            const possibleTesterFields = [
-                'testers', 'tester', 'testerData', 'tester_data',
-                'assignedTesters', 'testTeam', 'testerName', 'assignedTester'
-            ];
-
-            // Log tester fields for debugging (only for first few reports)
-            if (index < 3) {
-                console.log(`Report ${index} tester fields:`,
-                    possibleTesterFields.reduce((acc, field) => {
-                        acc[field] = report[field];
-                        return acc;
-                    }, {})
-                );
-            }
-
-            // Check for testers array
-            if (Array.isArray(report.testers)) {
-                report.testers.forEach(tester => {
-                    if (tester && typeof tester === 'string') {
-                        testers.add(tester.trim());
-                    } else if (tester && typeof tester === 'object') {
-                        // Handle different object structures
-                        const name = tester.name || tester.testerName || tester.email || tester.id;
-                        if (name) testers.add(name.toString().trim());
-                    }
-                });
-            }
-            // Check for testerData array (from form)
-            else if (Array.isArray(report.testerData)) {
-                report.testerData.forEach(tester => {
-                    if (tester && typeof tester === 'object' && tester.name) {
-                        testers.add(tester.name.trim());
-                    }
-                });
-            }
-            // Check for tester_data array (snake_case from database)
-            else if (Array.isArray(report.tester_data)) {
-                report.tester_data.forEach(tester => {
-                    if (tester && typeof tester === 'object' && tester.name) {
-                        testers.add(tester.name.trim());
-                    }
-                });
-            }
-            // Check for testers as JSON string
-            else if (report.testers && typeof report.testers === 'string') {
-                try {
-                    // Try to parse as JSON first
-                    const parsedTesters = JSON.parse(report.testers);
-                    if (Array.isArray(parsedTesters)) {
-                        parsedTesters.forEach(tester => {
-                            const name = typeof tester === 'object' ? tester.name : tester;
-                            if (name) testers.add(name.toString().trim());
-                        });
-                    }
-                } catch (e) {
-                    // If not JSON, treat as comma-separated string
-                    const testerList = report.testers.split(',').map(t => t.trim()).filter(t => t);
-                    testerList.forEach(tester => testers.add(tester));
-                }
-            }
-            // Check for single tester field
-            else if (report.tester && typeof report.tester === 'string') {
-                testers.add(report.tester.trim());
-            }
-            // Check for additional possible tester fields
-            else if (report.testerName) {
-                testers.add(report.testerName.toString().trim());
-            }
-            else if (report.assignedTester) {
-                testers.add(report.assignedTester.toString().trim());
-            }
-        });
+        
 
         // Convert sets to sorted arrays
         const sortedProjects = [...projects].sort();
         const sortedPortfolios = [...portfolios].sort();
         const sortedTesters = [...testers].sort();
 
-        console.log('Filter options extracted:', {
-            projects: sortedProjects,
-            portfolios: sortedPortfolios,
-            testers: sortedTesters
-        });
+        
 
-        console.log('Filter counts:', {
-            projects: sortedProjects.length,
-            portfolios: sortedPortfolios.length,
-            testers: sortedTesters.length
-        });
-
-        // If no testers found in reports, try to load from testers API
-        if (sortedTesters.length === 0) {
-            console.log('No testers found in reports, trying to load from testers API...');
-            try {
-                const testersResponse = await fetch('/api/testers');
-                if (testersResponse.ok) {
-                    const testersData = await testersResponse.json();
-                    console.log('Loaded testers from API:', testersData);
-                    testersData.forEach(tester => {
-                        if (tester.name) {
-                            testers.add(tester.name);
-                        }
-                    });
-                    const updatedSortedTesters = [...testers].sort();
-                    console.log('Updated testers list:', updatedSortedTesters);
-
-                    // Update the tester dropdown with API data
-                    const testerFilter = document.getElementById('testerFilter');
-                    if (testerFilter) {
-                        // Clear existing options except the first one
-                        while (testerFilter.children.length > 1) {
-                            testerFilter.removeChild(testerFilter.lastChild);
-                        }
-
-                        updatedSortedTesters.forEach(tester => {
-                            const option = document.createElement('option');
-                            option.value = tester;
-                            option.textContent = tester;
-                            testerFilter.appendChild(option);
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading testers from API:', error);
-            }
-        }
+        
 
         // Populate project dropdown
         const projectFilter = document.getElementById('projectFilter');
@@ -995,7 +647,7 @@ async function initializeFilterDropdowns() {
         }
 
     } catch (error) {
-        console.error('Error initializing filter dropdowns:', error);
+        
         showToast('Error loading filter options', 'error');
     }
 }
@@ -1698,14 +1350,10 @@ async function exportReportAsExcel(id) {
 
 // --- Modal & Utility Functions ---
 export function showModal(modalId) {
-    console.log('showModal called with modalId:', modalId);
     const modal = document.getElementById(modalId);
-    console.log('Modal element found:', modal);
     if (modal) {
         modal.style.display = 'flex';
-        console.log('Modal display set to flex');
     } else {
-        console.error('Modal element not found:', modalId);
     }
 }
 
@@ -1775,7 +1423,7 @@ async function addPortfolio() {
                 showToast('Error adding portfolio: ' + (error.error || 'Unknown error'), 'error');
             }
         } catch (error) {
-            console.error('Error adding portfolio:', error);
+            
             showToast('Error adding portfolio', 'error');
         }
     } else {
@@ -1827,7 +1475,7 @@ async function addProject() {
                 showToast('Error adding project: ' + (error.error || 'Unknown error'), 'error');
             }
         } catch (error) {
-            console.error('Error adding project:', error);
+            
             showToast('Error adding project', 'error');
         }
     } else {
@@ -2353,7 +2001,7 @@ export function showAddQANoteFieldModal() {
 export function updateQAFieldOptions() {
     // For now, this function doesn't do anything as there are no predefined options.
     // It's kept to fulfill the request.
-    console.log("updateQAFieldOptions called. No predefined options to update.");
+    
 }
 
 export function addQANoteField() {
@@ -2516,7 +2164,7 @@ export function renderQANoteFieldHTML(field) {
 async function populatePortfolioDropdownForCreateReport(portfolios) {
     const select = document.getElementById('portfolioName');
     if (!select) {
-        console.error('Portfolio select element not found!');
+        
         return;
     }
 
@@ -2582,7 +2230,7 @@ async function onPortfolioSelection() {
         }
 
     } catch (error) {
-        console.error('Error loading projects:', error);
+
         projectSelect.innerHTML = '<option value="">Error loading projects</option>';
     }
 }
@@ -2689,20 +2337,14 @@ async function onProjectSelection() {
 
 // Function to show the auto-load modal with data preview
 export function showAutoLoadModal(data) {
-    console.log('showAutoLoadModal called with data:', data);
     const modal = document.getElementById('autoLoadDataModal');
     const preview = document.getElementById('dataPreview');
 
-    console.log('Modal element:', modal);
-    console.log('Preview element:', preview);
-
     if (!modal) {
-        console.error('Modal element not found! Make sure you are on the create report page.');
         return;
     }
 
     if (!preview) {
-        console.error('Preview element not found!');
         return;
     }
 
@@ -2739,10 +2381,7 @@ export function showAutoLoadModal(data) {
     `;
 
     preview.innerHTML = previewHTML;
-    console.log('Preview HTML set, about to show modal');
-    console.log('Preview HTML content:', previewHTML);
     showModal('autoLoadDataModal');
-    console.log('showModal call completed');
 }
 
 // Function to load selected data
@@ -2824,7 +2463,7 @@ async function loadFormDropdownData() {
         disableFormFieldsExceptPortfolio();
         setupProgressiveFormHandlers();
     } catch (error) {
-        console.error('Error loading form data:', error);
+        
         showToast('Error loading form data', 'error');
     }
 }
@@ -2840,7 +2479,7 @@ async function loadPortfoliosOnly() {
             throw new Error('Failed to load portfolios');
         }
     } catch (error) {
-        console.error('Error loading portfolios:', error);
+        
         showToast('Error loading portfolios', 'error');
     }
 }
@@ -2848,7 +2487,7 @@ async function loadPortfoliosOnly() {
 // Load projects for a specific portfolio
 async function loadProjectsForPortfolio(portfolioId) {
     try {
-        console.log('Loading projects for portfolio:', portfolioId);
+        
         const response = await fetch(`/api/projects/by-portfolio/${portfolioId}`);
         if (response.ok) {
             const projects = await response.json();
@@ -2858,7 +2497,7 @@ async function loadProjectsForPortfolio(portfolioId) {
             throw new Error('Failed to load projects');
         }
     } catch (error) {
-        console.error('Error loading projects:', error);
+
         showToast('Error loading projects', 'error');
     }
 }
@@ -3021,10 +2660,7 @@ window.applyQuickFilter = applyQuickFilter;
 window.removeFilter = removeFilter;
 window.initializeFilterDropdowns = initializeFilterDropdowns;
 window.refreshFilterData = refreshFilterData;
-window.debugReportData = debugReportData;
-window.testAPI = testAPI;
-window.testTestersAPI = testTestersAPI;
-window.testIndividualFilters = testIndividualFilters;
+
 window.showAllReports = showAllReports;
 window.showAddProjectModal = showAddProjectModal;
 window.addProject = addProject;
@@ -3110,7 +2746,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-                console.log('Create report: Theme attribute changed, recreating charts...');
+                
                 // Trigger chart recreation with same logic as themeChanged event
                 setTimeout(() => {
                     // Store current chart data before destroying charts
@@ -3148,7 +2784,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Listen for theme changes and update chart colors
 window.addEventListener('themeChanged', (event) => {
-    console.log('Theme changed, recreating form charts...');
+    
 
     // Store current chart data before destroying charts
     const chartConfigs = [
@@ -3222,7 +2858,7 @@ export function recreateFormCharts(chartConfigs, chartData) {
         }
     });
 
-    console.log('Form charts recreated with new theme colors');
+    
 }
 
 // Make theme functions globally accessible
@@ -3318,20 +2954,18 @@ export function saveFormDataToLocalStorage() {
 
         localStorage.setItem(FORM_ARRAYS_KEY, JSON.stringify(arrayData));
 
-        console.log('Form data saved to localStorage:', Object.keys(formObject).length, 'fields');
+        
     } catch (error) {
-        console.error('Error saving form data to localStorage:', error);
+        
     }
 }
 
 export function loadFormDataFromLocalStorage() {
-    try {
-        console.log('Loading form data from localStorage...');
+        try {
         const savedFormData = localStorage.getItem(FORM_DATA_KEY);
         const savedArrayData = localStorage.getItem(FORM_ARRAYS_KEY);
 
         if (savedFormData) {
-            console.log('Found saved form data, loading...');
             const formObject = JSON.parse(savedFormData);
 
             // Load form fields
@@ -3341,7 +2975,6 @@ export function loadFormDataFromLocalStorage() {
                     element.value = formObject[key];
                 }
             });
-            console.log('Loaded', Object.keys(formObject).length, 'form fields');
 
             // Trigger calculations after loading data
             setTimeout(() => {
@@ -3355,11 +2988,9 @@ export function loadFormDataFromLocalStorage() {
                 if (typeof updateAutoCalculatedFields === 'function') updateAutoCalculatedFields();
             }, 500);
         } else {
-            console.log('No saved form data found in localStorage');
         }
 
         if (savedArrayData) {
-            console.log('Found saved array data, loading...');
             const arrayObject = JSON.parse(savedArrayData);
 
             // Load arrays
@@ -3385,8 +3016,6 @@ export function loadFormDataFromLocalStorage() {
         } else {
             console.log('No saved array data found');
         }
-
-        console.log('Form data loaded from localStorage');
     } catch (error) {
         console.error('Error loading form data from localStorage:', error);
     }
@@ -3396,8 +3025,7 @@ export function clearFormDataFromLocalStorage() {
     try {
         localStorage.removeItem(FORM_DATA_KEY);
         localStorage.removeItem(FORM_ARRAYS_KEY);
-        console.log('Form data cleared from localStorage');
-    } catch (error) {
+            } catch (error) {
         console.error('Error clearing form data from localStorage:', error);
     }
 }
@@ -3407,7 +3035,7 @@ export function autoSaveFormData() {
         clearTimeout(autoSaveTimeout);
     }
     autoSaveTimeout = setTimeout(() => {
-        console.log('Auto-saving form data...');
+        
         saveFormDataToLocalStorage();
     }, 1000); // Save after 1 second of inactivity
 }
@@ -3415,8 +3043,7 @@ export function autoSaveFormData() {
 // Add event listeners for auto-save
 export function setupAutoSave() {
     const form = document.getElementById('qaReportForm');
-    if (form) {
-        console.log('Setting up autosave on form');
+        if (form) {
         form.addEventListener('input', autoSaveFormData);
         form.addEventListener('change', autoSaveFormData);
     } else {
@@ -3451,8 +3078,7 @@ export function clearFormDataOnSubmit() {
         currentSection = 0;
         updateNavigationButtons();
 
-        console.log('Form data cleared after successful submission');
-    } catch (error) {
+            } catch (error) {
         console.error('Error clearing form data after submission:', error);
     }
 }

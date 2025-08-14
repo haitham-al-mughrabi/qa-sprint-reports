@@ -8,8 +8,7 @@ async function fetchDashboardStatsLocal() {
         const timestamp = new Date().getTime();
         const url = `/api/dashboard/stats?t=${timestamp}`;
         
-        console.log('Fetching dashboard stats from:', url);
-        response = await fetch(url, {
+                response = await fetch(url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -19,8 +18,7 @@ async function fetchDashboardStatsLocal() {
             }
         });
         
-        console.log('Dashboard stats response status:', response.status);
-        
+                
         if (!response.ok) {
             let errorMessage = `HTTP error! status: ${response.status}`;
             
@@ -63,11 +61,7 @@ async function fetchDashboardStatsLocal() {
             data.projects = [];
         }
         
-        console.log('Successfully fetched dashboard stats:', {
-            overall: data.overall ? '...' : 'no data',
-            projectsCount: data.projects ? data.projects.length : 0
-        });
-        
+                
         return data;
         
     } catch (error) {
@@ -94,21 +88,16 @@ async function fetchDashboardStatsLocal() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Dashboard charts: DOM loaded, checking for cached stats...');
-    
+        
     // Check if stats are already cached by the main dashboard script
     const checkForCachedStats = () => {
         if (window.dashboardStatsCache && window.dashboardStatsCache.data && window.dashboardStatsCache.data.overall) {
-            console.log('Using cached dashboard stats for charts');
-            createDashboardCharts(window.dashboardStatsCache.data.overall);
+                        createDashboardCharts(window.dashboardStatsCache.data.overall);
         } else if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
-            console.log('Using direct cached dashboard stats for charts');
-            createDashboardCharts(window.dashboardStatsCache.overall);
+                        createDashboardCharts(window.dashboardStatsCache.overall);
         } else if (typeof fetchDashboardStats === 'function') {
-            console.log('No cached stats, fetching from main function...');
-            fetchDashboardStats().then(stats => {
-                console.log('Dashboard stats received:', stats);
-                if (stats && stats.overall) {
+                        fetchDashboardStats().then(stats => {
+                                if (stats && stats.overall) {
                     createDashboardCharts(stats.overall);
                 } else {
                     console.error('No overall stats data available:', stats);
@@ -119,10 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 createDashboardCharts({});
             });
         } else {
-            console.log('Main fetch function not available, using local fetch...');
-            fetchDashboardStatsLocal().then(stats => {
-                console.log('Dashboard stats received:', stats);
-                if (stats && stats.overall) {
+                        fetchDashboardStatsLocal().then(stats => {
+                                if (stats && stats.overall) {
                     createDashboardCharts(stats.overall);
                 } else {
                     console.error('No overall stats data available:', stats);
@@ -142,12 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-                console.log('Dashboard charts: Theme attribute changed, recreating charts...');
-                // Trigger chart recreation with same logic as themeChanged event
+                                // Trigger chart recreation with same logic as themeChanged event
                 setTimeout(() => {
                     if (window.dashboardStatsCache && window.dashboardStatsCache.data && window.dashboardStatsCache.data.overall) {
-                        console.log('Using cached dashboard stats for theme attribute update');
-                        // Destroy existing charts first
+                                                // Destroy existing charts first
                         Object.values(dashboardCharts).forEach(chart => {
                             if (chart && chart.destroy) {
                                 chart.destroy();
@@ -156,8 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         dashboardCharts = {};
                         createDashboardCharts(window.dashboardStatsCache.data.overall);
                     } else if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
-                        console.log('Using direct cached dashboard stats for theme attribute update');
-                        // Destroy existing charts first
+                                                // Destroy existing charts first
                         Object.values(dashboardCharts).forEach(chart => {
                             if (chart && chart.destroy) {
                                 chart.destroy();
@@ -179,9 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Listen for theme changes and recreate charts with fresh data
 window.addEventListener('themeChanged', (event) => {
-    console.log('Dashboard charts: Theme changed event received, theme:', event.detail?.theme);
-    console.log('Dashboard charts: Recreating charts with fresh data...');
-
+        
     // Destroy all existing charts
     Object.values(dashboardCharts).forEach(chart => {
         if (chart && chart.destroy) {
@@ -195,14 +177,11 @@ window.addEventListener('themeChanged', (event) => {
     // Recreate charts with fresh data from cache or refetch
     setTimeout(() => {
         if (window.dashboardStatsCache && window.dashboardStatsCache.data && window.dashboardStatsCache.data.overall) {
-            console.log('Using cached dashboard stats for theme update');
-            createDashboardCharts(window.dashboardStatsCache.data.overall);
+                        createDashboardCharts(window.dashboardStatsCache.data.overall);
         } else if (window.dashboardStatsCache && window.dashboardStatsCache.overall) {
-            console.log('Using direct cached dashboard stats for theme update');
-            createDashboardCharts(window.dashboardStatsCache.overall);
+                        createDashboardCharts(window.dashboardStatsCache.overall);
         } else if (typeof fetchDashboardStats === 'function') {
-            console.log('Fetching fresh dashboard stats for theme update');
-            fetchDashboardStats().then(stats => {
+                        fetchDashboardStats().then(stats => {
                 if (stats && stats.overall) {
                     createDashboardCharts(stats.overall);
                 } else {
@@ -213,8 +192,7 @@ window.addEventListener('themeChanged', (event) => {
                 createDashboardCharts({});
             });
         } else {
-            console.log('Fetching dashboard stats locally for theme update');
-            fetchDashboardStatsLocal().then(stats => {
+                        fetchDashboardStatsLocal().then(stats => {
                 if (stats && stats.overall) {
                     createDashboardCharts(stats.overall);
                 } else {
@@ -230,16 +208,14 @@ window.addEventListener('themeChanged', (event) => {
 
 
 function createDashboardCharts(overallStats) {
-    console.log('Creating dashboard charts with data:', overallStats);
-
+    
     if (!window.Chart) {
         console.error('Chart.js is not loaded, waiting...');
         setTimeout(() => createDashboardCharts(overallStats), 100);
         return;
     }
     
-    console.log('Chart.js is available, proceeding with chart creation...');
-
+    
     // Use actual database data, provide minimal fallbacks only when data is completely unavailable
     overallStats = overallStats || {};
 
@@ -280,16 +256,14 @@ function createDashboardCharts(overallStats) {
             ...overallStats // Keep any real data that exists
         };
     }
-    console.log('Using stats data for charts:', overallStats);
-
+    
     try {
         const userStoriesCanvas = document.getElementById('dashboardUserStoriesChart');
         if (!userStoriesCanvas) {
             console.error('User stories chart canvas not found');
             return;
         }
-        console.log('User stories canvas found, creating chart...');
-
+        
         // Get theme colors for this chart
         const isLightTheme = window.themeManager ? window.themeManager.isLightTheme() : true;
 
@@ -303,8 +277,7 @@ function createDashboardCharts(overallStats) {
             overallStats.deferredUserStories || 0,
             overallStats.notTestableUserStories || 0
         ];
-        console.log('User Stories Chart Data:', userStoriesChartData);
-        dashboardCharts.userStories = new Chart(userStoriesCtx, {
+                dashboardCharts.userStories = new Chart(userStoriesCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
@@ -341,8 +314,7 @@ function createDashboardCharts(overallStats) {
             overallStats.deferredTestCases || 0,
             overallStats.notTestableTestCases || 0
         ];
-        console.log('Test Cases Chart Data:', testCasesChartData);
-        dashboardCharts.testCases = new Chart(testCasesCtx, {
+                dashboardCharts.testCases = new Chart(testCasesCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Passed', 'Passed with Issues', 'Failed', 'Blocked', 'Cancelled', 'Deferred', 'Not Testable'],
@@ -376,8 +348,7 @@ function createDashboardCharts(overallStats) {
             overallStats.mediumIssues || 0,
             overallStats.lowIssues || 0
         ];
-        console.log('Issues Priority Chart Data:', issuesPriorityChartData);
-        dashboardCharts.issuesPriority = new Chart(issuesPriorityCtx, {
+                dashboardCharts.issuesPriority = new Chart(issuesPriorityCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Critical', 'High', 'Medium', 'Low'],
@@ -412,8 +383,7 @@ function createDashboardCharts(overallStats) {
             overallStats.reopenedIssues || 0,
             overallStats.deferredIssues || 0
         ];
-        console.log('Issues Status Chart Data:', issuesStatusChartData);
-        dashboardCharts.issuesStatus = new Chart(issuesStatusCtx, {
+                dashboardCharts.issuesStatus = new Chart(issuesStatusCtx, {
             type: 'doughnut',
             data: {
                 labels: ['New', 'Fixed', 'Not Fixed', 'Re-opened', 'Deferred'],
@@ -446,8 +416,7 @@ function createDashboardCharts(overallStats) {
             overallStats.automationFailedTestCases || 0,
             overallStats.automationSkippedTestCases || 0
         ];
-        console.log('Automation Test Cases Chart Data:', automationTestCasesChartData);
-        dashboardCharts.automationTestCases = new Chart(automationTestCasesCtx, {
+                dashboardCharts.automationTestCases = new Chart(automationTestCasesCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Passed', 'Failed', 'Skipped'],
@@ -479,8 +448,7 @@ function createDashboardCharts(overallStats) {
             overallStats.automationStableTests || 0,
             overallStats.automationFlakyTests || 0
         ];
-        console.log('Automation Stability Chart Data:', automationStabilityChartData);
-        dashboardCharts.automationStability = new Chart(automationStabilityCtx, {
+                dashboardCharts.automationStability = new Chart(automationStabilityCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Stable', 'Flaky'],
@@ -514,8 +482,7 @@ function createDashboardCharts(overallStats) {
             overallStats.implementedEnhancements || 0,
             overallStats.existsEnhancements || 0
         ];
-        console.log('Enhancements Chart Data:', enhancementsChartData);
-        dashboardCharts.enhancements = new Chart(enhancementsCtx, {
+                dashboardCharts.enhancements = new Chart(enhancementsCtx, {
             type: 'doughnut',
             data: {
                 labels: ['New', 'Implemented', 'Exists'],
@@ -547,8 +514,7 @@ function getDashboardChartOptions() {
     const tooltipBg = isLightTheme ? '#ffffff' : '#1e293b';
     const borderColor = 'var(--surface)';
     
-    console.log('Dashboard chart options - isLightTheme:', isLightTheme, 'textColor:', textColor);
-
+    
     return {
         responsive: true,
         maintainAspectRatio: false,
@@ -627,13 +593,7 @@ function updateProgressCircle(barId, textId, percentage) {
     }, 500);
 }
 
-
-
-
 // Data extraction functions using real database data
-
-
-
 function calculateProjectQualityScore(project) {
     // Calculate quality score for individual project
     const userStoriesRate = project.totalUserStories > 0 ?
@@ -645,4 +605,3 @@ function calculateProjectQualityScore(project) {
 
     return Math.round((userStoriesRate * 0.4) + (testCasesRate * 0.4) + (issueFixRate * 0.2));
 }
-

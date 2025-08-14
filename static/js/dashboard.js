@@ -4,7 +4,6 @@ import { dashboardStats, CACHE_DURATION } from './globals.js';
 import { showToast } from './toast.js';
 
 export function updateDashboardStats(stats) {
-    console.log('Dashboard stats received:', stats);
     if (!stats) {
         console.error('No stats data received');
         return;
@@ -33,7 +32,6 @@ export function updateDashboardStats(stats) {
     const automationPassRate = automationTotal > 0 ? Math.round((automationPassed / automationTotal) * 100) : 0;
     document.getElementById('automationPassRate').textContent = `${automationPassRate}%`;
 
-    console.log('Projects data in updateDashboardStats:', stats.projects);
     renderProjectMetrics(stats.projects || []);
 }
 
@@ -44,9 +42,6 @@ export function renderProjectMetrics(projects) {
         console.error('Project metrics container not found');
         return;
     }
-    
-    // Debug log the projects data being rendered
-    console.log('Rendering projects:', projects);
     
     if (!projects || projects.length === 0) {
         container.innerHTML = `
@@ -64,9 +59,6 @@ export function renderProjectMetrics(projects) {
         (projects[0].passedUserStories !== undefined ||
         projects[0].passedTestCases !== undefined ||
         projects[0].criticalIssues !== undefined);
-
-
-    console.log('Has detailed breakdown data:', hasDetailedData);
 
     if (hasDetailedData) {
         // Render full detailed project cards
@@ -345,7 +337,7 @@ export function renderProjectMetrics(projects) {
         `).join('');
     } else {
         // Render simplified project cards when detailed data is not available
-        console.log('Rendering simplified project cards due to missing detailed data');
+        
         container.innerHTML = projects.map(project => `
             <div class="project-metric-card">
                 <div class="project-header">
@@ -524,17 +516,17 @@ export function hideDashboardLoading() {
 
 // Initialize the dashboard
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Dashboard: Initializing...');
-    console.log('Dashboard: Current URL:', window.location.pathname);
+    
+    
     
     // Debug: Check if required functions are available
-    console.log('Dashboard: fetchDashboardStats available:', typeof fetchDashboardStats);
-    console.log('Dashboard: updateDashboardStats available:', typeof updateDashboardStats);
-    console.log('Dashboard: renderProjectMetrics available:', typeof renderProjectMetrics);
+    
+    
+    
     
     // Check if we're on the dashboard page
     if (!window.location.pathname.includes('/dashboard')) {
-        console.log('Dashboard: Not on dashboard page, skipping initialization');
+        
         return;
     }
     
@@ -564,8 +556,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Load dashboard data
 export function loadDashboardData() {
-    console.log('Dashboard: Loading data...');
-    console.log('Dashboard: fetchDashboardStats function:', fetchDashboardStats);
+    
+    
     showDashboardLoading();
     
     // Clear any existing data
@@ -575,22 +567,16 @@ export function loadDashboardData() {
     }
     
     // Add debug info
-    console.log('Dashboard: fetchDashboardStats function available:', typeof fetchDashboardStats);
+    
     
     // Fetch and update dashboard stats
     fetchDashboardStats()
         .then(stats => {
-            console.log('Dashboard: Data loaded successfully', stats);
+            
             if (!stats) {
                 throw new Error('No data returned from server');
             }
-            
-            // Debug log the structure
-            console.log('Dashboard: Stats structure:', {
-                overall: stats.overall ? 'present' : 'missing',
-                projects: stats.projects ? `${stats.projects.length} projects` : 'missing'
-            });
-            
+                                    
             // Store stats in global cache
             dashboardStats.setCache({
                 data: stats,
