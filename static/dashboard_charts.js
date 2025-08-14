@@ -605,3 +605,134 @@ function calculateProjectQualityScore(project) {
 
     return Math.round((userStoriesRate * 0.4) + (testCasesRate * 0.4) + (issueFixRate * 0.2));
 }
+
+// Export Dashboard Report function using EXACT same Styled PDF logic from View Report
+async function exportDashboardReport() {
+    if (window.showToast) {
+        window.showToast('Generating styled dashboard PDF export...', 'info');
+    }
+
+    const { jsPDF } = window.jspdf;
+    const dashboardContent = document.querySelector('#dashboardPage .dashboard-container');
+    
+    if (!dashboardContent) {
+        if (window.showToast) {
+            window.showToast('Dashboard content not found.', 'error');
+        } else {
+            alert('Dashboard content not found.');
+        }
+        return;
+    }
+
+    // Get all dashboard sections EXCEPT the Project Metrics section
+    const sections = Array.from(dashboardContent.querySelectorAll('.dashboard-section')).filter(section => {
+        const sectionTitle = section.querySelector('.section-title, h2');
+        return sectionTitle && !sectionTitle.textContent.includes('Project Metrics');
+    });
+
+    if (!sections.length) {
+        if (window.showToast) {
+            window.showToast('No dashboard sections found to export.', 'error');
+        } else {
+            alert('No dashboard sections found to export.');
+        }
+        return;
+    }
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    let yPosition = 15;
+
+    // Correctly detect theme based on the 'data-theme' attribute
+    const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
+    
+    // Use EXACT colors from the CSS light theme variables to match view report
+    const themeColors = {
+        background: isLightMode ? '#ffffff' : '#0f172a',
+        surface: isLightMode ? '#f8fafc' : '#1e293b',
+        textPrimary: isLightMode ? '#1e293b' : '#f1f5f9',
+        textSecondary: isLightMode ? '#64748b' : '#94a3b8',
+        border: isLightMode ? '#e2e8f0' : '#334155',
+        primary: '#3b82f6'
+    };
+    
+    const themeBackgroundColor = themeColors.background;
+    const textColor = themeColors.textPrimary;
+    
+    console.log('Light mode detected:', isLightMode);
+    console.log('Using background color:', themeBackgroundColor);
+
+    const addPageBackground = () => {
+        pdf.setFillColor(themeBackgroundColor);
+        pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+    };
+
+    addPageBackground();
+
+    pdf.setTextColor(textColor);
+    pdf.setFontSize(18);
+    pdf.text('QA Dashboard Report', pdfWidth / 2, yPosition, { align: 'center' });
+    yPosition += 8;
+    pdf.setFontSize(10);
+    pdf.text('Comprehensive Quality Assurance Management System', pdfWidth / 2, yPosition, { align: 'center' });
+    yPosition += 12;
+
+    // Import html2canvas if not already available
+    if (!window.html2canvas) {
+        console.warn('html2canvas not available, loading...');
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        document.head.appendChild(script);
+        await new Promise(resolve => script.onload = resolve);
+    }
+
+    for (const section of sections) {
+        try {
+            const canvas = await html2canvas(section, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: themeBackgroundColor
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = pdfWidth - 20;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            if (yPosition + imgHeight > pdfHeight - 15) {
+                pdf.addPage();
+                addPageBackground();
+                yPosition = 15;
+            }
+
+            pdf.addImage(imgData, 'PNG', 10, yPosition, imgWidth, imgHeight, null, 'FAST');
+            yPosition += imgHeight + 5;
+
+        } catch (error) {
+            console.error('Could not render section to PDF:', error, section);
+        }
+    }
+
+    // Add note about excluded Project Metrics
+    if (yPosition + 20 > pdfHeight - 15) {
+        pdf.addPage();
+        addPageBackground();
+        yPosition = 15;
+    }
+    
+    pdf.setTextColor(textColor);
+    pdf.setFontSize(10);
+    pdf.text('Note: Project-specific metrics are available in the Project Statistics page.', 10, yPosition);
+
+    pdf.save('QA_Dashboard_Report_Styled.pdf');
+    
+    if (window.showToast) {
+        window.showToast('Styled dashboard PDF export completed successfully!', 'success');
+    } else {
+        alert('Styled dashboard PDF export completed successfully!');
+    }
+}
+
+// Make the function globally available
+window.exportDashboardReport = exportDashboardReport;

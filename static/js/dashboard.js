@@ -468,30 +468,7 @@ export async function exportDashboardReport() {
     doc.text(`Enhancements: ${overall.totalEnhancements}`, 160, yPos);
     yPos += 20;
 
-    // Project Metrics Table
-    if (currentCache.data.projects && currentCache.data.projects.length > 0) {
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text('Project Metrics', 10, yPos);
-        yPos += 10;
-
-        const projectTableData = currentCache.data.projects.map(project => [
-            project.projectName,
-            project.portfolioName,
-            project.totalReports.toString(),
-            project.totalUserStories.toString(),
-            project.totalTestCases.toString(),
-            project.totalIssues.toString(),
-        ]);
-
-        doc.autoTable({
-            startY: yPos,
-            head: [['Project', 'Portfolio', 'Reports', 'Stories', 'Cases', 'Issues', 'Score']],
-            body: projectTableData,
-            styles: { fontSize: 8, cellPadding: 2 },
-            headStyles: { fillColor: [66, 133, 244], textColor: 255, fontStyle: 'bold' }
-        });
-    }
+    // Project Metrics section excluded as requested
 
     doc.save('QA_Dashboard_Report.pdf');
 }
