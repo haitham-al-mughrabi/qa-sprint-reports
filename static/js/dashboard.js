@@ -17,11 +17,8 @@ export function updateDashboardStats(stats) {
 
     const overall = stats.overall || {};
     
-    // Report Status Statistics
+    // Total Reports
     totalReportsEl.textContent = overall.totalReports || 0;
-    document.getElementById('completedReports').textContent = overall.completedReports || 0;
-    document.getElementById('inProgressReports').textContent = overall.inProgressReports || 0;
-    document.getElementById('pendingReports').textContent = overall.pendingReports || 0;
 
     // User Stories Statistics
     document.getElementById('totalUserStories').textContent = overall.totalUserStories || 0;
