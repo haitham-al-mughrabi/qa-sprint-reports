@@ -103,101 +103,103 @@
         </div>
     </nav>
 
-    <!-- Enhanced Report Types Page -->
     <div id="reportTypesPage" class="page active">
-        <div class="report-types-container">
+        <div class="dashboard-container">
             <div class="dashboard-header">
                 <h1><i class="fas fa-file-plus"></i> Select Report Type</h1>
                 <p>Choose the type of QA report you want to create</p>
             </div>
 
-        <div class="report-types-grid">
-            <!-- Sprint Report Card -->
-            <div class="report-type-card sprint-card" onclick="selectReportType('sprint')">
-                <div class="card-icon">
-                    <i class="fas fa-running"></i>
-                </div>
-                <h3 class="card-title">Sprint Report</h3>
-                <p class="card-description">
-                    Comprehensive testing report for sprint cycles including user stories, test cases, and team evaluation.
-                </p>
-                <ul class="card-features">
-                    <li><i class="fas fa-check"></i> User Stories Analysis</li>
-                    <li><i class="fas fa-check"></i> Test Cases Tracking</li>
-                    <li><i class="fas fa-check"></i> Issues Management</li>
-                    <li><i class="fas fa-check"></i> Team Performance</li>
-                    <li><i class="fas fa-check"></i> Automation Integration</li>
-                </ul>
-                <button class="select-button">
-                    <i class="fas fa-arrow-right"></i>
-                    Create Sprint Report
-                </button>
-            </div>
+            <div class="dashboard-section">
+                <div class="report-types-grid">
+                    <!-- Sprint Report Card -->
+                    <div class="report-type-card sprint-card" onclick="selectReportType('sprint')">
+                        <div class="card-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <h3 class="card-title">Sprint Report</h3>
+                        <p class="card-description">
+                            Comprehensive testing report for sprint cycles including user stories, test cases, and team evaluation.
+                        </p>
+                        <ul class="card-features">
+                            <li><i class="fas fa-check"></i> User Stories Analysis</li>
+                            <li><i class="fas fa-check"></i> Test Cases Tracking</li>
+                            <li><i class="fas fa-check"></i> Issues Management</li>
+                            <li><i class="fas fa-check"></i> Team Performance</li>
+                            <li><i class="fas fa-check"></i> Automation Integration</li>
+                        </ul>
+                        <button class="select-button">
+                            <i class="fas fa-arrow-right"></i>
+                            Create Sprint Report
+                        </button>
+                    </div>
 
-            <!-- Manual Report Card -->
-            <div class="report-type-card manual-card" onclick="selectReportType('manual')">
-                <div class="card-icon">
-                    <i class="fas fa-hand-paper"></i>
-                </div>
-                <h3 class="card-title">Manual Report</h3>
-                <p class="card-description">
-                    Focused manual testing report for detailed exploratory and functional testing documentation.
-                </p>
-                <ul class="card-features">
-                    <li><i class="fas fa-check"></i> Manual Test Execution</li>
-                    <li><i class="fas fa-check"></i> Exploratory Testing</li>
-                    <li><i class="fas fa-check"></i> User Experience Review</li>
-                    <li><i class="fas fa-check"></i> Edge Case Testing</li>
-                    <li><i class="fas fa-check"></i> Detailed Bug Reports</li>
-                </ul>
-                <button class="select-button">
-                    <i class="fas fa-arrow-right"></i>
-                    Create Manual Report
-                </button>
-            </div>
+                    <!-- Manual Report Card -->
+                    <div class="report-type-card manual-card" onclick="selectReportType('manual')">
+                        <div class="card-icon">
+                            <i class="fas fa-hand-paper"></i>
+                        </div>
+                        <h3 class="card-title">Manual Report</h3>
+                        <p class="card-description">
+                            Focused manual testing report for detailed exploratory and functional testing documentation.
+                        </p>
+                        <ul class="card-features">
+                            <li><i class="fas fa-check"></i> Manual Test Execution</li>
+                            <li><i class="fas fa-check"></i> Exploratory Testing</li>
+                            <li><i class="fas fa-check"></i> User Experience Review</li>
+                            <li><i class="fas fa-check"></i> Edge Case Testing</li>
+                            <li><i class="fas fa-check"></i> Detailed Bug Reports</li>
+                        </ul>
+                        <button class="select-button">
+                            <i class="fas fa-arrow-right"></i>
+                            Create Manual Report
+                        </button>
+                    </div>
 
-            <!-- Automation Report Card -->
-            <div class="report-type-card automation-card" onclick="selectReportType('automation')">
-                <div class="card-icon">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <h3 class="card-title">Automation Report</h3>
-                <p class="card-description">
-                    Comprehensive automation testing report with test results, stability metrics, and CI/CD integration.
-                </p>
-                <ul class="card-features">
-                    <li><i class="fas fa-check"></i> Test Results Analysis</li>
-                    <li><i class="fas fa-check"></i> Test Stability Metrics</li>
-                    <li><i class="fas fa-check"></i> CI/CD Integration</li>
-                    <li><i class="fas fa-check"></i> Flaky Test Detection</li>
-                    <li><i class="fas fa-check"></i> Coverage Reports</li>
-                </ul>
-                <button class="select-button">
-                    <i class="fas fa-arrow-right"></i>
-                    Create Automation Report
-                </button>
-            </div>
+                    <!-- Automation Report Card -->
+                    <div class="report-type-card automation-card" onclick="selectReportType('automation')">
+                        <div class="card-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3 class="card-title">Automation Report</h3>
+                        <p class="card-description">
+                            Comprehensive automation testing report with test results, stability metrics, and CI/CD integration.
+                        </p>
+                        <ul class="card-features">
+                            <li><i class="fas fa-check"></i> Test Results Analysis</li>
+                            <li><i class="fas fa-check"></i> Test Stability Metrics</li>
+                            <li><i class="fas fa-check"></i> CI/CD Integration</li>
+                            <li><i class="fas fa-check"></i> Flaky Test Detection</li>
+                            <li><i class="fas fa-check"></i> Coverage Reports</li>
+                        </ul>
+                        <button class="select-button">
+                            <i class="fas fa-arrow-right"></i>
+                            Create Automation Report
+                        </button>
+                    </div>
 
-            <!-- Performance Report Card -->
-            <div class="report-type-card performance-card" onclick="selectReportType('performance')">
-                <div class="card-icon">
-                    <i class="fas fa-tachometer-alt"></i>
+                    <!-- Performance Report Card -->
+                    <div class="report-type-card performance-card" onclick="selectReportType('performance')">
+                        <div class="card-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <h3 class="card-title">Performance Report</h3>
+                        <p class="card-description">
+                            Performance and load testing report with metrics, benchmarks, and optimization recommendations.
+                        </p>
+                        <ul class="card-features">
+                            <li><i class="fas fa-check"></i> Load Testing Results</li>
+                            <li><i class="fas fa-check"></i> Response Time Analysis</li>
+                            <li><i class="fas fa-check"></i> Resource Utilization</li>
+                            <li><i class="fas fa-check"></i> Bottleneck Identification</li>
+                            <li><i class="fas fa-check"></i> Scalability Assessment</li>
+                        </ul>
+                        <button class="select-button">
+                            <i class="fas fa-arrow-right"></i>
+                            Create Performance Report
+                        </button>
+                    </div>
                 </div>
-                <h3 class="card-title">Performance Report</h3>
-                <p class="card-description">
-                    Performance and load testing report with metrics, benchmarks, and optimization recommendations.
-                </p>
-                <ul class="card-features">
-                    <li><i class="fas fa-check"></i> Load Testing Results</li>
-                    <li><i class="fas fa-check"></i> Response Time Analysis</li>
-                    <li><i class="fas fa-check"></i> Resource Utilization</li>
-                    <li><i class="fas fa-check"></i> Bottleneck Identification</li>
-                    <li><i class="fas fa-check"></i> Scalability Assessment</li>
-                </ul>
-                <button class="select-button">
-                    <i class="fas fa-arrow-right"></i>
-                    Create Performance Report
-                </button>
             </div>
         </div>
     </div>

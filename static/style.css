@@ -2000,6 +2000,44 @@ p {
     border-bottom: 1px solid var(--border);
 }
 
+.breakdown-title {
+    background: linear-gradient(135deg, var(--surface), var(--background));
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.breakdown-title:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.breakdown-title::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(var(--primary-rgb), 0.1), transparent);
+    transform: skewX(-30deg);
+    transition: all 0.8s ease;
+}
+
+.breakdown-title:hover::before {
+    left: 120%;
+}
+
 .reports-table th {
     background: linear-gradient(135deg, var(--primary), var(--accent));
     color: white;
@@ -3531,11 +3569,12 @@ p {
 }
 
 .breakdown-title {
-    font-size: 0.9rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
+        padding: 1.5rem 0px;
+    justify-content: center;
     border-bottom: 1px solid var(--border);
 }
 
