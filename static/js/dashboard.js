@@ -16,17 +16,59 @@ export function updateDashboardStats(stats) {
     }
 
     const overall = stats.overall || {};
+    
+    // Report Status Statistics
     totalReportsEl.textContent = overall.totalReports || 0;
     document.getElementById('completedReports').textContent = overall.completedReports || 0;
     document.getElementById('inProgressReports').textContent = overall.inProgressReports || 0;
     document.getElementById('pendingReports').textContent = overall.pendingReports || 0;
 
+    // User Stories Statistics
     document.getElementById('totalUserStories').textContent = overall.totalUserStories || 0;
-    document.getElementById('totalTestCases').textContent = overall.totalTestCases || 0;
-    document.getElementById('totalIssues').textContent = overall.totalIssues || 0;
-    document.getElementById('totalEnhancements').textContent = overall.totalEnhancements || 0;
+    document.getElementById('passedUserStories').textContent = overall.passedUserStories || 0;
+    document.getElementById('passedWithIssuesUserStories').textContent = overall.passedWithIssuesUserStories || 0;
+    document.getElementById('failedUserStories').textContent = overall.failedUserStories || 0;
+    document.getElementById('blockedUserStories').textContent = overall.blockedUserStories || 0;
+    document.getElementById('cancelledUserStories').textContent = overall.cancelledUserStories || 0;
+    document.getElementById('deferredUserStories').textContent = overall.deferredUserStories || 0;
+    document.getElementById('notTestableUserStories').textContent = overall.notTestableUserStories || 0;
 
+    // Test Cases Statistics
+    document.getElementById('totalTestCases').textContent = overall.totalTestCases || 0;
+    document.getElementById('passedTestCases').textContent = overall.passedTestCases || 0;
+    document.getElementById('passedWithIssuesTestCases').textContent = overall.passedWithIssuesTestCases || 0;
+    document.getElementById('failedTestCases').textContent = overall.failedTestCases || 0;
+    document.getElementById('blockedTestCases').textContent = overall.blockedTestCases || 0;
+    document.getElementById('cancelledTestCases').textContent = overall.cancelledTestCases || 0;
+    document.getElementById('deferredTestCases').textContent = overall.deferredTestCases || 0;
+    document.getElementById('notTestableTestCases').textContent = overall.notTestableTestCases || 0;
+
+    // Issues Statistics (Priority and Status)
+    document.getElementById('totalIssues').textContent = overall.totalIssues || 0;
+    document.getElementById('criticalIssues').textContent = overall.criticalIssues || 0;
+    document.getElementById('highIssues').textContent = overall.highIssues || 0;
+    document.getElementById('mediumIssues').textContent = overall.mediumIssues || 0;
+    document.getElementById('lowIssues').textContent = overall.lowIssues || 0;
+    document.getElementById('newIssues').textContent = overall.newIssues || 0;
+    document.getElementById('fixedIssues').textContent = overall.fixedIssues || 0;
+    document.getElementById('notFixedIssues').textContent = overall.notFixedIssues || 0;
+    document.getElementById('reopenedIssues').textContent = overall.reopenedIssues || 0;
+    document.getElementById('deferredIssues').textContent = overall.deferredIssues || 0;
+
+    // Enhancements Statistics
+    document.getElementById('totalEnhancements').textContent = overall.totalEnhancements || 0;
+    document.getElementById('newEnhancements').textContent = overall.newEnhancements || 0;
+    document.getElementById('implementedEnhancements').textContent = overall.implementedEnhancements || 0;
+    document.getElementById('existsEnhancements').textContent = overall.existsEnhancements || 0;
+
+    // Automation Statistics
     document.getElementById('totalAutomationTests').textContent = overall.automationTotalTestCases || 0;
+    document.getElementById('automationPassedTests').textContent = overall.automationPassedTestCases || 0;
+    document.getElementById('automationFailedTests').textContent = overall.automationFailedTestCases || 0;
+    document.getElementById('automationSkippedTests').textContent = overall.automationSkippedTestCases || 0;
+    document.getElementById('automationStableTests').textContent = overall.automationStableTests || 0;
+    document.getElementById('automationFlakyTests').textContent = overall.automationFlakyTests || 0;
+    
     const automationTotal = overall.automationTotalTestCases || 0;
     const automationPassed = overall.automationPassedTestCases || 0;
     const automationPassRate = automationTotal > 0 ? Math.round((automationPassed / automationTotal) * 100) : 0;

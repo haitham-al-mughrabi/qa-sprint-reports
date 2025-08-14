@@ -132,48 +132,296 @@
                     </div>
                 </div>
 
-                <!-- Aggregate Metrics -->
-                <div class="aggregate-metrics">
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-user-check"></i></div>
-                        <div class="metric-content">
-                            <h3 id="totalUserStories">0</h3>
-                            <p>Total User Stories</p>
+                <!-- User Stories Breakdown -->
+                <div class="metric-breakdown">
+                    <h3 class="breakdown-title"><i class="fas fa-user-check"></i> User Stories Statistics</h3>
+                    <div class="aggregate-metrics">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-list"></i></div>
+                            <div class="metric-content">
+                                <h3 id="totalUserStories">0</h3>
+                                <p>Total User Stories</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="passedUserStories">0</h3>
+                                <p>Passed</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-exclamation-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="passedWithIssuesUserStories">0</h3>
+                                <p>Passed with Issues</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-times-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="failedUserStories">0</h3>
+                                <p>Failed</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-ban"></i></div>
+                            <div class="metric-content">
+                                <h3 id="blockedUserStories">0</h3>
+                                <p>Blocked</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-calendar-times"></i></div>
+                            <div class="metric-content">
+                                <h3 id="cancelledUserStories">0</h3>
+                                <p>Cancelled</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                            <div class="metric-content">
+                                <h3 id="deferredUserStories">0</h3>
+                                <p>Deferred</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-question-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="notTestableUserStories">0</h3>
+                                <p>Not Testable</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-flask"></i></div>
-                        <div class="metric-content">
-                            <h3 id="totalTestCases">0</h3>
-                            <p>Total Test Cases</p>
+                </div>
+
+                <!-- Test Cases Breakdown -->
+                <div class="metric-breakdown">
+                    <h3 class="breakdown-title"><i class="fas fa-flask"></i> Test Cases Statistics</h3>
+                    <div class="aggregate-metrics">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-list"></i></div>
+                            <div class="metric-content">
+                                <h3 id="totalTestCases">0</h3>
+                                <p>Total Test Cases</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="passedTestCases">0</h3>
+                                <p>Passed</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-exclamation-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="passedWithIssuesTestCases">0</h3>
+                                <p>Passed with Issues</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-times-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="failedTestCases">0</h3>
+                                <p>Failed</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-ban"></i></div>
+                            <div class="metric-content">
+                                <h3 id="blockedTestCases">0</h3>
+                                <p>Blocked</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-calendar-times"></i></div>
+                            <div class="metric-content">
+                                <h3 id="cancelledTestCases">0</h3>
+                                <p>Cancelled</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                            <div class="metric-content">
+                                <h3 id="deferredTestCases">0</h3>
+                                <p>Deferred</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-question-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="notTestableTestCases">0</h3>
+                                <p>Not Testable</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                        <div class="metric-content">
-                            <h3 id="totalIssues">0</h3>
-                            <p>Total Issues</p>
+                </div>
+
+                <!-- Issues Breakdown -->
+                <div class="metric-breakdown">
+                    <h3 class="breakdown-title"><i class="fas fa-bug"></i> Issues Statistics</h3>
+                    <div class="aggregate-metrics">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-list"></i></div>
+                            <div class="metric-content">
+                                <h3 id="totalIssues">0</h3>
+                                <p>Total Issues</p>
+                            </div>
+                        </div>
+                        <div class="metric-card priority-critical">
+                            <div class="metric-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="criticalIssues">0</h3>
+                                <p>Critical</p>
+                            </div>
+                        </div>
+                        <div class="metric-card priority-high">
+                            <div class="metric-icon"><i class="fas fa-arrow-up"></i></div>
+                            <div class="metric-content">
+                                <h3 id="highIssues">0</h3>
+                                <p>High</p>
+                            </div>
+                        </div>
+                        <div class="metric-card priority-medium">
+                            <div class="metric-icon"><i class="fas fa-minus"></i></div>
+                            <div class="metric-content">
+                                <h3 id="mediumIssues">0</h3>
+                                <p>Medium</p>
+                            </div>
+                        </div>
+                        <div class="metric-card priority-low">
+                            <div class="metric-icon"><i class="fas fa-arrow-down"></i></div>
+                            <div class="metric-content">
+                                <h3 id="lowIssues">0</h3>
+                                <p>Low</p>
+                            </div>
+                        </div>
+                        <div class="metric-card status-new">
+                            <div class="metric-icon"><i class="fas fa-star"></i></div>
+                            <div class="metric-content">
+                                <h3 id="newIssues">0</h3>
+                                <p>New</p>
+                            </div>
+                        </div>
+                        <div class="metric-card status-fixed">
+                            <div class="metric-icon"><i class="fas fa-check"></i></div>
+                            <div class="metric-content">
+                                <h3 id="fixedIssues">0</h3>
+                                <p>Fixed</p>
+                            </div>
+                        </div>
+                        <div class="metric-card status-not-fixed">
+                            <div class="metric-icon"><i class="fas fa-times"></i></div>
+                            <div class="metric-content">
+                                <h3 id="notFixedIssues">0</h3>
+                                <p>Not Fixed</p>
+                            </div>
+                        </div>
+                        <div class="metric-card status-reopened">
+                            <div class="metric-icon"><i class="fas fa-redo"></i></div>
+                            <div class="metric-content">
+                                <h3 id="reopenedIssues">0</h3>
+                                <p>Reopened</p>
+                            </div>
+                        </div>
+                        <div class="metric-card status-deferred">
+                            <div class="metric-icon"><i class="fas fa-pause"></i></div>
+                            <div class="metric-content">
+                                <h3 id="deferredIssues">0</h3>
+                                <p>Deferred</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-magic"></i></div>
-                        <div class="metric-content">
-                            <h3 id="totalEnhancements">0</h3>
-                            <p>Total Enhancements</p>
+                </div>
+
+                <!-- Enhancements Breakdown -->
+                <div class="metric-breakdown">
+                    <h3 class="breakdown-title"><i class="fas fa-magic"></i> Enhancements Statistics</h3>
+                    <div class="aggregate-metrics">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-list"></i></div>
+                            <div class="metric-content">
+                                <h3 id="totalEnhancements">0</h3>
+                                <p>Total Enhancements</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-star"></i></div>
+                            <div class="metric-content">
+                                <h3 id="newEnhancements">0</h3>
+                                <p>New</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="implementedEnhancements">0</h3>
+                                <p>Implemented</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-clipboard-check"></i></div>
+                            <div class="metric-content">
+                                <h3 id="existsEnhancements">0</h3>
+                                <p>Already Exists</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-robot"></i></div>
-                        <div class="metric-content">
-                            <h3 id="totalAutomationTests">0</h3>
-                            <p>Automation Test Cases</p>
+                </div>
+
+                <!-- Automation Statistics -->
+                <div class="metric-breakdown">
+                    <h3 class="breakdown-title"><i class="fas fa-robot"></i> Automation Statistics</h3>
+                    <div class="aggregate-metrics">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-list"></i></div>
+                            <div class="metric-content">
+                                <h3 id="totalAutomationTests">0</h3>
+                                <p>Total Automation Tests</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-check-double"></i></div>
-                        <div class="metric-content">
-                            <h3 id="automationPassRate">0%</h3>
-                            <p>Automation Pass Rate</p>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="automationPassedTests">0</h3>
+                                <p>Passed Tests</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-times-circle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="automationFailedTests">0</h3>
+                                <p>Failed Tests</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-forward"></i></div>
+                            <div class="metric-content">
+                                <h3 id="automationSkippedTests">0</h3>
+                                <p>Skipped Tests</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="metric-content">
+                                <h3 id="automationStableTests">0</h3>
+                                <p>Stable Tests</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="metric-content">
+                                <h3 id="automationFlakyTests">0</h3>
+                                <p>Flaky Tests</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-percentage"></i></div>
+                            <div class="metric-content">
+                                <h3 id="automationPassRate">0%</h3>
+                                <p>Pass Rate</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -214,60 +462,6 @@
                 </div>
             </div>
 
-            <!-- Enhanced Visual Analytics -->
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-analytics"></i> Advanced Analytics</h2>
-                
-                <!-- Progress Indicators -->
-                <div class="progress-section">
-                    <h3 class="subsection-title"><i class="fas fa-tachometer-alt"></i> Completion Metrics</h3>
-                    <div class="progress-grid">
-                        <div class="progress-card">
-                            <h4>User Stories Progress</h4>
-                            <div class="progress-circle" id="userStoriesProgress">
-                                <svg viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border)" stroke-width="8"/>
-                                    <circle id="userStoriesProgressBar" cx="50" cy="50" r="45" fill="none" stroke="var(--success)" stroke-width="8" stroke-dasharray="0 283" stroke-linecap="round" transform="rotate(-90 50 50)"/>
-                                </svg>
-                                <div class="progress-text">
-                                    <span id="userStoriesPercentage">0%</span>
-                                    <small>Complete</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="progress-card">
-                            <h4>Test Cases Progress</h4>
-                            <div class="progress-circle" id="testCasesProgress">
-                                <svg viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border)" stroke-width="8"/>
-                                    <circle id="testCasesProgressBar" cx="50" cy="50" r="45" fill="none" stroke="var(--primary)" stroke-width="8" stroke-dasharray="0 283" stroke-linecap="round" transform="rotate(-90 50 50)"/>
-                                </svg>
-                                <div class="progress-text">
-                                    <span id="testCasesPercentage">0%</span>
-                                    <small>Complete</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="progress-card">
-                            <h4>Issues Resolution</h4>
-                            <div class="progress-circle" id="issuesProgress">
-                                <svg viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border)" stroke-width="8"/>
-                                    <circle id="issuesProgressBar" cx="50" cy="50" r="45" fill="none" stroke="var(--warning)" stroke-width="8" stroke-dasharray="0 283" stroke-linecap="round" transform="rotate(-90 50 50)"/>
-                                </svg>
-                                <div class="progress-text">
-                                    <span id="issuesPercentage">0%</span>
-                                    <small>Resolved</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-            </div>
 
             <!-- Project Metrics Section -->
             <div class="dashboard-section">
